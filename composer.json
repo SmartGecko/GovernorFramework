@@ -1,0 +1,24 @@
+{
+    "name": "davidkalosi/governor-framework",
+    "description": "PHP Command-Query-Responsibility-Segregation framework.",
+    "license": "MIT",
+    "autoload": {
+        "psr-0": {"Governor": "src/"}
+    },
+    "require": {
+        "rhumsaa/uuid": "@stable",
+        "psr/log": "@stable",
+        "php": ">=5.3"
+    },
+    "require-dev": {
+        "doctrine/common": ">=2.0,<2.5",
+        "doctrine/orm": ">=2.4",
+        "doctrine/mongodb-odm": "1.0.*@dev",
+        "jms/serializer": "*",
+        "jms/aop-bundle": "1.1.*@dev",
+        "symfony/framework-bundle": ">=2.0,<2.2",
+        "symfony/console": ">=2.0,<2.2",
+        "symfony/finder": ">=2.3",
+        "swiftmailer/swiftmailer": "4.*"
+    }
+}
