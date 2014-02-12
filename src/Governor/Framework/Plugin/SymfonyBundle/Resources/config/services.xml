@@ -8,14 +8,19 @@
         <parameter key="governor.command_bus.class">Governor\Framework\CommandHandling\ContainerAwareCommandBus</parameter>
         <parameter key="governor.event_bus.class">Governor\Framework\EventHandling\SimpleEventBus</parameter>
         <parameter key="governor.container_handler_locator.class">Governor\Framework\Plugin\SymfonyBundle\ContainerHandlerLocator</parameter>
-        <parameter key="governor.repository.class">Governor\Framework\Repository\GenericDoctrineRepository</parameter>
+        <parameter key="governor.repository.doctrine.class">Governor\Framework\Repository\GenericDoctrineRepository</parameter>
         <parameter key="governor.event_store.class">Governor\Framework\EventStore\OptimisticLocking\OptimisticLockingEventStore</parameter>
         <parameter key="governor.storage.class">Governor\Framework\EventStore\OptimisticLocking\MongoDBStorage</parameter>
         <parameter key="governor.serializer.class">Governor\Framework\Serializer\ReflectionSerializer</parameter>
+        
+        <!-- lock manager classes -->
+        <parameter key="governor.lock_manager.null.class">Governor\Framework\Repository\NullLockManager</parameter>
     </parameters>
 
     <services>
-        <service id="governor.lock_manager" class="Governor\Framework\Repository\NullLockManager">
+        
+        <!-- lock managers -->
+        <service id="governor.lock_manager.null" class="%governor.lock_manager.null.class%">
         </service>
         
         <service id="command_gateway" class="%governor.command_gateway.class%">
@@ -49,9 +54,8 @@
             <argument type="service" id="serializer"/>
         </service>
         
-        <service id="governor.repository" class="%governor.repository.class%" abstract="true">
-            <argument strict="false"></argument>
-            <argument type="service" id="governor.event_bus"/>
+        <service id="governor.repository.doctrine" class="%governor.repository.doctrine.class%" abstract="true">
+            <argument strict="false"></argument>            
             <argument type="service" id="governor.lock_manager"/>
             <argument type="service" id="doctrine.orm.default_entity_manager"/>
         </service>

@@ -23,10 +23,10 @@ class GenericDoctrineRepository extends LockingRepository
     private $entityManager;
     private $forceFlushOnSave = true;
 
-    public function __construct($className, EventBusInterface $eventBus,
-        LockManagerInterface $lockManager, EntityManager $entityManager)
-    {        
-        parent::__construct($className, $eventBus, $lockManager);
+    public function __construct($className, LockManagerInterface $lockManager,
+        EntityManager $entityManager)
+    {
+        parent::__construct($className, $lockManager);
         $this->entityManager = $entityManager;
     }
 
@@ -40,7 +40,7 @@ class GenericDoctrineRepository extends LockingRepository
     }
 
     protected function doSaveWithLock(AggregateRootInterface $aggregate)
-    {        
+    {
         $this->entityManager->persist($aggregate);
 
         if ($this->forceFlushOnSave) {

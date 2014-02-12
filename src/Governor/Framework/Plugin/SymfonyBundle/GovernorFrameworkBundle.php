@@ -16,7 +16,7 @@ class GovernorFrameworkBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new RepositoryPass(), PassConfig::TYPE_BEFORE_REMOVING);
+        //$container->addCompilerPass(new RepositoryPass(), PassConfig::TYPE_BEFORE_REMOVING);
         $container->addCompilerPass(new AggregateCommandHandlerPass(), PassConfig::TYPE_BEFORE_REMOVING);      
         $container->addCompilerPass(new HandlerPass(), PassConfig::TYPE_BEFORE_REMOVING);      
     }
