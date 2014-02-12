@@ -24,6 +24,7 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
 {
 
     private $mockEntityManager;
+    private $mockEventBus;
     private $testSubject; // GenericDoctrineRepository
     private $aggregateId;
     private $aggregate; // StubDoctrineAggregate
@@ -32,8 +33,9 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
     {
         $this->mockEntityManager = $this->getMock('Doctrine\ORM\EntityManager',
             array('find', 'flush', 'persist', 'remove'), array(), '', false);
+        $this->mockEventBus = $this->getMock('Governor\Framework\EventHandling\EventBusInterface');
         $this->testSubject = new GenericDoctrineRepository('Governor\Framework\Repository\StubDoctrineAggregate',
-            new StubEventBus(), new NullLockManager(), $this->mockEntityManager);
+             $this->mockEventBus, new NullLockManager(), $this->mockEntityManager);
 
         $this->aggregateId = "123";
         $this->aggregate = new StubDoctrineAggregate($this->aggregateId);
@@ -173,26 +175,6 @@ class StubDoctrineAggregate extends AbstractAggregateRoot
     public function getVersion()
     {
         return 0;
-    }
-
-}
-
-class StubEventBus implements \Governor\Framework\EventHandling\EventBusInterface
-{
-
-    public function publish(array $events)
-    {
-        
-    }
-
-    public function subscribe(\Governor\Framework\EventHandling\EventListenerInterface $eventListener)
-    {
-        
-    }
-
-    public function unsubscribe(\Governor\Framework\EventHandling\EventListenerInterface $eventListener)
-    {
-        
     }
 
 }

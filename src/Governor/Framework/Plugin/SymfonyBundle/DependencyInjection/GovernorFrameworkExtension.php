@@ -17,42 +17,34 @@ class GovernorFrameworkExtension extends Extension
     {
         $config = $this->processConfiguration(new Configuration, $configs);
 
-        $container->setAlias('governor.lock_manager',
-            new Alias(sprintf('governor.lock_manager.%s',
-                $config['lock_manager'])));
+        $container->setAlias('governor.lock_manager', new Alias(sprintf('governor.lock_manager.%s', $config['lock_manager'])));
 
-        $loader = new XmlFileLoader($container,
-            new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
-        $container->setParameter('governor.aggregate_locations',
-            $config['aggregate_locations']);
+        $container->setParameter('governor.aggregate_locations', $config['aggregate_locations']);
 
         // configure repositories 
         $this->loadRepositories($config, $container);
+        //configure aggregate command handlers
+        $this->loadAggregateCommandHandlers($config, $container);
+    }
+
+    private function loadAggregateCommandHandlers($config, ContainerBuilder $container)
+    {
+        foreach ($config['aggregate_command_handlers'] as $name => $parameters) {
+            echo $name . "\n";
+            print_r($parameters);
+        }
     }
 
     private function loadRepositories($config, ContainerBuilder $container)
     {
         foreach ($config['repositories'] as $name => $parameters) {
-            //  $container->setDefinition($name . '.repository', new DefinitionDecorator('governor.repository'))
-            //  ->a
-            //   print_r($parameters);
-            /*
+            $repository = new DefinitionDecorator(sprintf('governor.repository.%s', $parameters['type']));
+            $repository->replaceArgument(0, $parameters['aggregate_root']);
 
-              $definition = $container->findDefinition($id);
-
-              if (null === $tagAggregateRoot) {
-              throw new \RuntimeException(sprintf("Missing aggregateRoot attribute on the tagged governor repository [%s]",
-              $id));
-              }
-
-              // set the first argument based on the entity in the service tag
-              $arguments = $definition->getArguments();
-              $arguments[0] = $tagAggregateRoot;
-
-              $definition->setArguments($arguments);
-              $container->setDefinition($id, $definition); */
+            $container->setDefinition(sprintf('%s.repository', $name), $repository);
         }
     }
 

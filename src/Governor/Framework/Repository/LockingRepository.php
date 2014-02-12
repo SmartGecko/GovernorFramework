@@ -9,6 +9,7 @@
 namespace Governor\Framework\Repository;
 
 use Governor\Framework\Domain\AggregateRootInterface;
+use Governor\Framework\EventHandling\EventBusInterface;
 
 /**
  * Description of LockingRepository
@@ -20,9 +21,9 @@ abstract class LockingRepository extends AbstractRepository
 
     private $lockManager;
 
-    public function __construct($className, LockManagerInterface $lockManager)
+    public function __construct($className, EventBusInterface $eventBus, LockManagerInterface $lockManager)
     {
-        parent::__construct($className);
+        parent::__construct($className, $eventBus);
         $this->lockManager = $lockManager;
     }
 

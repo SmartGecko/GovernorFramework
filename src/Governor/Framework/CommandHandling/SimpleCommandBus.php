@@ -83,7 +83,6 @@ class SimpleCommandBus implements CommandBusInterface
         }
     }
 
-    /// !!! TODO provide container aware implementation of this 
     public function findCommandHandlerFor(CommandMessageInterface $command)
     {
         if (!array_key_exists($command->getCommandName(), $this->subscriptions)) {

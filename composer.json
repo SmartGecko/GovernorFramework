@@ -19,6 +19,6 @@
         "symfony/framework-bundle": ">=2.0,<2.2",
         "symfony/console": ">=2.0,<2.2",
         "symfony/finder": ">=2.3",
-        "swiftmailer/swiftmailer": "4.*"
+        "moontoast/math": "*"
     }
 }

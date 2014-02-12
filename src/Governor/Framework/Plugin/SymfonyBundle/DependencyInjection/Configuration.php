@@ -25,24 +25,54 @@ class Configuration implements ConfigurationInterface
                                        "[\"null\",\"optimistic\",\"pesimistic\"]")
                     ->end()
                 ->end()
-                ->booleanNode('monolog')->defaultTrue()->end()                    
-                    ->arrayNode('repositories')                        
-                        ->useAttributeAsKey('name')
-                        ->prototype('array')
-                            ->children()
-                                ->scalarNode('aggregate_root')->isRequired()->end()
-                                ->scalarNode('type')
-                                    ->validate()
-                                    ->ifNotInArray(array('doctrine', 'eventsourcing', 'hybrid'))
-                                        ->thenInvalid("Invalid repository type %s, possible values are " . 
+                ->booleanNode('monolog')->defaultTrue()->end()      
+                ->append($this->addRepositoriesNode())
+                ->append($this->addAggregateCommandHandlersNode())
+            ->end();
+
+        return $treeBuilder;
+    }
+    
+    private function addRepositoriesNode()
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('repositories');
+        
+        $node
+            ->useAttributeAsKey('name')
+                ->prototype('array')
+                    ->children()
+                        ->scalarNode('aggregate_root')->isRequired()->end()
+                        ->scalarNode('type')
+                            ->validate()
+                            ->ifNotInArray(array('doctrine', 'eventsourcing', 'hybrid'))
+                                ->thenInvalid("Invalid repository type %s, possible values are " . 
                                                       "[\"doctrine\",\"eventsourcing\",\"hybrid\"]")
-                                    ->end()
                                 ->end()
                             ->end()
                         ->end()
                     ->end()
                 ->end();
-
-        return $treeBuilder;
+        
+        return $node;
+    }
+    
+    private function addAggregateCommandHandlersNode()
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('aggregate_command_handlers');
+        
+        $node
+            ->useAttributeAsKey('name')
+                ->prototype('array')
+                    ->children()
+                        ->scalarNode('aggregate_root')->isRequired()->end()
+                        ->scalarNode('repository')->isRequired()->end()
+                        ->scalarNode('command_bus')->defaultValue('governor.command_bus')->end()
+                    ->end()
+                ->end()
+            ->end();
+                
+        return $node;
     }
 }

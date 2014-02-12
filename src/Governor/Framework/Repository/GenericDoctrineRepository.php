@@ -23,10 +23,10 @@ class GenericDoctrineRepository extends LockingRepository
     private $entityManager;
     private $forceFlushOnSave = true;
 
-    public function __construct($className, LockManagerInterface $lockManager,
+    public function __construct($className, EventBusInterface $eventBus, LockManagerInterface $lockManager,
         EntityManager $entityManager)
     {
-        parent::__construct($className, $lockManager);
+        parent::__construct($className, $eventBus, $lockManager);
         $this->entityManager = $entityManager;
     }
 

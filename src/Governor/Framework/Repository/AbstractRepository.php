@@ -11,6 +11,7 @@ namespace Governor\Framework\Repository;
 use Governor\Framework\Domain\AggregateRootInterface;
 use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
 use Governor\Framework\UnitOfWork\SaveAggregateCallbackInterface;
+use Governor\Framework\EventHandling\EventBusInterface;
 
 /**
  * Description of AbstractRepository
@@ -19,13 +20,15 @@ use Governor\Framework\UnitOfWork\SaveAggregateCallbackInterface;
  */
 abstract class AbstractRepository implements RepositoryInterface
 {
-
+    
+    private $eventBus;
     private $className;
     private $saveAggregateCallback;
 
-    public function __construct($className)
+    public function __construct($className, EventBusInterface $eventBus)
     {
         $this->className = $className;        
+        $this->eventBus = $eventBus;
 
         $repos = $this;
         $this->saveAggregateCallback = new SimpleSaveAggregateCallback(function (AggregateRootInterface $aggregateRoot) use ($repos) {
@@ -65,7 +68,7 @@ abstract class AbstractRepository implements RepositoryInterface
 
     public function supportsClass($class)
     {
-        return $this->className = $class;
+        return $this->className === $class;
     }
 
     public function getClass()
