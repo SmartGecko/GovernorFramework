@@ -17,11 +17,19 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('aggregate_locations')
                     ->prototype('scalar')->end()
                 ->end()
+                ->scalarNode('command_target_resolver')
+                    ->defaultValue('annotation')
+                    ->validate()
+                    ->ifNotInArray(array('annotation', 'metadata'))
+                        ->thenInvalid('Invalid command target resolver "%s", possible values are '.
+                                       "[\"annotation\",\"metadata\"]")
+                    ->end()
+                ->end()
                 ->scalarNode('lock_manager')
                     ->defaultValue('null')
                     ->validate()
                     ->ifNotInArray(array('null', 'optimistic', 'pesimistic'))
-                        ->thenInvalid('Invalid lock manager driver "%s", possible values are '.
+                        ->thenInvalid('Invalid lock manager "%s", possible values are '.
                                        "[\"null\",\"optimistic\",\"pesimistic\"]")
                     ->end()
                 ->end()

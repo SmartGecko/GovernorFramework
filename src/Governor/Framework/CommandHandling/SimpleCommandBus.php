@@ -18,17 +18,17 @@ use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 class SimpleCommandBus implements CommandBusInterface
 {
 
-    protected $subscriptions = array();
+    protected $locator;
 
-    public function __construct()
+    public function __construct(CommandHandlerLocatorInterface $locator)
     {
-        
+        $this->locator = $locator;
     }
 
     public function dispatch(CommandMessageInterface $command,
         CommandCallback $callback = null)
     {
-        $handler = $this->findCommandHandlerFor($command);
+        $handler = $this->locator->findCommandHandlerFor($command);
 
         if (null === $callback) {
             $callback = new CommandCallback(function($result) {
@@ -50,7 +50,7 @@ class SimpleCommandBus implements CommandBusInterface
         CommandHandlerInterface $handler)
     {
         $unitOfWork = DefaultUnitOfWork::startAndGet();
-        
+
         try {
             $return = $handler->handle($command, $unitOfWork);
         } catch (\Exception $ex) {
@@ -60,37 +60,7 @@ class SimpleCommandBus implements CommandBusInterface
         }
 
         $unitOfWork->commit();
-        
+
         return $return;
-    }
-
-    public function subscribe($commandName, $handler)
-    {
-        $this->subscriptions[$commandName] = $handler;
-    }
-
-    public function unsubscribe($commandName, $handler)
-    {
-        if (isset($this->subscriptions[$commandName])) {
-            unset($this->subscriptions[$commandName]);
-        }
-    }
-
-    public function setSubscriptions(array $handlers)
-    {
-        foreach ($handlers as $commandName => $handler) {
-            $this->subscribe($commandName, $handler);
-        }
-    }
-
-    public function findCommandHandlerFor(CommandMessageInterface $command)
-    {
-        if (!array_key_exists($command->getCommandName(), $this->subscriptions)) {
-            throw new NoHandlerForCommandException(sprintf("No handler was subscribed for command [%s]",
-                $command->getCommandName()));
-        }
-
-        return $this->subscriptions[$command->getCommandName()];
-    }
-
+    }   
 }

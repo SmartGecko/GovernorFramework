@@ -21,14 +21,16 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
 {
 
     private $commandBus;
+    private $locator;
 
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp()        
     {
-        $this->commandBus = new SimpleCommandBus();
+        $this->locator = new InMemoryCommandHandlerLocator();
+        $this->commandBus = new SimpleCommandBus($this->locator);
     }
 
     /**
@@ -55,9 +57,9 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
     public function testDispatchCommand_HandlerUnsubscribed()
     {
         $commandHandler = new TestCommandHandler();
-        $this->commandBus->subscribe(get_class(new TestCommand('hi')),
+        $this->locator->subscribe(get_class(new TestCommand('hi')),
             $commandHandler);
-        $this->commandBus->unsubscribe(get_class(new TestCommand('hi')),
+        $this->locator->unsubscribe(get_class(new TestCommand('hi')),
             $commandHandler);
 
         $this->commandBus->dispatch(new GenericCommandMessage(new TestCommand('hi'),
@@ -67,7 +69,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
     public function testDispatchCommand_HandlerSubscribed()
     {
         $commandHandler = new TestCommandHandler();
-        $this->commandBus->subscribe('Governor\Framework\CommandHandling\TestCommand',
+        $this->locator->subscribe('Governor\Framework\CommandHandling\TestCommand',
             $commandHandler);
  
         $command = new TestCommand('hi');

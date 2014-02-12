@@ -13,51 +13,12 @@ class HandlerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         $this->registerCommandHandlers($container);
-        $this->registerEventHandlers($container);
+        //   $this->registerEventHandlers($container);
     }
 
-    private function registerCommandHandlers($container)
+    private function registerCommandHandlers(ContainerBuilder $container)
     {
-        $services = array();
-        $reader = new AnnotationReader();
-        $locatorDefinition = $container->findDefinition('command_bus');
-
-        foreach ($container->findTaggedServiceIds('governor.command_handler') as $id => $attributes) {
-            $definition = $container->findDefinition($id);
-            $class = $definition->getClass();
-
-            $reflClass = new \ReflectionClass($class);
-            
-            $handlerId = hash('crc32', openssl_random_pseudo_bytes(8));
-
-            $def = $container->register($handlerId,
-                    'Governor\Framework\CommandHandling\AnnotatedCommandHandlerAdapter')
-                ->addArgument(new Reference($id))
-                ->setPublic(true);
-
-            foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                $annot = $reader->getMethodAnnotation($method,
-                    'Governor\Framework\Annotations\CommandHandler');
-
-                // not a handler
-                if (null === $annot) {
-                    continue;
-                }
-
-                $commandParam = current($method->getParameters());
-
-                // command type must be typehinted
-                if (!$commandParam->getClass()) {
-                    continue;
-                }
-
-                $services[$commandParam->getClass()->name] = $handlerId;
-            }
-
-            $container->addDefinitions(array($def));
-        }
-
-        $locatorDefinition->addMethodCall('setSubscriptions', array($services));
+        
     }
 
     function registerEventHandlers($container)

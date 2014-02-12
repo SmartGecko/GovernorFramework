@@ -5,10 +5,11 @@ namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Doctrine\Common\Annotations\AnnotationReader;
 
 class GovernorFrameworkExtension extends Extension
 {
@@ -17,12 +18,20 @@ class GovernorFrameworkExtension extends Extension
     {
         $config = $this->processConfiguration(new Configuration, $configs);
 
-        $container->setAlias('governor.lock_manager', new Alias(sprintf('governor.lock_manager.%s', $config['lock_manager'])));
+        $container->setAlias('governor.lock_manager',
+            new Alias(sprintf('governor.lock_manager.%s',
+                $config['lock_manager'])));
 
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $container->setAlias('governor.command_target_resolver',
+            new Alias(sprintf('governor.command_target_resolver.%s',
+                $config['command_target_resolver'])));
+
+        $loader = new XmlFileLoader($container,
+            new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
-        $container->setParameter('governor.aggregate_locations', $config['aggregate_locations']);
+        $container->setParameter('governor.aggregate_locations',
+            $config['aggregate_locations']);
 
         // configure repositories 
         $this->loadRepositories($config, $container);
@@ -30,21 +39,64 @@ class GovernorFrameworkExtension extends Extension
         $this->loadAggregateCommandHandlers($config, $container);
     }
 
-    private function loadAggregateCommandHandlers($config, ContainerBuilder $container)
+    private function loadAggregateCommandHandlers($config,
+        ContainerBuilder $container)
     {
+        $reader = new AnnotationReader();
+        $locatorDefinition = $container->findDefinition('governor.command_handler_locator');
+
         foreach ($config['aggregate_command_handlers'] as $name => $parameters) {
-            echo $name . "\n";
-            print_r($parameters);
+            $reflectionClass = new \ReflectionClass($parameters['aggregate_root']);
+
+            foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+                $annot = $reader->getMethodAnnotation($method,
+                    'Governor\Framework\Annotations\CommandHandler');
+
+                // not a handler
+                if (null === $annot) {
+                    continue;
+                }
+
+                $commandParam = current($method->getParameters());
+
+                // command type must be typehinted
+                if (!$commandParam->getClass()) {
+                    continue;
+                }
+
+                $handlerClass = 'Governor\Framework\CommandHandling\Handlers\AnnotatedAggregateCommandHandler';
+                $methodName = $method->name;
+                $commandClassName = $commandParam->getClass()->name;
+                $repository = new Reference($parameters['repository']);
+                $resolver = new Reference('governor.command_target_resolver');
+
+                $handlerId = sprintf("governor.aggregate_command_handler.%s",
+                    hash('crc32', openssl_random_pseudo_bytes(8)));
+
+                $container->register($handlerId, $handlerClass)
+                    ->addArgument($commandClassName)
+                    ->addArgument($methodName)
+                    ->addArgument($parameters['aggregate_root'])
+                    ->addArgument($repository)
+                    ->addArgument($resolver)
+                    ->setPublic(true);
+
+                $locatorDefinition->addMethodCall('subscribe',
+                    array($commandParam->getClass()->name, $handlerId));
+            }
+            
         }
     }
 
     private function loadRepositories($config, ContainerBuilder $container)
     {
         foreach ($config['repositories'] as $name => $parameters) {
-            $repository = new DefinitionDecorator(sprintf('governor.repository.%s', $parameters['type']));
+            $repository = new DefinitionDecorator(sprintf('governor.repository.%s',
+                    $parameters['type']));
             $repository->replaceArgument(0, $parameters['aggregate_root']);
 
-            $container->setDefinition(sprintf('%s.repository', $name), $repository);
+            $container->setDefinition(sprintf('%s.repository', $name),
+                $repository);
         }
     }
 

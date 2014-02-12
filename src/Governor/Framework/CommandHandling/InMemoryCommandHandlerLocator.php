@@ -8,23 +8,15 @@
 
 namespace Governor\Framework\CommandHandling;
 
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-
 /**
- * Description of ContainerAwareCommandBus
+ * Description of InMemoryCommandHandlerLocator
  *
  * @author david
  */
-class ContainerAwareCommandBus extends SimpleCommandBus implements ContainerAwareInterface
+class InMemoryCommandHandlerLocator implements CommandHandlerLocatorInterface
 {
 
-    private $container;
-
-    public function setContainer(ContainerInterface $container = null)
-    {
-        $this->container = $container;
-    }
+    private $subscriptions = array();
 
     public function findCommandHandlerFor(CommandMessageInterface $command)
     {
@@ -33,7 +25,19 @@ class ContainerAwareCommandBus extends SimpleCommandBus implements ContainerAwar
                 $command->getCommandName()));
         }
 
-        return $this->container->get($this->subscriptions[$command->getCommandName()]);
+        return $this->subscriptions[$command->getCommandName()];
+    }
+
+    public function subscribe($commandName, $handler)
+    {
+        $this->subscriptions[$commandName] = $handler;
+    }
+
+    public function unsubscribe($commandName, $handler)
+    {
+        if (isset($this->subscriptions[$commandName])) {
+            unset($this->subscriptions[$commandName]);
+        }
     }
 
 }
