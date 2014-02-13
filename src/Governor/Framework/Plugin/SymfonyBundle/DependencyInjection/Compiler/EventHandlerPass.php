@@ -5,15 +5,14 @@ namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 
-class EventHandlerPass implements CompilerPassInterface
+class EventHandlerPass extends AbstractHandlerPass
 {
 
     public function process(ContainerBuilder $container)
     {
         $reader = new AnnotationReader();
-        $locatorDefinition = $container->findDefinition('governor.event_handler_locator');
+        $locatorDefinition = $container->findDefinition('governor.event_listener_locator');
 
         foreach ($container->findTaggedServiceIds('governor.event_handler') as $id => $attributes) {
             $definition = $container->findDefinition($id);
@@ -40,9 +39,7 @@ class EventHandlerPass implements CompilerPassInterface
                 $eventClassName = $eventParam->getClass()->name;
                 $methodName = $method->name;
                 $eventTarget = new Reference($id);
-
-                $handlerId = sprintf("governor.event_handler.%s",
-                        hash('crc32', openssl_random_pseudo_bytes(8)));
+                $handlerId = $handlerId = $this->getHandlerIdentifier("governor.event_handler");
 
                 $container->register($handlerId,
                                 'Governor\Framework\EventHandling\Listeners\AnnotatedEventListener')
@@ -50,9 +47,9 @@ class EventHandlerPass implements CompilerPassInterface
                         ->addArgument($methodName)
                         ->addArgument($eventTarget)
                         ->setPublic(true);
-
+                
                 $locatorDefinition->addMethodCall('subscribe',
-                        array($eventClassName, $handlerId));
+                        array($eventClassName, new Reference($handlerId)));
             }
         }
     }

@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\CommandHandling;
 
+use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 use Governor\Framework\EventStore\EventStoreInterface;
 
 /**
@@ -32,33 +33,30 @@ class CommandHandlingTest extends \PHPUnit_Framework_TestCase
         $this->aggregateIdentifier = "testAggregateIdentifier";
     }
 
-    /*
-      @Test
-      public void testCommandHandlerLoadsSameAggregateTwice() {
-      DefaultUnitOfWork.startAndGet();
-      StubAggregate stubAggregate = new StubAggregate(aggregateIdentifier);
-      stubAggregate.doSomething();
-      repository.add(stubAggregate);
-      CurrentUnitOfWork.commit();
+    public function testCommandHandlerLoadsSameAggregateTwice()
+    {
+       // DefaultUnitOfWork::startAndGet();
+        /*
+          StubAggregate stubAggregate = new StubAggregate(aggregateIdentifier);
+          stubAggregate.doSomething();
+          repository.add(stubAggregate);
+          CurrentUnitOfWork.commit();
 
-      DefaultUnitOfWork.startAndGet();
-      repository.load(aggregateIdentifier).doSomething();
-      repository.load(aggregateIdentifier).doSomething();
-      CurrentUnitOfWork.commit();
+          DefaultUnitOfWork.startAndGet();
+          repository.load(aggregateIdentifier).doSomething();
+          repository.load(aggregateIdentifier).doSomething();
+          CurrentUnitOfWork.commit();
 
-      DomainEventStream es = mockEventStore.readEvents("", aggregateIdentifier);
-      assertTrue(es.hasNext());
-      assertEquals((Object) 0L, es.next().getSequenceNumber());
-      assertTrue(es.hasNext());
-      assertEquals((Object) 1L, es.next().getSequenceNumber());
-      assertTrue(es.hasNext());
-      assertEquals((Object) 2L, es.next().getSequenceNumber());
-      assertFalse(es.hasNext());
-      } */
+          DomainEventStream es = mockEventStore.readEvents("", aggregateIdentifier);
+          assertTrue(es.hasNext());
+          assertEquals((Object) 0L, es.next().getSequenceNumber());
+          assertTrue(es.hasNext());
+          assertEquals((Object) 1L, es.next().getSequenceNumber());
+          assertTrue(es.hasNext());
+          assertEquals((Object) 2L, es.next().getSequenceNumber());
+          assertFalse(es.hasNext()); */
+    }
 
-    /**
-     *
-     */
 }
 
 class StubEventStore implements EventStoreInterface
@@ -67,7 +65,7 @@ class StubEventStore implements EventStoreInterface
     private $storedEvents = array();
 
     public function appendEvents($type,
-        \Governor\Framework\Domain\DomainEventStreamInterface $events)
+            \Governor\Framework\Domain\DomainEventStreamInterface $events)
     {
         while ($events->hasNext()) {
             $this->storedEvents[] = $events->next();

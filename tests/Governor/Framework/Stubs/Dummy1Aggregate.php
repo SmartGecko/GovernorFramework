@@ -9,22 +9,49 @@
 namespace Governor\Framework\Stubs;
 
 use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
+use Governor\Framework\Annotations\CommandHandler;
 
 /**
  * Description of DummyAggregate
  *
  * @author 255196
  */
-class Dummy1Aggregate extends  AbstractEventSourcedAggregateRoot
+class Dummy1Aggregate extends AbstractEventSourcedAggregateRoot
 {
-    private $id;   
+
+    private $id;
     
+    /**
+     * @CommandHandler 
+     */
+    public function __construct(CreateDummy1Command $command)
+    {
+        ;
+    }
+
     protected function getChildEntities()
     {
         return null;
     }
 
     public function getIdentifier()
+    {
+        return $this->id;
+    }
+
+}
+
+class CreateDummy1Command
+{
+
+    private $id;
+
+    function __construct($id)
+    {
+        $this->id = $id;
+    }
+
+    public function getId()
     {
         return $this->id;
     }

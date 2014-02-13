@@ -10,7 +10,6 @@ namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -18,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  *
  * @author david
  */
-class CommandHandlerPass implements CompilerPassInterface
+class CommandHandlerPass extends AbstractHandlerPass
 {
 
     public function process(ContainerBuilder $container)
@@ -51,9 +50,7 @@ class CommandHandlerPass implements CompilerPassInterface
                 $commandClassName = $commandParam->getClass()->name;
                 $methodName = $method->name;
                 $commandTarget = new Reference($id);
-
-                $handlerId = sprintf("governor.command_handler.%s",
-                    hash('crc32', openssl_random_pseudo_bytes(8)));
+                $handlerId = $this->getHandlerIdentifier("governor.command_handler");
 
                 $container->register($handlerId,
                         'Governor\Framework\CommandHandling\Handlers\AnnotatedCommandHandler')
