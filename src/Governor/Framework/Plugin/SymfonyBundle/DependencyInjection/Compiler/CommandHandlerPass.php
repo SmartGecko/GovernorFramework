@@ -63,7 +63,7 @@ class CommandHandlerPass implements CompilerPassInterface
                     ->setPublic(true);
 
                 $locatorDefinition->addMethodCall('subscribe',
-                    array($commandParam->getClass()->name, $handlerId));
+                    array($commandClassName, $handlerId));
             }
         }
     }

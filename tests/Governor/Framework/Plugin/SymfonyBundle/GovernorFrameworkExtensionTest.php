@@ -7,7 +7,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Compiler\ResolveDefinitionTemplatesPass;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\GovernorFrameworkExtension;
-use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler\HandlerPass;
+use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler\CommandHandlerPass;
 
 class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 {
@@ -49,6 +49,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
             'kernel.environment' => 'test',
             'kernel.root_dir' => __DIR__ . '/../../../../' // src dir
         )));
+        
         $loader = new GovernorFrameworkExtension();
         $container->registerExtension($loader);
         $container->set('doctrine.orm.default_entity_manager', $this->getMock('Doctrine\ORM\EntityManager', array(
@@ -56,7 +57,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
         $loader->load($config, $container);
 
-        //  $container->addCompilerPass(new HandlerPass(), PassConfig::TYPE_AFTER_REMOVING);
+        $container->addCompilerPass(new CommandHandlerPass(), PassConfig::TYPE_BEFORE_REMOVING);
         $container->compile();
 
         return $container;

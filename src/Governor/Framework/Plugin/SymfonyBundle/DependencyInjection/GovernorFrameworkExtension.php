@@ -83,8 +83,7 @@ class GovernorFrameworkExtension extends Extension
 
                 $locatorDefinition->addMethodCall('subscribe',
                     array($commandParam->getClass()->name, $handlerId));
-            }
-            
+            }            
         }
     }
 
@@ -93,8 +92,9 @@ class GovernorFrameworkExtension extends Extension
         foreach ($config['repositories'] as $name => $parameters) {
             $repository = new DefinitionDecorator(sprintf('governor.repository.%s',
                     $parameters['type']));
-            $repository->replaceArgument(0, $parameters['aggregate_root']);
-
+            $repository->replaceArgument(0, $parameters['aggregate_root'])
+                    ->setPublic(true);
+            
             $container->setDefinition(sprintf('%s.repository', $name),
                 $repository);
         }

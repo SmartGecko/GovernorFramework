@@ -2,7 +2,6 @@
 
 namespace Governor\Framework\EventStore;
 
-use Rhumsaa\Uuid\Uuid;
 use Governor\Framework\Domain\DomainEventStreamInterface;
 
 /**
@@ -15,7 +14,7 @@ interface EventStoreInterface
 {
 
     /**
-     * Append the events in the given {@link org.axonframework.domain.DomainEventStream stream} to the event store.
+     * Append the events in the given {@link DomainEventStreamInterface stream} to the event store.
      *
      * @param type   The type descriptor of the object to store
      * @param events The event stream containing the events to store

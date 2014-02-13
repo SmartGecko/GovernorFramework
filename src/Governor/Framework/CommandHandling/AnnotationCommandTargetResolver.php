@@ -35,40 +35,51 @@ class AnnotationCommandTargetResolver implements CommandTargetResolverInterface
         if (null === $id) {
             throw new \InvalidArgumentException(
             sprintf("Invalid command. It does not identify the target aggregate. " .
-                "Make sure at least one of the fields or methods in the [%s] class contains the " .
-                "@TargetAggregateIdentifier annotation and that it returns a non-null value.",
-                $command->getPayloadType()));
+                    "Make sure at least one of the fields or methods in the [%s] class contains the " .
+                    "@TargetAggregateIdentifier annotation and that it returns a non-null value.",
+                    $command->getPayloadType()));
         }
 
         return new VersionedAggregateIdentifier($id, $version);
     }
 
-    private function findIdentifier(CommandMessageInterface $command,
-        AnnotationReader $reader, \ReflectionClass $reflClass)
+    private function getAnnotatedTargetValue($annotationName,
+            CommandMessageInterface $command, AnnotationReader $reader,
+            \ReflectionClass $reflClass)
     {
         foreach ($reflClass->getProperties() as $property) {
             if (null !== $annot = $reader->getPropertyAnnotation($property,
-                'Governor\Framework\Annotations\TargetAggregateIdentifier')) {
+                    $annotationName)) {
                 $property->setAccessible(true);
 
                 return $property->getValue($command->getPayload());
             }
         }
-    }
 
-    private function findVersion(CommandMessageInterface $command,
-        AnnotationReader $reader, \ReflectionClass $reflClass)
-    {
-        foreach ($reflClass->getProperties() as $property) {
-            if (null !== $annot = $reader->getPropertyAnnotation($property,
-                'Governor\Framework\Annotations\TargetAggregateVersion')) {
-                $property->setAccessible(true);
+        foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+            if (null !== $annot = $reader->getMethodAnnotation($method,
+                    $annotationName)) {
+                $method->setAccessible(true);
 
-                return $property->getValue($command->getPayload());
+                return $method->invoke($command->getPayload());
             }
         }
 
         return null;
+    }
+
+    private function findIdentifier(CommandMessageInterface $command,
+            AnnotationReader $reader, \ReflectionClass $reflClass)
+    {
+        return $this->getAnnotatedTargetValue('Governor\Framework\Annotations\TargetAggregateIdentifier',
+                        $command, $reader, $reflClass);
+    }
+
+    private function findVersion(CommandMessageInterface $command,
+            AnnotationReader $reader, \ReflectionClass $reflClass)
+    {
+        return $this->getAnnotatedTargetValue('Governor\Framework\Annotations\TargetAggregateVersion',
+                        $command, $reader, $reflClass);
     }
 
 }

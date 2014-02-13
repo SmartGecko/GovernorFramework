@@ -10,7 +10,7 @@ namespace Governor\Framework\Annotations;
 
 /**
  * @Annotation
- * @Target("PROPERTY")
+ * @Target({"METHOD","PROPERTY"})
  */
 final class TargetAggregateVersion
 {

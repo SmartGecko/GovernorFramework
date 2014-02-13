@@ -47,7 +47,8 @@ class Configuration implements ConfigurationInterface
         $node = $treeBuilder->root('repositories');
         
         $node
-            ->useAttributeAsKey('name')
+            ->requiresAtLeastOneElement()
+                ->useAttributeAsKey('name')
                 ->prototype('array')
                     ->children()
                         ->scalarNode('aggregate_root')->isRequired()->end()
@@ -70,7 +71,7 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('aggregate_command_handlers');
         
-        $node
+        $node            
             ->useAttributeAsKey('name')
                 ->prototype('array')
                     ->children()

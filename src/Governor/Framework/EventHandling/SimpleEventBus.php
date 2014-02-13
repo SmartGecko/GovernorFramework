@@ -8,8 +8,6 @@
 
 namespace Governor\Framework\EventHandling;
 
-use Governor\Framework\Domain\EventMessageInterface;
-
 /**
  * Description of SimpleEventBus
  *
@@ -18,52 +16,27 @@ use Governor\Framework\Domain\EventMessageInterface;
 class SimpleEventBus implements EventBusInterface
 {
 
-    private $listeners = array();
+    /**
+     *
+     * @var \Governor\Framework\EventHandling\EventListenerLocatorInterface
+     */
+    protected $locator;
+
+    function __construct(EventListenerLocatorInterface $locator)
+    {
+        $this->locator = $locator;
+    }
 
     public function publish(array $events)
     {
-        if (empty($this->listeners)) {
-            return;
-        }
-
+        echo "publish\n";
         foreach ($events as $event) {
-            foreach ($this->listeners as $listener) {
-                /*    if (logger.isDebugEnabled()) {
-                  logger.debug("Dispatching Event [{}] to EventListener [{}]",
-                  event.getPayloadType().getSimpleName(),
-                  listener instanceof EventListenerProxy
-                  ? ((EventListenerProxy) listener).getTargetType().getClass()
-                  .getSimpleName()
-                  : listener.getClass().getSimpleName());
-                  } */
+            $listeners = $this->locator->getListenersFor($event);
+            foreach ($listeners as $listener) {
+                echo get_class($listener) . "\n";
                 $listener->handle($event);
             }
         }
-    }
-
-    public function subscribe(EventListenerInterface $eventListener)
-    {
-        $listenerType = $this->getActualListenerType($eventListener);
-        $this->listeners[] = $eventListener;
-    }
-
-    public function unsubscribe(EventListenerInterface $eventListener)
-    {
-        $listenerType = $this->getActualListenerType($eventListener);
-
-        if (isset($this->listeners[$eventListener])) {
-            unset($this->listeners[$eventListener]);
-        }
-    }
-
-    private function getActualListenerType(EventListenerInterface $eventListener)
-    {
-        if ($eventListener instanceof EventListenerProxy) {
-            $listenerType = $eventListener->getTargetType();
-        } else {
-            $listenerType = get_class($eventListener);
-        }
-        return $listenerType;
     }
 
 }
