@@ -35,21 +35,21 @@ class GenericDomainEventMessageTest extends \PHPUnit_Framework_TestCase
             $metaData);
 
 
-        $this->assertSame($id, $message1->getAggregateId());
+        $this->assertSame($id, $message1->getAggregateIdentifier());
         $this->assertEquals($seqNo, $message1->getScn());
         $this->assertSame(MetaData::emptyInstance(), $message1->getMetaData());
         $this->assertEquals(get_class($payload),
             get_class($message1->getPayload()));
         $this->assertEquals(get_class($payload), $message1->getPayloadType());
 
-        $this->assertSame($id, $message2->getAggregateId());
+        $this->assertSame($id, $message2->getAggregateIdentifier());
         $this->assertEquals($seqNo, $message2->getScn());
         $this->assertSame($metaData, $message2->getMetaData());
         $this->assertEquals(get_class($payload),
             get_class($message2->getPayload()));
         $this->assertEquals(get_class($payload), $message2->getPayloadType());
 
-        $this->assertNotEquals($message1->getId(), $message2->getId());
+        $this->assertNotEquals($message1->getIdentifier(), $message2->getIdentifier());
     }
 
     /**

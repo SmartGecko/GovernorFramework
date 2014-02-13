@@ -25,7 +25,19 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
 
     public function initializeState(DomainEventStreamInterface $domainEventStream)
     {
-        // !!! TODO 
+        if (0 !== $this->getUncommittedEventCount()) {
+            throw new \RuntimeException("Aggregate is already initialized");
+        }
+
+        $lastScn = -1;
+
+        while ($domainEventStream->hasNext()) {
+            $event = $domainEventStream->next();
+            $lastScn = $event->getScn();            
+            $this->handleRecursively($event);
+        }
+
+        $this->initializeEventStream($lastScn);
     }
 
     protected abstract function getChildEntities();
@@ -42,7 +54,7 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
             if (null !== $annot) {
                 $parameter = current($method->getParameters());
 
-                if (null !== $parameter->getClass() && $parameter->getClass()->name === $event->getPayloadType()) {                    
+                if (null !== $parameter->getClass() && $parameter->getClass()->name === $event->getPayloadType()) {
                     $method->invokeArgs($this, array($event->getPayload()));
                 }
             }

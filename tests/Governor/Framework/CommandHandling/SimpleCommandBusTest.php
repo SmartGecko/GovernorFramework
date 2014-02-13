@@ -21,7 +21,6 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
 {
 
     private $commandBus;
-    private $locator;
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -29,8 +28,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()        
     {
-        $this->locator = new InMemoryCommandHandlerLocator();
-        $this->commandBus = new SimpleCommandBus($this->locator);
+        $this->commandBus = new SimpleCommandBus();
     }
 
     /**
@@ -57,9 +55,9 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
     public function testDispatchCommand_HandlerUnsubscribed()
     {
         $commandHandler = new TestCommandHandler();
-        $this->locator->subscribe(get_class(new TestCommand('hi')),
+        $this->commandBus->subscribe(get_class(new TestCommand('hi')),
             $commandHandler);
-        $this->locator->unsubscribe(get_class(new TestCommand('hi')),
+        $this->commandBus->unsubscribe(get_class(new TestCommand('hi')),
             $commandHandler);
 
         $this->commandBus->dispatch(new GenericCommandMessage(new TestCommand('hi'),
@@ -69,7 +67,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
     public function testDispatchCommand_HandlerSubscribed()
     {
         $commandHandler = new TestCommandHandler();
-        $this->locator->subscribe('Governor\Framework\CommandHandling\TestCommand',
+        $this->commandBus->subscribe('Governor\Framework\CommandHandling\TestCommand',
             $commandHandler);
  
         $command = new TestCommand('hi');

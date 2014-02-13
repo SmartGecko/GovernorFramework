@@ -23,7 +23,7 @@ class CommandHandlerPass extends AbstractHandlerPass
     public function process(ContainerBuilder $container)
     {
         $reader = new AnnotationReader();
-        $locatorDefinition = $container->findDefinition('governor.command_handler_locator');
+        $busDefinition = $container->findDefinition('governor.command_bus');
 
         foreach ($container->findTaggedServiceIds('governor.command_handler') as $id => $attributes) {
             $definition = $container->findDefinition($id);
@@ -57,10 +57,11 @@ class CommandHandlerPass extends AbstractHandlerPass
                     ->addArgument($commandClassName)
                     ->addArgument($methodName)
                     ->addArgument($commandTarget)
-                    ->setPublic(true);
+                    ->setPublic(true)
+                    ->setLazy(true);
 
-                $locatorDefinition->addMethodCall('subscribe',
-                    array($commandClassName, $handlerId));
+                $busDefinition->addMethodCall('subscribe',
+                    array($commandClassName, new Reference($handlerId)));
             }
         }
     }

@@ -42,7 +42,7 @@ class EventContainerTest extends \PHPUnit_Framework_TestCase {
         
         $domainEvent = $eventContainer->getEventList()[0];
         $this->assertEquals(12, $domainEvent->getScn());        
-        $this->assertEquals($id, $domainEvent->getAggregateId());
+        $this->assertEquals($id, $domainEvent->getAggregateIdentifier());
         $this->assertTrue($eventContainer->getEventStream()->hasNext());
         
         $eventContainer->commit();

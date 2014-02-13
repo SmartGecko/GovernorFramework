@@ -8,7 +8,12 @@
 
 namespace Governor\Framework\CommandHandling;
 
+use Governor\Framework\Stubs\StubAggregate;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
+use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
+use Governor\Framework\Repository\NullLockManager;
+use Governor\Framework\EventSourcing\EventSourcingRepository;
+use Governor\Framework\EventSourcing\GenericAggregateFactory;
 use Governor\Framework\EventStore\EventStoreInterface;
 
 /**
@@ -27,34 +32,35 @@ class CommandHandlingTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->mockEventStore = new StubEventStore();
-        //$this->repository = new EventSourcingRepository<StubAggregate>(StubAggregate.class, mockEventStore);
-        //$this->mockEventBus = mock(EventBus.class);
-        //repository.setEventBus(mockEventBus);
+        $this->mockEventBus = $this->getMock('Governor\Framework\EventHandling\EventBusInterface');
+        $this->repository = new EventSourcingRepository('Governor\Framework\Stubs\StubAggregate',
+            $this->mockEventBus, new NullLockManager(), $this->mockEventStore,
+            new GenericAggregateFactory('Governor\Framework\Stubs\StubAggregate'));
         $this->aggregateIdentifier = "testAggregateIdentifier";
     }
 
     public function testCommandHandlerLoadsSameAggregateTwice()
     {
-       // DefaultUnitOfWork::startAndGet();
-        /*
-          StubAggregate stubAggregate = new StubAggregate(aggregateIdentifier);
-          stubAggregate.doSomething();
-          repository.add(stubAggregate);
-          CurrentUnitOfWork.commit();
+        DefaultUnitOfWork::startAndGet();
 
-          DefaultUnitOfWork.startAndGet();
-          repository.load(aggregateIdentifier).doSomething();
-          repository.load(aggregateIdentifier).doSomething();
-          CurrentUnitOfWork.commit();
+        $stubAggregate = new StubAggregate($this->aggregateIdentifier);
+        $stubAggregate->doSomething();
+        $this->repository->add($stubAggregate);
+        CurrentUnitOfWork::commit();
 
-          DomainEventStream es = mockEventStore.readEvents("", aggregateIdentifier);
-          assertTrue(es.hasNext());
-          assertEquals((Object) 0L, es.next().getSequenceNumber());
-          assertTrue(es.hasNext());
-          assertEquals((Object) 1L, es.next().getSequenceNumber());
-          assertTrue(es.hasNext());
-          assertEquals((Object) 2L, es.next().getSequenceNumber());
-          assertFalse(es.hasNext()); */
+        DefaultUnitOfWork::startAndGet();
+        $this->repository->load($this->aggregateIdentifier)->doSomething();
+        $this->repository->load($this->aggregateIdentifier)->doSomething();
+        CurrentUnitOfWork::commit();
+
+        $es = $this->mockEventStore->readEvents("", $this->aggregateIdentifier);
+        $this->assertTrue($es->hasNext());
+        $this->assertEquals(0, $es->next()->getScn());
+        $this->assertTrue($es->hasNext());
+        $this->assertEquals(1, $es->next()->getScn());
+        $this->assertTrue($es->hasNext());
+        $this->assertEquals(2, $es->next()->getScn());
+        $this->assertFalse($es->hasNext());
     }
 
 }
@@ -65,7 +71,7 @@ class StubEventStore implements EventStoreInterface
     private $storedEvents = array();
 
     public function appendEvents($type,
-            \Governor\Framework\Domain\DomainEventStreamInterface $events)
+        \Governor\Framework\Domain\DomainEventStreamInterface $events)
     {
         while ($events->hasNext()) {
             $this->storedEvents[] = $events->next();

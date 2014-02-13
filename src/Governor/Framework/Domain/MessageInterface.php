@@ -21,7 +21,7 @@ interface MessageInterface
      * 
      * @return \Rhumsaa\Uuid\Uuid
      */
-    public function getId();
+    public function getIdentifier();
 
     /**
      * Returns the message metadata

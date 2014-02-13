@@ -20,7 +20,7 @@ interface DomainEventMessageInterface extends MessageInterface
      * 
      * @return mixed
      */
-    public function getAggregateId();
+    public function getAggregateIdentifier();
 
     /**
      * Returns the sequence number that allows DomainEvents originating from the same Aggregate to be placed in the

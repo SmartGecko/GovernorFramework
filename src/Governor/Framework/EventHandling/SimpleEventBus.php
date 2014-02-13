@@ -8,6 +8,8 @@
 
 namespace Governor\Framework\EventHandling;
 
+use Governor\Framework\Domain\EventMessageInterface;
+
 /**
  * Description of SimpleEventBus
  *
@@ -18,24 +20,52 @@ class SimpleEventBus implements EventBusInterface
 
     /**
      *
-     * @var \Governor\Framework\EventHandling\EventListenerLocatorInterface
+     * @var \SplObjectStorage
      */
-    protected $locator;
+    private $listeners;
 
-    function __construct(EventListenerLocatorInterface $locator)
+    function __construct()
     {
-        $this->locator = $locator;
+        $this->listeners = new \SplObjectStorage();
     }
 
     public function publish(array $events)
-    {
-        echo "publish\n";
+    {        
         foreach ($events as $event) {
-            $listeners = $this->locator->getListenersFor($event);
-            foreach ($listeners as $listener) {
-                echo get_class($listener) . "\n";
+            $listeners = $this->getListenersFor($event);
+            foreach ($listeners as $listener) {                
                 $listener->handle($event);
             }
+        }
+    }
+
+    protected function getListenersFor(EventMessageInterface $eventName)
+    {
+        $result = array();
+        $this->listeners->rewind();
+
+        while ($this->listeners->valid()) {
+            if ($eventName->getPayloadType() === $this->listeners->getInfo()) {
+                $result[] = $this->listeners->current();
+            }
+
+            $this->listeners->next();
+        }
+        return $result;
+    }
+
+    public function subscribe($eventName, EventListenerInterface $eventListener)
+    {
+        if (!$this->listeners->contains($eventListener)) {
+            $this->listeners->attach($eventListener, $eventName);
+        }
+    }
+
+    public function unsubscribe($eventName,
+        EventListenerInterface $eventListener)
+    {
+        if ($this->listeners->contains($eventListener)) {
+            $this->listeners->detach($eventListener);
         }
     }
 

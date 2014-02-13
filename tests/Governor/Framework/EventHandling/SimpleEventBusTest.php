@@ -20,8 +20,7 @@ class SimpleEventBusTest extends \PHPUnit_Framework_TestCase
 
     private $listener1;
     private $listener2;
-    private $testSubject;
-    private $locator;
+    private $testSubject;    
     private $listener3;
 
     public function setUp()
@@ -32,9 +31,8 @@ class SimpleEventBusTest extends \PHPUnit_Framework_TestCase
                 array('handle'));
         $this->listener3 = $this->getMock('Governor\Framework\EventHandling\EventListenerInterface',
                 array('handle'));
-
-        $this->locator = new InMemoryEventListenerLocator();
-        $this->testSubject = new SimpleEventBus($this->locator);
+        
+        $this->testSubject = new SimpleEventBus();
     }
 
     public function testEventIsDispatchedToSubscribedListeners()
@@ -52,27 +50,27 @@ class SimpleEventBusTest extends \PHPUnit_Framework_TestCase
                 ->method('handle');
 
         $this->testSubject->publish($this->newEvent());
-        $this->locator->subscribe('Governor\Framework\EventHandling\StubEventMessage',
+        $this->testSubject->subscribe('Governor\Framework\EventHandling\StubEventMessage',
                 $this->listener1);
 
         // subscribing twice should not make a difference
-        $this->locator->subscribe('Governor\Framework\EventHandling\StubEventMessage',
+        $this->testSubject->subscribe('Governor\Framework\EventHandling\StubEventMessage',
                 $this->listener1);
         $this->testSubject->publish($this->newEvent());
-        $this->locator->subscribe('Governor\Framework\EventHandling\StubEventMessage',
+        $this->testSubject->subscribe('Governor\Framework\EventHandling\StubEventMessage',
                 $this->listener2);
-        $this->locator->subscribe('Governor\Framework\EventHandling\StubEventMessage',
+        $this->testSubject->subscribe('Governor\Framework\EventHandling\StubEventMessage',
                 $this->listener3);
         $this->testSubject->publish($this->newEvent());
-        $this->locator->unsubscribe('Governor\Framework\EventHandling\StubEventMessage',
+        $this->testSubject->unsubscribe('Governor\Framework\EventHandling\StubEventMessage',
                 $this->listener1);
         $this->testSubject->publish($this->newEvent());
-        $this->locator->unsubscribe('Governor\Framework\EventHandling\StubEventMessage',
+        $this->testSubject->unsubscribe('Governor\Framework\EventHandling\StubEventMessage',
                 $this->listener2);
-        $this->locator->unsubscribe('Governor\Framework\EventHandling\StubEventMessage',
+        $this->testSubject->unsubscribe('Governor\Framework\EventHandling\StubEventMessage',
                 $this->listener3);
         // unsubscribe a non-subscribed listener should not fail
-        $this->locator->unsubscribe('Governor\Framework\EventHandling\StubEventMessage',
+        $this->testSubject->unsubscribe('Governor\Framework\EventHandling\StubEventMessage',
                 $this->listener3);
         $this->testSubject->publish($this->newEvent());
     }

@@ -19,14 +19,14 @@ class GenericDomainEventMessage extends GenericEventMessage implements DomainEve
     private $aggregateId;
     private $scn;
 
-    public function __construct($aggregateId, $scn, $payload, MetaData $metadata)
+    public function __construct($aggregateId, $scn, $payload, MetaData $metadata = null)
     {
         parent::__construct($payload, $metadata);
         $this->aggregateId = $aggregateId;
         $this->scn = $scn;
     }
 
-    public function getAggregateId()
+    public function getAggregateIdentifier()
     {
         return $this->aggregateId;
     }
@@ -42,7 +42,7 @@ class GenericDomainEventMessage extends GenericEventMessage implements DomainEve
             return $this;
         }
 
-        return new GenericDomainEventMessage($this->getAggregateId(),
+        return new GenericDomainEventMessage($this->getAggregateIdentifier(),
             $this->scn, $this->getPayload(),
             $this->getMetaData()->mergeWith($metadata));
     }

@@ -5,7 +5,7 @@ namespace Governor\Framework\Plugin\SymfonyBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\DependencyInjection\Compiler\ResolveDefinitionTemplatesPass;
+use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\GovernorFrameworkExtension;
 use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler\CommandHandlerPass;
@@ -29,34 +29,53 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
         $repo2 = $this->testSubject->get('dummy2.repository');
 
         $this->assertInstanceOf('Governor\Framework\Repository\RepositoryInterface',
-                $repo1);
+            $repo1);
         $this->assertInstanceOf('Governor\Framework\Repository\RepositoryInterface',
-                $repo2);
+            $repo2);
         $this->assertNotSame($repo1, $repo2);
         $this->assertEquals('Governor\Framework\Stubs\Dummy1Aggregate',
-                $repo1->getClass());
+            $repo1->getClass());
         $this->assertEquals('Governor\Framework\Stubs\Dummy2Aggregate',
-                $repo2->getClass());
+            $repo2->getClass());
     }
 
     public function testEventHandlers()
     {
         $eventBus = $this->testSubject->get('governor.event_bus');
-        $eventListenerLocator = $this->testSubject->get('governor.event_listener_locator');
 
         $this->assertInstanceOf('Governor\Framework\EventHandling\EventBusInterface',
-                $eventBus);
-        $this->assertInstanceOf('Governor\Framework\EventHandling\EventListenerLocatorInterface',
-                $eventListenerLocator);
+            $eventBus);
 
-        $reflProperty = new \ReflectionProperty($eventListenerLocator,
-                'listeners');
+        $reflProperty = new \ReflectionProperty($eventBus, 'listeners');
         $reflProperty->setAccessible(true);
 
-        $listeners = $reflProperty->getValue($eventListenerLocator);
+        $listeners = $reflProperty->getValue($eventBus);
 
         $this->assertCount(1, $listeners);
-        $this->assertContainsOnlyInstancesOf('Governor\Framework\EventHandling\EventListenerInterface', $listeners);
+        $this->assertContainsOnlyInstancesOf('Governor\Framework\EventHandling\EventListenerInterface',
+            $listeners);
+    }
+
+    public function testEventHandlerLazyLoading()
+    {
+        foreach ($this->testSubject->getServiceIds() as $id) {
+            if (preg_match('/^governor.event_handler.*/', $id)) {
+                $def = $this->testSubject->getDefinition($id);
+
+                $this->assertTrue($def->isLazy());
+            }
+        }
+    }
+
+    public function testCommandHandlerLazyLoading()
+    {
+        foreach ($this->testSubject->getServiceIds() as $id) {
+            if (preg_match('/^governor.command_handler.*/', $id)) {
+                $def = $this->testSubject->getDefinition($id);
+
+                $this->assertTrue($def->isLazy());
+            }
+        }
     }
 
     public function createTestContainer()
@@ -79,11 +98,14 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
         )));
 
         $loader = new GovernorFrameworkExtension();
+
+        $container->setProxyInstantiator(new RuntimeInstantiator());
+
         $container->registerExtension($loader);
         $container->set('doctrine.orm.default_entity_manager',
-                $this->getMock('Doctrine\ORM\EntityManager',
-                        array(
-                    'find', 'flush', 'persist', 'remove'), array(), '', false));
+            $this->getMock('Doctrine\ORM\EntityManager',
+                array(
+                'find', 'flush', 'persist', 'remove'), array(), '', false));
 
         $this->addTaggedCommandHandlers($container);
         $this->addTaggedEventListeners($container);
@@ -91,9 +113,9 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
         $loader->load($config, $container);
 
         $container->addCompilerPass(new CommandHandlerPass(),
-                PassConfig::TYPE_BEFORE_REMOVING);
+            PassConfig::TYPE_BEFORE_REMOVING);
         $container->addCompilerPass(new EventHandlerPass(),
-                PassConfig::TYPE_BEFORE_REMOVING);
+            PassConfig::TYPE_BEFORE_REMOVING);
         $container->compile();
 
         return $container;
@@ -101,18 +123,18 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
     private function addTaggedCommandHandlers(ContainerBuilder $container)
     {
-        $definition = new Definition(new ContainerCommandHandler1());
+        $definition = new Definition('Governor\Framework\Plugin\SymfonyBundle\ContainerCommandHandler1');
         $definition->addTag('governor.command_handler')
-                ->setPublic(true);
+            ->setPublic(true);
 
         $container->setDefinition('test.command_handler', $definition);
     }
 
     private function addTaggedEventListeners(ContainerBuilder $container)
     {
-        $definition = new Definition(new ContainerEventListener1());
+        $definition = new Definition('Governor\Framework\Plugin\SymfonyBundle\ContainerEventListener1');
         $definition->addTag('governor.event_handler')
-                ->setPublic(true);
+            ->setPublic(true);
 
         $container->setDefinition('test.event_handler', $definition);
     }

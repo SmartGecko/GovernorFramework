@@ -8,7 +8,9 @@
     "require": {
         "rhumsaa/uuid": "@stable",
         "psr/log": "@stable",
-        "php": ">=5.3"
+        "php": ">=5.3",        
+        "symfony/proxy-manager-bridge":">=2.4",
+        "ocramius/proxy-manager": "0.5.*"
     },
     "require-dev": {
         "doctrine/common": ">=2.0,<2.5",
@@ -16,8 +18,8 @@
         "doctrine/mongodb-odm": "1.0.*@dev",
         "jms/serializer": "*",
         "jms/aop-bundle": "1.1.*@dev",
-        "symfony/framework-bundle": ">=2.0,<2.2",
-        "symfony/console": ">=2.0,<2.2",
+        "symfony/framework-bundle": ">=2.4",
+        "symfony/console": ">=2.3",
         "symfony/finder": ">=2.3",
         "moontoast/math": "*"
     }

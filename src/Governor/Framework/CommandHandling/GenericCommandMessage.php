@@ -62,7 +62,7 @@ class GenericCommandMessage implements CommandMessageInterface
         return $this->commandName;
     }
 
-    public function getId()
+    public function getIdentifier()
     {
         return $this->id;
     }

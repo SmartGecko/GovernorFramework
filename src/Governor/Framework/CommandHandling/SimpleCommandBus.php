@@ -18,17 +18,12 @@ use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 class SimpleCommandBus implements CommandBusInterface
 {
 
-    protected $locator;
-
-    public function __construct(CommandHandlerLocatorInterface $locator)
-    {
-        $this->locator = $locator;
-    }
+    private $subscriptions = array();
 
     public function dispatch(CommandMessageInterface $command,
         CommandCallback $callback = null)
     {
-        $handler = $this->locator->findCommandHandlerFor($command);
+        $handler = $this->findCommandHandlerFor($command);
 
         if (null === $callback) {
             $callback = new CommandCallback(function($result) {
@@ -62,5 +57,28 @@ class SimpleCommandBus implements CommandBusInterface
         $unitOfWork->commit();
 
         return $return;
-    }   
+    }
+
+    public function findCommandHandlerFor(CommandMessageInterface $command)
+    {
+        if (!array_key_exists($command->getCommandName(), $this->subscriptions)) {
+            throw new NoHandlerForCommandException(sprintf("No handler was subscribed for command [%s]",
+                $command->getCommandName()));
+        }
+
+        return $this->subscriptions[$command->getCommandName()];
+    }
+
+    public function subscribe($commandName, CommandHandlerInterface $handler)
+    {
+        $this->subscriptions[$commandName] = $handler;
+    }
+
+    public function unsubscribe($commandName, CommandHandlerInterface $handler)
+    {
+        if (isset($this->subscriptions[$commandName])) {
+            unset($this->subscriptions[$commandName]);
+        }
+    }
+
 }

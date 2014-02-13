@@ -29,7 +29,7 @@ class GenericMessage implements MessageInterface
         $this->payload = $payload;
     }
 
-    public function getId()
+    public function getIdentifier()
     {
         return $this->id;
     }

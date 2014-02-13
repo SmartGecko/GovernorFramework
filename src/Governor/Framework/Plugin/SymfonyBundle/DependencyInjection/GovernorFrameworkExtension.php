@@ -43,7 +43,7 @@ class GovernorFrameworkExtension extends Extension
         ContainerBuilder $container)
     {
         $reader = new AnnotationReader();
-        $locatorDefinition = $container->findDefinition('governor.command_handler_locator');
+        $busDefinition = $container->findDefinition('governor.command_bus');
 
         foreach ($config['aggregate_command_handlers'] as $name => $parameters) {
             $reflectionClass = new \ReflectionClass($parameters['aggregate_root']);
@@ -79,11 +79,12 @@ class GovernorFrameworkExtension extends Extension
                     ->addArgument($parameters['aggregate_root'])
                     ->addArgument($repository)
                     ->addArgument($resolver)
-                    ->setPublic(true);
+                    ->setPublic(true)
+                    ->setLazy(true);
 
-                $locatorDefinition->addMethodCall('subscribe',
-                    array($commandParam->getClass()->name, $handlerId));
-            }            
+                $busDefinition->addMethodCall('subscribe',
+                    array($commandParam->getClass()->name, new Reference($handlerId)));
+            }
         }
     }
 
@@ -93,8 +94,8 @@ class GovernorFrameworkExtension extends Extension
             $repository = new DefinitionDecorator(sprintf('governor.repository.%s',
                     $parameters['type']));
             $repository->replaceArgument(0, $parameters['aggregate_root'])
-                    ->setPublic(true);
-            
+                ->setPublic(true);
+
             $container->setDefinition(sprintf('%s.repository', $name),
                 $repository);
         }

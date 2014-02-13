@@ -99,4 +99,10 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
         return $this->eventContainer;
     }
 
+    protected function initializeEventStream($lastScn)
+    {
+        $this->getEventContainer()->initializeSequenceNumber($lastScn);
+        $this->lastEventScn = $lastScn >= 0 ? $lastScn : null;
+    }
+
 }

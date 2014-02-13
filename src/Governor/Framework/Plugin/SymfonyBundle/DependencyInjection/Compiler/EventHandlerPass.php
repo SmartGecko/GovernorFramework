@@ -12,17 +12,16 @@ class EventHandlerPass extends AbstractHandlerPass
     public function process(ContainerBuilder $container)
     {
         $reader = new AnnotationReader();
-        $locatorDefinition = $container->findDefinition('governor.event_listener_locator');
+        $busDefinition = $container->findDefinition('governor.event_bus');
 
         foreach ($container->findTaggedServiceIds('governor.event_handler') as $id => $attributes) {
             $definition = $container->findDefinition($id);
             $class = $definition->getClass();
-
             $reflClass = new \ReflectionClass($class);
 
             foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
                 $annot = $reader->getMethodAnnotation($method,
-                        'Governor\Framework\Annotations\EventHandler');
+                    'Governor\Framework\Annotations\EventHandler');
 
                 // not a handler
                 if (null === $annot) {
@@ -39,17 +38,18 @@ class EventHandlerPass extends AbstractHandlerPass
                 $eventClassName = $eventParam->getClass()->name;
                 $methodName = $method->name;
                 $eventTarget = new Reference($id);
-                $handlerId = $handlerId = $this->getHandlerIdentifier("governor.event_handler");
+                $handlerId = $handlerId = $this->getHandlerIdentifier("governor.event_handler");                               
 
                 $container->register($handlerId,
-                                'Governor\Framework\EventHandling\Listeners\AnnotatedEventListener')
-                        ->addArgument($eventClassName)
-                        ->addArgument($methodName)
-                        ->addArgument($eventTarget)
-                        ->setPublic(true);
-                
-                $locatorDefinition->addMethodCall('subscribe',
-                        array($eventClassName, new Reference($handlerId)));
+                        'Governor\Framework\EventHandling\Listeners\AnnotatedEventListener')
+                    ->addArgument($eventClassName)
+                    ->addArgument($methodName)
+                    ->addArgument($eventTarget)
+                    ->setPublic(true)
+                    ->setLazy(true);            
+                                
+                $busDefinition->addMethodCall('subscribe',
+                    array($eventClassName, new Reference($handlerId)));
             }
         }
     }
