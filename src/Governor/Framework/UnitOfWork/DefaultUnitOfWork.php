@@ -10,6 +10,7 @@ namespace Governor\Framework\UnitOfWork;
 
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\Domain\EventMessageInterface;
+use Governor\Framework\Domain\DomainEventMessageInterface;
 
 /**
  * Description of DefaultUnitOfWork
@@ -77,11 +78,11 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     }
 
     public function registerAggregate($aggregateRoot,
-        EventBusInterface $eventBus,
-        SaveAggregateCallbackInterface $saveAggregateCallback)
+            EventBusInterface $eventBus,
+            SaveAggregateCallbackInterface $saveAggregateCallback)
     {
         $similarAggregate = $this->findSimilarAggregate(get_class($aggregateRoot),
-            $aggregateRoot->getIdentifier());
+                $aggregateRoot->getIdentifier());
         if (null !== $similarAggregate) {
             /* if (logger.isInfoEnabled()) {
               logger.info("Ignoring aggregate registration. An aggregate of same type and identifier was already"
@@ -91,14 +92,20 @@ class DefaultUnitOfWork extends NestableUnitOfWork
               } */
             return $similarAggregate;
         }
-        // EventRegistrationCallback eventRegistrationCallback = new UoWEventRegistrationCallback(eventBus);
+
+        $uow = $this;
+        $eventRegistrationCallback = new UoWEventRegistrationCallback(function (DomainEventMessageInterface $event) use ($uow, $eventBus) {            
+            $event = $uow->invokeEventRegistrationListeners($event);
+            $uow->eventsToPublishOn($event, $eventBus);
+
+            return $event;
+        });
 
         $this->registeredAggregates[spl_object_hash($aggregateRoot)] = array($aggregateRoot,
             $saveAggregateCallback);
 
-        //   registeredAggregates.put(aggregate, new AggregateEntry<T>(aggregate, saveAggregateCallback));
         // listen for new events registered in the aggregate
-        //$aggregateRoot->addEventRegistrationCallback(eventRegistrationCallback);
+        $aggregateRoot->addEventRegistrationCallback($eventRegistrationCallback);
         return $aggregateRoot;
     }
 
@@ -120,7 +127,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     }
 
     private function eventsToPublishOn(EventMessageInterface $event,
-        EventBusInterface $eventBus)
+            EventBusInterface $eventBus)
     {
         if (!$this->eventsToPublish->contains($eventBus)) {
             $this->eventsToPublish->attach($eventBus, array($event));
@@ -138,8 +145,8 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     }
 
     public function publishEvent(EventMessageInterface $event,
-        EventBusInterface $eventBus)
-    {
+            EventBusInterface $eventBus)
+    {        
         $event = $this->invokeEventRegistrationListeners($event);
         $this->eventsToPublishOn($event, $eventBus);
     }
@@ -158,11 +165,11 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         }
         $this->dispatcherStatus = self::STATUS_DISPATCHING;
         $this->eventsToPublish->rewind();
-
+        
         while ($this->eventsToPublish->valid()) {
             $bus = $this->eventsToPublish->current();
             $events = $this->eventsToPublish->getInfo();
-            
+
             // clear and send
             $this->eventsToPublish->setInfo(array());
             $bus->publish($events);
@@ -170,7 +177,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
             $this->eventsToPublish->next();
         }
 
-        /*  
+        /*
           Map.Entry<EventBus, List<EventMessage<?>>> entry = iterator.next();
           List<EventMessage<?>> messageList = entry.getValue();
           EventMessage<?>[] messages = messageList.toArray(new EventMessage<?>[messageList.size()]);

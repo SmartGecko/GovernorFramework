@@ -20,6 +20,7 @@ class EventContainer
     private $aggregateId;
     private $lastCommitedScn;
     private $lastScn;
+    private $registrationCallbacks = array();
 
     public function __construct($aggregateId)
     {
@@ -27,9 +28,13 @@ class EventContainer
     }
 
     public function addEvent(MetaData $metadata, $payload)
-    {
+    {        
         $event = new GenericDomainEventMessage($this->aggregateId,
-            $this->newScn(), $payload, $metadata);
+                $this->newScn(), $payload, $metadata);
+        
+        foreach ($this->registrationCallbacks as $callback) {
+            $event = $callback->onRegisteredEvent($event);
+        }
 
         $this->lastScn = $event->getScn();
         $this->events[] = $event;
@@ -70,6 +75,7 @@ class EventContainer
     {
         $this->lastCommitedScn = $this->getLastScn();
         $this->events = array();
+        $this->registrationCallbacks = array();
     }
 
     /**
@@ -111,4 +117,14 @@ class EventContainer
     {
         return $this->events;
     }
+
+    public function addEventRegistrationCallback(EventRegistrationCallbackInterface $eventRegistrationCallback)
+    {        
+        $this->registrationCallbacks[] = $eventRegistrationCallback;
+
+        foreach ($this->events as $event) {            
+            $event = $eventRegistrationCallback->onRegisteredEvent($event);
+        }
+    }
+
 }

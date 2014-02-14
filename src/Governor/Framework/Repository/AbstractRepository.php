@@ -81,7 +81,7 @@ abstract class AbstractRepository implements RepositoryInterface
     {
         if (null !== $expectedVersion && null !== $object->getVersion() &&
             $expectedVersion !== $object->getVersion()) {
-            throw new ConflictingAggregateVersionException($object->getId(),
+            throw new ConflictingAggregateVersionException($object->getIdentifier(),
             $expectedVersion, $object->getVersion());
         }
     }

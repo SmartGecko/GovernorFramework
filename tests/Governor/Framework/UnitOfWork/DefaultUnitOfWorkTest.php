@@ -60,7 +60,7 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         $this->assertFalse(CurrentUnitOfWork::isStarted(),
-            "A UnitOfWork was not properly cleared");
+                "A UnitOfWork was not properly cleared");
     }
 
     /*
@@ -110,8 +110,8 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
     {
         $parentUoW = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkInterface');
         $parentUoW->expects($this->once())
-            ->method('registerListener')
-            ->with($this->anything());
+                ->method('registerListener')
+                ->with($this->anything());
 
         CurrentUnitOfWork::set($parentUoW);
         $innerUow = DefaultUnitOfWork::startAndGet();
@@ -135,9 +135,9 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $outer->rollback();
 
         $this->assertTrue($isRolledBack,
-            "The inner UoW wasn't properly rolled back");
+                "The inner UoW wasn't properly rolled back");
         $this->assertFalse(CurrentUnitOfWork::isStarted(),
-            "The UnitOfWork haven't been correctly cleared");
+                "The UnitOfWork haven't been correctly cleared");
     }
 
     public function testInnerUnitOfWorkCommittedBackWithOuter()
@@ -152,12 +152,12 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $inner->commit();
         $this->assertFalse($isCommitted,
-            "The inner UoW was committed prematurely");
+                "The inner UoW was committed prematurely");
         $outer->commit();
         $this->assertTrue($isCommitted,
-            "The inner UoW wasn't properly committed");
+                "The inner UoW wasn't properly committed");
         $this->assertFalse(CurrentUnitOfWork::isStarted(),
-            "The UnitOfWork haven't been correctly cleared");
+                "The UnitOfWork haven't been correctly cleared");
     }
 
 // !!! TODO 
@@ -178,7 +178,7 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
           }).when(listener1).handle(event1); */
 
         $this->testSubject->registerAggregate($this->mockAggregateRoot,
-            $this->mockEventBus, $this->callback);
+                $this->mockEventBus, $this->callback);
 
         $this->testSubject->commit();
 
@@ -194,23 +194,23 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
     {
         $mockListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
         $mockListener->expects($this->once())
-            ->method('onPrepareCommit')
-            ->with($this->anything(), $this->anything(), $this->anything())
-            ->will($this->throwException(new \RuntimeException('phpunit')));
+                ->method('onPrepareCommit')
+                ->with($this->anything(), $this->anything(), $this->anything())
+                ->will($this->throwException(new \RuntimeException('phpunit')));
 
         $mockListener->expects($this->once())
-            ->method('onRollback')
-            ->with($this->anything(),
-                $this->callback(function ($subject) {
-                    return $subject instanceof \RuntimeException;
-                }));
+                ->method('onRollback')
+                ->with($this->anything(),
+                        $this->callback(function ($subject) {
+                            return $subject instanceof \RuntimeException;
+                        }));
 
         $mockListener->expects($this->never())
-            ->method('afterCommit');
+                ->method('afterCommit');
 
         $mockListener->expects($this->once())
-            ->method('onCleanup')
-            ->with($this->anything());
+                ->method('onCleanup')
+                ->with($this->anything());
 
         $this->testSubject->registerListener($mockListener);
         $this->testSubject->start();
@@ -229,32 +229,32 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $mockListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
 
         $this->callback->expects($this->once())
-            ->method('save')
-            ->with($this->anything())
-            ->will($this->throwException(new \RuntimeException('phpunit')));
+                ->method('save')
+                ->with($this->anything())
+                ->will($this->throwException(new \RuntimeException('phpunit')));
 
         $mockListener->expects($this->once())
-            ->method('onPrepareCommit')
-            ->with($this->anything(), $this->anything(), $this->anything());
+                ->method('onPrepareCommit')
+                ->with($this->anything(), $this->anything(), $this->anything());
 
 
         $mockListener->expects($this->once())
-            ->method('onRollback')
-            ->with($this->anything(),
-                $this->callback(function ($subject) {
-                    return $subject instanceof \RuntimeException;
-                }));
+                ->method('onRollback')
+                ->with($this->anything(),
+                        $this->callback(function ($subject) {
+                            return $subject instanceof \RuntimeException;
+                        }));
 
         $mockListener->expects($this->never())
-            ->method('afterCommit');
+                ->method('afterCommit');
 
         $mockListener->expects($this->once())
-            ->method('onCleanup')
-            ->with($this->anything());
+                ->method('onCleanup')
+                ->with($this->anything());
 
         $this->testSubject->registerListener($mockListener);
         $this->testSubject->registerAggregate($this->mockAggregateRoot,
-            $this->mockEventBus, $this->callback);
+                $this->mockEventBus, $this->callback);
         $this->testSubject->start();
 
         try {
@@ -262,9 +262,9 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
             $this->fail("Expected exception");
         } catch (\RuntimeException $ex) {
             $this->assertInstanceOf('\RuntimeException', $ex,
-                "Got an exception, but the wrong one");
+                    "Got an exception, but the wrong one");
             $this->assertEquals('phpunit', $ex->getMessage(),
-                "Got an exception, but the wrong one");
+                    "Got an exception, but the wrong one");
         }
     }
 
@@ -273,43 +273,43 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $mockListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
 
         $mockListener->expects($this->once())
-            ->method('onEventRegistered')
-            ->with($this->anything(), $this->anything())
-            ->will($this->returnValue(new GenericEventMessage(new TestMessage(1))));
+                ->method('onEventRegistered')
+                ->with($this->anything(), $this->anything())
+                ->will($this->returnValue(new GenericEventMessage(new TestMessage(1))));
 
         $this->mockEventBus->expects($this->once())
-            ->method('publish')
-            ->with($this->anything())
-            ->will($this->throwException(new \RuntimeException('phpunit')));
+                ->method('publish')
+                ->with($this->anything())
+                ->will($this->throwException(new \RuntimeException('phpunit')));
 
         $mockListener->expects($this->once())
-            ->method('onPrepareCommit')
-            ->with($this->anything(), $this->anything(), $this->anything());
+                ->method('onPrepareCommit')
+                ->with($this->anything(), $this->anything(), $this->anything());
 
 
         $mockListener->expects($this->once())
-            ->method('onRollback')
-            ->with($this->anything(),
-                $this->callback(function ($subject) {
-                    return $subject instanceof \RuntimeException;
-                }));
+                ->method('onRollback')
+                ->with($this->anything(),
+                        $this->callback(function ($subject) {
+                            return $subject instanceof \RuntimeException;
+                        }));
 
         $mockListener->expects($this->never())
-            ->method('afterCommit');
+                ->method('afterCommit');
 
         $this->testSubject->start();
         $this->testSubject->registerListener($mockListener);
         $this->testSubject->publishEvent(new GenericEventMessage(new TestMessage(1)),
-            $this->mockEventBus);
+                $this->mockEventBus);
 
         try {
             $this->testSubject->commit();
             $this->fail("Expected exception");
         } catch (\RuntimeException $ex) {
             $this->assertInstanceOf('\RuntimeException', $ex,
-                "Got an exception, but the wrong one");
+                    "Got an exception, but the wrong one");
             $this->assertEquals('phpunit', $ex->getMessage(),
-                "Got an exception, but the wrong one");
+                    "Got an exception, but the wrong one");
         }
     }
 
@@ -325,15 +325,17 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $inner->registerListener($innerListener);
 
         $innerListener->expects($this->once())
-            ->method('afterCommit');
-        
+                ->method('afterCommit');
+
         $innerListener->expects($this->once())
-            ->method('onCleanup');
+                ->method('onCleanup');
 
         $inner->commit();
         
+        //$innerListener->expects($this->at(1))
+
         $outer->commit();
-        
+
         /*
           UnitOfWork outer = DefaultUnitOfWork.startAndGet();
           UnitOfWork inner = DefaultUnitOfWork.startAndGet();
@@ -459,7 +461,7 @@ class RollbackTestAdapter extends UnitOfWorkListenerAdapter
     }
 
     public function onRollback(UnitOfWorkInterface $unitOfWork,
-        \Exception $failureCause = null)
+            \Exception $failureCause = null)
     {
         $cb = $this->closure;
         $cb($unitOfWork, $failureCause);

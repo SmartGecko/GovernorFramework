@@ -22,12 +22,11 @@ interface AggregateRootInterface
      * @return integer the identifier of this aggregate
      */
     public function getIdentifier();
-    
+
     /**
      * Clears the events currently marked as "uncommitted"
      * 
      */
-    
     public function commitEvents();
 
     /**
@@ -65,4 +64,15 @@ interface AggregateRootInterface
      * @return boolean
      */
     public function isDeleted();
+
+    /**
+     * Adds an EventRegistrationCallback, which is notified when the aggregate registers an Event for publication.
+     * These callbacks are cleared when the aggregate is committed.
+     * <p/>
+     * If the aggregate contains uncommitted events, they are all passed to the given
+     * <code>eventRegistrationCallback</code> for processing.
+     *
+     * @param eventRegistrationCallback the callback to notify when an event is registered
+     */
+    public function addEventRegistrationCallback(EventRegistrationCallbackInterface $eventRegistrationCallback);
 }

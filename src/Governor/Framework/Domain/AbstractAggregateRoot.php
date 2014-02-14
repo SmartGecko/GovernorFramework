@@ -29,7 +29,7 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
 
     protected function registerEvent($payload, MetaData $metaData = null)
     {
-        $meta = (null === $metaData) ? new MetaData() : $metaData;
+        $meta = (null === $metaData) ? MetaData::emptyInstance() : $metaData;
 
         return $this->getEventContainer()->addEvent($meta, $payload);
     }
@@ -105,4 +105,8 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
         $this->lastEventScn = $lastScn >= 0 ? $lastScn : null;
     }
 
+    public function addEventRegistrationCallback(EventRegistrationCallbackInterface $callback)
+    {
+        $this->getEventContainer()->addEventRegistrationCallback($callback);
+    }
 }
