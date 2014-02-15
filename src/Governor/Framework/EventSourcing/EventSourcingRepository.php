@@ -28,10 +28,20 @@ class EventSourcingRepository extends LockingRepository
     private $eventStore;
     private $factory;
     private $conflictResolver;
+    private $eventStreamDecorators = array();
 
+    /**
+     * Creates a new EventSourcingRepository with the given parameters.
+     * 
+     * @param string $className
+     * @param \Governor\Framework\EventHandling\EventBusInterface $eventBus
+     * @param \Governor\Framework\Repository\LockManagerInterface $lockManager
+     * @param \Governor\Framework\EventStore\EventStoreInterface $eventStore
+     * @param \Governor\Framework\EventSourcing\AggregateFactoryInterface $factory
+     */
     public function __construct($className, EventBusInterface $eventBus,
-            LockManagerInterface $lockManager, EventStoreInterface $eventStore,
-            AggregateFactoryInterface $factory)
+        LockManagerInterface $lockManager, EventStoreInterface $eventStore,
+        AggregateFactoryInterface $factory)
     {
         $this->validateEventSourcedAggregate($className);
 
@@ -48,30 +58,28 @@ class EventSourcingRepository extends LockingRepository
 
     protected function doLoad($id, $exceptedVersion)
     {
-        $originalStream = null;
-
         try {
             $events = $this->eventStore->readEvents($this->getTypeIdentifier(),
-                    $id);
+                $id);
         } catch (EventStreamNotFoundException $ex) {
-            throw new AggregateNotFoundException($id,
-            "The aggregate was not found", $ex);
+            throw new AggregateNotFoundException($id, "The aggregate was not found", $ex);
         }
-        /*    originalStream = events;
-          for (EventStreamDecorator decorator : eventStreamDecorators) {
-          events = decorator.decorateForRead(getTypeIdentifier(), aggregateIdentifier, events);
-          } */
+
+        foreach ($this->eventStreamDecorators as $decorator) {
+            $events = $decorator->decorateForRead($this->getTypeIdentifier(),
+                $id, $events);
+        }
 
         $aggregate = $this->factory->createAggregate($id, $events->peek());
         $unseenEvents = array();
 
         $aggregate->initializeState(new CapturingEventStream($events,
-                $unseenEvents, $exceptedVersion));
+            $unseenEvents, $exceptedVersion));
         if ($aggregate->isDeleted()) {
             throw new AggregateDeletedException($id);
         }
 
-        //CurrentUnitOfWork::get()->registerListener(new ConflictResolvingListener(aggregate, unseenEvents));
+        CurrentUnitOfWork::get()->registerListener(new ConflictResolvingListener($aggregate, $unseenEvents, $this->conflictResolver));
 
         return $aggregate;
     }
@@ -80,10 +88,14 @@ class EventSourcingRepository extends LockingRepository
     {
         $eventStream = $aggregate->getUncommittedEvents();
 
-        /* Iterator<EventStreamDecorator> iterator = eventStreamDecorators.descendingIterator();
-          while (iterator.hasNext()) {
-          eventStream = iterator.next().decorateForAppend(getTypeIdentifier(), aggregate, eventStream);
-          } */
+        $iterator = new \ArrayIterator(array_reverse($this->eventStreamDecorators));
+
+        while ($iterator->valid()) {
+            $eventStream = $iterator->current->decorateForAppend($this->getTypeIdentifier(),
+                $aggregate, $eventStream);
+            $iterator->next();
+        }
+
         $this->eventStore->appendEvents($this->getTypeIdentifier(), $eventStream);
     }
 
@@ -93,16 +105,23 @@ class EventSourcingRepository extends LockingRepository
 
         if (!$reflClass->implementsInterface('Governor\Framework\EventSourcing\EventSourcedAggregateRootInterface')) {
             throw new \InvalidArgumentException(sprintf("EventSourcingRepository aggregates need to implements EventSourcedAggregateRootInterface, %s does not.",
-                    $className));
+                $className));
         }
     }
 
+    /**
+     * Returns the type identifier of the aggregates in this repository.
+     * 
+     * @return string
+     * @throws \RuntimeException
+     */
     public function getTypeIdentifier()
     {
         if (null === $this->factory) {
             throw new \RuntimeException("Either an aggregate factory must be configured (recommended), " .
-            "or the getTypeIdentifier() method must be overridden.");
+                "or the getTypeIdentifier() method must be overridden.");
         }
+
         return $this->factory->getTypeIdentifier();
     }
 
@@ -110,7 +129,7 @@ class EventSourcingRepository extends LockingRepository
      * Sets the conflict resolver to use for this repository. If not set (or <code>null</code>), the repository will
      * throw an exception if any unexpected changes appear in loaded aggregates.
      *
-     * @param conflictResolver The conflict resolver to use for this repository
+     * @param ConflictResolverInterface $conflictResolver The conflict resolver to use for this repository
      */
     public function setConflictResolver(ConflictResolverInterface $conflictResolver)
     {
@@ -118,7 +137,7 @@ class EventSourcingRepository extends LockingRepository
     }
 
     protected function validateOnLoad(AggregateRootInterface $object,
-            $expectedVersion)
+        $expectedVersion)
     {
         if (null === $this->conflictResolver) {
             parent::validateOnLoad($object, $expectedVersion);

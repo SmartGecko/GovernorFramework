@@ -31,7 +31,7 @@ abstract class UnitOfWorkListenerAdapter implements UnitOfWorkListenerInterface
     public function onEventRegistered(UnitOfWorkInterface $unitOfWork,
         EventMessageInterface $event)
     {
-        
+        return $event;
     }
 
     public function onPrepareCommit(UnitOfWorkInterface $unitOfWork,

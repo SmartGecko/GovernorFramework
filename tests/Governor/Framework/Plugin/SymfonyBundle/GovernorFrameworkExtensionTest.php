@@ -99,7 +99,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
         $loader = new GovernorFrameworkExtension();
 
-        //$container->setProxyInstantiator(new RuntimeInstantiator());
+        $container->setProxyInstantiator(new RuntimeInstantiator());
 
         $container->registerExtension($loader);
         $container->set('doctrine.orm.default_entity_manager',

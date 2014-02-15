@@ -33,7 +33,7 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
 
         while ($domainEventStream->hasNext()) {
             $event = $domainEventStream->next();
-            $lastScn = $event->getScn();            
+            $lastScn = $event->getScn();                   
             $this->handleRecursively($event);
         }
 

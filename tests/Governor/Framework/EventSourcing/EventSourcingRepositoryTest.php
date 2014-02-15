@@ -17,6 +17,7 @@ use Governor\Framework\Repository\NullLockManager;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
 use Governor\Framework\Stubs\StubDomainEvent;
+use Governor\Framework\Repository\ConflictingAggregateVersionException;
 
 /**
  * Description of EventSourcingRepositoryTest
@@ -36,11 +37,11 @@ class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
     {
         $this->mockEventStore = $this->getMock('Governor\Framework\EventStore\SnapshotEventStoreInterface');
         $this->mockEventBus = $this->getMock('Governor\Framework\EventHandling\EventBusInterface',
-                array('publish', 'subscribe', 'unsubscribe'));
+            array('publish', 'subscribe', 'unsubscribe'));
         $this->stubAggregateFactory = new StubAggregateFactory();
         $this->testSubject = new EventSourcingRepository('Governor\Framework\EventSourcing\TestAggregate',
-                $this->mockEventBus, new NullLockManager(),
-                $this->mockEventStore, $this->stubAggregateFactory);
+            $this->mockEventBus, new NullLockManager(), $this->mockEventStore,
+            $this->stubAggregateFactory);
 
         $this->unitOfWork = DefaultUnitOfWork::startAndGet();
     }
@@ -56,16 +57,15 @@ class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
     {
         $identifier = Uuid::uuid1()->toString();
         $event1 = new GenericDomainEventMessage($identifier, 1, new \stdClass(),
-                MetaData::emptyInstance());
+            MetaData::emptyInstance());
         $event2 = new GenericDomainEventMessage($identifier, 2, new \stdClass(),
-                MetaData::emptyInstance());
+            MetaData::emptyInstance());
 
         $this->mockEventStore->expects($this->any())
-                ->method('readEvents')
-                ->with($this->identicalTo("test"),
-                        $this->identicalTo($identifier))
-                ->will($this->returnValue(new SimpleDomainEventStream(array(
-                            $event1, $event2))));
+            ->method('readEvents')
+            ->with($this->identicalTo("test"), $this->identicalTo($identifier))
+            ->will($this->returnValue(new SimpleDomainEventStream(array(
+                    $event1, $event2))));
 
         $aggregate = $this->testSubject->load($identifier, null);
 
@@ -78,11 +78,11 @@ class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
         $event3 = new StubDomainEvent();
 
         $this->mockEventStore->expects($this->once())
-                ->method('appendEvents');
+            ->method('appendEvents');
 
         $this->mockEventBus->expects($this->once())
-                ->method('publish')
-                ->with($this->anything());
+            ->method('publish')
+            ->with($this->anything());
 
         $aggregate->apply($event3);
 
@@ -97,11 +97,10 @@ class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
         $aggregate = new TestAggregate($identifier);
 
         $this->mockEventStore->expects($this->once())
-                ->method('readEvents')
-                ->with($this->identicalTo("test"),
-                        $this->identicalTo($identifier))
-                ->will($this->returnValue(new SimpleDomainEventStream(array(new GenericDomainEventMessage($identifier,
-                                    10, $aggregate)))));
+            ->method('readEvents')
+            ->with($this->identicalTo("test"), $this->identicalTo($identifier))
+            ->will($this->returnValue(new SimpleDomainEventStream(array(new GenericDomainEventMessage($identifier,
+                        10, $aggregate)))));
 
         $this->assertSame($aggregate, $this->testSubject->load($identifier));
     }
@@ -111,37 +110,37 @@ class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
         $conflictResolver = $this->getMock('Governor\Framework\EventSourcing\ConflictResolverInterface');
         $identifier = Uuid::uuid1()->toString();
         $event2 = new GenericDomainEventMessage($identifier, 2, new \stdClass(),
-                MetaData::emptyInstance());
+            MetaData::emptyInstance());
         $event3 = new GenericDomainEventMessage($identifier, 3, new \stdClass(),
-                MetaData::emptyInstance());
+            MetaData::emptyInstance());
 
         $this->mockEventStore->expects($this->once())
-                ->method('readEvents')
-                ->with($this->identicalTo("test"),
-                        $this->identicalTo($identifier))
-                ->will($this->returnValue(new SimpleDomainEventStream(array(new GenericDomainEventMessage($identifier,
-                                    1, new \stdClass()), $event2, $event3))));
-        
+            ->method('readEvents')
+            ->with($this->identicalTo("test"), $this->identicalTo($identifier))
+            ->will($this->returnValue(new SimpleDomainEventStream(array(new GenericDomainEventMessage($identifier,
+                        1, new \stdClass()), $event2, $event3))));
+
         $this->testSubject->setConflictResolver($conflictResolver);
-        
-        $conflictResolver->expects($this->never())
-                ->method('resolveConflicts');
-       
+
         $actual = $this->testSubject->load($identifier, 1);
-        
+
         $appliedEvent = new StubDomainEvent();
-        
-        // !!! TODO conflic resolving listener
-      //  $conflictResolver->expects($this->once())
-           //     ->method('resolveConflicts')
-            //    ->with($this->anything(), $this->anything());
-        
+
+     //   $conflictResolver->expects($this->never())
+          //  ->method('resolveConflicts');
+        //!!! TODO conflic resolving listener
+
         $actual->apply($appliedEvent);
-        
+
+        $conflictResolver->expects($this->once())
+            ->method('resolveConflicts')
+            ->with($this->anything(), $this->anything());
+
+
         CurrentUnitOfWork::commit();
-        
+
         /*
-      
+
           verify(conflictResolver, never()).resolveConflicts(anyListOf(DomainEventMessage.class), anyListOf(
           DomainEventMessage.class));
           final StubDomainEvent appliedEvent = new StubDomainEvent();
@@ -168,83 +167,86 @@ class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
       .appendText(" payload");
       }
       });
-      }
+      } */
 
-      @Test
-      public void testLoadWithConflictingChanges_NoConflictResolverSet() {
-      UUID identifier = UUID.randomUUID();
-      DomainEventMessage event2 = new GenericDomainEventMessage<String>(identifier, (long) 2,
-      "Mock contents", MetaData.emptyInstance());
-      DomainEventMessage event3 = new GenericDomainEventMessage<String>(identifier, (long) 3,
-      "Mock contents", MetaData.emptyInstance());
-      when(mockEventStore.readEvents("test", identifier)).thenReturn(
-      new SimpleDomainEventStream(new GenericDomainEventMessage<String>(identifier, (long) 1,
-      "Mock contents",
-      MetaData.emptyInstance()
-      ), event2, event3));
+    public function testLoadWithConflictingChanges_NoConflictResolverSet()
+    {
+        $identifier = Uuid::uuid1()->toString();
+        $event2 = new GenericDomainEventMessage($identifier, 2, new \stdClass(),
+            MetaData::emptyInstance());
+        $event3 = new GenericDomainEventMessage($identifier, 3, new \stdClass(),
+            MetaData::emptyInstance());
 
-      try {
-      testSubject.load(identifier, 1L);
-      fail("Expected ConflictingAggregateVersionException");
-      } catch (ConflictingAggregateVersionException e) {
-      assertEquals(identifier, e.getAggregateIdentifier());
-      assertEquals(1L, e.getExpectedVersion());
-      assertEquals(3L, e.getActualVersion());
-      }
-      }
+        $this->mockEventStore->expects($this->once())
+            ->method('readEvents')
+            ->with($this->identicalTo("test"), $this->identicalTo($identifier))
+            ->will($this->returnValue(new SimpleDomainEventStream(array(new GenericDomainEventMessage($identifier,
+                        1, new \stdClass()), $event2, $event3))));
 
-      @Test
-      public void testLoadWithConflictingChanges_NoConflictResolverSet_UsingTooHighExpectedVersion() {
-      UUID identifier = UUID.randomUUID();
-      DomainEventMessage event2 = new GenericDomainEventMessage<String>(identifier, (long) 2,
-      "Mock contents", MetaData.emptyInstance());
-      DomainEventMessage event3 = new GenericDomainEventMessage<String>(identifier, (long) 3,
-      "Mock contents", MetaData.emptyInstance());
-      when(mockEventStore.readEvents("test", identifier)).thenReturn(
-      new SimpleDomainEventStream(new GenericDomainEventMessage<String>(identifier, (long) 1,
-      "Mock contents",
-      MetaData.emptyInstance()
-      ), event2, event3));
+        try {
+            $this->testSubject->load($identifier, 1);
+            fail("Expected ConflictingAggregateVersionException");
+        } catch (ConflictingAggregateVersionException $ex) {
+            $this->assertEquals($identifier, $ex->getAggregateIdentifier());
+            $this->assertEquals(1, $ex->getExpectedVersion());
+            $this->assertEquals(3, $ex->getActualVersion());
+        }
+    }
 
-      try {
-      testSubject.load(identifier, 100L);
-      fail("Expected ConflictingAggregateVersionException");
-      } catch (ConflictingAggregateVersionException e) {
-      assertEquals(identifier, e.getAggregateIdentifier());
-      assertEquals(100L, e.getExpectedVersion());
-      assertEquals(3L, e.getActualVersion());
-      }
-      }
+    public function testLoadWithConflictingChanges_NoConflictResolverSet_UsingTooHighExpectedVersion()
+    {
+        $identifier = Uuid::uuid1()->toString();
+        $event2 = new GenericDomainEventMessage($identifier, 2, new \stdClass(),
+            MetaData::emptyInstance());
+        $event3 = new GenericDomainEventMessage($identifier, 3, new \stdClass(),
+            MetaData::emptyInstance());
 
-      @Test
-      public void testLoadAndSaveWithoutConflictingChanges() {
-      ConflictResolver conflictResolver = mock(ConflictResolver.class);
-      UUID identifier = UUID.randomUUID();
-      when(mockEventStore.readEvents("test", identifier)).thenReturn(
-      new SimpleDomainEventStream(new GenericDomainEventMessage<String>(identifier, (long) 1,
-      "Mock contents",
-      MetaData.emptyInstance()
-      ),
-      new GenericDomainEventMessage<String>(identifier, (long) 2,
-      "Mock contents",
-      MetaData.emptyInstance()
-      ),
-      new GenericDomainEventMessage<String>(identifier, (long) 3,
-      "Mock contents",
-      MetaData.emptyInstance()
-      )));
-      testSubject.setConflictResolver(conflictResolver);
-      TestAggregate actual = testSubject.load(identifier, 3L);
-      verify(conflictResolver, never()).resolveConflicts(anyListOf(DomainEventMessage.class), anyListOf(
-      DomainEventMessage.class));
-      actual.apply(new StubDomainEvent());
+        $this->mockEventStore->expects($this->once())
+            ->method('readEvents')
+            ->with($this->identicalTo("test"), $this->identicalTo($identifier))
+            ->will($this->returnValue(new SimpleDomainEventStream(array(new GenericDomainEventMessage($identifier,
+                        1, new \stdClass()), $event2, $event3))));
+        try {
+            $this->testSubject->load($identifier, 100);
+            $this->fail("Expected ConflictingAggregateVersionException");
+        } catch (ConflictingAggregateVersionException $ex) {
+            $this->assertEquals($identifier, $ex->getAggregateIdentifier());
+            $this->assertEquals(100, $ex->getExpectedVersion());
+            $this->assertEquals(3, $ex->getActualVersion());
+        }
+    }
 
-      CurrentUnitOfWork.commit();
+    public function testLoadAndSaveWithoutConflictingChanges()
+    {
+        $conflictResolver = $this->getMock('Governor\Framework\EventSourcing\ConflictResolverInterface');
+        $identifier = Uuid::uuid1()->toString();
+        $event2 = new GenericDomainEventMessage($identifier, 2, new \stdClass(),
+            MetaData::emptyInstance());
+        $event3 = new GenericDomainEventMessage($identifier, 3, new \stdClass(),
+            MetaData::emptyInstance());
 
-      verify(conflictResolver, never()).resolveConflicts(anyListOf(DomainEventMessage.class), anyListOf(
-      DomainEventMessage.class));
-      }
+        $this->mockEventStore->expects($this->once())
+            ->method('readEvents')
+            ->with($this->identicalTo("test"), $this->identicalTo($identifier))
+            ->will($this->returnValue(new SimpleDomainEventStream(array(new GenericDomainEventMessage($identifier,
+                        1, new \stdClass()), $event2, $event3))));
 
+        $this->testSubject->setConflictResolver($conflictResolver);
+
+        $actual = $this->testSubject->load($identifier, 3);
+
+        $conflictResolver->expects($this->never())
+            ->method('resolveConflicts');
+
+        $actual->apply(new StubDomainEvent());
+
+        $conflictResolver->expects($this->never())
+            ->method('resolveConflicts');
+
+        CurrentUnitOfWork::commit();
+    }
+
+    /*
       @Test
       public void testLoadEventsWithDecorators() {
       UUID identifier = UUID.randomUUID();
@@ -366,7 +368,7 @@ class StubAggregateFactory extends AbstractAggregateFactory
 {
 
     public function doCreateAggregate($aggregateIdentifier,
-            DomainEventMessageInterface $firstEvent)
+        DomainEventMessageInterface $firstEvent)
     {
         return new TestAggregate($aggregateIdentifier);
     }

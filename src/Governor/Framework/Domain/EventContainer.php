@@ -22,17 +22,28 @@ class EventContainer
     private $lastScn;
     private $registrationCallbacks = array();
 
+    /**     
+     * @param mixed $aggregateId
+     */
     public function __construct($aggregateId)
     {
         $this->aggregateId = $aggregateId;
     }
 
+    /**
+     * Adds an event with the metadata and payload into the eventcontainer.
+     * 
+     * @param \Governor\Framework\Domain\MetaData $metadata
+     * @param mixed $payload
+     * 
+     * @return \Governor\Framework\Domain\GenericDomainEventMessage
+     */
     public function addEvent(MetaData $metadata, $payload)
     {        
         $event = new GenericDomainEventMessage($this->aggregateId,
                 $this->newScn(), $payload, $metadata);
         
-        foreach ($this->registrationCallbacks as $callback) {
+        foreach ($this->registrationCallbacks as $callback) {            
             $event = $callback->onRegisteredEvent($event);
         }
 
@@ -45,7 +56,7 @@ class EventContainer
     /**
      * Returns the sequence number of the event last added to this container.
      *
-     * @return the sequence number of the last event
+     * @return integer the sequence number of the last event
      */
     public function getLastScn()
     {
@@ -55,14 +66,25 @@ class EventContainer
             $last = end($this->events);
             $this->lastScn = $last->getScn();
         }
+        
         return $this->lastScn;
     }
 
+    /**
+     * Returns the last commited scn number.
+     * 
+     * @return integer
+     */
     public function getLastCommitedScn()
     {
         return $this->lastCommitedScn;
     }
 
+    /**
+     * Returns the size of the event container.
+     * 
+     * @return integer
+     */
     public function size()
     {
         return count($this->events);
@@ -81,7 +103,7 @@ class EventContainer
     /**
      * Sets the first sequence number that should be assigned to an incoming event.
      *
-     * @param $lastKnownScn the sequence number of the last known event
+     * @param integer $lastKnownScn the sequence number of the last known event
      */
     public function initializeSequenceNumber($lastKnownScn)
     {
@@ -103,26 +125,45 @@ class EventContainer
         return $currentScn + 1;
     }
 
+    /**
+     * Returns an event stream 
+     * @return \Governor\Framework\Domain\SimpleDomainEventStream
+     */
     public function getEventStream()
     {
         return new SimpleDomainEventStream($this->events);
     }
+    
+    /**
+     * Returns the {@see AggregateRootInterface} identifier.
+     * 
+     * @return mixed
+     */
 
-    public function getAggregateId()
+    public function getAggregateIdentifier()
     {
         return $this->aggregateId;
     }
 
+    /**
+     * Returns a list of events 
+     * @return array<GenericDomainEventMessage>
+     */
     public function getEventList()
     {
         return $this->events;
     }
 
+    /**
+     * Adds an {@see EventRegistrationCallbackInterface} to this event container.
+     * 
+     * @param \Governor\Framework\Domain\EventRegistrationCallbackInterface $eventRegistrationCallback
+     */
     public function addEventRegistrationCallback(EventRegistrationCallbackInterface $eventRegistrationCallback)
     {        
         $this->registrationCallbacks[] = $eventRegistrationCallback;
 
-        foreach ($this->events as $event) {            
+        foreach ($this->events as &$event) {            
             $event = $eventRegistrationCallback->onRegisteredEvent($event);
         }
     }

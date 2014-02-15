@@ -15,63 +15,62 @@ use Rhumsaa\Uuid\Uuid;
  *
  * @author david
  */
-class EventContainerTest extends \PHPUnit_Framework_TestCase {
+class EventContainerTest extends \PHPUnit_Framework_TestCase
+{
 
-    
-    /**
-     * @covers Governor\Framework\Domain\EventContainer::getAggregateId
-     * @covers Governor\Framework\Domain\EventContainer::size
-     * @covers Governor\Framework\Domain\EventContainer::getEventStream
-     * @covers Governor\Framework\Domain\EventContainer::addEvent
-     * @covers Governor\Framework\Domain\EventContainer::getEventList
-     * @covers Governor\Framework\Domain\EventContainer::commit
-     */
-    public function testAddEventIdAndSequenceNumberInitialized() {
+    public function testAddEventIdAndSequenceNumberInitialized()
+    {
         $id = Uuid::uuid1();
 
         $eventContainer = new EventContainer($id);
-        $this->assertEquals($id, $eventContainer->getAggregateId());
+        $this->assertEquals($id, $eventContainer->getAggregateIdentifier());
         $eventContainer->initializeSequenceNumber(11);
-        
+
         $this->assertEquals(0, $eventContainer->size());
         $this->assertFalse($eventContainer->getEventStream()->hasNext());
-        
-        $eventContainer->addEvent(new MetaData(), new Event());
-        
+
+        $eventContainer->addEvent(MetaData::emptyInstance(), new Event());
+
         $this->assertEquals(1, $eventContainer->size());
-        
+
         $domainEvent = $eventContainer->getEventList()[0];
-        $this->assertEquals(12, $domainEvent->getScn());        
+        $this->assertEquals(12, $domainEvent->getScn());
         $this->assertEquals($id, $domainEvent->getAggregateIdentifier());
         $this->assertTrue($eventContainer->getEventStream()->hasNext());
-        
+
         $eventContainer->commit();
-        
-        $this->assertEquals(0, $eventContainer->size());       
+
+        $this->assertEquals(0, $eventContainer->size());
     }
 
-    /**
-     * 
-     *
-    public function testRegisterCallbackInvokedWithAllRegisteredEvents() {
-        EventContainer container = new EventContainer(UUID.randomUUID().toString());
-        container.addEvent(metaData, "payload");
+    public function testRegisterCallbackInvokedWithAllRegisteredEvents()
+    {
+        $container = new EventContainer(Uuid::uuid1()->toString());
+        $container->addEvent(MetaData::emptyInstance(), new Event());
 
-        assertFalse(container.getEventList().get(0).getMetaData().containsKey("key"));
+        $this->assertFalse(current($container->getEventList())->getMetaData()->has("key"));
 
-        container.addEventRegistrationCallback(new EventRegistrationCallback() {
-            @Override
-            public <T> DomainEventMessage<T> onRegisteredEvent(DomainEventMessage<T> event) {
-                return event.withMetaData(singletonMap("key", "value"));
-            }
-        });
+        $container->addEventRegistrationCallback(new TestEventRegistrationCallback());
 
-        DomainEventMessage firstEvent = container.getEventList().get(0);
-        assertEquals("value", firstEvent.getMetaData().get("key"));
-    }*/
+        $this->assertEquals("value",
+            current($container->getEventList())->getMetadata()->get("key"));
+    }
+
 }
 
+class TestEventRegistrationCallback implements EventRegistrationCallbackInterface
+{
 
-class Event {
+    public function onRegisteredEvent(DomainEventMessageInterface $event)
+    {
+        return $event->withMetaData(array("key" => "value"));
+    }
+
+}
+
+class Event
+{
+
     public $property;
+
 }

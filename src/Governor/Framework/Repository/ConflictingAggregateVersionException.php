@@ -30,7 +30,7 @@ class ConflictingAggregateVersionException extends \RuntimeException
         $this->actualVersion = $actualVersion;
     }
 
-    public function getAggregateId()
+    public function getAggregateIdentifier()
     {
         return $this->aggregateIdentifier;
     }

@@ -8,6 +8,8 @@
         <parameter key="governor.command_bus.class">Governor\Framework\CommandHandling\SimpleCommandBus</parameter>
         <parameter key="governor.event_bus.class">Governor\Framework\EventHandling\SimpleEventBus</parameter>          
         <parameter key="governor.repository.doctrine.class">Governor\Framework\Repository\GenericDoctrineRepository</parameter>
+        <parameter key="governor.repository.hybrid.class">Governor\Framework\EventSourcimg\HybridDoctrineRepository</parameter>
+        <parameter key="governor.repository.eventsourcing.class">Governor\Framework\EventSourcing\EventSourcingRepository</parameter>
         
         <parameter key="governor.serializer.class">Governor\Framework\Serializer\ReflectionSerializer</parameter>
         
@@ -17,6 +19,9 @@
         <!-- command target resolver classes -->
         <parameter key="governor.command_target_resolver.annotation.class">Governor\Framework\CommandHandling\AnnotationCommandTargetResolver</parameter>
         <parameter key="governor.command_target_resolver.metadata.class">Governor\Framework\CommandHandling\MetadataCommandTargetResolver</parameter>
+        
+        <!-- aggregate factory -->
+        <parameter key="governor.aggregate_factory.generic.class">Governor\Framework\EventSourcing\GenericAggregateFactory</parameter>
     </parameters>
 
     <services>
@@ -29,6 +34,15 @@
         
         <service id="governor.command_target_resolver.annotation" class="%governor.command_target_resolver.annotation.class%"/>
         <service id="governor.command_target_resolver.metadata" class="%governor.command_target_resolver.metadata.class%"/>
+        
+        
+        <!-- aggregate factory -->
+        <service id="governor.aggregate_factory" class="%governor.aggregate_factory.generic.class%">
+        </service>
+        
+        <!-- event store -->
+        <service id="governor.event_store" class="Governor\Framework\EventStore\NullEventStore">
+        </service>
         
         <service id="governor.command_gateway" class="%governor.command_gateway.class%">
             <argument type="service" id="governor.command_bus" />
@@ -45,6 +59,22 @@
             <argument type="service" id="governor.event_bus"/>        
             <argument type="service" id="governor.lock_manager"/>
             <argument type="service" id="doctrine.orm.default_entity_manager"/>
+        </service>
+        
+        <service id="governor.repository.hybrid" class="%governor.repository.hybrid.class%" abstract="true" public="false">
+            <argument strict="false"></argument>    
+            <argument type="service" id="governor.event_bus"/>        
+            <argument type="service" id="governor.lock_manager"/>
+            <argument type="service" id="doctrine.orm.default_entity_manager"/>
+            <argument type="service" id="governor.event_store"/>
+        </service>
+        
+        <service id="governor.repository.eventsourcing" class="%governor.repository.eventsourcing.class%" abstract="true" public="false">
+            <argument strict="false"></argument>    
+            <argument type="service" id="governor.event_bus"/>        
+            <argument type="service" id="governor.lock_manager"/>
+            <argument type="service" id="governor.event_store"/>
+            <argument type="service" id="governor.aggregate_factory"/>
         </service>
     </services>
 </container>
