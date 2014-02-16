@@ -55,7 +55,7 @@ abstract class LockingRepository extends AbstractRepository
 
     protected function doDelete(AggregateRootInterface $object)
     {
-        if (null !== $object->getVersion() && !$this->lockManager->validateLockvalidateLock($object)) {
+        if (null !== $object->getVersion() && !$this->lockManager->validateLock($object)) {
             throw new ConcurrencyException(sprintf(
                 "The aggregate of type [%s] with identifier [%s] could not be " .
                 "saved, as a valid lock is not held. Either another thread has saved an aggregate, or " .

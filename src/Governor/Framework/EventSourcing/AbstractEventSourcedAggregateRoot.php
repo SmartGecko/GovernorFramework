@@ -96,6 +96,7 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
         }
     }
 
+    
     public function getVersion()
     {
         return $this->getLastCommittedEventScn();

@@ -53,6 +53,8 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('aggregate_root')->isRequired()->end()
                         ->scalarNode('type')
+                            ->isRequired()
+                            ->cannotBeEmpty()
                             ->validate()
                             ->ifNotInArray(array('doctrine', 'eventsourcing', 'hybrid'))
                                 ->thenInvalid("Invalid repository type %s, possible values are " . 

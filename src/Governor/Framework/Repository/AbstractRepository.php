@@ -20,14 +20,14 @@ use Governor\Framework\EventHandling\EventBusInterface;
  */
 abstract class AbstractRepository implements RepositoryInterface
 {
-    
+
     private $eventBus;
     private $className;
     private $saveAggregateCallback;
 
     public function __construct($className, EventBusInterface $eventBus)
     {
-        $this->className = $className;        
+        $this->className = $className;
         $this->eventBus = $eventBus;
 
         $repos = $this;
@@ -37,8 +37,13 @@ abstract class AbstractRepository implements RepositoryInterface
             } else {
                 $repos->doSave($aggregateRoot);
             }
-
+            
             $aggregateRoot->commitEvents();
+            if ($aggregateRoot->isDeleted()) {
+                $repos->postDelete($aggregateRoot);
+            } else {
+                $repos->postSave($aggregateRoot);
+            }
         });
     }
 
@@ -91,4 +96,27 @@ abstract class AbstractRepository implements RepositoryInterface
     protected abstract function doLoad($id, $exceptedVersion);
 
     protected abstract function doDelete(AggregateRootInterface $object);
+
+    /**
+     * Perform action that needs to be done directly after updating an aggregate and committing the aggregate's
+     * uncommitted events.
+     *
+     * @param aggregate The aggregate instance being saved
+     */
+    protected function postSave(AggregateRootInterface $object)
+    {
+        
+    }
+
+    /**
+     * Perform action that needs to be done directly after deleting an aggregate and committing the aggregate's
+     * uncommitted events.
+     *
+     * @param aggregate The aggregate instance being saved
+     */
+    protected function postDelete(AggregateRootInterface $object)
+    {
+        
+    }
+
 }

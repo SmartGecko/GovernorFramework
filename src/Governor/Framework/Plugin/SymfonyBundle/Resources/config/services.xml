@@ -8,7 +8,7 @@
         <parameter key="governor.command_bus.class">Governor\Framework\CommandHandling\SimpleCommandBus</parameter>
         <parameter key="governor.event_bus.class">Governor\Framework\EventHandling\SimpleEventBus</parameter>          
         <parameter key="governor.repository.doctrine.class">Governor\Framework\Repository\GenericDoctrineRepository</parameter>
-        <parameter key="governor.repository.hybrid.class">Governor\Framework\EventSourcimg\HybridDoctrineRepository</parameter>
+        <parameter key="governor.repository.hybrid.class">Governor\Framework\EventSourcing\HybridDoctrineRepository</parameter>
         <parameter key="governor.repository.eventsourcing.class">Governor\Framework\EventSourcing\EventSourcingRepository</parameter>
         
         <parameter key="governor.serializer.class">Governor\Framework\Serializer\ReflectionSerializer</parameter>

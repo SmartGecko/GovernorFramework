@@ -8,7 +8,7 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
     /**
      * @var integer
      */
-    protected $version;
+    private $version;
 
     /**
      * @var EventContainer
@@ -64,7 +64,7 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
     public function getVersion()
     {
         return $this->version;
-    }
+    }       
 
     public function isDeleted()
     {

@@ -99,6 +99,11 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
         $method->setAccessible(true);
 
         $method->invokeArgs($this->testSubject, array($this->aggregate));
+        
+        $method2 = $reflection->getMethod('postSave');
+        $method2->setAccessible(true);
+
+        $method2->invokeArgs($this->testSubject, array($this->aggregate));
     }
 
     public function testPersistAggregate_ExplicitFlushModeOn()
@@ -111,6 +116,11 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
         $method->setAccessible(true);
 
         $method->invokeArgs($this->testSubject, array($this->aggregate));
+        
+        $method2 = $reflection->getMethod('postSave');
+        $method2->setAccessible(true);
+
+        $method2->invokeArgs($this->testSubject, array($this->aggregate));
     }
 
     public function testPersistAggregate_ExplicitFlushModeOff()

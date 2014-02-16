@@ -185,7 +185,7 @@ class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
 
         try {
             $this->testSubject->load($identifier, 1);
-            fail("Expected ConflictingAggregateVersionException");
+            $this->fail("Expected ConflictingAggregateVersionException");
         } catch (ConflictingAggregateVersionException $ex) {
             $this->assertEquals($identifier, $ex->getAggregateIdentifier());
             $this->assertEquals(1, $ex->getExpectedVersion());
