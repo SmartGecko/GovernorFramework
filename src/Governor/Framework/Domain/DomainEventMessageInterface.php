@@ -12,7 +12,7 @@ namespace Governor\Framework\Domain;
  *
  * @author david
  */
-interface DomainEventMessageInterface extends MessageInterface
+interface DomainEventMessageInterface extends EventMessageInterface
 {
 
     /**
