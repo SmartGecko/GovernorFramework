@@ -49,9 +49,7 @@ abstract class AbstractEventSourcedEntity implements EventSourcedEntityInterface
     protected abstract function getChildEntities();
 
     protected function handle(DomainEventMessageInterface $event)
-    {
-        print_r($event);
-        die();
+    {       
     }
 
     protected function apply($event, MetaData $metaData)
