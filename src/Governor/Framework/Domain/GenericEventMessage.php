@@ -15,25 +15,23 @@ namespace Governor\Framework\Domain;
  */
 class GenericEventMessage extends GenericMessage implements EventMessageInterface
 {
-    
+
     /**
      *
      * @var \DateTime
      */
     private $timestamp;
-    
-    
-    public function __construct($payload, MetaData $metadata = null)
+
+    public function __construct($payload, MetaData $metadata = null, $id = null,
+            \DateTime $timestamp = null)
     {
-        parent::__construct($payload, $metadata);
-        $this->timestamp = new \DateTime();
+        parent::__construct($payload, $metadata, $id);
+        $this->timestamp = isset($timestamp) ? $timestamp : new \DateTime();
     }
 
-    
     public function getTimestamp()
     {
         return $this->timestamp;
     }
-
 
 }

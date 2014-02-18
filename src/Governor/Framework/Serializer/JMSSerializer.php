@@ -28,9 +28,9 @@ class JMSSerializer implements SerializerInterface
                         })->build();
     }
 
-    public function deserialize($data)
+    public function deserialize($data, $type)
     {
-        return $this->serializer->deserialize($data, 'json');
+        return $this->serializer->deserialize($data, $type, 'json');
     }
 
     public function serialize($object)

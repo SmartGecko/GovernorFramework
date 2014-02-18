@@ -31,7 +31,7 @@ abstract class AbstractEventSourcedEntity implements EventSourcedEntityInterface
 
         foreach ($childEntities as $child) {
             if (null !== $child) {
-                $child->registerAggregateRoot($this);
+                $child->registerAggregateRoot($this->aggregateRoot);
                 $child->handleRecursively($event);
             }
         }
@@ -39,10 +39,11 @@ abstract class AbstractEventSourcedEntity implements EventSourcedEntityInterface
 
     public function registerAggregateRoot(AbstractEventSourcedAggregateRoot $aggregateRootToRegister)
     {
-        if (null !== $this->aggregateRoot && $this->aggregateRoot != $aggregateRootToRegister) {
+        if (null !== $this->aggregateRoot && $this->aggregateRoot !== $aggregateRootToRegister) {
             throw new \RuntimeException("Cannot register new aggregate. "
             . "This entity is already part of another aggregate");
         }
+        
         $this->aggregateRoot = $aggregateRootToRegister;
     }
 
@@ -54,7 +55,7 @@ abstract class AbstractEventSourcedEntity implements EventSourcedEntityInterface
         die();
     }
 
-    protected function apply($event, MetaData $metaData)
+    public function apply($event, MetaData $metaData = null)
     {
         if (null === $this->aggregateRoot) {
             throw new \RuntimeException("The aggregate root is unknown. "

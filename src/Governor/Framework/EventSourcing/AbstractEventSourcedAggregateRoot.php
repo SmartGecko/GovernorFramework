@@ -61,7 +61,7 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
         }
     }
 
-    protected function apply($payload, MetaData $metaData = null)
+    public function apply($payload, MetaData $metaData = null)
     {
         $metaData = isset($metaData) ? $metaData : MetaData::emptyInstance();
 

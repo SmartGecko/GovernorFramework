@@ -5,7 +5,6 @@ namespace Governor\Framework\Plugin\SymfonyBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\GovernorFrameworkExtension;
 use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler\CommandHandlerPass;
@@ -99,7 +98,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
         $loader = new GovernorFrameworkExtension();
 
-        $container->setProxyInstantiator(new RuntimeInstantiator());
+        //$container->setProxyInstantiator(new RuntimeInstantiator());
 
         $container->registerExtension($loader);
         $container->set('doctrine.orm.default_entity_manager',

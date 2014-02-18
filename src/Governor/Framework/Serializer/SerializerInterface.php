@@ -9,6 +9,6 @@ namespace Governor\Framework\Serializer;
 interface SerializerInterface
 {
     public function serialize($object);
-    public function deserialize($data);
+    public function deserialize($data, $type);
 }
 

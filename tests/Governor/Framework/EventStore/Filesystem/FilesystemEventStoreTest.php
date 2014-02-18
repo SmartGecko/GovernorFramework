@@ -30,7 +30,8 @@ class FilesystemEventStoreTest extends \PHPUnit_Framework_TestCase
 
     public function testSaveStreamAndReadBackIn()
     {
-        $eventStore = new FilesystemEventStore(new SimpleEventFileResolver($this->tempDirectory), $this->serializer);
+        $eventStore = new FilesystemEventStore(new SimpleEventFileResolver($this->tempDirectory),
+                $this->serializer);
 
         $event1 = new GenericDomainEventMessage(
                 $this->aggregateIdentifier, 0, new StubDomainEvent());
@@ -41,7 +42,8 @@ class FilesystemEventStoreTest extends \PHPUnit_Framework_TestCase
         $stream = new SimpleDomainEventStream(array($event1, $event2, $event3));
         $eventStore->appendEvents("test", $stream);
 
-        $eventStream = $eventStore->readEvents("test", $this->aggregateIdentifier);
+        $eventStream = $eventStore->readEvents("test",
+                $this->aggregateIdentifier);
         $domainEvents = array();
 
         while ($eventStream->hasNext()) {
@@ -56,31 +58,28 @@ class FilesystemEventStoreTest extends \PHPUnit_Framework_TestCase
                 $domainEvents[2]->getIdentifier());
     }
 
+    /**
+     * @expectedException Governor\Framework\Repository\ConflictingModificationException
+     */
+    public function testShouldThrowExceptionUponDuplicateAggregateId()
+    {
+        $eventStore = new FileSystemEventStore(new SimpleEventFileResolver($this->tempDirectory),
+                $this->serializer);
+
+        $event1 = new GenericDomainEventMessage(
+                $this->aggregateIdentifier, 0, new StubDomainEvent());
+        $event2 = new GenericDomainEventMessage(
+                $this->aggregateIdentifier, 1, new StubDomainEvent());
+        $stream = new SimpleDomainEventStream(array($event1, $event2));
+        $eventStore->appendEvents("test", $stream);
+
+        $event3 = new GenericDomainEventMessage(
+                $this->aggregateIdentifier, 0, new StubDomainEvent());
+        $stream2 = new SimpleDomainEventStream(array($event3));
+        $eventStore->appendEvents("test", $stream2);
+    }
+
     /*
-      @Test(expected = ConflictingModificationException.class)
-      // Issue AXON-121: FileSystemEventStore allows duplicate construction of the same AggregateRoot
-      public void testShouldThrowExceptionUponDuplicateAggregateId() {
-      FileSystemEventStore eventStore = new FileSystemEventStore(new SimpleEventFileResolver(eventFileBaseDir));
-
-      GenericDomainEventMessage<StubDomainEvent> event1 = new GenericDomainEventMessage<StubDomainEvent>(
-      aggregateIdentifier,
-      0,
-      new StubDomainEvent());
-      GenericDomainEventMessage<StubDomainEvent> event2 = new GenericDomainEventMessage<StubDomainEvent>(
-      aggregateIdentifier,
-      1,
-      new StubDomainEvent());
-      DomainEventStream stream = new SimpleDomainEventStream(event1, event2);
-      eventStore.appendEvents("test", stream);
-
-      GenericDomainEventMessage<StubDomainEvent> event3 = new GenericDomainEventMessage<StubDomainEvent>(
-      aggregateIdentifier,
-      0,
-      new StubDomainEvent());
-      DomainEventStream stream2 = new SimpleDomainEventStream(event3);
-      eventStore.appendEvents("test", stream2);
-      }
-
       @Test
       public void testReadEventsWithIllegalSnapshot() {
       final XStreamSerializer serializer = spy(new XStreamSerializer());

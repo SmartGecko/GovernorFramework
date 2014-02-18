@@ -8,6 +8,8 @@
 
 namespace Governor\Framework\Domain;
 
+use JMS\Serializer\Annotation\Type;
+
 /**
  * Description of MetaData
  *
@@ -22,7 +24,7 @@ class MetaData implements \IteratorAggregate, \Countable
 
     /**
      * Metadata storage.
-     * 
+     * @Type ("array")
      * @var array
      */
     private $metadata = array();
