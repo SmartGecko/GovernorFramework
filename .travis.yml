@@ -6,5 +6,11 @@ php:
 
 before_script:
   - phpenv config-add myconfig.ini
+  - wget https://scrutinizer-ci.com/ocular.phar
   - composer self-update
   - composer update
+
+script: phpunit --coverage-clover=coverage.clover
+    
+after_script:
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover

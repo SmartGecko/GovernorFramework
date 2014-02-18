@@ -40,31 +40,31 @@ class FilesystemEventMessageWriter
     /**
      * Writes the given <code>eventMessage</code> to the underling output.
      *
-     * @param eventMessage the EventMessage to write to the underlying output
-     * @throws java.io.IOException when any exception occurs writing to the underlying stream
+     * @param eventMessage the EventMessage to write to the underlying output     
      */
     public function writeEventMessage(DomainEventMessageInterface $eventMessage)
-    {                       
-        print_r($eventMessage);
-        $this->file->fwrite($this->serializer->serialize($eventMessage));
-        // type byte for future use
-       /* $this->file->fwrite((int) 0);
-        $this->file->fwrite($eventMessage->getIdentifier());
-        $this->file->fwrite($eventMessage->getTimestamp()->format('c'));
-        $this->file->fwrite($eventMessage->getAggregateIdentifier());
-        $this->file->fwrite($eventMessage->getScn());
-
+    {
         $serializedPayload = $this->messageSerializer->serializePayload($eventMessage->getPayload());
         $serializedMetaData = $this->messageSerializer->serializeMetaData($eventMessage->getMetaData());
-        
-        $this->file->fwrite($eventMessage->getPayloadType());
-        //   out . writeUTF(serializedPayload . getType() . getName());
-        //  String revision = serializedPayload . getType() . getRevision();
-        //  out . writeUTF(revision == null ? "" : revision);
-        $this->file->fwrite(strlen($serializedPayload));
-        $this->file->fwrite($serializedPayload);
-        $this->file->fwrite(strlen($serializedMetaData));
-        $this->file->fwrite($serializedMetaData);*/
+
+        $packFormat = sprintf("na36Na36NNa%sNa%sNa%s",
+                strlen($eventMessage->getPayloadType()),
+                strlen($serializedPayload), strlen($serializedMetaData));
+
+        $binary = pack($packFormat, 0, $eventMessage->getIdentifier(),
+                $eventMessage->getTimestamp()->format('U'),
+                $eventMessage->getAggregateIdentifier(),
+                $eventMessage->getScn(),
+                strlen($eventMessage->getPayloadType()),
+                $eventMessage->getPayloadType(), strlen($serializedPayload),
+                $serializedPayload, strlen($serializedMetaData),
+                $serializedMetaData);
+
+        $len = pack('n', strlen($binary));
+
+        // !!! TODO error handling
+        $this->file->fwrite($len);
+        $this->file->fwrite($binary);
     }
 
 }

@@ -13,6 +13,7 @@ use Governor\Framework\Domain\DomainEventStreamInterface;
 use Governor\Framework\EventStore\EventStoreInterface;
 use Governor\Framework\EventStore\SnapshotEventStoreInterface;
 use Governor\Framework\Serializer\SerializerInterface;
+use Governor\Framework\EventStore\EventStreamNotFoundException;
 
 /**
  * Description of FilesystemEventStore
@@ -61,7 +62,7 @@ class FilesystemEventStore implements EventStoreInterface, SnapshotEventStoreInt
                 $next->getAggregateIdentifier());
         $eventMessageWriter = new FilesystemEventMessageWriter($file,
                 $this->serializer);
-        
+
         while ($events->hasNext()) {
             $eventMessageWriter->writeEventMessage($events->next());
         }
@@ -75,7 +76,13 @@ class FilesystemEventStore implements EventStoreInterface, SnapshotEventStoreInt
 
     public function readEvents($type, $identifier)
     {
-        
+        if (!$this->fileResolver->eventFileExists($type, $identifier)) {
+            throw new EventStreamNotFoundException($type, $identifier);
+        }
+
+        $file = $this->fileResolver->openEventFileForReading($type, $identifier);
+
+        return new FilesystemDomainEventStream($file, $this->serializer);
     }
 
 }

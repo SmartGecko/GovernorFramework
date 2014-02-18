@@ -22,9 +22,9 @@ class GenericMessage implements MessageInterface
     private $metadata;
     private $payload;
 
-    public function __construct($payload, MetaData $metadata = null)
+    public function __construct($payload, MetaData $metadata = null, $id = null)
     {
-        $this->id = Uuid::uuid1();
+        $this->id = isset($id) ? $id : Uuid::uuid1();
         $this->metadata = isset($metadata) ? $metadata : MetaData::emptyInstance();
         $this->payload = $payload;
     }
