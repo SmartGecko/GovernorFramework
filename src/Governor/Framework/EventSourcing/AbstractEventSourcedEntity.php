@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\EventSourcing;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\Domain\MetaData;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 
@@ -51,6 +52,22 @@ abstract class AbstractEventSourcedEntity implements EventSourcedEntityInterface
 
     protected function handle(DomainEventMessageInterface $event)
     {       
+        // !!! TODO annotation reader (duplicate code with AR)
+        $reflectionClass = new \ReflectionClass($this);
+        $reader = new AnnotationReader();
+
+        foreach ($reflectionClass->getMethods() as $method) {
+            $annot = $reader->getMethodAnnotation($method,
+                'Governor\Framework\Annotations\EventHandler');
+
+            if (null !== $annot) {
+                $parameter = current($method->getParameters());
+
+                if (null !== $parameter->getClass() && $parameter->getClass()->name === $event->getPayloadType()) {
+                    $method->invokeArgs($this, array($event->getPayload()));
+                }
+            }
+        }
     }
 
     public function apply($event, MetaData $metaData = null)
