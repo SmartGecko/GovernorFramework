@@ -39,7 +39,7 @@ class FilesystemEventStore implements EventStoreInterface, SnapshotEventStoreInt
      * @param SerializerInterface $serializer
      */
     function __construct(EventFileResolverInterface $fileResolver,
-        SerializerInterface $serializer)
+            SerializerInterface $serializer)
     {
         $this->serializer = $serializer;
         $this->fileResolver = $fileResolver;
@@ -53,16 +53,16 @@ class FilesystemEventStore implements EventStoreInterface, SnapshotEventStoreInt
 
         $next = $events->peek();
         if (0 === $next->getScn() && $this->fileResolver->eventFileExists($type,
-                $next->getAggregateIdentifier())) {
+                        $next->getAggregateIdentifier())) {
             throw new ConflictingModificationException(sprintf("Could not create event stream for aggregate, such stream "
-                . "already exists, type=%s, id=%s", $type,
-                $next->getAggregateIdentifier()));
+                    . "already exists, type=%s, id=%s", $type,
+                    $next->getAggregateIdentifier()));
         }
 
         $file = $this->fileResolver->openEventFileForWriting($type,
-            $next->getAggregateIdentifier());
+                $next->getAggregateIdentifier());
         $eventMessageWriter = new FilesystemEventMessageWriter($file,
-            $this->serializer);
+                $this->serializer);
 
         while ($events->hasNext()) {
             $eventMessageWriter->writeEventMessage($events->next());
@@ -70,31 +70,36 @@ class FilesystemEventStore implements EventStoreInterface, SnapshotEventStoreInt
     }
 
     public function appendSnapshotEvent($type,
-        DomainEventMessageInterface $snapshotEvent)
+            DomainEventMessageInterface $snapshotEvent)
     {
         $eventFile = $this->fileResolver->openEventFileForReading($type,
-            $snapshotEvent->getAggregateIdentifier());
+                $snapshotEvent->getAggregateIdentifier());
         $snapshotEventFile = $this->fileResolver->openSnapshotFileForWriting($type,
-            $snapshotEvent->getAggregateIdentifier());
+                $snapshotEvent->getAggregateIdentifier());
+
+        $snapshotEventWriter = new FilesystemSnapshotEventWriter($eventFile,
+                $snapshotEventFile, $this->serializer);
+
+        $snapshotEventWriter->writeSnapshotEvent($snapshotEvent);
     }
 
     public function readEvents($type, $identifier)
-    {        
+    {
         if (!$this->fileResolver->eventFileExists($type, $identifier)) {
             throw new EventStreamNotFoundException($type, $identifier);
         }
 
         $file = $this->fileResolver->openEventFileForReading($type, $identifier);
-        $snapshotEvent = null;
-        
+
         try {
             $snapshotEvent = $this->readSnapshotEvent($type, $identifier, $file);
         } catch (\Exception $ex) {
-            // ignore 
+            $snapshotEvent = null;
         }
 
-        if (null !== $snapshotEvent) {
-            // $snapshotEventMessageWriter = new FilesystemEventMessageWriter($file, $serializer)
+        if (null !== $snapshotEvent) {            
+            return new SnapshotFilesystemDomainEventStream($snapshotEvent,
+                    $file, $this->serializer);
         }
 
         return new FilesystemDomainEventStream($file, $this->serializer);
@@ -103,13 +108,13 @@ class FilesystemEventStore implements EventStoreInterface, SnapshotEventStoreInt
     private function readSnapshotEvent($type, $identifier, $eventFile)
     {
         $snapshotEvent = null;
-        if ($this->eventFileResolver->snapshotFileExists($type, $identifier)) {
-            $snapshotEventFile = $this->eventFileResolver->openSnapshotFileForReading($type,
-                $identifier);
-            $fileSystemSnapshotEventReader = new FileSystemSnapshotEventReader($eventFile,
-                $snapshotEventFile, $this->eventSerializer);
+        if ($this->fileResolver->snapshotFileExists($type, $identifier)) {
+            $snapshotEventFile = $this->fileResolver->openSnapshotFileForReading($type,
+                    $identifier);
+            $fileSystemSnapshotEventReader = new FilesystemSnapshotEventReader($eventFile,
+                    $snapshotEventFile, $this->serializer);
             $snapshotEvent = $fileSystemSnapshotEventReader->readSnapshotEvent($type,
-                $identifier);
+                    $identifier);
         }
         return $snapshotEvent;
     }

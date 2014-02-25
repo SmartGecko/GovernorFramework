@@ -21,7 +21,7 @@ class SimpleEventFileResolver implements EventFileResolverInterface
      * @param string $baseDirectory
      */
     function __construct($baseDirectory)
-    {
+    {        
         if (!is_dir($baseDirectory)) {
             throw new \InvalidArgumentException(sprintf("%s is not a valid directory",
                     $baseDirectory));
@@ -43,7 +43,7 @@ class SimpleEventFileResolver implements EventFileResolverInterface
     }
 
     public function openEventFileForWriting($type, $aggregateIdentifier)
-    {
+    {        
         return new \SplFileObject($this->getEventFileName($type,
                         $aggregateIdentifier, self::FILE_EXTENSION_EVENTS), 'ab+');
     }
@@ -56,7 +56,7 @@ class SimpleEventFileResolver implements EventFileResolverInterface
     }
 
     public function openSnapshotFileForWriting($type, $aggregateIdentifier)
-    {
+    {        
         return new \SplFileObject($this->getEventFileName($type,
                         $aggregateIdentifier, self::FILE_EXTENSION_SNAPSHOTS),
                 'ab+');

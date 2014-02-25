@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\EventStore\Filesystem;
 
+use Governor\Framework\EventStore\EventStoreException;
 use Governor\Framework\Serializer\SerializerInterface;
 
 /**
@@ -15,7 +16,7 @@ use Governor\Framework\Serializer\SerializerInterface;
  *
  * @author david
  */
-class FileSystemSnapshotEventReader
+class FilesystemSnapshotEventReader
 {
 
     private $eventFile;
@@ -30,7 +31,7 @@ class FileSystemSnapshotEventReader
      * @param eventSerializer   the serializer that is used to deserialize events in snapshot file
      */
     public function __construct($eventFile, $snapshotEventFile,
-        SerializerInterface $eventSerializer)
+            SerializerInterface $eventSerializer)
     {
         $this->eventFile = $eventFile;
         $this->snapshotEventFile = $snapshotEventFile;
@@ -49,17 +50,19 @@ class FileSystemSnapshotEventReader
     public function readSnapshotEvent($type, $identifier)
     {
         $snapshotEvent = null;
-
         $fileSystemSnapshotEvent = $this->readLastSnapshotEntry();
 
         if (null !== $fileSystemSnapshotEvent) {
-            $actuallySkipped = $this->eventFile->fseek($fileSystemSnapshotEvent['bytesToSkip']);
-            /// if ($actuallySkipped !== $fileSystemSnapshotEvent->getBytesToSkipInEventFile()) {
-            /* logger.warn(
-              "The skip operation did not actually skip the expected amount of bytes. "
-              + "The event log of aggregate of type {} and identifier {} might be corrupt.",
-              type, identifier); */
-            //   }
+            $this->eventFile->fseek($fileSystemSnapshotEvent['bytesToSkip']);
+            $actuallySkipped = $this->eventFile->ftell();
+            
+            if ($actuallySkipped !== $fileSystemSnapshotEvent['bytesToSkip']) {
+                throw new EventStoreException(sprintf(
+                        "The skip operation did not actually skip the expected amount of bytes. " .
+                        "The event log of aggregate of type %s and identifier %s might be corrupt.",
+                        $type, $identifier));
+            }
+
             $snapshotEvent = $fileSystemSnapshotEvent['snapshotEvent'];
         }
 
@@ -73,10 +76,10 @@ class FileSystemSnapshotEventReader
         do {
             $snapshotEvent = $this->readSnapshotEventEntry();
 
-            if (null !== $snapshotEvent) {
+            if (!empty($snapshotEvent)) {
                 $lastSnapshotEvent = $snapshotEvent;
             }
-        } while ($snapshotEvent !== null);
+        } while (!empty($snapshotEvent));
 
         return $lastSnapshotEvent;
     }
@@ -84,16 +87,16 @@ class FileSystemSnapshotEventReader
     private function readSnapshotEventEntry()
     {
         $snapshotEventReader = new FilesystemEventMessageReader($this->snapshotEventFile,
-            $this->eventSerializer);
-        try {
-            $bytesToSkip = $this->readLong($this->snapshotEventFile);
-            $snapshotEvent = $snapshotEventReader->readEventMessage();
+                $this->eventSerializer);
 
-            return array('snapshotEvent' => $snapshotEvent, 'bytesToSkip' => $bytesToSkip);
-        } catch (\Exception $ex) {
-            // No more events available
-            return null;
+        $bytesToSkip = $this->readLong($this->snapshotEventFile);
+        $snapshotEvent = $snapshotEventReader->readEventMessage();
+
+        if (null === $bytesToSkip && null === $snapshotEvent) {
+            return array();
         }
+
+        return array('snapshotEvent' => $snapshotEvent, 'bytesToSkip' => $bytesToSkip);
     }
 
     private function readLong($file)
@@ -107,7 +110,8 @@ class FileSystemSnapshotEventReader
             $stream .= $file->fgetc();
         }
 
-        return $stream;
+        $data = unpack("Nskip", $stream);
+        return $data['skip'];
     }
 
 }

@@ -65,6 +65,7 @@ class FilesystemEventMessageWriter
         // !!! TODO error handling
         $this->file->fwrite($len);
         $this->file->fwrite($binary);
+        $this->file->fflush();
     }
 
 }
