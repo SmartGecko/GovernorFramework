@@ -31,19 +31,19 @@ class FilesystemEventStoreTest extends \PHPUnit_Framework_TestCase
     public function testSaveStreamAndReadBackIn()
     {
         $eventStore = new FilesystemEventStore(new SimpleEventFileResolver($this->tempDirectory),
-                $this->serializer);
+            $this->serializer);
 
         $event1 = new GenericDomainEventMessage(
-                $this->aggregateIdentifier, 0, new StubDomainEvent());
+            $this->aggregateIdentifier, 0, new StubDomainEvent());
         $event2 = new GenericDomainEventMessage(
-                $this->aggregateIdentifier, 1, new StubDomainEvent());
+            $this->aggregateIdentifier, 1, new StubDomainEvent());
         $event3 = new GenericDomainEventMessage(
-                $this->aggregateIdentifier, 2, new StubDomainEvent());
+            $this->aggregateIdentifier, 2, new StubDomainEvent());
         $stream = new SimpleDomainEventStream(array($event1, $event2, $event3));
         $eventStore->appendEvents("test", $stream);
 
         $eventStream = $eventStore->readEvents("test",
-                $this->aggregateIdentifier);
+            $this->aggregateIdentifier);
         $domainEvents = array();
 
         while ($eventStream->hasNext()) {
@@ -51,11 +51,11 @@ class FilesystemEventStoreTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertEquals($event1->getIdentifier(),
-                $domainEvents[0]->getIdentifier());
+            $domainEvents[0]->getIdentifier());
         $this->assertEquals($event2->getIdentifier(),
-                $domainEvents[1]->getIdentifier());
+            $domainEvents[1]->getIdentifier());
         $this->assertEquals($event3->getIdentifier(),
-                $domainEvents[2]->getIdentifier());
+            $domainEvents[2]->getIdentifier());
     }
 
     /**
@@ -64,50 +64,47 @@ class FilesystemEventStoreTest extends \PHPUnit_Framework_TestCase
     public function testShouldThrowExceptionUponDuplicateAggregateId()
     {
         $eventStore = new FileSystemEventStore(new SimpleEventFileResolver($this->tempDirectory),
-                $this->serializer);
+            $this->serializer);
 
         $event1 = new GenericDomainEventMessage(
-                $this->aggregateIdentifier, 0, new StubDomainEvent());
+            $this->aggregateIdentifier, 0, new StubDomainEvent());
         $event2 = new GenericDomainEventMessage(
-                $this->aggregateIdentifier, 1, new StubDomainEvent());
+            $this->aggregateIdentifier, 1, new StubDomainEvent());
         $stream = new SimpleDomainEventStream(array($event1, $event2));
         $eventStore->appendEvents("test", $stream);
 
         $event3 = new GenericDomainEventMessage(
-                $this->aggregateIdentifier, 0, new StubDomainEvent());
+            $this->aggregateIdentifier, 0, new StubDomainEvent());
         $stream2 = new SimpleDomainEventStream(array($event3));
         $eventStore->appendEvents("test", $stream2);
     }
 
+    public function testReadEventsWithIllegalSnapshot()
+    {
+        $eventStore = new FileSystemEventStore(new SimpleEventFileResolver($this->tempDirectory),
+            $this->serializer);
+
+        $event1 = new GenericDomainEventMessage(
+            $this->aggregateIdentifier, 0, new StubDomainEvent());
+        $event2 = new GenericDomainEventMessage(
+            $this->aggregateIdentifier, 1, new StubDomainEvent());
+
+        $stream = new SimpleDomainEventStream(array($event1, $event2));
+        $eventStore->appendEvents("test", $stream);
+
+        //doReturn(new SimpleSerializedObject<byte[]>("error".getBytes(), byte[].class, String.class.getName(), "old"))
+        //.when(serializer).serialize(anyObject(), eq(byte[].class));
+
+        $eventStore->appendSnapshotEvent("test", $event2);
+
+        $actual = $eventStore->readEvents("test", $this->aggregateIdentifier);
+        $this->assertTrue($actual->hasNext());
+        $this->assertEquals(0, $actual->next()->getScn());
+        $this->assertEquals(1, $actual->next()->getScn());
+        $this->assertFalse($actual->hasNext());
+    }
+
     /*
-      @Test
-      public void testReadEventsWithIllegalSnapshot() {
-      final XStreamSerializer serializer = spy(new XStreamSerializer());
-      FileSystemEventStore eventStore = new FileSystemEventStore(serializer,
-      new SimpleEventFileResolver(eventFileBaseDir));
-
-      GenericDomainEventMessage<StubDomainEvent> event1 = new GenericDomainEventMessage<StubDomainEvent>(
-      aggregateIdentifier,
-      0,
-      new StubDomainEvent());
-      GenericDomainEventMessage<StubDomainEvent> event2 = new GenericDomainEventMessage<StubDomainEvent>(
-      aggregateIdentifier,
-      1,
-      new StubDomainEvent());
-      DomainEventStream stream = new SimpleDomainEventStream(event1, event2);
-      eventStore.appendEvents("test", stream);
-
-      doReturn(new SimpleSerializedObject<byte[]>("error".getBytes(), byte[].class, String.class.getName(), "old"))
-      .when(serializer).serialize(anyObject(), eq(byte[].class));
-      eventStore.appendSnapshotEvent("test", event2);
-
-      DomainEventStream actual = eventStore.readEvents("test", aggregateIdentifier);
-      assertTrue(actual.hasNext());
-      assertEquals(0, actual.next().getSequenceNumber());
-      assertEquals(1, actual.next().getSequenceNumber());
-      assertFalse(actual.hasNext());
-      }
-
       @Test
       // Issue #25: XStreamFileSystemEventStore fails when event data contains newline character
       public void testSaveStreamAndReadBackIn_NewLineInEvent() {

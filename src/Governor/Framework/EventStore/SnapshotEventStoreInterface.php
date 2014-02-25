@@ -8,7 +8,7 @@
 
 namespace Governor\Framework\EventStore;
 
-use Governor\Framework\Domain\DomainEventStreamInterface;
+use Governor\Framework\Domain\DomainEventMessageInterface;
 
 /**
  *
@@ -29,5 +29,5 @@ interface SnapshotEventStoreInterface extends EventStoreInterface
      * @param snapshotEvent The event summarizing one or more domain events for a specific aggregate.
      */
     public function appendSnapshotEvent($type,
-        DomainEventStreamInterface $snapshotEvent);
+        DomainEventMessageInterface $snapshotEvent);
 }
