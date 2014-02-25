@@ -8,7 +8,7 @@
 
 namespace Governor\Framework\EventStore;
 
-interface PartialStreamSupport
+interface PartialEventStreamSupportInterface
 {
 
     /**
@@ -26,6 +26,6 @@ interface PartialStreamSupport
      * @param lastSequenceNumber  The sequence number of the last event in the stream
      * @return a Stream containing events for the given aggregate, starting at the given first sequence number
      */
-    public function readEvents(S$type, $identifier, $firstSequenceNumber,
+    public function readEvents($type, $identifier, $firstSequenceNumber,
             $lastSequenceNumber = null);
 }
