@@ -46,19 +46,19 @@ class FilesystemEventMessageWriter
     {
         $serializedPayload = $this->messageSerializer->serializePayload($eventMessage->getPayload());
         $serializedMetaData = $this->messageSerializer->serializeMetaData($eventMessage->getMetaData());
-
+        
         $packFormat = sprintf("na36Na36NNa%sNa%sNa%s",
-                strlen($eventMessage->getPayloadType()),
-                strlen($serializedPayload), strlen($serializedMetaData));
+                strlen($serializedPayload->getType()->getName()),
+                strlen($serializedPayload->getData()), strlen($serializedMetaData->getData()));
 
         $binary = pack($packFormat, 0, $eventMessage->getIdentifier(),
                 $eventMessage->getTimestamp()->format('U'),
                 $eventMessage->getAggregateIdentifier(),
                 $eventMessage->getScn(),
-                strlen($eventMessage->getPayloadType()),
-                $eventMessage->getPayloadType(), strlen($serializedPayload),
-                $serializedPayload, strlen($serializedMetaData),
-                $serializedMetaData);
+                strlen($serializedPayload->getType()->getName()),
+                $serializedPayload->getType()->getName(), strlen($serializedPayload->getData()),
+                $serializedPayload->getData(), strlen($serializedMetaData->getData()),
+                $serializedMetaData->getData());
 
         $len = pack('n', strlen($binary));
 

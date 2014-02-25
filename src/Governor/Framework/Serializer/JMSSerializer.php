@@ -20,22 +20,38 @@ class JMSSerializer implements SerializerInterface
      */
     private $serializer;
 
-    public function __construct()
+    /**
+     * @var RevisionResolverInterface 
+     */
+    private $revisionResolver;
+
+    public function __construct(RevisionResolverInterface $revisionResolver)
     {
         $this->serializer = SerializerBuilder::create()
-                        ->configureHandlers(function(HandlerRegistry $registry) {
-                            $registry->registerSubscribingHandler(new RhumsaaUuidHandler());
-                        })->build();
+                ->configureHandlers(function(HandlerRegistry $registry) {
+                    $registry->registerSubscribingHandler(new RhumsaaUuidHandler());
+                })->build();
+
+        $this->revisionResolver = $revisionResolver;
     }
 
-    public function deserialize($data, $type)
-    {
-        return $this->serializer->deserialize($data, $type, 'json');
+    public function deserialize(SerializedObjectInterface $data)
+    {        
+        return $this->serializer->deserialize($data->getData(),
+                $data->getContentType(), 'json');
     }
 
     public function serialize($object)
     {
-        return $this->serializer->serialize($object, 'json');
+        $result = $this->serializer->serialize($object, 'json');
+        return new SimpleSerializedObject($result, $this->typeForClass($object));
+    }
+
+    public function typeForClass($object)
+    {
+        $type = get_class($object);
+        return new SimpleSerializedType($type,
+            $this->revisionResolver->revisionOf($type));
     }
 
 }

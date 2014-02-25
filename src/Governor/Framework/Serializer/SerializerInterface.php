@@ -2,13 +2,25 @@
 
 namespace Governor\Framework\Serializer;
 
-
 /**
  * Abstraction for DomainEvent serializers
  */
 interface SerializerInterface
 {
-    public function serialize($object);
-    public function deserialize($data, $type);
-}
 
+    /**
+     * @return SerializedObjectInterface
+     */
+    public function serialize($object);
+
+    /**
+     * @param SerializedObjectInterface $data     
+     * @return mixed
+     */
+    public function deserialize(SerializedObjectInterface $data);
+
+    /**
+     * @return SerializedObjectInterface
+     */
+    public function typeForClass($object);
+}

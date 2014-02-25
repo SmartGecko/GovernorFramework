@@ -25,11 +25,21 @@ class MessageSerializer
         $this->serializer = $serializer;
     }
 
+    /**
+     * 
+     * @param \Governor\Framework\Domain\MetaData $metadata
+     * @return SerializedObjectInterface
+     */
     public function serializeMetaData(MetaData $metadata)
     {
         return $this->serializer->serialize($metadata);
     }
 
+    /**
+     * 
+     * @param mixed $payload
+     * @return SerializedObjectInterface
+     */
     public function serializePayload($payload)
     {
         return $this->serializer->serialize($payload);

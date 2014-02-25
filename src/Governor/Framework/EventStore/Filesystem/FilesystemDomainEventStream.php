@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\EventStore\Filesystem;
 
+use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\EventStore\EventStoreException;
 use Governor\Framework\Domain\DomainEventStreamInterface;
 use Governor\Framework\Serializer\SerializerInterface;
@@ -22,12 +23,14 @@ class FilesystemDomainEventStream implements DomainEventStreamInterface
 
     protected $eventReader;
     protected $events;
+    protected $serializer;
 
     public function __construct(\SplFileObject $file,
-            SerializerInterface $serializer)
+        SerializerInterface $serializer)
     {
-        $this->eventReader = new FilesystemEventMessageReader($file, $serializer);
+        $this->eventReader = new FilesystemEventMessageReader($file);
         $this->events = new \SplDoublyLinkedList();
+        $this->serializer = $serializer;
         $this->doReadNext();
     }
 
@@ -60,7 +63,13 @@ class FilesystemDomainEventStream implements DomainEventStreamInterface
     {
         try {
             if (null !== $event = $this->eventReader->readEventMessage()) {
-                $this->events->push($event);
+                $payload = $this->serializer->deserialize($event->getPayload());
+                $metadata = $this->serializer->deserialize($event->getMetaData());
+
+                $message = new GenericDomainEventMessage($event->getAggregateIdentifier(),
+                    $event->getScn(), $payload, $metadata,
+                    $event->getEventIdentifier(), $event->getTimestamp());
+                $this->events->push($message);
             }
         } catch (\Exception $ex) {
             throw new EventStoreException("An error occurred while reading the event stream",

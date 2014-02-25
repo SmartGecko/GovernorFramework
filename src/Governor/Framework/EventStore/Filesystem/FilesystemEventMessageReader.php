@@ -8,7 +8,7 @@
 
 namespace Governor\Framework\EventStore\Filesystem;
 
-use Governor\Framework\Domain\GenericDomainEventMessage;
+use Governor\Framework\Serializer\SimpleSerializedDomainEventData;
 use Governor\Framework\Serializer\SerializerInterface;
 
 /**
@@ -24,23 +24,22 @@ class FilesystemEventMessageReader
      */
     private $file;
 
-    /**
-     * @var SerializerInterface 
-     */
-    private $serializer;
-
-    function __construct(\SplFileObject $file, SerializerInterface $serializer)
+    function __construct(\SplFileObject $file)
     {
         $this->file = $file;
-        $this->serializer = $serializer;
     }
 
+    /**
+     * 
+     * @return \Governor\Framework\Serializer\SerializedDomainEventDataInterface|null
+     * @throws \RuntimeException
+     */
     public function readEventMessage()
     {
         if (null === $len = $this->readBytes(2)) {
             return null;
-        }        
-        
+        }
+
         $eventLength = unpack('nlength', $len);
 
         if (!is_integer($eventLength['length'])) {
@@ -49,33 +48,27 @@ class FilesystemEventMessageReader
 
         $message = $this->readBytes($eventLength['length']);
         $array = unpack('nmagic/a36eventIdentifier/Ntimestamp/a36aggregateIdentifier/Nscn/NpayloadTypeLength',
-                $message);
+            $message);
 
         $offset = 86;
         $array = array_merge($array,
-                unpack(sprintf("a%spayloadType/NpayloadLength",
-                                $array['payloadTypeLength']),
-                        substr($message, $offset)));
+            unpack(sprintf("a%spayloadType/NpayloadLength",
+                    $array['payloadTypeLength']), substr($message, $offset)));
 
         $offset += strlen($array['payloadType']) + 4;
         $array = array_merge($array,
-                unpack(sprintf("a%spayload/NmetaDataLength",
-                                $array['payloadLength']),
-                        substr($message, $offset)));
+            unpack(sprintf("a%spayload/NmetaDataLength", $array['payloadLength']),
+                substr($message, $offset)));
 
         $offset += strlen($array['payload']) + 4;
         $array = array_merge($array,
-                unpack(sprintf("a%smetaData", $array['metaDataLength']),
-                        substr($message, $offset)));
+            unpack(sprintf("a%smetaData", $array['metaDataLength']),
+                substr($message, $offset)));
 
-        $payload = $this->serializer->deserialize($array['payload'],
-                $array['payloadType']);
-        $metadata = $this->serializer->deserialize($array['metaData'],
-                'Governor\Framework\Domain\MetaData');
-
-        return new GenericDomainEventMessage($array['aggregateIdentifier'],
-                $array['scn'], $payload, $metadata, $array['eventIdentifier'],
-                \DateTime::createFromFormat('U', $array['timestamp']));
+        return new SimpleSerializedDomainEventData($array['eventIdentifier'],
+            $array['aggregateIdentifier'], $array['scn'],
+            \DateTime::createFromFormat('U', $array['timestamp']),
+            $array['payloadType'], $array['payload'], $array['metaData']);
     }
 
     private function readBytes($length)
@@ -85,9 +78,9 @@ class FilesystemEventMessageReader
             if ($this->file->eof()) {
                 return null;
             }
-            
+
             $stream .= $this->file->fgetc();
-        }       
+        }
 
         return $stream;
     }
