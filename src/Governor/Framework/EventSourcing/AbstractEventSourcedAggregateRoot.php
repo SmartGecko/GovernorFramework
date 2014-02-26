@@ -8,7 +8,6 @@
 
 namespace Governor\Framework\EventSourcing;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\Domain\MetaData;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\DomainEventMessageInterface;
@@ -42,29 +41,12 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
 
     protected abstract function getChildEntities();
 
-    protected function handle(DomainEventMessageInterface $event)
-    {
-        $reflectionClass = new \ReflectionClass($this);
-        $reader = new AnnotationReader();
-
-        foreach ($reflectionClass->getMethods() as $method) {
-            $annot = $reader->getMethodAnnotation($method,
-                'Governor\Framework\Annotations\EventHandler');
-
-            if (null !== $annot) {
-                $parameter = current($method->getParameters());
-
-                if (null !== $parameter->getClass() && $parameter->getClass()->name === $event->getPayloadType()) {
-                    $method->invokeArgs($this, array($event->getPayload()));
-                }
-            }
-        }
-    }
+    protected abstract function handle(DomainEventMessageInterface $event);
 
     public function apply($payload, MetaData $metaData = null)
     {
         $metaData = isset($metaData) ? $metaData : MetaData::emptyInstance();
-
+      
         if (null === $this->getIdentifier()) {
             if ($this->getUncommittedEventCount() > 0 || $this->getVersion() !== null) {
                 throw new \RuntimeException("The Aggregate Identifier has not been initialized. "
@@ -77,7 +59,7 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
         } else {
             $event = $this->registerEvent($payload, $metaData);
             $this->handleRecursively($event);
-        }
+        }        
     }
 
     private function handleRecursively(DomainEventMessageInterface $event)

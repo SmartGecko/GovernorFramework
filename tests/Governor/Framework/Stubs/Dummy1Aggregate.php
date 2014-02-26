@@ -39,6 +39,11 @@ class Dummy1Aggregate extends AbstractEventSourcedAggregateRoot
         return $this->id;
     }
 
+    protected function handle(\Governor\Framework\Domain\DomainEventMessageInterface $event)
+    {
+        
+    }
+
 }
 
 class CreateDummy1Command
