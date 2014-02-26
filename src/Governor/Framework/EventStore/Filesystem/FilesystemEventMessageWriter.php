@@ -44,8 +44,8 @@ class FilesystemEventMessageWriter
      */
     public function writeEventMessage(DomainEventMessageInterface $eventMessage)
     {
-        $serializedPayload = $this->messageSerializer->serializePayload($eventMessage->getPayload());
-        $serializedMetaData = $this->messageSerializer->serializeMetaData($eventMessage->getMetaData());
+        $serializedPayload = $this->messageSerializer->serializePayload($eventMessage);
+        $serializedMetaData = $this->messageSerializer->serializeMetaData($eventMessage);
         
         $packFormat = sprintf("na36Na36NNa%sNa%sNa%s",
                 strlen($serializedPayload->getType()->getName()),

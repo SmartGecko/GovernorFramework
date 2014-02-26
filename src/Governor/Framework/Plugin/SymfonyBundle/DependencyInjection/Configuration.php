@@ -11,12 +11,9 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('governor');
-        
+
         $rootNode
-            ->children()                
-                ->arrayNode('aggregate_locations')
-                    ->prototype('scalar')->end()
-                ->end()
+            ->children()
                 ->scalarNode('command_target_resolver')
                     ->defaultValue('annotation')
                     ->validate()
@@ -33,19 +30,38 @@ class Configuration implements ConfigurationInterface
                                        "[\"null\",\"optimistic\",\"pesimistic\"]")
                     ->end()
                 ->end()
-                ->booleanNode('monolog')->defaultTrue()->end()      
+                ->arrayNode('event_store')
+                    ->children()
+                        ->scalarNode('type')
+                            ->defaultValue('null')
+                            ->validate()
+                            ->ifNotInArray(array('null', 'orm', 'odm', 'filesystem'))
+                                ->thenInvalid('Invalid event store "%s", possible values are '.
+                                           "[\"null\",\"orm\",\"odm\", \"filesystem\"]")
+                            ->end()
+                        ->end()
+                        ->arrayNode('parameters')
+                            ->children()
+                                ->scalarNode('entity_manager')->end()
+                                ->scalarNode('document_manager')->end()
+                                ->scalarNode('directory')->end()
+                            ->end()
+                        ->end()
+                    ->end()                    
+                ->end()
+                ->scalarNode('serializer')->defaultValue('jms')->end()                
                 ->append($this->addRepositoriesNode())
                 ->append($this->addAggregateCommandHandlersNode())
             ->end();
 
         return $treeBuilder;
     }
-    
+
     private function addRepositoriesNode()
     {
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('repositories');
-        
+
         $node
             ->requiresAtLeastOneElement()
                 ->useAttributeAsKey('name')
@@ -57,23 +73,23 @@ class Configuration implements ConfigurationInterface
                             ->cannotBeEmpty()
                             ->validate()
                             ->ifNotInArray(array('doctrine', 'eventsourcing', 'hybrid'))
-                                ->thenInvalid("Invalid repository type %s, possible values are " . 
+                                ->thenInvalid("Invalid repository type %s, possible values are " .
                                                       "[\"doctrine\",\"eventsourcing\",\"hybrid\"]")
                                 ->end()
                             ->end()
                         ->end()
                     ->end()
                 ->end();
-        
+
         return $node;
     }
-    
+
     private function addAggregateCommandHandlersNode()
     {
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('aggregate_command_handlers');
-        
-        $node            
+
+        $node
             ->useAttributeAsKey('name')
                 ->prototype('array')
                     ->children()
@@ -83,7 +99,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
             ->end();
-                
+
         return $node;
     }
 }

@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\Serializer;
 
+use Governor\Framework\Domain\MessageInterface;
 use Governor\Framework\Domain\MetaData;
 
 /**
@@ -15,7 +16,7 @@ use Governor\Framework\Domain\MetaData;
  *
  * @author 255196
  */
-class MessageSerializer
+class MessageSerializer implements SerializerInterface
 {
 
     private $serializer;
@@ -27,22 +28,37 @@ class MessageSerializer
 
     /**
      * 
-     * @param \Governor\Framework\Domain\MetaData $metadata
+     * @param \Governor\Framework\Domain\MessageInterface $message
      * @return SerializedObjectInterface
      */
-    public function serializeMetaData(MetaData $metadata)
+    public function serializeMetaData(MessageInterface $message)
     {
-        return $this->serializer->serialize($metadata);
+        return $this->serializer->serialize($message->getMetaData());
     }
 
     /**
      * 
-     * @param mixed $payload
+     * @param \Governor\Framework\Domain\MessageInterface $message
      * @return SerializedObjectInterface
      */
-    public function serializePayload($payload)
+    public function serializePayload(MessageInterface $message)
     {
-        return $this->serializer->serialize($payload);
+        return $this->serializer->serialize($message->getPayload());
+    }
+
+    public function deserialize(SerializedObjectInterface $data)
+    {
+        return $this->serializer->deserialize($data);
+    }
+
+    public function serialize($object)
+    {
+        return $this->serializer->serialize($object);
+    }
+
+    public function typeForClass($object)
+    {
+        return $this->serializer->typeForClass($object);
     }
 
 }

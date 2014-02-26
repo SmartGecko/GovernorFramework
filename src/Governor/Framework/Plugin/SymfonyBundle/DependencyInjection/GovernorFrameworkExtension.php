@@ -7,6 +7,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Alias;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
@@ -26,17 +27,44 @@ class GovernorFrameworkExtension extends Extension
             new Alias(sprintf('governor.command_target_resolver.%s',
                 $config['command_target_resolver'])));
 
+        $container->setAlias('governor.serializer',
+            new Alias(sprintf('governor.serializer.%s', $config['serializer'])));
+
         $loader = new XmlFileLoader($container,
             new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
-
-        $container->setParameter('governor.aggregate_locations',
-            $config['aggregate_locations']);
 
         // configure repositories 
         $this->loadRepositories($config, $container);
         //configure aggregate command handlers
         $this->loadAggregateCommandHandlers($config, $container);
+        // configure event store
+        $this->loadEventStore($config, $container);
+    }
+
+    private function loadEventStore($config, ContainerBuilder $container)
+    {
+        $definition = new Definition($container->getParameter(sprintf('governor.event_store.%s.class',
+                    $config['event_store']['type'])));
+        $serviceId = sprintf('governor.event_store.%s',
+            $config['event_store']['type']);
+
+        switch ($config['event_store']['type']) {
+            case 'filesystem':
+                break;
+            case 'orm':
+                $definition->addArgument(new Reference(sprintf('doctrine.orm.%s',
+                        $config['event_store']['parameters']['entity_manager'])));
+                $definition->addArgument(new Reference('governor.serializer'));
+                break;
+            case 'odm':
+                break;
+            case 'null':
+                break;
+        }
+
+        $container->setDefinition($serviceId, $definition);
+        $container->setAlias('governor.event_store', $serviceId);
     }
 
     private function loadAggregateCommandHandlers($config,

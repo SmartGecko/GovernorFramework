@@ -11,7 +11,11 @@
         <parameter key="governor.repository.hybrid.class">Governor\Framework\EventSourcing\HybridDoctrineRepository</parameter>
         <parameter key="governor.repository.eventsourcing.class">Governor\Framework\EventSourcing\EventSourcingRepository</parameter>
         
-        <parameter key="governor.serializer.class">Governor\Framework\Serializer\ReflectionSerializer</parameter>
+        <!-- revision resolver classes -->
+        <parameter key="governor.revision_resolver.class">Governor\Framework\Serializer\NullRevisionResolver</parameter>
+        
+        <!-- serializer classes -->
+        <parameter key="governor.serializer.jms.class">Governor\Framework\Serializer\JMSSerializer</parameter>
         
         <!-- lock manager classes -->
         <parameter key="governor.lock_manager.null.class">Governor\Framework\Repository\NullLockManager</parameter>
@@ -22,9 +26,21 @@
         
         <!-- aggregate factory -->
         <parameter key="governor.aggregate_factory.generic.class">Governor\Framework\EventSourcing\GenericAggregateFactory</parameter>
+        
+        <!-- event store classes -->
+        <parameter key="governor.event_store.null.class">Governor\Framework\EventStore\NullEventStore</parameter>
+        <parameter key="governor.event_store.orm.class">Governor\Framework\EventStore\Orm\OrmEventStore</parameter>
+        <parameter key="governor.event_store.odm.class">Governor\Framework\EventStore\Odm\OdmEventStore</parameter>
+        <parameter key="governor.event_store.filesystem.class">Governor\Framework\EventStore\Filesystem\FilesystemEventStore</parameter>
+        
+        <parameter key="governor.event_file_resolver.class">Governor\Framework\EventStore\Filesystem\SimpleEventFileResolver</parameter>
     </parameters>
 
-    <services>
+    <services>        
+        
+        <!-- revision resolver -->
+        <service id="governor.revision_resolver" class="%governor.revision_resolver.class%">
+        </service>
         
         <!-- lock managers -->
         <service id="governor.lock_manager.null" class="%governor.lock_manager.null.class%">
@@ -40,10 +56,6 @@
         <service id="governor.aggregate_factory" class="%governor.aggregate_factory.generic.class%">
         </service>
         
-        <!-- event store -->
-        <service id="governor.event_store" class="Governor\Framework\EventStore\NullEventStore">
-        </service>
-        
         <service id="governor.command_gateway" class="%governor.command_gateway.class%">
             <argument type="service" id="governor.command_bus" />
         </service>
@@ -51,7 +63,8 @@
         <service id="governor.command_bus" class="%governor.command_bus.class%"/>                    
         <service id="governor.event_bus" class="%governor.event_bus.class%"/>
                       
-        <service id="governor.serializer" class="%governor.serializer.class%">
+        <service id="governor.serializer.jms" class="%governor.serializer.jms.class%">
+            <argument type="service" id="governor.revision_resolver"/>
         </service>
               
         <service id="governor.repository.doctrine" class="%governor.repository.doctrine.class%" abstract="true" public="false">
