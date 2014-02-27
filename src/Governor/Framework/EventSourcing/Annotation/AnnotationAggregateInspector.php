@@ -42,7 +42,7 @@ class AnnotationAggregateInspector
             $annot = $this->reader->getPropertyAnnotation($property,
                 self::AGGREGATE_IDENTIFIER_ANNOTATION);
 
-            if (null !== $annot) {                
+            if (null !== $annot) {
                 $property->setAccessible(true);
                 return $property->getValue($this->targetObject);
             }
@@ -57,22 +57,28 @@ class AnnotationAggregateInspector
     public function getChildEntities()
     {
         $entities = array();
-        
+
         foreach (ReflectionUtils::getProperties($this->reflectionClass) as $property) {
-            $annot = $this->reader->getPropertyAnnotation($property, self::EVENT_SOURCED_MEMBER_ANNOTATION);
-            
+            $annot = $this->reader->getPropertyAnnotation($property,
+                self::EVENT_SOURCED_MEMBER_ANNOTATION);
+
             if (null !== $annot) {
-                $property->setAccessible(true);                
+                $property->setAccessible(true);
                 $child = $property->getValue($this->targetObject);
-                
-                if (is_array($child)) {
+
+
+                if (is_array($child)) {                    
                     $entities = array_merge($entities, $child);
+                } else if ($child instanceof \IteratorAggregate) {
+                    foreach ($child as $element) {
+                        $entities[] = $element;
+                    }
                 } else {
                     $entities[] = $child;
                 }
             }
         }
-        
+
         return $entities;
     }
 

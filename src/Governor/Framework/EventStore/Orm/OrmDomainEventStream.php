@@ -45,9 +45,9 @@ class OrmDomainEventStream implements DomainEventStreamInterface
      * @var boolean
      */
     private $skipUnknownTypes;
-    
-    /**     
-     * @var SerializerInterface 
+
+    /**
+     * @var SerializerInterface
      */
     private $serializer;
 
@@ -67,10 +67,12 @@ class OrmDomainEventStream implements DomainEventStreamInterface
         $this->aggregateIdentifier = $aggregateIdentifier;
         $this->skipUnknownTypes = $skipUnknownTypes;
         $this->lastScn = (null === $lastScn) ? PHP_INT_MAX : $lastScn;
-        $this->cursor = $cursor;        
-        
+        $this->cursor = $cursor;
+
         if (null !== $snapshotEvent) {
             $this->next = $snapshotEvent;
+            // skip the event with the same SCN 
+            $this->cursor->next();
         } else {
             $this->doGetNext();
         }
@@ -82,7 +84,7 @@ class OrmDomainEventStream implements DomainEventStreamInterface
     }
 
     public function next()
-    {
+    {        
         $current = $this->next;
         $this->doGetNext();
         return $current;
@@ -94,15 +96,15 @@ class OrmDomainEventStream implements DomainEventStreamInterface
     }
 
     private function doGetNext()
-    {        
-        if (false !== $eventRow = $this->cursor->next()) {               
+    {
+        if (false !== $eventRow = $this->cursor->next()) {
             $event = current($eventRow);
             $payload = $this->serializer->deserialize($event->getPayload());
             $metadata = $this->serializer->deserialize($event->getMetaData());
-            
+
             $this->next = new GenericDomainEventMessage($event->getAggregateIdentifier(),
                     $event->getScn(), $payload, $metadata,
-                    $event->getEventIdentifier(), $event->getTimestamp());                        
+                    $event->getEventIdentifier(), $event->getTimestamp());
         } else {
             $this->next = null;
         }

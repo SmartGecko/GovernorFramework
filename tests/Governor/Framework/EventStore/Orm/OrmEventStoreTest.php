@@ -36,10 +36,6 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
     private $aggregate1;
     private $aggregate2;
 
-    /*  @Autowired
-      private PlatformTransactionManager txManager;
-      private TransactionTemplate template; */
-
     public static function setUpBeforeClass()
     {
         // bootstrap doctrine
@@ -52,13 +48,13 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
 
         self::$config = Setup::createConfiguration(true);
         self::$config->setMetadataDriverImpl(new \Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver(self::getMappingDirectories()));
-       // self::$config->setSQLLogger(new \Doctrine\DBAL\Logging\EchoSQLLogger());
+        //self::$config->setSQLLogger(new \Doctrine\DBAL\Logging\EchoSQLLogger());
     }
 
     public function setUp()
     {
         $this->entityManager = EntityManager::create(self::$dbParams,
-                        self::$config);
+                self::$config);
 
         $tool = new \Doctrine\ORM\Tools\SchemaTool($this->entityManager);
         $classes = array($this->entityManager->getClassMetadata('Governor\Framework\EventStore\Orm\DomainEventEntry'),
@@ -67,7 +63,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $tool->createSchema($classes);
 
         $this->testSubject = new OrmEventStore($this->entityManager,
-                new JMSSerializer(new NullRevisionResolver()));
+            new JMSSerializer(new NullRevisionResolver()));
 
         // template = new TransactionTemplate(txManager);
         $this->aggregate1 = new StubAggregateRoot(Uuid::uuid1()->toString());
@@ -79,13 +75,6 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $this->aggregate2->changeState();
         $this->aggregate2->changeState();
         $this->aggregate2->changeState();
-        /*
-          template.execute(new TransactionCallbackWithoutResult() {
-          @Override
-          protected void doInTransactionWithoutResult(TransactionStatus status) {
-          entityManager.createQuery("DELETE FROM DomainEventEntry").executeUpdate();
-          }
-          }); */
     }
 
     private static function getMappingDirectories()
@@ -96,8 +85,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
             'doctrine');
 
         return array(
-            // __DIR__ . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path)
-            'C:\XXX'
+            __DIR__ . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path)
             => 'Governor\Framework'
         );
     }
@@ -114,20 +102,20 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
     public function testUniqueKeyConstraintOnEventIdentifier()
     {
         $emptySerializedObject = new SimpleSerializedObject('{}',
-                new SimpleSerializedType('stdClass'));
+            new SimpleSerializedType('stdClass'));
 
         //$firstEvent = $this->aggregate2->getUncommittedEvents()->next();        
         $this->entityManager->persist(new DomainEventEntry("type",
-                new GenericDomainEventMessage("someValue", 0,
-                $emptySerializedObject, MetaData::emptyInstance(), "a",
-                new \DateTime()), $emptySerializedObject, $emptySerializedObject));
+            new GenericDomainEventMessage("someValue", 0,
+            $emptySerializedObject, MetaData::emptyInstance(), "a",
+            new \DateTime()), $emptySerializedObject, $emptySerializedObject));
 
         $this->entityManager->flush();
 
         $this->entityManager->persist(new DomainEventEntry("type",
-                new GenericDomainEventMessage("anotherValue", 0,
-                $emptySerializedObject, MetaData::emptyInstance(), "a",
-                new \DateTime()), $emptySerializedObject, $emptySerializedObject));
+            new GenericDomainEventMessage("anotherValue", 0,
+            $emptySerializedObject, MetaData::emptyInstance(), "a",
+            new \DateTime()), $emptySerializedObject, $emptySerializedObject));
 
         $this->entityManager->flush();
     }
@@ -138,7 +126,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
     public function testStoreAndLoadEvents_BadIdentifierType()
     {
         $this->testSubject->appendEvents("type",
-                new SimpleDomainEventStream(array(
+            new SimpleDomainEventStream(array(
             new GenericDomainEventMessage(new \stdClass(), 1, new \stdClass()))));
     }
 
@@ -161,45 +149,42 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($this->testSubject);
 
         $this->testSubject->appendEvents("test",
-                $this->aggregate1->getUncommittedEvents());
+            $this->aggregate1->getUncommittedEvents());
         $this->entityManager->flush();
 
         $this->assertEquals($this->aggregate1->getUncommittedEventCount(),
-                $this->entityManager->createQuery("SELECT count(e) FROM Governor\Framework\EventStore\Orm\DomainEventEntry e")->getSingleScalarResult());
+            $this->entityManager->createQuery("SELECT count(e) FROM Governor\Framework\EventStore\Orm\DomainEventEntry e")->getSingleScalarResult());
 
         // we store some more events to make sure only correct events are retrieved
         $this->testSubject->appendEvents("test",
-                new SimpleDomainEventStream(array(
+            new SimpleDomainEventStream(array(
             new GenericDomainEventMessage($this->aggregate2->getIdentifier(), 0,
-                    new \stdClass(), new MetaData(array("key" => "Value"))
+                new \stdClass(), new MetaData(array("key" => "Value"))
         ))));
 
         $this->entityManager->flush();
         $this->entityManager->clear();
 
         $events = $this->testSubject->readEvents("test",
-                $this->aggregate1->getIdentifier());
+            $this->aggregate1->getIdentifier());
         $actualEvents = array();
 
         while ($events->hasNext()) {
             $event = $events->next();
-            //event.getPayload();
-            //event.getMetaData();
             $actualEvents[] = $event;
         }
         $this->assertEquals($this->aggregate1->getUncommittedEventCount(),
-                count($actualEvents));
+            count($actualEvents));
 
         /// we make sure persisted events have the same MetaData alteration logic
         $other = $this->testSubject->readEvents("test",
-                $this->aggregate2->getIdentifier());
+            $this->aggregate2->getIdentifier());
         $this->assertTrue($other->hasNext());
         $messageWithMetaData = $other->next();
-        
+
         $altered = $messageWithMetaData->withMetaData(array("key2" => "value"));
         $combined = $messageWithMetaData->andMetaData(array("key2" => "value"));
         $this->assertTrue($altered->getMetaData()->has("key2"));
-        //altered . getPayload();
         $this->assertFalse($altered->getMetaData()->has("key"));
         $this->assertTrue($altered->getMetaData()->has("key2"));
         $this->assertTrue($combined->getMetaData()->has("key"));
@@ -259,31 +244,33 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
       assertNotNull(actualEvents.get(t).getPayload());
       assertNotNull(actualEvents.get(t + 1).getPayload());
       }
-      }
+      } */
 
-      @Test
-      @Transactional
-      public void testLoad_LargeAmountOfEvents() {
-      List<DomainEventMessage<String>> domainEvents = new ArrayList<DomainEventMessage<String>>(110);
-      String aggregateIdentifier = "id";
-      for (int t = 0; t < 110; t++) {
-      domainEvents.add(new GenericDomainEventMessage<String>(aggregateIdentifier, (long) t,
-      "Mock contents", MetaData.emptyInstance()));
-      }
-      testSubject.appendEvents("test", new SimpleDomainEventStream(domainEvents));
-      entityManager.flush();
-      entityManager.clear();
+    public function testLoad_LargeAmountOfEvents()
+    {
+        $domainEvents = array();
+        $aggregateIdentifier = "id";
+        for ($cc = 0; $cc < 110; $cc++) {
+            $domainEvents[] = new GenericDomainEventMessage($aggregateIdentifier,
+                $cc, new \stdClass(), MetaData::emptyInstance());
+        }
 
-      DomainEventStream events = testSubject.readEvents("test", aggregateIdentifier);
-      long t = 0L;
-      while (events.hasNext()) {
-      DomainEventMessage event = events.next();
-      assertEquals(t, event.getSequenceNumber());
-      t++;
-      }
-      assertEquals(110L, t);
-      }
+        $this->testSubject->appendEvents("test",
+            new SimpleDomainEventStream($domainEvents));
+        $this->entityManager->flush();
+        $this->entityManager->clear();
 
+        $events = $this->testSubject->readEvents("test", $aggregateIdentifier);
+        $cc = 0;
+        while ($events->hasNext()) {
+            $event = $events->next();
+            $this->assertEquals($cc, $event->getScn());
+            $cc++;
+        }
+        $this->assertEquals(110, $cc);
+    }
+
+    /*
       @DirtiesContext
       @Test
       @Transactional
@@ -428,66 +415,81 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
 
       DomainEventStream stream = testSubject.readEvents("test", aggregateIdentifier);
       assertEquals(0L, stream.peek().getSequenceNumber());
-      }
+      } */
 
-      @Test
-      @Transactional
-      public void testLoad_LargeAmountOfEventsWithSnapshot() {
-      List<DomainEventMessage<String>> domainEvents = new ArrayList<DomainEventMessage<String>>(110);
-      String aggregateIdentifier = "id";
-      for (int t = 0; t < 110; t++) {
-      domainEvents.add(new GenericDomainEventMessage<String>(aggregateIdentifier, (long) t,
-      "Mock contents", MetaData.emptyInstance()));
-      }
-      testSubject.appendEvents("test", new SimpleDomainEventStream(domainEvents));
-      testSubject.appendSnapshotEvent("test", new GenericDomainEventMessage<String>(aggregateIdentifier, (long) 30,
-      "Mock contents",
-      MetaData.emptyInstance()
-      ));
-      entityManager.flush();
-      entityManager.clear();
+    public function testLoad_LargeAmountOfEventsWithSnapshot()
+    {
+        $domainEvents = array();
+        $aggregateIdentifier = "id";
+        for ($cc = 0; $cc < 110; $cc++) {
+            $domainEvents[] = new GenericDomainEventMessage($aggregateIdentifier,
+                $cc, new \stdClass(), MetaData::emptyInstance());
+        }
 
-      DomainEventStream events = testSubject.readEvents("test", aggregateIdentifier);
-      long t = 30L;
-      while (events.hasNext()) {
-      DomainEventMessage event = events.next();
-      assertEquals(t, event.getSequenceNumber());
-      t++;
-      }
-      assertEquals(110L, t);
-      }
+        $this->testSubject->appendEvents("test",
+            new SimpleDomainEventStream($domainEvents));
+        $this->testSubject->appendSnapshotEvent("test",
+            new GenericDomainEventMessage($aggregateIdentifier, 30,
+            new \stdClass(), MetaData::emptyInstance()
+        ));
 
-      @Test
-      @Transactional
-      public void testLoadWithSnapshotEvent() {
-      testSubject.appendEvents("test", aggregate1.getUncommittedEvents());
-      aggregate1.commitEvents();
-      entityManager.flush();
-      entityManager.clear();
-      testSubject.appendSnapshotEvent("test", aggregate1.createSnapshotEvent());
-      entityManager.flush();
-      entityManager.clear();
-      aggregate1.changeState();
-      testSubject.appendEvents("test", aggregate1.getUncommittedEvents());
-      aggregate1.commitEvents();
+        $this->entityManager->flush();
+        $this->entityManager->clear();
 
-      DomainEventStream actualEventStream = testSubject.readEvents("test", aggregate1.getIdentifier());
-      List<DomainEventMessage> domainEvents = new ArrayList<DomainEventMessage>();
-      while (actualEventStream.hasNext()) {
-      DomainEventMessage next = actualEventStream.next();
-      domainEvents.add(next);
-      assertEquals(aggregate1.getIdentifier(), next.getAggregateIdentifier());
-      }
+        $events = $this->testSubject->readEvents("test", $aggregateIdentifier);
+        $cc = 30;
 
-      assertEquals(2, domainEvents.size());
-      }
+        while ($events->hasNext()) {
+            $event = $events->next();
+            $this->assertEquals($cc, $event->getScn());
+            $cc++;
+        }
+        $this->assertEquals(110, $cc);
+    }
 
-      @Test(expected = EventStreamNotFoundException.class)
-      @Transactional
-      public void testLoadNonExistent() {
-      testSubject.readEvents("Stub", UUID.randomUUID());
-      }
+    public function testLoadWithSnapshotEvent()
+    {
+        $this->testSubject->appendEvents("test",
+            $this->aggregate1->getUncommittedEvents());
+        $this->aggregate1->commitEvents();
+        $this->entityManager->flush();
+        $this->entityManager->clear();
 
+        $this->testSubject->appendSnapshotEvent("test",
+            $this->aggregate1->createSnapshotEvent());
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        $this->aggregate1->changeState();
+        $this->testSubject->appendEvents("test",
+            $this->aggregate1->getUncommittedEvents());
+        $this->aggregate1->commitEvents();
+
+        $actualEventStream = $this->testSubject->readEvents("test",
+            $this->aggregate1->getIdentifier());
+        $domainEvents = array();
+
+        while ($actualEventStream->hasNext()) {
+            $next = $actualEventStream->next();
+            $domainEvents[] = $next;
+            $this->assertEquals($this->aggregate1->getIdentifier(),
+                $next->getAggregateIdentifier());
+        }
+
+        $this->assertEquals(2, count($domainEvents));
+    }
+
+    // @Test(expected = EventStreamNotFoundException.class)
+    //@Transactional
+
+    /*
+    public function testLoadNonExistent()
+    {
+        $this->testSubject->readEvents("Stub", Uuid::uuid1()->toString());
+        //$this->fail('erer');
+    }*/
+
+    /*
       @Test
       @Transactional
       public void testVisitAllEvents() {
@@ -835,8 +837,8 @@ class StubAggregateRoot extends AbstractAnnotatedAggregateRoot
     public function createSnapshotEvent()
     {
         return new GenericDomainEventMessage($this->getIdentifier(),
-                $this->getVersion(), new StubStateChangedEvent(),
-                MetaData::emptyInstance()
+            $this->getVersion(), new StubStateChangedEvent(),
+            MetaData::emptyInstance()
         );
     }
 

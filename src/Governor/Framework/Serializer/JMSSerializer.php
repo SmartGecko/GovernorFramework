@@ -11,6 +11,7 @@ namespace Governor\Framework\Serializer;
 use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\SerializerBuilder;
 use Governor\Framework\Serializer\Handlers\RhumsaaUuidHandler;
+use Governor\Framework\Serializer\Handlers\AggregateReferenceHandler;
 
 class JMSSerializer implements SerializerInterface
 {
@@ -28,8 +29,10 @@ class JMSSerializer implements SerializerInterface
     public function __construct(RevisionResolverInterface $revisionResolver)
     {
         $this->serializer = SerializerBuilder::create()
+                ->addDefaultHandlers()
                 ->configureHandlers(function(HandlerRegistry $registry) {
                     $registry->registerSubscribingHandler(new RhumsaaUuidHandler());
+                    $registry->registerSubscribingHandler(new AggregateReferenceHandler());
                 })->build();
 
         $this->revisionResolver = $revisionResolver;

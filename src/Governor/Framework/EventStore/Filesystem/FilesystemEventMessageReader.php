@@ -65,10 +65,11 @@ class FilesystemEventMessageReader
             unpack(sprintf("a%smetaData", $array['metaDataLength']),
                 substr($message, $offset)));
 
+        // !!! TODO support for payload revision 
         return new SimpleSerializedDomainEventData($array['eventIdentifier'],
             $array['aggregateIdentifier'], $array['scn'],
             \DateTime::createFromFormat('U', $array['timestamp']),
-            $array['payloadType'], $array['payload'], $array['metaData']);
+            $array['payloadType'], null, $array['payload'], $array['metaData']);
     }
 
     private function readBytes($length)

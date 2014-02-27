@@ -108,6 +108,7 @@ class OrmEventStore implements EventStoreInterface, SnapshotEventStoreInterface
         $entries = $this->entryStore->fetchAggregateStream($type, $identifier,
                 $snapshotScn, 10000, $this->entityManager);
 
+        // !!! TODO implement batch fetching now we cannot detect empty result sets :(
         if ($snapshotEvent === null && empty($entries)) {
             throw new EventStreamNotFoundException($type, $identifier);
         }
