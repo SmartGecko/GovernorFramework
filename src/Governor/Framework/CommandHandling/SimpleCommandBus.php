@@ -36,7 +36,7 @@ class SimpleCommandBus implements CommandBusInterface
         try {
             $result = $this->doDispatch($command, $handler);
             $callback->onSuccess($result);
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $callback->onFailure($ex);
         }
     }

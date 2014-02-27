@@ -11,7 +11,7 @@ interface RepositoryInterface
 
     /**
      * @param \Rhumsaa\Uuid\Uuid $id
-     * @param int $expectedVersion
+     * @param integer $expectedVersion
      *
      * @return \Governor\Framework\Domain\AggregateRootInterface
      */

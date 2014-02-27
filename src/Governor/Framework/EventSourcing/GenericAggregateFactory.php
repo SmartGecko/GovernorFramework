@@ -18,8 +18,19 @@ use Governor\Framework\Domain\DomainEventMessageInterface;
 class GenericAggregateFactory extends AbstractAggregateFactory
 {
 
+    /**
+     * @var string
+     */
     private $aggregateType;
+
+    /**
+     * @var string
+     */
     private $typeIdentifier;
+
+    /**
+     * @var \ReflectionClass
+     */
     private $reflClass;
 
     function __construct($aggregateType)

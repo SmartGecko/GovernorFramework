@@ -21,7 +21,7 @@ class MetaData implements \IteratorAggregate, \Countable
 
     /**
      * @Exclude
-     * @var type 
+     * @var MetaData 
      */
     private static $emptyInstance;
 
@@ -95,6 +95,11 @@ class MetaData implements \IteratorAggregate, \Countable
         return new MetaData(array_replace($this->metadata, $metadata));
     }
 
+    /**
+     * 
+     * @param array $keys
+     * @return \Governor\Framework\Domain\MetaData
+     */
     public function withoutKeys(array $keys = array())
     {
         if (empty($keys)) {
@@ -112,6 +117,10 @@ class MetaData implements \IteratorAggregate, \Countable
         return new MetaData($newMetadata);
     }
 
+    /**
+     * 
+     * @return boolean
+     */
     public function isEmpty()
     {
         return empty($this->metadata);
@@ -151,6 +160,10 @@ class MetaData implements \IteratorAggregate, \Countable
         return new \ArrayIterator($this->metadata);
     }
 
+    /**
+     * 
+     * @return MetaData
+     */
     public static function emptyInstance()
     {
         if (!isset(self::$emptyInstance)) {

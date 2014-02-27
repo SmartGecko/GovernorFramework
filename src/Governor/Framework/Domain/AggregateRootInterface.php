@@ -19,7 +19,7 @@ interface AggregateRootInterface
     /**
      * Returns the if of this aggregate.
      *
-     * @return integer the identifier of this aggregate
+     * @return mixed the identifier of this aggregate
      */
     public function getIdentifier();
 
@@ -72,7 +72,7 @@ interface AggregateRootInterface
      * If the aggregate contains uncommitted events, they are all passed to the given
      * <code>eventRegistrationCallback</code> for processing.
      *
-     * @param eventRegistrationCallback the callback to notify when an event is registered
+     * @param EventRegistrationCallbackInterface $eventRegistrationCallback the callback to notify when an event is registered
      */
     public function addEventRegistrationCallback(EventRegistrationCallbackInterface $eventRegistrationCallback);
 }

@@ -31,14 +31,14 @@ interface UnitOfWorkInterface
      * and
      * if the UnitOfWork has not been committed or rolled back.
      *
-     * @return <code>true</code> if this UnitOfWork is started, <code>false</code> otherwise.
+     * @return boolean <code>true</code> if this UnitOfWork is started, <code>false</code> otherwise.
      */
     public function isStarted();
 
     /**
      * Indicates whether this UnitOfWork is bound to a transaction.
      *
-     * @return <code>true</code> if this unit of work is bound to a transaction, otherwise <code>false</code>
+     * @return boolean <code>true</code> if this unit of work is bound to a transaction, otherwise <code>false</code>
      */
     public function isTransactional();
 
@@ -50,8 +50,8 @@ interface UnitOfWorkInterface
      * Request to publish the given <code>event</code> on the given <code>eventBus</code>. The UnitOfWork may either
      * publish immediately, or buffer the events until the UnitOfWork is committed.
      *
-     * @param event    The event to be published on the event bus
-     * @param eventBus The event bus on which to publish the event
+     * @param EventMessageInterface $event    The event to be published on the event bus
+     * @param EventBusInterface $eventBus The event bus on which to publish the event
      */
     public function publishEvent(EventMessageInterface $event,
         EventBusInterface $eventBus);

@@ -91,7 +91,7 @@ class EventSourcingRepository extends LockingRepository
         $iterator = new \ArrayIterator(array_reverse($this->eventStreamDecorators));
 
         while ($iterator->valid()) {
-            $eventStream = $iterator->current->decorateForAppend($this->getTypeIdentifier(),
+            $eventStream = $iterator->current()->decorateForAppend($this->getTypeIdentifier(),
                 $aggregate, $eventStream);
             $iterator->next();
         }

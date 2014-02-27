@@ -18,7 +18,7 @@ interface UnitOfWorkListenerInterface
      * dispatching. In some cases, the events could already have been dispatched. When processing of this method causes
      * an exception, a UnitOfWork may choose to call {@link #onRollback(UnitOfWork, Throwable)} consecutively.
      *
-     * @param unitOfWork The Unit of Work being committed
+     * @param UnitOfWorkInterface $unitOfWork The Unit of Work being committed
      * @see UnitOfWork#commit()
      */
     public function afterCommit(UnitOfWorkInterface $unitOfWork);
@@ -27,8 +27,8 @@ interface UnitOfWorkListenerInterface
      * Invoked when the UnitOfWork is rolled back. The UnitOfWork may choose to invoke this method when committing the
      * UnitOfWork failed, too.
      *
-     * @param unitOfWork   The Unit of Work being rolled back
-     * @param failureCause The exception (or error) causing the roll back
+     * @param UnitOfWorkInterface $unitOfWork   The Unit of Work being rolled back
+     * @param \Exception $failureCause The exception (or error) causing the roll back
      * @see UnitOfWork#rollback(Throwable)
      */
     public function onRollback(UnitOfWorkInterface $unitOfWork,
@@ -41,10 +41,9 @@ interface UnitOfWorkListenerInterface
      * <p/>
      * The simplest implementation simply returns the given <code>event</code>.
      *
-     * @param unitOfWork The Unit of Work on which an event is registered
-     * @param event      The event about to be registered for publication
-     * @param <T>        The type of payload of the EventMessage
-     * @return the (modified) event to register for publication
+     * @param UnitOfWorkInterface $unitOfWork The Unit of Work on which an event is registered
+     * @param EventMessageInterface $event      The event about to be registered for publication     
+     * @return EventMessageInterface the (modified) event to register for publication
      */
     public function onEventRegistered(UnitOfWorkInterface $unitOfWork,
         EventMessageInterface $event);
@@ -57,9 +56,9 @@ interface UnitOfWorkListenerInterface
      * <code>aggregateRoots</code>. To retrieve all events, collect all uncommitted events from the aggregate roots and
      * combine them with the list of events.
      *
-     * @param unitOfWork     The Unit of Work being committed
-     * @param aggregateRoots the aggregate roots being committed
-     * @param events         Events that have been registered for dispatching with the UnitOfWork
+     * @param UnitOfWorkInterface $unitOfWork     The Unit of Work being committed
+     * @param array $aggregateRoots the aggregate roots being committed
+     * @param array $events         Events that have been registered for dispatching with the UnitOfWork
      */
     public function onPrepareCommit(UnitOfWorkInterface $unitOfWork,
         array $aggregateRoots, array $events);
@@ -71,7 +70,7 @@ interface UnitOfWorkListenerInterface
      * <p/>
      * Note that this method is only invoked if the Unit of Work is bound to a transaction.
      *
-     * @param unitOfWork  The Unit of Work of which the underlying transaction is being committed.
+     * @param UnitOfWorkInterface $unitOfWork  The Unit of Work of which the underlying transaction is being committed.
      * @param transaction The object representing the (status of) the transaction, as returned by {@link
      *                    org.axonframework.unitofwork.TransactionManager#startTransaction()}.
      * @see org.axonframework.unitofwork.TransactionManager
@@ -85,7 +84,7 @@ interface UnitOfWorkListenerInterface
      * <p/>
      * This method is always called after all listeners have been notified of a commit or rollback.
      *
-     * @param unitOfWork The Unit of Work being cleaned up
+     * @param UnitOfWorkInterface $unitOfWork The Unit of Work being cleaned up
      */
     public function onCleanup(UnitOfWorkInterface $unitOfWork);
 }
