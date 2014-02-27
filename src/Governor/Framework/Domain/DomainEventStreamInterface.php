@@ -26,7 +26,7 @@ interface DomainEventStreamInterface
      * return <code>null</code>, or throw an exception, depending on the actual implementation. Use {@link #hasNext()}
      * to confirm the existence of elements after the current pointer.
      *
-     * @return the next event in the stream.
+     * @return DomainEventMessageInterface the next event in the stream.
      */
     public function next();
 
@@ -39,7 +39,7 @@ interface DomainEventStreamInterface
      * return <code>null</code>, or throw an exception, depending on the actual implementation. Use {@link #hasNext()}
      * to confirm the existence of elements after the current pointer.
      *
-     * @return the next event in the stream.
+     * @return DomainEventMessageInterface the next event in the stream.
      */
     public function peek();
 }

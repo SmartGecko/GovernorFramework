@@ -9,6 +9,7 @@
 namespace Governor\Framework\EventStore\Orm;
 
 use Doctrine\ORM\EntityManager;
+use Governor\Framework\Common\IdentifierValidator;
 use Governor\Framework\EventStore\EventStreamNotFoundException;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\DomainEventStreamInterface;
@@ -41,7 +42,7 @@ class OrmEventStore implements EventStoreInterface, SnapshotEventStoreInterface
     private $entryStore;
 
     public function __construct(EntityManager $entityManager,
-        SerializerInterface $serializer) //, EventEntryStoreInterface $entryStore)
+            SerializerInterface $serializer) //, EventEntryStoreInterface $entryStore)
     {
         $this->entityManager = $entityManager;
         $this->serializer = new MessageSerializer($serializer);
@@ -52,25 +53,26 @@ class OrmEventStore implements EventStoreInterface, SnapshotEventStoreInterface
     {
         while ($events->hasNext()) {
             $event = $events->next();            
+            IdentifierValidator::validateIdentifier($event->getAggregateIdentifier());
             $serializedPayload = $this->serializer->serializePayload($event);
             $serializedMetaData = $this->serializer->serializeMetaData($event);
 
             $this->entryStore->persistEvent($type, $event, $serializedPayload,
-                $serializedMetaData, $this->entityManager);
+                    $serializedMetaData, $this->entityManager);
         }
 
         $this->entityManager->flush();
     }
 
     public function appendSnapshotEvent($type,
-        DomainEventMessageInterface $snapshotEvent)
+            DomainEventMessageInterface $snapshotEvent)
     {
         // Persist snapshot before pruning redundant archived ones, in order to prevent snapshot misses when reloading
         // an aggregate, which may occur when a READ_UNCOMMITTED transaction isolation level is used.
         $serializedPayload = $this->serializer->serializePayload($snapshotEvent);
         $serializedMetaData = $this->serializer->serializeMetaData($snapshotEvent);
         $this->entryStore->persistSnapshot($type, $snapshotEvent,
-            $serializedPayload, $serializedMetaData, $this->entityManager);
+                $serializedPayload, $serializedMetaData, $this->entityManager);
 
         /*
           if (maxSnapshotsArchived > 0) {
@@ -82,16 +84,16 @@ class OrmEventStore implements EventStoreInterface, SnapshotEventStoreInterface
     public function readEvents($type, $identifier)
     {
         $snapshotScn = -1;
+        $snapshotEvent = null;
         $lastSnapshotEvent = $this->entryStore->loadLastSnapshotEvent($type,
-            $identifier, $this->entityManager);
-
-        //  DomainEventMessage snapshotEvent = null;
+                $identifier, $this->entityManager);
+        
         if (null !== $lastSnapshotEvent) {
             try {
                 $snapshotEvent = new GenericDomainEventMessage(
-                    $identifier, $lastSnapshotEvent->getScn(),
-                    $this->serializer->deserialize($lastSnapshotEvent->getPayload()),
-                    $this->serializer->deserialize($lastSnapshotEvent->getMetaData()));
+                        $identifier, $lastSnapshotEvent->getScn(),
+                        $this->serializer->deserialize($lastSnapshotEvent->getPayload()),
+                        $this->serializer->deserialize($lastSnapshotEvent->getMetaData()));
 
 
                 $snapshotScn = $snapshotEvent->getScn();
@@ -104,24 +106,13 @@ class OrmEventStore implements EventStoreInterface, SnapshotEventStoreInterface
         }
 
         $entries = $this->entryStore->fetchAggregateStream($type, $identifier,
-            $snapshotScn, 10000, $this->entityManager);
+                $snapshotScn, 10000, $this->entityManager);
 
         if ($snapshotEvent === null && empty($entries)) {
             throw new EventStreamNotFoundException($type, $identifier);
         }
 
-        return new \Governor\Framework\Domain\SimpleDomainEventStream($entries);
-        /*  EntityManager entityManager1 = entityManagerProvider.getEntityManager();
-          Iterator<? extends SerializedDomainEventData> entries = eventEntryStore.fetchAggregateStream(type,
-          identifier,
-          snapshotSequenceNumber
-          + 1,
-          batchSize,
-          entityManager1);
-          if (snapshotEvent == null && !entries.hasNext()) {
-          throw new EventStreamNotFoundException(type, identifier);
-          }
-          return new CursorBackedDomainEventStream(snapshotEvent, entries, identifier, false); */
+        return new OrmDomainEventStream($this->serializer, $entries, $identifier, $snapshotEvent);
     }
 
 }

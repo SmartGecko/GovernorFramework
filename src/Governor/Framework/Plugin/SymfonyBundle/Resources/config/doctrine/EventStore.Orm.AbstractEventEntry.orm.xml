@@ -7,10 +7,10 @@
         <id name="aggregateIdentifier" type="string" column="aggregate_id"/>
         <id name="scn" type="integer" column="scn"/>
         
-        <field name="eventIdentifier" type="string" column="event_id"/>
+        <field name="eventIdentifier" type="string" column="event_id" unique="true"/>
         <field name="timestamp" type="datetime" column="created_at"/>
         <field name="payloadType" type="string" column="payload_type"/>
-        <field name="payloadRevision" type="string" column="payload_revision"/>
+        <field name="payloadRevision" type="string" column="payload_revision" nullable="true"/>
         <field name="payload" type="text" column="payload"/>
         <field name="metaData" type="text" column="metadata"/>
     </mapped-superclass>        

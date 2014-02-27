@@ -28,13 +28,13 @@ interface EventEntryStoreInterface
      * <p/>
      * These events should be returned by the <code>fetchAggregateStream(...)</code> methods.
      *
-     * @param aggregateType      The type identifier of the aggregate that generated the event
-     * @param event              The actual event instance. May be used to extract relevant meta data
-     * @param serializedPayload  The serialized payload of the event
-     * @param serializedMetaData The serialized MetaData of the event
-     * @param entityManager      The entity manager providing access to the data store
+     * @param string $aggregateType      The type identifier of the aggregate that generated the event
+     * @param DomainEventMessageInterface $event   The actual event instance. May be used to extract relevant meta data
+     * @param SerializedObjectInterface $serializedPayload  The serialized payload of the event
+     * @param SerializedObjectInterface $serializedMetaData The serialized MetaData of the event
+     * @param EntityManager $entityManager      The entity manager providing access to the data store
      */
-    public function persistEvent($ggregateType,
+    public function persistEvent($aggregateType,
         DomainEventMessageInterface $event,
         SerializedObjectInterface $serializedPayload,
         SerializedObjectInterface $serializedMetaData,
@@ -44,9 +44,9 @@ interface EventEntryStoreInterface
      * Load the last known snapshot event for aggregate of given <code>type</code> with given <code>identifier</code>
      * using given <code>entityManager</code>.
      *
-     * @param aggregateType The type identifier of the aggregate that generated the event
-     * @param identifier    The identifier of the aggregate to load the snapshot for
-     * @param entityManager The entity manager providing access to the data store
+     * @param string $aggregateType The type identifier of the aggregate that generated the event
+     * @param string $identifier    The identifier of the aggregate to load the snapshot for
+     * @param EntityManager $entityManager The entity manager providing access to the data store
      * @return SerializedDomainEventDataInterface the serialized representation of the last known snapshot event
      */
     public function loadLastSnapshotEvent($aggregateType, $identifier,
@@ -60,12 +60,12 @@ interface EventEntryStoreInterface
      * <p/>
      * Note that the result is expected to be ordered by sequence number, with the lowest number first.
      *
-     * @param aggregateType       The type identifier of the aggregate that generated the event
-     * @param identifier          The identifier of the aggregate to load the snapshot for
-     * @param firstSequenceNumber The sequence number of the first event to include in the batch
-     * @param batchSize           The number of entries to include in the batch (if available)
-     * @param entityManager       The entity manager providing access to the data store
-     * @return a List of serialized representations of Events included in this batch
+     * @param string $aggregateType       The type identifier of the aggregate that generated the event
+     * @param string $identifier          The identifier of the aggregate to load the snapshot for
+     * @param integer $firstSequenceNumber The sequence number of the first event to include in the batch
+     * @param integer $batchSize           The number of entries to include in the batch (if available)
+     * @param EntityManager $entityManager       The entity manager providing access to the data store
+     * @return \Iterator a List of serialized representations of Events included in this batch
      */
     public function fetchAggregateStream($aggregateType, $identifier, $firstscn,
         $batchSize, EntityManager $entityManager);
@@ -97,10 +97,10 @@ interface EventEntryStoreInterface
      * archive after pruning, unless that number of snapshots has not been created yet. The given
      * <code>entityManager</code> provides access to the data store.
      *
-     * @param type                    the type of the aggregate for which to prune snapshots
-     * @param mostRecentSnapshotEvent the last appended snapshot event
-     * @param maxSnapshotsArchived    the number of snapshots that may remain archived
-     * @param entityManager           the entityManager providing access to the data store
+     * @param string $type                    the type of the aggregate for which to prune snapshots
+     * @param DomainEventMessageInterface $mostRecentSnapshotEvent the last appended snapshot event
+     * @param integer $maxSnapshotsArchived    the number of snapshots that may remain archived
+     * @param EntityManager $entityManager           the entityManager providing access to the data store
      */
     public function pruneSnapshots($type,
         DomainEventMessageInterface $mostRecentSnapshotEvent,

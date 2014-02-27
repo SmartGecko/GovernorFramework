@@ -11,20 +11,27 @@ namespace Governor\Framework\EventStore\Orm;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Rhumsaa\Uuid\Uuid;
+use Governor\Framework\Serializer\JMSSerializer;
+use Governor\Framework\Domain\MetaData;
+use Governor\Framework\Domain\SimpleDomainEventStream;
+use Governor\Framework\Serializer\NullRevisionResolver;
+use Governor\Framework\Serializer\SimpleSerializedObject;
+use Governor\Framework\Serializer\SimpleSerializedType;
 use Governor\Framework\Annotations\EventSourcingHandler;
 use Governor\Framework\EventSourcing\Annotation\AbstractAnnotatedAggregateRoot;
 use Governor\Framework\Domain\GenericDomainEventMessage;
-use Governor\Framework\Domain\MetaData;
 
 /**
  * Description of OrmEventStoreTest
  *
  * @author david
  */
-class JpaEventStoreTest extends \PHPUnit_Framework_TestCase
+class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
 {
 
     private $testSubject;
+    private static $config;
+    private static $dbParams;
     private $entityManager;
     private $aggregate1;
     private $aggregate2;
@@ -33,8 +40,35 @@ class JpaEventStoreTest extends \PHPUnit_Framework_TestCase
       private PlatformTransactionManager txManager;
       private TransactionTemplate template; */
 
+    public static function setUpBeforeClass()
+    {
+        // bootstrap doctrine
+        self::$dbParams = array(
+            'driver' => 'pdo_sqlite',
+            'user' => 'root',
+            'password' => '',
+            'memory' => true
+        );
+
+        self::$config = Setup::createConfiguration(true);
+        self::$config->setMetadataDriverImpl(new \Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver(self::getMappingDirectories()));
+       // self::$config->setSQLLogger(new \Doctrine\DBAL\Logging\EchoSQLLogger());
+    }
+
     public function setUp()
     {
+        $this->entityManager = EntityManager::create(self::$dbParams,
+                        self::$config);
+
+        $tool = new \Doctrine\ORM\Tools\SchemaTool($this->entityManager);
+        $classes = array($this->entityManager->getClassMetadata('Governor\Framework\EventStore\Orm\DomainEventEntry'),
+            $this->entityManager->getClassMetadata('Governor\Framework\EventStore\Orm\SnapshotEventEntry'));
+
+        $tool->createSchema($classes);
+
+        $this->testSubject = new OrmEventStore($this->entityManager,
+                new JMSSerializer(new NullRevisionResolver()));
+
         // template = new TransactionTemplate(txManager);
         $this->aggregate1 = new StubAggregateRoot(Uuid::uuid1()->toString());
         for ($t = 0; $t < 10; $t++) {
@@ -45,24 +79,6 @@ class JpaEventStoreTest extends \PHPUnit_Framework_TestCase
         $this->aggregate2->changeState();
         $this->aggregate2->changeState();
         $this->aggregate2->changeState();
-
-        // bootstrap doctrine
-        $isDevMode = true;
-        $namespaces = array(
-             __DIR__ . '/../../../../../src/Governor/Framework/Plugin/SymfonyBundle/Resources/config/doctrine' => 'Governor\Framework'
-        );
-
-        $dbParams = array(
-            'driver' => 'pdo_sqlite',
-            'user' => 'root',
-            'password' => '',
-            'memory' => true
-        );
-   
-        $config = Setup::createConfiguration($isDevMode);
-        $config->setMetadataDriverImpl(new \Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver($namespaces));
-        $this->entityManager = EntityManager::create($dbParams, $config);                    
-
         /*
           template.execute(new TransactionCallbackWithoutResult() {
           @Override
@@ -72,67 +88,61 @@ class JpaEventStoreTest extends \PHPUnit_Framework_TestCase
           }); */
     }
 
+    private static function getMappingDirectories()
+    {
+
+        $path = array('..', '..', '..', '..', '..', 'src',
+            'Governor', 'Framework', 'Plugin', 'SymfonyBundle', 'Resources', 'config',
+            'doctrine');
+
+        return array(
+            // __DIR__ . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path)
+            'C:\XXX'
+            => 'Governor\Framework'
+        );
+    }
+
     public function tearDown()
     {
         // just to make sure
         //DateTimeUtils.setCurrentMillisSystem();
     }
 
-    public function testDummy()
+    /**
+     * @expectedException \Doctrine\DBAL\DBALException
+     */
+    public function testUniqueKeyConstraintOnEventIdentifier()
     {
-        //$this->assertTrue(false);
+        $emptySerializedObject = new SimpleSerializedObject('{}',
+                new SimpleSerializedType('stdClass'));
+
+        //$firstEvent = $this->aggregate2->getUncommittedEvents()->next();        
+        $this->entityManager->persist(new DomainEventEntry("type",
+                new GenericDomainEventMessage("someValue", 0,
+                $emptySerializedObject, MetaData::emptyInstance(), "a",
+                new \DateTime()), $emptySerializedObject, $emptySerializedObject));
+
+        $this->entityManager->flush();
+
+        $this->entityManager->persist(new DomainEventEntry("type",
+                new GenericDomainEventMessage("anotherValue", 0,
+                $emptySerializedObject, MetaData::emptyInstance(), "a",
+                new \DateTime()), $emptySerializedObject, $emptySerializedObject));
+
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testStoreAndLoadEvents_BadIdentifierType()
+    {
+        $this->testSubject->appendEvents("type",
+                new SimpleDomainEventStream(array(
+            new GenericDomainEventMessage(new \stdClass(), 1, new \stdClass()))));
     }
 
     /*
-      @Test(expected = DataIntegrityViolationException.class)
-      public void testUniqueKeyConstraintOnEventIdentifier() {
-      final SimpleSerializedObject<byte[]> emptySerializedObject = new SimpleSerializedObject<byte[]>(new byte[]{},
-      byte[].class,
-      "test",
-      "");
-
-      template.execute(new TransactionCallbackWithoutResult() {
-      @Override
-      protected void doInTransactionWithoutResult(
-      TransactionStatus status) {
-      DomainEventMessage firstEvent = aggregate2.getUncommittedEvents().next();
-      entityManager.persist(new DomainEventEntry("type",
-      new GenericDomainEventMessage(
-      "a",
-      new DateTime(),
-      "someValue",
-      0,
-      "",
-      MetaData.emptyInstance()),
-      emptySerializedObject,
-      emptySerializedObject));
-      }
-      });
-      template.execute(new TransactionCallbackWithoutResult() {
-      @Override
-      protected void doInTransactionWithoutResult(
-      TransactionStatus status) {
-      entityManager.persist(new DomainEventEntry("type",
-      new GenericDomainEventMessage(
-      "a",
-      new DateTime(),
-      "anotherValue",
-      0,
-      "",
-      MetaData.emptyInstance()),
-      emptySerializedObject,
-      emptySerializedObject));
-      }
-      });
-      }
-
-      @Transactional
-      @Test(expected = IllegalArgumentException.class)
-      public void testStoreAndLoadEvents_BadIdentifierType() {
-      testSubject.appendEvents("type", new SimpleDomainEventStream(
-      new GenericDomainEventMessage<Object>(new BadIdentifierType(), 1, new Object())));
-      }
-
       @Transactional
       @Test(expected = UnknownSerializedTypeException.class)
       public void testUnknownSerializedTypeCausesException() {
@@ -144,55 +154,62 @@ class JpaEventStoreTest extends \PHPUnit_Framework_TestCase
       .executeUpdate();
 
       testSubject.readEvents("type", aggregate1.getIdentifier());
-      }
+      } */
 
-      @Transactional
-      @Test
-      public void testStoreAndLoadEvents() {
-      assertNotNull(testSubject);
-      testSubject.appendEvents("test", aggregate1.getUncommittedEvents());
-      entityManager.flush();
-      assertEquals((long) aggregate1.getUncommittedEventCount(),
-      entityManager.createQuery("SELECT count(e) FROM DomainEventEntry e").getSingleResult());
+    public function testStoreAndLoadEvents()
+    {
+        $this->assertNotNull($this->testSubject);
 
-      // we store some more events to make sure only correct events are retrieved
-      testSubject.appendEvents("test", new SimpleDomainEventStream(
-      new GenericDomainEventMessage<Object>(aggregate2.getIdentifier(),
-      0,
-      new Object(),
-      Collections.singletonMap("key", (Object) "Value"))));
-      entityManager.flush();
-      entityManager.clear();
+        $this->testSubject->appendEvents("test",
+                $this->aggregate1->getUncommittedEvents());
+        $this->entityManager->flush();
 
-      DomainEventStream events = testSubject.readEvents("test", aggregate1.getIdentifier());
-      List<DomainEventMessage> actualEvents = new ArrayList<DomainEventMessage>();
-      while (events.hasNext()) {
-      DomainEventMessage event = events.next();
-      event.getPayload();
-      event.getMetaData();
-      actualEvents.add(event);
-      }
-      assertEquals(aggregate1.getUncommittedEventCount(), actualEvents.size());
+        $this->assertEquals($this->aggregate1->getUncommittedEventCount(),
+                $this->entityManager->createQuery("SELECT count(e) FROM Governor\Framework\EventStore\Orm\DomainEventEntry e")->getSingleScalarResult());
 
-      /// we make sure persisted events have the same MetaData alteration logic
-      DomainEventStream other = testSubject.readEvents("test", aggregate2.getIdentifier());
-      assertTrue(other.hasNext());
-      DomainEventMessage messageWithMetaData = other.next();
-      DomainEventMessage altered = messageWithMetaData.withMetaData(Collections.singletonMap("key2",
-      (Object) "value"));
-      DomainEventMessage combined = messageWithMetaData.andMetaData(Collections.singletonMap("key2",
-      (Object) "value"));
-      assertTrue(altered.getMetaData().containsKey("key2"));
-      altered.getPayload();
-      assertFalse(altered.getMetaData().containsKey("key"));
-      assertTrue(altered.getMetaData().containsKey("key2"));
-      assertTrue(combined.getMetaData().containsKey("key"));
-      assertTrue(combined.getMetaData().containsKey("key2"));
-      assertNotNull(messageWithMetaData.getPayload());
-      assertNotNull(messageWithMetaData.getMetaData());
-      assertFalse(messageWithMetaData.getMetaData().isEmpty());
-      }
+        // we store some more events to make sure only correct events are retrieved
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream(array(
+            new GenericDomainEventMessage($this->aggregate2->getIdentifier(), 0,
+                    new \stdClass(), new MetaData(array("key" => "Value"))
+        ))));
 
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        $events = $this->testSubject->readEvents("test",
+                $this->aggregate1->getIdentifier());
+        $actualEvents = array();
+
+        while ($events->hasNext()) {
+            $event = $events->next();
+            //event.getPayload();
+            //event.getMetaData();
+            $actualEvents[] = $event;
+        }
+        $this->assertEquals($this->aggregate1->getUncommittedEventCount(),
+                count($actualEvents));
+
+        /// we make sure persisted events have the same MetaData alteration logic
+        $other = $this->testSubject->readEvents("test",
+                $this->aggregate2->getIdentifier());
+        $this->assertTrue($other->hasNext());
+        $messageWithMetaData = $other->next();
+        
+        $altered = $messageWithMetaData->withMetaData(array("key2" => "value"));
+        $combined = $messageWithMetaData->andMetaData(array("key2" => "value"));
+        $this->assertTrue($altered->getMetaData()->has("key2"));
+        //altered . getPayload();
+        $this->assertFalse($altered->getMetaData()->has("key"));
+        $this->assertTrue($altered->getMetaData()->has("key2"));
+        $this->assertTrue($combined->getMetaData()->has("key"));
+        $this->assertTrue($combined->getMetaData()->has("key2"));
+        $this->assertNotNull($messageWithMetaData->getPayload());
+        $this->assertNotNull($messageWithMetaData->getMetaData());
+        $this->assertFalse($messageWithMetaData->getMetaData()->isEmpty());
+    }
+
+    /*
       @DirtiesContext
       @Test
       @Transactional
@@ -818,19 +835,14 @@ class StubAggregateRoot extends AbstractAnnotatedAggregateRoot
     public function createSnapshotEvent()
     {
         return new GenericDomainEventMessage($this->getIdentifier(),
-            $this->getVersion(), new StubStateChangedEvent(),
-            MetaData::emptyInstance()
+                $this->getVersion(), new StubStateChangedEvent(),
+                MetaData::emptyInstance()
         );
     }
 
 }
 
 class StubStateChangedEvent
-{
-    
-}
-
-class BadIdentifierType
 {
     
 }

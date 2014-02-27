@@ -19,14 +19,14 @@ interface MessageInterface
     /**
      * Returns the message identifier
      * 
-     * @return \Rhumsaa\Uuid\Uuid
+     * @return string
      */
     public function getIdentifier();
 
     /**
      * Returns the message metadata
      * 
-     * @return Governor\Framework\Domain\MetaData
+     * @return MetaData
      */
     public function getMetaData();
 

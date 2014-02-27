@@ -9,6 +9,7 @@
 namespace Governor\Framework\Domain;
 
 use JMS\Serializer\Annotation\Type;
+use JMS\Serializer\Annotation\Exclude;
 
 /**
  * Description of MetaData
@@ -18,6 +19,10 @@ use JMS\Serializer\Annotation\Type;
 class MetaData implements \IteratorAggregate, \Countable
 {
 
+    /**
+     * @Exclude
+     * @var type 
+     */
     private static $emptyInstance;
 
     const METADATA_IMMUTABLE = 'The MetaData object is immutable';

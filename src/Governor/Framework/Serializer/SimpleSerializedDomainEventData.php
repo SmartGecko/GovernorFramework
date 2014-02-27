@@ -47,14 +47,14 @@ class SimpleSerializedDomainEventData implements SerializedDomainEventDataInterf
     private $serializedMetaData;
 
     public function __construct($eventIdentifier, $aggregateIdentifier, $scn,
-        \DateTime $timestamp, $payloadType, $payload, $metaData)
-    {
+        \DateTime $timestamp, $payloadType, $payloadRevision, $payload, $metaData)
+    {        
         $this->eventIdentifier = $eventIdentifier;
         $this->aggregateIdentifier = $aggregateIdentifier;
         $this->scn = $scn;
         $this->timestamp = $timestamp;
         $this->serializedPayload = new SimpleSerializedObject($payload,
-            new SimpleSerializedType($payloadType));
+            new SimpleSerializedType($payloadType, $payloadRevision));
         $this->serializedMetaData = new SimpleSerializedObject($metaData,
             new SimpleSerializedType('Governor\Framework\Domain\MetaData'));
     }

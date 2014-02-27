@@ -16,20 +16,29 @@ namespace Governor\Framework\Domain;
 class GenericDomainEventMessage extends GenericEventMessage implements DomainEventMessageInterface
 {
 
-    private $aggregateId;
+    private $aggregateIdentifier;
     private $scn;
 
-    public function __construct($aggregateId, $scn, $payload,
+    /**
+     * 
+     * @param string $aggregateIdentifier
+     * @param integer $scn
+     * @param mixed $payload
+     * @param \Governor\Framework\Domain\MetaData $metadata
+     * @param string $id
+     * @param \DateTime $timestamp
+     */
+    public function __construct($aggregateIdentifier, $scn, $payload,
             MetaData $metadata = null, $id = null, \DateTime $timestamp = null)
     {
         parent::__construct($payload, $metadata, $id, $timestamp);
-        $this->aggregateId = $aggregateId;
+        $this->aggregateIdentifier = $aggregateIdentifier;
         $this->scn = $scn;
     }
 
     public function getAggregateIdentifier()
     {
-        return $this->aggregateId;
+        return $this->aggregateIdentifier;
     }
 
     public function getScn()
@@ -37,6 +46,11 @@ class GenericDomainEventMessage extends GenericEventMessage implements DomainEve
         return $this->scn;
     }
 
+    /**
+     * 
+     * @param array $metadata
+     * @return \Governor\Framework\Domain\GenericDomainEventMessage
+     */
     public function andMetaData(array $metadata = array())
     {
         if (empty($metadata)) {
@@ -48,14 +62,19 @@ class GenericDomainEventMessage extends GenericEventMessage implements DomainEve
                 $this->getMetaData()->mergeWith($metadata));
     }
 
+    /**
+     * 
+     * @param array $metadata
+     * @return \Governor\Framework\Domain\GenericDomainEventMessage
+     */
     public function withMetaData(array $metadata = array())
     {
         if ($this->getMetaData()->isEqualTo($metadata)) {
             return $this;
         }
 
-        return new GenericDomainEventMessage($this->aggregateId, $this->scn,
-                $this->getPayload(), new MetaData($metadata));
+        return new GenericDomainEventMessage($this->aggregateIdentifier,
+                $this->scn, $this->getPayload(), new MetaData($metadata));
     }
 
 }

@@ -40,7 +40,7 @@ interface AggregateRootInterface
      * Returns a DomainEventStream to the events in the aggregate that have been raised since creation or the last
      * commit.
      *
-     * @return the DomainEventStream to the uncommitted events.
+     * @return DomainEventStreamInterface the DomainEventStream to the uncommitted events.
      */
     public function getUncommittedEvents();
 

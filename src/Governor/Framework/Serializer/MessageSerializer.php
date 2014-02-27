@@ -52,7 +52,7 @@ class MessageSerializer implements SerializerInterface
     }
 
     public function serialize($object)
-    {
+    {        
         return $this->serializer->serialize($object);
     }
 
