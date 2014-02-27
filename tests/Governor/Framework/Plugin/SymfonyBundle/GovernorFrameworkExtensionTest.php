@@ -11,6 +11,7 @@ use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler\Command
 use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler\EventHandlerPass;
 use Governor\Framework\Annotations\EventHandler;
 use Governor\Framework\Annotations\CommandHandler;
+use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
 
 class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 {
@@ -86,7 +87,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
                 , 'aggregate_command_handlers' => array('dummy1' => array('aggregate_root' => 'Governor\Framework\Stubs\Dummy1Aggregate',
                         'repository' => 'dummy1.repository'),
                     'dummy2' => array('aggregate_root' => 'Governor\Framework\Stubs\Dummy2Aggregate',
-                        'repository' => 'dummy2.repository'))));
+                        'repository' => 'dummy2.repository')), 'event_store' => array ('type' => 'null')));
 
         $container = new ContainerBuilder(new ParameterBag(array(
             'kernel.debug' => false,
@@ -98,7 +99,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
         $loader = new GovernorFrameworkExtension();
 
-        //$container->setProxyInstantiator(new RuntimeInstantiator());
+        $container->setProxyInstantiator(new RuntimeInstantiator());
 
         $container->registerExtension($loader);
         $container->set('doctrine.orm.default_entity_manager',

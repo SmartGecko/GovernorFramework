@@ -31,6 +31,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
                 ->arrayNode('event_store')
+                    ->isRequired()
                     ->children()
                         ->scalarNode('type')
                             ->defaultValue('null')
