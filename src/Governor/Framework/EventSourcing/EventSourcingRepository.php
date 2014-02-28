@@ -87,7 +87,6 @@ class EventSourcingRepository extends LockingRepository
     protected function doSaveWithLock(AggregateRootInterface $aggregate)
     {
         $eventStream = $aggregate->getUncommittedEvents();
-
         $iterator = new \ArrayIterator(array_reverse($this->eventStreamDecorators));
 
         while ($iterator->valid()) {
@@ -95,7 +94,7 @@ class EventSourcingRepository extends LockingRepository
                 $aggregate, $eventStream);
             $iterator->next();
         }
-
+                
         $this->eventStore->appendEvents($this->getTypeIdentifier(), $eventStream);
     }
 

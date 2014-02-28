@@ -15,7 +15,6 @@ use Governor\Framework\Serializer\MessageSerializer;
 /**
  * Description of FilesystemEventMessageWriter
  *
- * @author 255196
  */
 class FilesystemEventMessageWriter
 {
@@ -43,14 +42,14 @@ class FilesystemEventMessageWriter
      * @param eventMessage the EventMessage to write to the underlying output     
      */
     public function writeEventMessage(DomainEventMessageInterface $eventMessage)
-    {
-        $serializedPayload = $this->messageSerializer->serializePayload($eventMessage);
+    {               
+        $serializedPayload = $this->messageSerializer->serializePayload($eventMessage);        
         $serializedMetaData = $this->messageSerializer->serializeMetaData($eventMessage);
         
         $packFormat = sprintf("na36Na36NNa%sNa%sNa%s",
                 strlen($serializedPayload->getType()->getName()),
                 strlen($serializedPayload->getData()), strlen($serializedMetaData->getData()));
-
+        
         $binary = pack($packFormat, 0, $eventMessage->getIdentifier(),
                 $eventMessage->getTimestamp()->format('U'),
                 $eventMessage->getAggregateIdentifier(),
@@ -61,10 +60,10 @@ class FilesystemEventMessageWriter
                 $serializedMetaData->getData());
 
         $len = pack('n', strlen($binary));
-
+        
         // !!! TODO error handling
         $this->file->fwrite($len);
-        $this->file->fwrite($binary);
+        $this->file->fwrite($binary);        
         $this->file->fflush();
     }
 

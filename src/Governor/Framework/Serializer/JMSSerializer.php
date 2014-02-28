@@ -29,7 +29,7 @@ class JMSSerializer implements SerializerInterface
     public function __construct(RevisionResolverInterface $revisionResolver)
     {
         $this->serializer = SerializerBuilder::create()
-                ->addDefaultHandlers()
+                ->addDefaultHandlers()                
                 ->configureHandlers(function(HandlerRegistry $registry) {
                     $registry->registerSubscribingHandler(new RhumsaaUuidHandler());
                     $registry->registerSubscribingHandler(new AggregateReferenceHandler());
@@ -46,7 +46,11 @@ class JMSSerializer implements SerializerInterface
 
     public function serialize($object)
     {
+        try {
         $result = $this->serializer->serialize($object, 'json');
+        }catch (\Exception $ex) {
+            echo $ex->getMessage();
+        }
         return new SimpleSerializedObject($result, $this->typeForClass($object));
     }
 
