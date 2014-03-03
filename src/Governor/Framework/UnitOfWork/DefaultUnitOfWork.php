@@ -45,7 +45,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     }
 
     public static function startAndGet()
-    {
+    {        
         $uow = new DefaultUnitOfWork();
         $uow->start();
         return $uow;
@@ -247,7 +247,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
               entry.aggregateRoot.getClass().getName(),
               entry.aggregateRoot.getIdentifier());
               } */
-            //$aggregate->saveAggregate();
+            //$aggregate->saveAggregate();            
             $callback->save($aggregate);
             //entry.saveAggregate();
         }

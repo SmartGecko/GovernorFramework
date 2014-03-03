@@ -8,7 +8,6 @@
 
 namespace Governor\Framework\CommandHandling\Handlers;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 

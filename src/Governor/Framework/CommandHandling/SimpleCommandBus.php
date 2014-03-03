@@ -38,6 +38,7 @@ class SimpleCommandBus implements CommandBusInterface
             $callback->onSuccess($result);
         } catch (\Exception $ex) {
             $callback->onFailure($ex);
+            throw $ex;
         }
     }
 
@@ -50,7 +51,6 @@ class SimpleCommandBus implements CommandBusInterface
             $return = $handler->handle($command, $unitOfWork);
         } catch (\Exception $ex) {
             $unitOfWork->rollback();
-
             throw $ex;
         }
 

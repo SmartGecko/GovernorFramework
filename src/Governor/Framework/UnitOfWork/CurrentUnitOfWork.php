@@ -55,12 +55,12 @@ abstract class CurrentUnitOfWork
      * @param unitOfWork The UnitOfWork to bind to the current thread.
      */
     public static function set(UnitOfWorkInterface $unitOfWork)
-    {        
+    {                
         self::$current[] = $unitOfWork;
     }
 
     public static function clear(UnitOfWorkInterface $unitOfWork)
-    {
+    {        
         if (end(self::$current) === $unitOfWork) {
             $current = array_pop(self::$current);
         } else {

@@ -49,7 +49,7 @@ class EventHandlerPass extends AbstractHandlerPass
                     ->setLazy(true);            
                                 
                 $busDefinition->addMethodCall('subscribe',
-                    array($eventClassName, new Reference($handlerId)));
+                    array(new Reference($handlerId)));
             }
         }
     }

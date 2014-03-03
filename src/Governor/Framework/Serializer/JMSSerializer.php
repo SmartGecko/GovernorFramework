@@ -13,7 +13,7 @@ use JMS\Serializer\SerializerBuilder;
 use Governor\Framework\Serializer\Handlers\RhumsaaUuidHandler;
 use Governor\Framework\Serializer\Handlers\AggregateReferenceHandler;
 
-class JMSSerializer implements SerializerInterface
+class JMSSerializer extends AbstractSerializer
 {
 
     /**
@@ -21,21 +21,16 @@ class JMSSerializer implements SerializerInterface
      */
     private $serializer;
 
-    /**
-     * @var RevisionResolverInterface 
-     */
-    private $revisionResolver;
-
+ 
     public function __construct(RevisionResolverInterface $revisionResolver)
     {
+        parent::__construct($revisionResolver);
         $this->serializer = SerializerBuilder::create()
                 ->addDefaultHandlers()                
                 ->configureHandlers(function(HandlerRegistry $registry) {
                     $registry->registerSubscribingHandler(new RhumsaaUuidHandler());
                     $registry->registerSubscribingHandler(new AggregateReferenceHandler());
-                })->build();
-
-        $this->revisionResolver = $revisionResolver;
+                })->build();        
     }
 
     public function deserialize(SerializedObjectInterface $data)
@@ -46,19 +41,8 @@ class JMSSerializer implements SerializerInterface
 
     public function serialize($object)
     {
-        try {
-        $result = $this->serializer->serialize($object, 'json');
-        }catch (\Exception $ex) {
-            echo $ex->getMessage();
-        }
+        $result = $this->serializer->serialize($object, 'json');       
         return new SimpleSerializedObject($result, $this->typeForClass($object));
-    }
-
-    public function typeForClass($object)
-    {
-        $type = get_class($object);
-        return new SimpleSerializedType($type,
-            $this->revisionResolver->revisionOf($type));
     }
 
 }

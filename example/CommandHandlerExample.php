@@ -31,10 +31,14 @@ use Governor\Framework\EventSourcing\GenericAggregateFactory;
 use Governor\Framework\Repository\NullLockManager;
 use Governor\Framework\Repository\RepositoryInterface;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
-use Governor\Framework\Serializer\JMSSerializer;
+use Governor\Framework\Serializer\PhpSerializer;
 use Governor\Framework\Serializer\NullRevisionResolver;
+use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 
 AnnotationRegistry::registerLoader(array($loader, "loadClass"));
+
+// start default UOW
+//DefaultUnitOfWork::startAndGet();
 
 /**
  * Our aggregate.
@@ -90,12 +94,24 @@ class User extends AbstractEventSourcedAggregateRoot
         return $this->identifier;
     }
 
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
 }
 
 abstract class AbstractUserEvent
 {
 
+    /**
+     * @var string
+     */
     private $identifier;
+
+    /**
+     * @var string
+     */
     private $email;
 
     function __construct($identifier, $email)
@@ -171,14 +187,14 @@ class UserCommandHandler implements CommandHandlerInterface
     }
 
     public function handle(CommandMessageInterface $commandMessage,
-            UnitOfWorkInterface $unitOfWork)
+        UnitOfWorkInterface $unitOfWork)
     {
         $command = $commandMessage->getPayload();
 
         switch ($commandMessage->getPayloadType()) {
             case 'CommandHandlerExample\CreateUserCommand':
                 $aggregate = new User($command->getIdentifier(),
-                        $command->getEmail());
+                    $command->getEmail());
                 $this->repository->add($aggregate);
                 break;
             case 'CommandHandlerExample\ChangeUserEmailCommand':
@@ -210,34 +226,38 @@ echo sprintf("Initializing FileSystemEventStore in %s\n", $rootDirectory);
 
 // 2. initialize the event store
 $eventStore = new FilesystemEventStore(new SimpleEventFileResolver($rootDirectory),
-        new JMSSerializer(new NullRevisionResolver()));
+    new PhpSerializer(new NullRevisionResolver()));
 
 // 3. create the event bus
 $eventBus = new SimpleEventBus();
 
 // 4. create an event sourcing repository
 $repository = new EventSourcingRepository('CommandHandlerExample\User',
-        $eventBus, new NullLockManager(), $eventStore,
-        new GenericAggregateFactory('CommandHandlerExample\User'));
+    $eventBus, new NullLockManager(), $eventStore,
+    new GenericAggregateFactory('CommandHandlerExample\User'));
 
 //5. create and register our commands
 $commandHandler = new UserCommandHandler($repository);
 $commandBus->subscribe('CommandHandlerExample\CreateUserCommand',
-        $commandHandler);
+    $commandHandler);
 $commandBus->subscribe('CommandHandlerExample\ChangeUserEmailCommand',
-        $commandHandler);
+    $commandHandler);
 
 //6. create and register the eventlistener
 $eventListener = new UserEventListener();
-$eventBus->subscribe('CommandHandlerExample\UserCreatedEvent', $eventListener);
-$eventBus->subscribe('CommandHandlerExample\UserEmailChangedEvent', $eventListener);
+$eventBus->subscribe($eventListener);
 
 //7. send commands 
 $aggregateIdentifier = Uuid::uuid1()->toString();
 
 $commandGateway->send(new CreateUserCommand($aggregateIdentifier,
-        'email@davidkalosi.com'));
+    'email@davidkalosi.com'));
 $commandGateway->send(new ChangeUserEmailCommand($aggregateIdentifier,
-        'newemail@davidkalosi.com'));
+    'newemail@davidkalosi.com'));
 
-
+//8. read back aggregate from store
+$uow = DefaultUnitOfWork::startAndGet();
+$aggregate = $repository->load($aggregateIdentifier);
+echo sprintf("User identifier:%s, email:%s, version:%s",
+    $aggregate->getIdentifier(), $aggregate->getEmail(),
+    $aggregate->getVersion());

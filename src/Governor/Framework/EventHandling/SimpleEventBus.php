@@ -8,8 +8,6 @@
 
 namespace Governor\Framework\EventHandling;
 
-use Governor\Framework\Domain\EventMessageInterface;
-
 /**
  * Description of SimpleEventBus
  *
@@ -30,39 +28,27 @@ class SimpleEventBus implements EventBusInterface
     }
 
     public function publish(array $events)
-    {        
-        foreach ($events as $event) {
-            $listeners = $this->getListenersFor($event);
-            foreach ($listeners as $listener) {                
-                $listener->handle($event);
-            }
-        }
-    }
-
-    protected function getListenersFor(EventMessageInterface $eventName)
     {
-        $result = array();
-        $this->listeners->rewind();
+        foreach ($events as $event) {
+            $this->listeners->rewind();
 
-        while ($this->listeners->valid()) {
-            if ($eventName->getPayloadType() === $this->listeners->getInfo()) {
-                $result[] = $this->listeners->current();
+            while ($this->listeners->valid()) {
+                $listener = $this->listeners->current();
+                $listener->handle($event);
+
+                $this->listeners->next();
             }
-
-            $this->listeners->next();
         }
-        return $result;
     }
 
-    public function subscribe($eventName, EventListenerInterface $eventListener)
+    public function subscribe(EventListenerInterface $eventListener)
     {
         if (!$this->listeners->contains($eventListener)) {
-            $this->listeners->attach($eventListener, $eventName);
+            $this->listeners->attach($eventListener);
         }
     }
 
-    public function unsubscribe($eventName,
-        EventListenerInterface $eventListener)
+    public function unsubscribe(EventListenerInterface $eventListener)
     {
         if ($this->listeners->contains($eventListener)) {
             $this->listeners->detach($eventListener);

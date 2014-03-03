@@ -23,15 +23,13 @@ class CurrentUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    /*
-      public void tearDown() {
-      while (CurrentUnitOfWork.isStarted()) {
-      CurrentUnitOfWork.get().rollback();
-      }
-      }
-     */
+    public function tearDown()
+    {
+        while (CurrentUnitOfWork::isStarted()) {
+            CurrentUnitOfWork::get()->rollback();
+        }
+    }
 
-//      @Test(expected = IllegalStateException.class)
     /**
      * @expectedException \RuntimeException
      */
@@ -51,16 +49,21 @@ class CurrentUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(CurrentUnitOfWork::isStarted());
     }
 
-    
-    /*
-      public function testNotCurrentUnitOfWorkCommitted() {
-      $outerUoW = new DefaultUnitOfWork();
-      outerUoW.start();
-      new DefaultUnitOfWork().start();
-      try {
-      outerUoW.commit();
-      } catch (IllegalStateException e) {
-      assertTrue("Wrong type of message: " + e.getMessage(), e.getMessage().contains("not the active"));
-      }
-      } */
+    public function testNotCurrentUnitOfWorkCommitted()
+    {
+        $outerUoW = new DefaultUnitOfWork();
+        $outerUoW->start();
+
+        $other = new DefaultUnitOfWork();
+        $other->start();
+
+        try {
+            $outerUoW->commit();
+        } catch (\Exception $ex) {
+            $other->rollback();
+            $this->assertGreaterThanOrEqual(0,
+                strpos($ex->getMessage(), "not the active"));
+        }
+    }
+
 }
