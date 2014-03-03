@@ -32,7 +32,6 @@ use Governor\Framework\Repository\NullLockManager;
 use Governor\Framework\Repository\RepositoryInterface;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 use Governor\Framework\Serializer\PhpSerializer;
-use Governor\Framework\Serializer\NullRevisionResolver;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 
 AnnotationRegistry::registerLoader(array($loader, "loadClass"));
@@ -226,7 +225,7 @@ echo sprintf("Initializing FileSystemEventStore in %s\n", $rootDirectory);
 
 // 2. initialize the event store
 $eventStore = new FilesystemEventStore(new SimpleEventFileResolver($rootDirectory),
-    new PhpSerializer(new NullRevisionResolver()));
+    new PhpSerializer());
 
 // 3. create the event bus
 $eventBus = new SimpleEventBus();

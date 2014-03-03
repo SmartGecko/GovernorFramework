@@ -34,7 +34,7 @@ abstract class LockingRepository extends AbstractRepository
 
         try {
             parent::add($object);
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $this->lockManager->releaseLock($aggregateId);
             throw $ex;
         }
@@ -47,7 +47,7 @@ abstract class LockingRepository extends AbstractRepository
             $object = parent::load($id, $expectedVersion);
 
             return $object;
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $this->lockManager->releaseLock($id);
             throw $ex;
         }
@@ -74,7 +74,7 @@ abstract class LockingRepository extends AbstractRepository
                 "The aggregate of type [%s] with identifier [%s] could not be "
                 . "saved, as a valid lock is not held. Either another thread has saved an aggregate, or "
                 . "the current thread had released its lock earlier on.",
-                get_class($object), $object->getId()
+                get_class($object), $object->getIdentifier()
             ));
         }
 
