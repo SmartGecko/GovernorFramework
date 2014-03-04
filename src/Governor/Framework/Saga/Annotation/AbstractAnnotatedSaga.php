@@ -12,6 +12,7 @@ use Rhumsaa\Uuid\Uuid;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\Saga\SagaInterface;
 use Governor\Framework\Saga\AssociationValue;
+use Governor\Framework\Saga\Annotation\AssociationValuesImpl;
 
 /**
  * Implementation of the {@link Saga interface} that delegates incoming events to {@link
@@ -20,8 +21,19 @@ use Governor\Framework\Saga\AssociationValue;
 abstract class AbstractAnnotatedSaga implements SagaInterface
 {
 
+    /**
+     * @var AssociationValues 
+     */
     private $associationValues;
+
+    /**
+     * @var string 
+     */
     private $identifier;
+
+    /**
+     * @var boolean 
+     */
     private $isActive = true;
 
     /**
@@ -32,9 +44,9 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
     public function __construct($identifier = null)
     {
         $this->identifier = (null === $identifier) ? Uuid::uuid1()->toString() : $identifier;
-        $this->associationValues = array();
-        $this->associationValues = new AssociationValue('sagaIdentifier',
-                $this->identifier);        
+        $this->associationValues = new AssociationValuesImpl();
+        $this->associationValues->add(new AssociationValue('sagaIdentifier',
+                $this->identifier));
     }
 
     public function getSagaIdentifier()
@@ -43,7 +55,7 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
     }
 
     /**
-     * @return array 
+     * @return AssociationValues 
      */
     public function getAssociationValues()
     {
@@ -52,12 +64,12 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
 
     public final function handle(EventMessageInterface $event)
     {
-       
-    }
-
-    private function doHandle(EventMessageInterface $event)
-    {
-       
+        if ($this->isActive()) {
+            // find and invoke handler
+             if ($handler->isEndingHandler()) {
+                 $this->end();
+            }
+        }
     }
 
     /**
@@ -80,11 +92,11 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
      * Registers a AssociationValue with the given saga. When the saga is committed, it can be found using the
      * registered property.
      *
-     * @param AssociationValue $property The value to associate this saga with.
+     * @param AssociationValue $associationValue The value to associate this saga with.
      */
-    protected function associateWith(AssociationValue $property)
+    protected function associateWith(AssociationValue $associationValue)
     {
-        $this->associationValues[] = $property;
+        $this->associationValues->add($associationValue);
     }
 
     /**
@@ -93,9 +105,9 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
      *
      * @param AssociationValue $property the association value to remove from the saga.
      */
-    protected function removeAssociationWith(AssociationValue $property)
+    protected function removeAssociationWith(AssociationValue $associationValue)
     {
-        //$this->associationValues.remove(property);
+        $this->associationValues->remove($associationValue);        
     }
 
 }

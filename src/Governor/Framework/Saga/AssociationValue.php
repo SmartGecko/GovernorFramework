@@ -8,11 +8,13 @@
 
 namespace Governor\Framework\Saga;
 
+use Doctrine\Common\Comparable;
+
 /**
  * Description of AssociationValue
  *
  */
-class AssociationValue
+class AssociationValue implements Comparable
 {
 
     /**
@@ -50,6 +52,19 @@ class AssociationValue
     public function getPropertyValue()
     {
         return $this->propertyValue;
+    }
+
+    public function compareTo($other)
+    {
+        if (0 !== $keyDiff = strcmp($this->propertyKey, $other->propertyKey)) {
+            return $keyDiff;
+        }
+
+        if (0 !== $valDiff = strcmp($this->propertyValue, $other->propertyValue)) {
+            return $valDiff;
+        }
+
+        return 0;
     }
 
 }

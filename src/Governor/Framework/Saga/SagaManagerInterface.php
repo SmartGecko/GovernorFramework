@@ -6,13 +6,15 @@
  * and open the template in the editor.
  */
 
-namespace Governor\Framework\Annotations;
+namespace Governor\Framework\Saga;
+
+use Governor\Framework\EventHandling\EventListenerProxyInterface;
 
 /**
- * @Annotation
- * @Target("METHOD")
+ *
+ * @author 255196
  */
-final class EventHandler
+interface SagaManagerInterface extends EventListenerProxyInterface
 {
-
+    
 }

@@ -12,7 +12,7 @@ namespace Governor\Framework\Annotations;
  * @Annotation
  * @Target("METHOD")
  */
-final class EventHandler
+final class EndSaga
 {
-
+    //put your code here
 }
