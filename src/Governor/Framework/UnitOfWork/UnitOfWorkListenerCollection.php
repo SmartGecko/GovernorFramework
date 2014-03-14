@@ -40,7 +40,7 @@ class UnitOfWorkListenerCollection implements UnitOfWorkListenerInterface
 
     public function onEventRegistered(UnitOfWorkInterface $unitOfWork,
         EventMessageInterface $event)
-    {
+    {        
         $newEvent = $event;
         foreach ($this->listeners as $listener) {        
             $newEvent = $listener->onEventRegistered($unitOfWork, $newEvent);

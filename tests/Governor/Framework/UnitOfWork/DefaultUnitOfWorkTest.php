@@ -21,6 +21,7 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
     private $testSubject;
     private $mockEventBus;
     private $mockAggregateRoot;
+    private $mockLogger;
     private $event1;
     private $event2;
     private $listener1;
@@ -35,8 +36,10 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->event1 = new GenericEventMessage(new TestMessage(1));
         $this->event2 = new GenericEventMessage(new TestMessage(1));
+        
+        $this->mockLogger = $this->getMock('Psr\Log\LoggerInterface');
 
-        $this->testSubject = new DefaultUnitOfWork();
+        $this->testSubject = new DefaultUnitOfWork($this->mockLogger);
         $this->mockEventBus = $this->getMock('Governor\Framework\EventHandling\EventBusInterface');
         $this->mockAggregateRoot = $this->getMock('Governor\Framework\Domain\AggregateRootInterface');
         $this->listener1 = $this->getMock('Governor\Framework\EventHandling\EventListenerInterface');
@@ -114,7 +117,7 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
                 ->with($this->anything());
 
         CurrentUnitOfWork::set($parentUoW);
-        $innerUow = DefaultUnitOfWork::startAndGet();
+        $innerUow = DefaultUnitOfWork::startAndGet($this->mockLogger);
         $innerUow->rollback();
         $parentUoW->rollback();
         CurrentUnitOfWork::clear($parentUoW);
@@ -123,8 +126,8 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
     public function testInnerUnitOfWorkRolledBackWithOuter()
     {
         $isRolledBack = false;
-        $outer = DefaultUnitOfWork::startAndGet();
-        $inner = DefaultUnitOfWork::startAndGet();
+        $outer = DefaultUnitOfWork::startAndGet($this->mockLogger);
+        $inner = DefaultUnitOfWork::startAndGet($this->mockLogger);
 
         $inner->registerListener(new RollbackTestAdapter(function (UnitOfWorkInterface $uow, \Exception $ex = null) use (&$isRolledBack) {
             $isRolledBack = true;
@@ -143,8 +146,8 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
     public function testInnerUnitOfWorkCommittedBackWithOuter()
     {
         $isCommitted = false;
-        $outer = DefaultUnitOfWork::startAndGet();
-        $inner = DefaultUnitOfWork::startAndGet();
+        $outer = DefaultUnitOfWork::startAndGet($this->mockLogger);
+        $inner = DefaultUnitOfWork::startAndGet($this->mockLogger);
 
         $inner->registerListener(new AfterCommitTestAdapter(function (UnitOfWorkInterface $uow) use (&$isCommitted) {
             $isCommitted = true;
@@ -318,8 +321,8 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $outerListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
         $innerListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
 
-        $outer = DefaultUnitOfWork::startAndGet();
-        $inner = DefaultUnitOfWork::startAndGet();
+        $outer = DefaultUnitOfWork::startAndGet($this->mockLogger);
+        $inner = DefaultUnitOfWork::startAndGet($this->mockLogger);
 
         $outer->registerListener($outerListener);
         $inner->registerListener($innerListener);

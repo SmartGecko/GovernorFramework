@@ -8,6 +8,8 @@
 
 namespace Governor\Framework\Saga\Annotation;
 
+use Governor\Framework\Annotations\SagaEventHandler;
+use Governor\Framework\Annotations\EndSaga;
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\Saga\AssociationValue;
 
@@ -21,60 +23,58 @@ class AbstractAnnotatedSagaTest extends \PHPUnit_Framework_TestCase
 
     public function testInvokeSaga()
     {
-      /*  $testSubject = new StubAnnotatedSaga();
+        $testSubject = new StubAnnotatedSaga();
         $testSubject->associateWith(new AssociationValue("propertyName", "id"));
         $testSubject->handle(new GenericEventMessage(new RegularEvent("id")));
         $testSubject->handle(new GenericEventMessage(new RegularEvent("wrongId")));
         $testSubject->handle(new GenericEventMessage(new \stdClass()));
-        $this->assertEquals(1, $testSubject->invocationCount);*/
+        $this->assertEquals(1, $testSubject->invocationCount);
     }
 
-    /*
-      @Test
-      public void testSerializeAndInvokeSaga() throws Exception {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      final StubAnnotatedSaga original = new StubAnnotatedSaga();
-      original.associateWith("propertyName", "id");
-      new ObjectOutputStream(baos).writeObject(original);
-      StubAnnotatedSaga testSubject = (StubAnnotatedSaga) new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()))
-      .readObject();
-      testSubject.handle(new GenericEventMessage<RegularEvent>(new RegularEvent("id")));
-      testSubject.handle(new GenericEventMessage<Object>(new Object()));
-      assertEquals(1, testSubject.invocationCount);
-      }
+    public function testSerializeAndInvokeSaga()
+    {        
+        $original = new StubAnnotatedSaga();
+        $original->associateWith(new AssociationValue("propertyName", "id"));
+        $serialized = serialize($original);     
+        $testSubject = unserialize($serialized);
+        $testSubject->handle(new GenericEventMessage(new RegularEvent("id")));
+        $testSubject->handle(new GenericEventMessage(new \stdClass()));
+        $this->assertEquals(1, $testSubject->invocationCount);
+    }
 
-      @Test
-      public void testEndedAfterInvocation_BeanProperty() {
-      StubAnnotatedSaga testSubject = new StubAnnotatedSaga();
-      testSubject.associateWith("propertyName", "id");
-      testSubject.handle(new GenericEventMessage<RegularEvent>(new RegularEvent("id")));
-      testSubject.handle(new GenericEventMessage<Object>(new Object()));
-      testSubject.handle(new GenericEventMessage<SagaEndEvent>(new SagaEndEvent("id")));
-      assertEquals(2, testSubject.invocationCount);
-      assertFalse(testSubject.isActive());
-      }
+    public function testEndedAfterInvocation_BeanProperty()
+    {
+        $testSubject = new StubAnnotatedSaga();
+        $testSubject->associateWith(new AssociationValue("propertyName", "id"));
+        $testSubject->handle(new GenericEventMessage(new RegularEvent("id")));
+        $testSubject->handle(new GenericEventMessage(new \stdClass()));
+        $testSubject->handle(new GenericEventMessage(new SagaEndEvent("id")));
+        $this->assertEquals(2, $testSubject->invocationCount);
+        $this->assertFalse($testSubject->isActive());
+    }
 
-      @Test
-      public void testEndedAfterInvocation_WhenAssociationIsRemoved() {
-      StubAnnotatedSaga testSubject = new StubAnnotatedSagaWithExplicitAssociationRemoval();
-      testSubject.associateWith("propertyName", "id");
-      testSubject.handle(new GenericEventMessage<RegularEvent>(new RegularEvent("id")));
-      testSubject.handle(new GenericEventMessage<Object>(new Object()));
-      testSubject.handle(new GenericEventMessage<SagaEndEvent>(new SagaEndEvent("id")));
-      assertEquals(2, testSubject.invocationCount);
-      assertFalse(testSubject.isActive());
-      }
+    public function testEndedAfterInvocation_WhenAssociationIsRemoved()
+    {
+        $testSubject = new StubAnnotatedSagaWithExplicitAssociationRemoval();
+        $testSubject->associateWith(new AssociationValue("propertyName", "id"));
+        $testSubject->handle(new GenericEventMessage(new RegularEvent("id")));
+        $testSubject->handle(new GenericEventMessage(new \stdClass()));
+        $testSubject->handle(new GenericEventMessage(new SagaEndEvent("id")));
+        $this->assertEquals(2, $testSubject->invocationCount);
+        $this->assertFalse($testSubject->isActive());
+    }
 
-      @Test
-      public void testEndedAfterInvocation_UniformAccessPrinciple() {
-      StubAnnotatedSaga testSubject = new StubAnnotatedSaga();
-      testSubject.associateWith("propertyName", "id");
-      testSubject.handle(new GenericEventMessage<UniformAccessEvent>(new UniformAccessEvent("id")));
-      testSubject.handle(new GenericEventMessage<Object>(new Object()));
-      testSubject.handle(new GenericEventMessage<SagaEndEvent>(new SagaEndEvent("id")));
-      assertEquals(2, testSubject.invocationCount);
-      assertFalse(testSubject.isActive());
-      } */
+    public function testEndedAfterInvocation_UniformAccessPrinciple()
+    {
+        $testSubject = new StubAnnotatedSaga();
+        $testSubject->associateWith(new AssociationValue("propertyName", "id"));
+        $testSubject->handle(new GenericEventMessage(new UniformAccessEvent("id")));
+        $testSubject->handle(new GenericEventMessage(new \stdClass()));
+        $testSubject->handle(new GenericEventMessage(new SagaEndEvent("id")));
+        $this->assertEquals(2, $testSubject->invocationCount);
+        $this->assertFalse($testSubject->isActive());
+    }
+
 }
 
 class StubAnnotatedSaga extends AbstractAnnotatedSaga
@@ -106,7 +106,7 @@ class StubAnnotatedSaga extends AbstractAnnotatedSaga
     {
         $this->invocationCount++;
     }
-    
+
     public function associateWith(\Governor\Framework\Saga\AssociationValue $associationValue)
     {
         parent::associateWith($associationValue);
@@ -117,17 +117,21 @@ class StubAnnotatedSaga extends AbstractAnnotatedSaga
         parent::removeAssociationWith($associationValue);
     }
 
-
 }
 
 class StubAnnotatedSagaWithExplicitAssociationRemoval extends StubAnnotatedSaga
 {
 
+    /**
+     * @EndSaga
+     * @SagaEventHandler(associationProperty = "propertyName")
+     */
     public function onSagaEndEvent(SagaEndEvent $event)
     {
-        // since this method overrides a handler, it doesn't need the annotations anymore
+        // !!! TODO since this method overrides a handler, it doesn't need the annotations anymore
         parent::onSagaEndEvent($event);
-        $this->removeAssociationWith("propertyName", $event->getPropertyName());
+        $this->removeAssociationWith(new AssociationValue("propertyName",
+            $event->getPropertyName()));
     }
 
 }

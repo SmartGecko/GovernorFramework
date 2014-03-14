@@ -20,24 +20,29 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
     private $innerUnitsOfWork = array();
     private $isStarted;
 
+    /**
+     * @var \Psr\Log\LoggerInterface 
+     */
+    protected $logger;
+
     public function commit()
     {
         $exception = null;
-        //logger.debug("Committing Unit Of Work");
+        $this->logger->debug("Committing Unit Of Work");
         $this->assertStarted();
         try {
             $this->notifyListenersPrepareCommit();
             $this->saveAggregates();
             if (null === $this->outerUnitOfWork) {
-                //logger.debug("This Unit Of Work is not nested. Finalizing commit...");
+                $this->logger->debug("This Unit Of Work is not nested. Finalizing commit...");
                 $this->doCommit();
                 $this->stop();
                 $this->performCleanup();
-            } /* else if (logger.isDebugEnabled()) {
-              logger.debug("This Unit Of Work is nested. Commit will be finalized by outer Unit Of Work.");
-              } */
+            } else {
+                $this->logger->debug("This Unit Of Work is nested. Commit will be finalized by outer Unit Of Work.");
+            }
         } catch (\RuntimeException $ex) {
-            //logger.debug("An error occurred while committing this UnitOfWork. Performing rollback...");
+            $this->logger->debug("An error occurred while committing this UnitOfWork. Performing rollback...");
             $this->doRollback($ex);
             $this->stop();
             if (null === $this->outerUnitOfWork) {
@@ -63,7 +68,7 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
 
     public function start()
     {
-        //logger.debug("Starting Unit Of Work.");
+        $this->logger->debug("Starting Unit Of Work.");
         if ($this->isStarted) {
             throw new \RuntimeException("UnitOfWork is already started");
         }
@@ -79,10 +84,10 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
                 $listener = new CommitOnOuterCommitTask(function(UnitOfWorkInterface $uow ) {
                     $this->performInnerCommit();
                 },
-                    function (UnitOfWorkInterface $uow) {
+                        function (UnitOfWorkInterface $uow) {
                     $this->performCleanup();
                 },
-                    function (UnitOfWorkInterface $uow, \Exception $ex = null) {
+                        function (UnitOfWorkInterface $uow, \Exception $ex = null) {
                     CurrentUnitOfWork::set($this);
                     $this->rollback($ex);
                 });
@@ -90,18 +95,19 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
                 $this->outerUnitOfWork->registerListener($listener);
             }
         }
-        // logger.debug("Registering Unit Of Work as CurrentUnitOfWork");
+        $this->logger->debug("Registering Unit Of Work as CurrentUnitOfWork");
         CurrentUnitOfWork::set($this);
         $this->isStarted = true;
     }
 
     public function rollback(\Exception $ex = null)
     {
-        /* if (cause != null && logger.isInfoEnabled()) {
-          logger.debug("Rollback requested for Unit Of Work due to exception. ", cause);
-          } else if (logger.isInfoEnabled()) {
-          logger.debug("Rollback requested for Unit Of Work for unknown reason.");
-          } */
+        if (null !== $ex) {
+            $this->logger->debug("Rollback requested for Unit Of Work due to exception. {} ",
+                    $ex->getMessage());
+        } else {
+            $this->logger->debug("Rollback requested for Unit Of Work for unknown reason.");
+        }
 
         try {
             if ($this->isStarted()) {
@@ -151,7 +157,7 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
     private function performInnerCommit()
     {
         $exception = null;
-// logger.debug("Finalizing commit of inner Unit Of Work...");
+        $this->logger->debug("Finalizing commit of inner Unit Of Work...");
         CurrentUnitOfWork::set($this);
         try {
             $this->doCommit();
@@ -177,7 +183,7 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
 
     private function stop()
     {
-        //logger.debug("Stopping Unit Of Work");
+        $this->logger->debug("Stopping Unit Of Work");
         $this->isStarted = false;
     }
 
@@ -212,6 +218,7 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
     protected abstract function notifyListenersPrepareCommit();
 
     protected abstract function notifyListenersCleanup();
+
 }
 
 class CommitOnOuterCommitTask extends UnitOfWorkListenerAdapter
@@ -222,7 +229,7 @@ class CommitOnOuterCommitTask extends UnitOfWorkListenerAdapter
     private $rollbackClosure;
 
     function __construct(\Closure $commitClosure, \Closure $cleanupClosure,
-        \Closure $rollbackClosure)
+            \Closure $rollbackClosure)
     {
         $this->commitClosure = $commitClosure;
         $this->cleanupClosure = $cleanupClosure;
@@ -242,7 +249,7 @@ class CommitOnOuterCommitTask extends UnitOfWorkListenerAdapter
     }
 
     public function onRollback(UnitOfWorkInterface $unitOfWork,
-        \Exception $failureCause = null)
+            \Exception $failureCause = null)
     {
         $cb = $this->rollbackClosure;
         $cb($unitOfWork, $failureCause);

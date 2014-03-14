@@ -15,9 +15,12 @@ namespace Governor\Framework\UnitOfWork;
  */
 class CurrentUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 {
-
+    private $mockLogger;
+    
     public function setUp()
     {
+        $this->mockLogger = $this->getMock('Psr\Log\LoggerInterface');
+        
         while (CurrentUnitOfWork::isStarted()) {
             CurrentUnitOfWork::get()->rollback();
         }
@@ -51,10 +54,10 @@ class CurrentUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
     public function testNotCurrentUnitOfWorkCommitted()
     {
-        $outerUoW = new DefaultUnitOfWork();
+        $outerUoW = new DefaultUnitOfWork($this->mockLogger);
         $outerUoW->start();
 
-        $other = new DefaultUnitOfWork();
+        $other = new DefaultUnitOfWork($this->mockLogger);
         $other->start();
 
         try {

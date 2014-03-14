@@ -27,7 +27,7 @@ class UoWEventRegistrationCallback implements EventRegistrationCallbackInterface
     }
 
     public function onRegisteredEvent(DomainEventMessageInterface $event)
-    {
+    {        
         $cb = $this->closure;
         return $cb($event);
     }

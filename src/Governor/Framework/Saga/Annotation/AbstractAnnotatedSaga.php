@@ -15,14 +15,13 @@ use Governor\Framework\Saga\AssociationValue;
 use Governor\Framework\Saga\Annotation\AssociationValuesImpl;
 
 /**
- * Implementation of the {@link Saga interface} that delegates incoming events to {@link
- * org.axonframework.saga.annotation.SagaEventHandler @SagaEventHandler} annotated methods.
+ * Implementation of the {@link Saga interface} that delegates incoming events to SagaEventHandler annotated methods.
  */
-abstract class AbstractAnnotatedSaga implements SagaInterface
+abstract class AbstractAnnotatedSaga implements SagaInterface, \Serializable
 {
 
     /**
-     * @var AssociationValues 
+     * @var AssociationValuesInterface 
      */
     private $associationValues;
 
@@ -37,6 +36,12 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
     private $isActive = true;
 
     /**
+     *
+     * @var SagaMehtodMessageHandlerInspector
+     */
+    private $inspector;
+
+    /**
      * Initialize the saga. If an identifier is provided it will be used, otherwise a random UUID will be generated.
      * 
      * @param string $identifier
@@ -45,6 +50,7 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
     {
         $this->identifier = (null === $identifier) ? Uuid::uuid1()->toString() : $identifier;
         $this->associationValues = new AssociationValuesImpl();
+        $this->inspector = new SagaMethodMessageHandlerInspector($this);
         $this->associationValues->add(new AssociationValue('sagaIdentifier',
                 $this->identifier));
     }
@@ -55,7 +61,7 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
     }
 
     /**
-     * @return AssociationValues 
+     * @return AssociationValuesInterface
      */
     public function getAssociationValues()
     {
@@ -66,8 +72,11 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
     {
         if ($this->isActive()) {
             // find and invoke handler
-             if ($handler->isEndingHandler()) {
-                 $this->end();
+            $handler = $this->inspector->findHandlerMethod($this, $event);
+            $handler->invoke($this, $event);
+
+            if ($handler->isEndingHandler()) {
+                $this->end();
             }
         }
     }
@@ -94,7 +103,7 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
      *
      * @param AssociationValue $associationValue The value to associate this saga with.
      */
-    protected function associateWith(AssociationValue $associationValue)
+    public function associateWith(AssociationValue $associationValue)
     {
         $this->associationValues->add($associationValue);
     }
@@ -107,7 +116,22 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
      */
     protected function removeAssociationWith(AssociationValue $associationValue)
     {
-        $this->associationValues->remove($associationValue);        
+        $this->associationValues->remove($associationValue);
+    }
+
+    public function serialize()
+    {
+        return serialize(array('associationValues' => $this->associationValues,
+            'identifier' => $this->identifier, 'isActive' => $this->isActive));
+    }
+
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        $this->associationValues = $data['associationValues'];
+        $this->identifier = $data['identifier'];
+        $this->isActive = $data['isActive'];
+        $this->inspector = new SagaMethodMessageHandlerInspector($this);
     }
 
 }

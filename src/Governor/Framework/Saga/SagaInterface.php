@@ -31,7 +31,7 @@ interface SagaInterface {
     /**
      * Returns a view on the Association Values for this saga instance. The returned instance is mutable.
      *
-     * @return array a view on the Association Values for this saga instance
+     * @return AssociationValuesInterface a view on the Association Values for this saga instance
      */
     public function getAssociationValues();
 

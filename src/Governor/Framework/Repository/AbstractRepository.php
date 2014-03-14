@@ -31,13 +31,13 @@ abstract class AbstractRepository implements RepositoryInterface
         $this->eventBus = $eventBus;
 
         $repos = $this;
-        $this->saveAggregateCallback = new SimpleSaveAggregateCallback(function (AggregateRootInterface $aggregateRoot) use ($repos) {
+        $this->saveAggregateCallback = new SimpleSaveAggregateCallback(function (AggregateRootInterface $aggregateRoot) use ($repos) {            
             if ($aggregateRoot->isDeleted()) {
                 $repos->doDelete($aggregateRoot);
             } else {
                 $repos->doSave($aggregateRoot);
             }
-            
+                                   
             $aggregateRoot->commitEvents();
             if ($aggregateRoot->isDeleted()) {
                 $repos->postDelete($aggregateRoot);
@@ -53,7 +53,7 @@ abstract class AbstractRepository implements RepositoryInterface
         $this->validateOnLoad($object, $expectedVersion);
 
         return CurrentUnitOfWork::get()->registerAggregate($object,
-                $this->eventBus, $this->saveAggregateCallback);
+                        $this->eventBus, $this->saveAggregateCallback);
     }
 
     public function add(AggregateRootInterface $aggregateRoot)
@@ -64,16 +64,26 @@ abstract class AbstractRepository implements RepositoryInterface
 
         if (!$this->supportsClass(get_class($aggregateRoot))) {
             throw new \InvalidArgumentException(sprintf("This repository supports %s, but got %s",
-                $this->className, get_class($aggregateRoot)));
+                    $this->className, get_class($aggregateRoot)));
         }
-
+        
         CurrentUnitOfWork::get()->registerAggregate($aggregateRoot,
-            $this->eventBus, $this->saveAggregateCallback);
+                $this->eventBus, $this->saveAggregateCallback);
     }
 
     public function supportsClass($class)
     {
-        return $this->className === $class;
+        $reflClass = new \ReflectionClass($class);
+        
+        if ($reflClass->name === $this->className) {
+            return true;
+        }
+        
+        if ($reflClass->isSubclassOf($this->className)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getClass()
@@ -82,10 +92,10 @@ abstract class AbstractRepository implements RepositoryInterface
     }
 
     protected function validateOnLoad(AggregateRootInterface $object,
-        $expectedVersion)
+            $expectedVersion)
     {
         if (null !== $expectedVersion && null !== $object->getVersion() &&
-            $expectedVersion !== $object->getVersion()) {
+                $expectedVersion !== $object->getVersion()) {
             throw new ConflictingAggregateVersionException($object->getIdentifier(),
             $expectedVersion, $object->getVersion());
         }

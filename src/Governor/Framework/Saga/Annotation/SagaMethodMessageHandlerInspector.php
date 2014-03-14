@@ -8,7 +8,9 @@
 
 namespace Governor\Framework\Saga\Annotation;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\Domain\EventMessageInterface;
+use Governor\Framework\Common\ReflectionUtils;
 
 /**
  * Description of SagaMethodMessageHandlerInspector
@@ -18,27 +20,50 @@ use Governor\Framework\Domain\EventMessageInterface;
 class SagaMethodMessageHandlerInspector
 {
 
-    private $sagaType;
+    const SAGA_EVENT_HANDLER_ANNOTATION = 'Governor\Framework\Annotations\SagaEventHandler';
 
-    public function __construct($sagaType)
+    private $targetSaga;    
+    private $reader;    
+
+    public function __construct($targetSaga)
     {
-        $this->sagaType = $sagaType;
+        $this->targetSaga = $targetSaga;
+        $this->reader = new AnnotationReader();        
     }
 
     public function getMessageHandlers(EventMessageInterface $event)
     {
-        /* List<SagaMethodMessageHandler> found = new ArrayList<SagaMethodMessageHandler>(1);
-          for (SagaMethodMessageHandler handler : handlers) {
-          if (handler.matches(event)) {
-          found.add(handler);
-          }
-          }
-          return found; */
+        $found = array();
+        $reflectionClass = ReflectionUtils::getClass($this->targetSaga);
+        foreach (ReflectionUtils::getMethods($reflectionClass) as $method) {
+            $annot = $this->reader->getMethodAnnotation($method,
+                self::SAGA_EVENT_HANDLER_ANNOTATION);
+
+            if (null !== $annot) {
+                $parameter = current($method->getParameters());               
+
+                if (null !== $parameter->getClass() &&
+                    $parameter->getClass()->name === $event->getPayloadType()) {
+                    $found[] = SagaMethodMessageHandler::getInstance($event,
+                            $method, $annot);
+                }
+            }
+        }
+        
+        return $found;
     }
 
     public function findHandlerMethod(AbstractAnnotatedSaga $target,
-            EventMessageInterface $event)
+        EventMessageInterface $event)
     {
+        foreach ($this->getMessageHandlers($event) as $handler) {
+            $associationValue = $handler->getAssociationValue($event);
+            if ($target->getAssociationValues()->contains($associationValue)) {                
+                return $handler;
+            }
+        }
+
+        return SagaMethodMessageHandler::noHandlers();
         /*   for (SagaMethodMessageHandler handler : getMessageHandlers(event)) {
           final AssociationValue associationValue = handler.getAssociationValue(event);
           if (target.getAssociationValues().contains(associationValue)) {

@@ -49,7 +49,7 @@ class AssociationValuesImpl implements AssociationValuesInterface
      * @return boolean
      */
     private function inCollection(AssociationValue $associationValue,
-            array $collection)
+        array $collection)
     {
         foreach ($collection as $element) {
             if ($element == $associationValue) {
@@ -70,13 +70,13 @@ class AssociationValuesImpl implements AssociationValuesInterface
         }
 
         if ($added) {
-            if ($this->inCollection($associationValue, $this->removedValues)) {                
+            if ($this->inCollection($associationValue, $this->removedValues)) {
                 $this->removedValues = array_udiff($this->removedValues,
-                        array($associationValue),
-                        function ($a, $b) {
-                            return $a->compareTo($b);
+                    array($associationValue),
+                    function ($a, $b) {
+                    return $a->compareTo($b);
                 });
-            } else {                
+            } else {
                 $this->addedValues[] = $associationValue;
             }
         }
@@ -104,10 +104,10 @@ class AssociationValuesImpl implements AssociationValuesInterface
     {
         if ($this->inCollection($associationValue, $this->values)) {
             $this->values = array_udiff($this->values, array($associationValue),
-                    function ($a, $b) {
-                        return $a->compareTo($b);
+                function ($a, $b) {
+                return $a->compareTo($b);
             });
-            $removed = true;            
+            $removed = true;
         } else {
             $removed = false;
         }
@@ -115,9 +115,9 @@ class AssociationValuesImpl implements AssociationValuesInterface
         if ($removed) {
             if ($this->inCollection($associationValue, $this->addedValues)) {
                 $this->addedValues = array_udiff($this->addedValues,
-                        array($associationValue),
-                        function ($a, $b) {
-                            return $a->compareTo($b);
+                    array($associationValue),
+                    function ($a, $b) {
+                    return $a->compareTo($b);
                 });
             } else {
                 $this->removedValues[] = $associationValue;
@@ -134,7 +134,12 @@ class AssociationValuesImpl implements AssociationValuesInterface
 
     public function size()
     {
-        return $this->values->count();
+        return count($this->values);
+    }
+
+    public function isEmpty()
+    {
+        return empty($this->values);
     }
 
 }

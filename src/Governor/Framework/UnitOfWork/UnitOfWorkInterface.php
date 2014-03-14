@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\UnitOfWork;
 
+use Governor\Framework\Domain\AggregateRootInterface;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\EventHandling\EventBusInterface;
 
@@ -42,7 +43,7 @@ interface UnitOfWorkInterface
      */
     public function isTransactional();
 
-    public function registerAggregate($aggregateRoot,
+    public function registerAggregate(AggregateRootInterface $aggregateRoot,
         EventBusInterface $eventBus,
         SaveAggregateCallbackInterface $saveAggregateCallback);
 

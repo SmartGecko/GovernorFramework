@@ -8,7 +8,7 @@
 
 namespace Governor\Framework\EventSourcing;
 
-use Governor\Framework\Repository\GenericDoctrineRepository;
+use Governor\Framework\Repository\GenericOrmRepository;
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\Repository\LockManagerInterface;
 use Governor\Framework\EventStore\EventStoreInterface;
@@ -20,7 +20,7 @@ use Doctrine\ORM\EntityManager;
  *
  * @author david
  */
-class HybridDoctrineRepository extends GenericDoctrineRepository
+class HybridDoctrineRepository extends GenericOrmRepository
 {
 
     private $eventStore;

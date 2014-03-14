@@ -28,6 +28,7 @@ class CommandHandlingTest extends \PHPUnit_Framework_TestCase
     private $aggregateIdentifier;
     private $mockEventBus;
     private $mockEventStore;
+    private $mockLogger;
 
     public function setUp()
     {
@@ -37,18 +38,19 @@ class CommandHandlingTest extends \PHPUnit_Framework_TestCase
             $this->mockEventBus, new NullLockManager(), $this->mockEventStore,
             new GenericAggregateFactory('Governor\Framework\Stubs\StubAggregate'));
         $this->aggregateIdentifier = "testAggregateIdentifier";
+        $this->mockLogger = $this->getMock('Psr\Log\LoggerInterface');
     }
 
     public function testCommandHandlerLoadsSameAggregateTwice()
     {
-        DefaultUnitOfWork::startAndGet();
+        DefaultUnitOfWork::startAndGet($this->mockLogger);
 
         $stubAggregate = new StubAggregate($this->aggregateIdentifier);
         $stubAggregate->doSomething();
         $this->repository->add($stubAggregate);
         CurrentUnitOfWork::commit();
 
-        DefaultUnitOfWork::startAndGet();
+        DefaultUnitOfWork::startAndGet($this->mockLogger);
         $this->repository->load($this->aggregateIdentifier)->doSomething();
         $this->repository->load($this->aggregateIdentifier)->doSomething();
         CurrentUnitOfWork::commit();

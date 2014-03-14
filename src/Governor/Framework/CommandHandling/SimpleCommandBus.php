@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\CommandHandling;
 
+use Psr\Log\LoggerInterface;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 
 /**
@@ -20,8 +21,19 @@ class SimpleCommandBus implements CommandBusInterface
 
     private $subscriptions = array();
 
+    /**
+     * @var LoggerInterface 
+     */
+    private $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+        ;
+    }
+
     public function dispatch(CommandMessageInterface $command,
-        CommandCallback $callback = null)
+            CommandCallback $callback = null)
     {
         $handler = $this->findCommandHandlerFor($command);
 
@@ -43,9 +55,11 @@ class SimpleCommandBus implements CommandBusInterface
     }
 
     protected function doDispatch(CommandMessageInterface $command,
-        CommandHandlerInterface $handler)
+            CommandHandlerInterface $handler)
     {
-        $unitOfWork = DefaultUnitOfWork::startAndGet();
+        $this->logger->debug("Dispatching command [{name}]",
+                array('name' => $command->getCommandName()));
+        $unitOfWork = DefaultUnitOfWork::startAndGet($this->logger);
 
         try {
             $return = $handler->handle($command, $unitOfWork);
@@ -63,7 +77,7 @@ class SimpleCommandBus implements CommandBusInterface
     {
         if (!array_key_exists($command->getCommandName(), $this->subscriptions)) {
             throw new NoHandlerForCommandException(sprintf("No handler was subscribed for command [%s]",
-                $command->getCommandName()));
+                    $command->getCommandName()));
         }
 
         return $this->subscriptions[$command->getCommandName()];

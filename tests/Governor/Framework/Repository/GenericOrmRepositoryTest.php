@@ -20,7 +20,7 @@ use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
  *
  * @author david
  */
-class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
+class GenericOrmRepositoryTest extends \PHPUnit_Framework_TestCase
 {
 
     private $mockEntityManager;
@@ -34,12 +34,12 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->mockEntityManager = $this->getMock('Doctrine\ORM\EntityManager',
             array('find', 'flush', 'persist', 'remove'), array(), '', false);
         $this->mockEventBus = $this->getMock('Governor\Framework\EventHandling\EventBusInterface');
-        $this->testSubject = new GenericDoctrineRepository('Governor\Framework\Repository\StubDoctrineAggregate',
+        $this->testSubject = new GenericOrmRepository('Governor\Framework\Repository\StubDoctrineAggregate',
              $this->mockEventBus, new NullLockManager(), $this->mockEntityManager);
 
         $this->aggregateId = "123";
         $this->aggregate = new StubDoctrineAggregate($this->aggregateId);
-        DefaultUnitOfWork::startAndGet();
+        DefaultUnitOfWork::startAndGet($this->getMock('Psr\Log\LoggerInterface'));
     }
 
     public function tearDown()
@@ -94,7 +94,7 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->mockEntityManager->expects($this->once())
             ->method('flush');
 
-        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericDoctrineRepository');
+        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericOrmRepository');
         $method = $reflection->getMethod('doSaveWithLock');
         $method->setAccessible(true);
 
@@ -111,7 +111,7 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->mockEntityManager->expects($this->once())
             ->method('flush');
 
-        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericDoctrineRepository');
+        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericOrmRepository');
         $method = $reflection->getMethod('doSaveWithLock');
         $method->setAccessible(true);
 
@@ -131,7 +131,7 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($this->testSubject->isForceFlushOnSave());
 
-        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericDoctrineRepository');
+        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericOrmRepository');
         $method = $reflection->getMethod('doSaveWithLock');
         $method->setAccessible(true);
 
@@ -143,7 +143,7 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->mockEntityManager->expects($this->once())
             ->method('flush');
 
-        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericDoctrineRepository');
+        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericOrmRepository');
         $method = $reflection->getMethod('doDeleteWithLock');
         $method->setAccessible(true);
 
@@ -158,7 +158,7 @@ class GenericDoctrineRepositoryTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($this->testSubject->isForceFlushOnSave());
 
-        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericDoctrineRepository');
+        $reflection = new \ReflectionClass('Governor\Framework\Repository\GenericOrmRepository');
         $method = $reflection->getMethod('doDeleteWithLock');
         $method->setAccessible(true);
 

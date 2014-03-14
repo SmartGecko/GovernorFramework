@@ -33,8 +33,8 @@ abstract class CurrentUnitOfWork
         if (self::isEmpty()) {
             throw new \RuntimeException("No UnitOfWork is currently started");
         }
-
-        return reset(self::$current);
+                
+        return end(self::$current);
     }
 
     private static function isEmpty()

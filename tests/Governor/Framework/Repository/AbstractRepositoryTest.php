@@ -21,14 +21,14 @@ class AbstractRepositoryTest extends \PHPUnit_Framework_TestCase
 {
 
     private $testSubject;
-    private $mockEventBus;
+    private $mockEventBus;    
 
     public function setUp()
     {
         $this->mockEventBus = $this->getMock('Governor\Framework\EventHandling\EventBusInterface');
         $this->testSubject = new MockAbstractRepository('Governor\Framework\Repository\MockAggregateRoot',
             $this->mockEventBus);
-        DefaultUnitOfWork::startAndGet();
+        DefaultUnitOfWork::startAndGet($this->getMock('Psr\Log\LoggerInterface'));
     }
 
     public function tearDown()

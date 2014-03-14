@@ -17,7 +17,7 @@ use Doctrine\ORM\EntityManager;
  *
  * @author david
  */
-class GenericDoctrineRepository extends LockingRepository
+class GenericOrmRepository extends LockingRepository
 {
 
     private $entityManager;

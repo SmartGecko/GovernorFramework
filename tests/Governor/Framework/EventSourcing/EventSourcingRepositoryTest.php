@@ -43,7 +43,7 @@ class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
             $this->mockEventBus, new NullLockManager(), $this->mockEventStore,
             $this->stubAggregateFactory);
 
-        $this->unitOfWork = DefaultUnitOfWork::startAndGet();
+        $this->unitOfWork = DefaultUnitOfWork::startAndGet($this->getMock('Psr\Log\LoggerInterface'));
     }
 
     public function tearDown()

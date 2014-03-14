@@ -82,12 +82,13 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
     {
         $config = array('governor' => array('repositories' => array('dummy1' => array(
                         'aggregate_root' => 'Governor\Framework\Stubs\Dummy1Aggregate',
-                        'type' => 'doctrine'), 'dummy2' => array('aggregate_root' => 'Governor\Framework\Stubs\Dummy2Aggregate',
-                        'type' => 'doctrine'))
+                        'type' => 'orm'), 'dummy2' => array('aggregate_root' => 'Governor\Framework\Stubs\Dummy2Aggregate',
+                        'type' => 'orm'))
                 , 'aggregate_command_handlers' => array('dummy1' => array('aggregate_root' => 'Governor\Framework\Stubs\Dummy1Aggregate',
                         'repository' => 'dummy1.repository'),
                     'dummy2' => array('aggregate_root' => 'Governor\Framework\Stubs\Dummy2Aggregate',
-                        'repository' => 'dummy2.repository')), 'event_store' => array ('type' => 'null')));
+                        'repository' => 'dummy2.repository')), 'event_store' => array ('type' => 'null')
+            ));
 
         $container = new ContainerBuilder(new ParameterBag(array(
             'kernel.debug' => false,
@@ -107,6 +108,8 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
                 array(
                 'find', 'flush', 'persist', 'remove'), array(), '', false));
 
+        $container->set('logger', $this->getMock('Psr\Log\LoggerInterface'));
+        
         $this->addTaggedCommandHandlers($container);
         $this->addTaggedEventListeners($container);
 

@@ -28,7 +28,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()        
     {
-        $this->commandBus = new SimpleCommandBus();
+        $this->commandBus = new SimpleCommandBus($this->getMock('Psr\Log\LoggerInterface'));
     }
 
     /**
@@ -75,7 +75,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
         $this->commandBus->dispatch(GenericCommandMessage::asCommandMessage($command),
                 new CommandCallback(function ($result) use ($command) {
                 $this->assertEquals ($command, $result->getPayload());                
-            }, function ($exception) {
+            }, function ($exception) {                
                 $this->fail('Exception not expected');
             }));
     }

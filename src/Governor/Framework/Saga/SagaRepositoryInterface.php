@@ -13,7 +13,7 @@ namespace Governor\Framework\Saga;
  * values
  * they have been associated with (see {@link AssociationValue}) or via their unique identifier.
  */
-interface SagaRepository
+interface SagaRepositoryInterface
 {
 
     /**
