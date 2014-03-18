@@ -27,7 +27,6 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
 
     public function commit()
     {
-        $exception = null;
         $this->logger->debug("Committing Unit Of Work");
         $this->assertStarted();
         try {
@@ -47,14 +46,12 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
             $this->stop();
             if (null === $this->outerUnitOfWork) {
                 $this->performCleanup();
-            }
-            $exception = $ex;
-        }
-
-        $this->clear();
-
-        if (null !== $exception) {
-            throw $exception;
+            }           
+            
+            throw $ex;
+        } finally {
+            $this->logger->debug("Clearing resources of this Unit Of Work.");
+            $this->clear();
         }
     }
 
@@ -218,7 +215,6 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
     protected abstract function notifyListenersPrepareCommit();
 
     protected abstract function notifyListenersCleanup();
-
 }
 
 class CommitOnOuterCommitTask extends UnitOfWorkListenerAdapter

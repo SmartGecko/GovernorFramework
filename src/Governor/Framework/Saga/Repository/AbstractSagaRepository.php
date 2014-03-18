@@ -40,10 +40,10 @@ abstract class AbstractSagaRepository implements SagaRepositoryInterface
     }
 
     public function commit(SagaInterface $saga)
-    {
-        if (!$saga->isActive()) {
+    {        
+        if (!$saga->isActive()) {            
             $this->deleteSaga($saga);
-        } else {
+        } else {            
             $sagaType = $this->typeOf($saga);
             $associationValues = $saga->getAssociationValues();
             foreach ($associationValues->addedAssociations() as $av) {

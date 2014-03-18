@@ -1,21 +1,40 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\Saga;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerAwareInterface;
 use Governor\Framework\Domain\EventMessageInterface;
 
 /**
- * Description of AbstractSagaManager
- *
- * @author david
+ * Base SagaManagerInterface implementation.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-abstract class AbstractSagaManager implements SagaManagerInterface
+abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareInterface
 {
 
     private $sagaRepository;
@@ -24,6 +43,11 @@ abstract class AbstractSagaManager implements SagaManagerInterface
     private $suppressExceptions = true;
     private $synchronizeSagaAccess = true;
     private $sagasInCreation = array();
+
+    /**
+     * @var LoggerInterface 
+     */
+    private $logger;
 
     //private final IdentifierBasedLock lock = new IdentifierBasedLock();
     //private Map<String, Saga> sagasInCreation = new ConcurrentHashMap<String, Saga>();
@@ -43,7 +67,6 @@ abstract class AbstractSagaManager implements SagaManagerInterface
 
     public function handle(EventMessageInterface $event)
     {
-        echo "HANDLE\n";
         foreach ($this->sagaTypes as $sagaType) {
             $associationValues = $this->extractAssociationValues($sagaType,
                     $event);
@@ -98,17 +121,21 @@ abstract class AbstractSagaManager implements SagaManagerInterface
             $sagas = $this->sagaRepository->find($sagaType, $associationValue);
         }
 
-      /*  foreach ($this->sagasInCreation as $id => $sagaInCreation) {
-            if ($sagaType === get_class($sagaInCreation) && $this->containsAny($sagaInCreation->getAssociationValues(),
-                            $associationValues)) {
-                $sagas[] = $id;
-            }
-        }*/
+        /*  foreach ($this->sagasInCreation as $id => $sagaInCreation) {
+          if ($sagaType === get_class($sagaInCreation) && $this->containsAny($sagaInCreation->getAssociationValues(),
+          $associationValues)) {
+          $sagas[] = $id;
+          }
+          } */
 
-        $sagaOfTypeInvoked = false;        
+        $sagaOfTypeInvoked = false;
 
         foreach ($sagas as $sagaId) {
-            $this->loadAndInvoke($event, $sagaId, $associationValues);
+            $saga = $this->loadAndInvoke($event, $sagaId, $associationValues);
+
+            if (null !== $saga) {
+                $sagaOfTypeInvoked = true;
+            }
         }
 
         return $sagaOfTypeInvoked;
@@ -130,7 +157,6 @@ abstract class AbstractSagaManager implements SagaManagerInterface
         try {
             $saga->handle($event);
         } catch (\Exception $ex) {
-
             $exception = $ex;
         } finally {
             $this->commit($saga);
@@ -138,10 +164,9 @@ abstract class AbstractSagaManager implements SagaManagerInterface
 
         if (null !== $exception) {
             if ($this->suppressExceptions) {
-                /*    logger.error(format("An exception occurred while a Saga [%s] was handling an Event [%s]:",
-                  saga.getClass().getSimpleName(),
-                  event.getPayloadType().getSimpleName()),
-                  e); */
+                $this->logger->error("An exception occurred while a Saga {name} was handling an Event {event}: {exception}",
+                        array('name' => get_class($saga), 'event' => $event->getPayloadType(),
+                    'exception' => $exception->getMessage()));
             } else {
                 throw $exception;
             }
@@ -157,10 +182,9 @@ abstract class AbstractSagaManager implements SagaManagerInterface
             $saga->handle($event);
         } catch (\RuntimeException $ex) {
             if ($this->suppressExceptions) {
-                //    logger.error(format("An exception occurred while a Saga [%s] was handling an Event [%s]:",
-                //                     saga.getClass().getSimpleName(),
-                //             event.getPayloadType().getSimpleName()),
-                //      e);
+                $this->logger->error("An exception occurred while a Saga {name} was handling an Event {event}: {exception}",
+                        array('name' => get_class($saga), 'event' => $event->getPayloadType(),
+                    'exception' => $ex->getMessage()));
             } else {
                 throw $ex;
             }
@@ -220,6 +244,11 @@ abstract class AbstractSagaManager implements SagaManagerInterface
     public function setSuppressExceptions($suppressExceptions)
     {
         $this->suppressExceptions = $suppressExceptions;
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
 }

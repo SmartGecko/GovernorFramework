@@ -15,17 +15,8 @@ use Governor\Framework\Saga\AbstractSagaManager;
 use Governor\Framework\Saga\SagaInterface;
 
 /**
- * Description of AnnotatedSagaManager
- *
- * @author david
- */
-
-/**
  * Implementation of the SagaManager that uses annotations on the Sagas to describe the lifecycle management. Unlike
  * the SimpleSagaManager, this implementation can manage several types of Saga in a single AnnotatedSagaManager.
- *
- * @author Allard Buijze
- * @since 0.7
  */
 class AnnotatedSagaManager extends AbstractSagaManager
 {
@@ -51,15 +42,14 @@ class AnnotatedSagaManager extends AbstractSagaManager
     protected function extractAssociationValues($sagaType,
             EventMessageInterface $event)
     {
-        $inspector = new SagaMethodMessageHandlerInspector($sagaType);
+        $inspector = new SagaMethodMessageHandlerInspector($sagaType);        
         $handlers = $inspector->getMessageHandlers($event);
         $values = array();
 
         foreach ($handlers as $handler) {
             $values[] = $handler->getAssociationValue($event);
         }
-
-        print_r($values);
+       
         return $values;
     }
 

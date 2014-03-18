@@ -31,13 +31,13 @@ abstract class AbstractRepository implements RepositoryInterface
         $this->eventBus = $eventBus;
 
         $repos = $this;
-        $this->saveAggregateCallback = new SimpleSaveAggregateCallback(function (AggregateRootInterface $aggregateRoot) use ($repos) {            
+        $this->saveAggregateCallback = new SimpleSaveAggregateCallback(function (AggregateRootInterface $aggregateRoot) use ($repos) {
             if ($aggregateRoot->isDeleted()) {
                 $repos->doDelete($aggregateRoot);
             } else {
                 $repos->doSave($aggregateRoot);
             }
-                                   
+
             $aggregateRoot->commitEvents();
             if ($aggregateRoot->isDeleted()) {
                 $repos->postDelete($aggregateRoot);
@@ -66,7 +66,7 @@ abstract class AbstractRepository implements RepositoryInterface
             throw new \InvalidArgumentException(sprintf("This repository supports %s, but got %s",
                     $this->className, get_class($aggregateRoot)));
         }
-        
+
         CurrentUnitOfWork::get()->registerAggregate($aggregateRoot,
                 $this->eventBus, $this->saveAggregateCallback);
     }
@@ -74,11 +74,11 @@ abstract class AbstractRepository implements RepositoryInterface
     public function supportsClass($class)
     {
         $reflClass = new \ReflectionClass($class);
-        
+
         if ($reflClass->name === $this->className) {
             return true;
         }
-        
+
         if ($reflClass->isSubclassOf($this->className)) {
             return true;
         }

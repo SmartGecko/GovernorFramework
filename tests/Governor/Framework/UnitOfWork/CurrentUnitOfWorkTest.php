@@ -15,12 +15,13 @@ namespace Governor\Framework\UnitOfWork;
  */
 class CurrentUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 {
+
     private $mockLogger;
-    
+
     public function setUp()
     {
-        $this->mockLogger = $this->getMock('Psr\Log\LoggerInterface');
-        
+        $this->mockLogger = $this->getMock(\Psr\Log\LoggerInterface::class);
+
         while (CurrentUnitOfWork::isStarted()) {
             CurrentUnitOfWork::get()->rollback();
         }
@@ -43,7 +44,7 @@ class CurrentUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
     public function testSetSession()
     {
-        $mockUnitOfWork = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkInterface');
+        $mockUnitOfWork = $this->getMock(UnitOfWorkInterface::class);
         CurrentUnitOfWork::set($mockUnitOfWork);
 
         $this->assertSame($mockUnitOfWork, CurrentUnitOfWork::get());
@@ -65,7 +66,7 @@ class CurrentUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         } catch (\Exception $ex) {
             $other->rollback();
             $this->assertGreaterThanOrEqual(0,
-                strpos($ex->getMessage(), "not the active"));
+                    strpos($ex->getMessage(), "not the active"));
         }
     }
 

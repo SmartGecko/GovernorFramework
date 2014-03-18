@@ -27,8 +27,7 @@ class GenericSagaFactory implements SagaFactoryInterface
     }
 
     public function createSaga($sagaType)
-    {
-        echo "createSaga\n";
+    {        
         $reflClass = new \ReflectionClass($sagaType);
 
         if (!$this->supports($sagaType)) {

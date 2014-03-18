@@ -41,30 +41,31 @@ class SagaMethodMessageHandler implements Comparable
     public static function noHandlers()
     {
         return new SagaMethodMessageHandler(SagaCreationPolicy::NONE, null,
-            null, null, null);
+                null, null, null);
     }
 
     public static function getInstance(EventMessageInterface $event,
-        \ReflectionMethod $handlerMethod)
+            \ReflectionMethod $handlerMethod)
     {
         $reader = new AnnotationReader();
         $handlerAnnotation = $reader->getMethodAnnotation($handlerMethod,
-            'Governor\Framework\Annotations\SagaEventHandler');
+                \Governor\Framework\Annotations\SagaEventHandler::class);
 
         $associationProperty = PropertyAccessStrategy::getProperty($event->getPayload(),
-                $handlerAnnotation->associationProperty);
-
+                        $handlerAnnotation->associationProperty);
 
         if (null === $associationProperty) {
-            throw new \RuntimeException(sprintf("SagaEventHandler %s.%s defines a property %s that is not " + "defined on the Event it declares to handle (%s)",
-                $handlerMethod->class, $handlerMethod->name,
-                $handlerAnnotation->associationProperty,
-                $event->getPayloadType()));
+            throw new \RuntimeException(sprintf("SagaEventHandler %s::%s defines a property %s that is not " .
+                    "defined on the Event it declares to handle (%s)",
+                    $handlerMethod->class, $handlerMethod->name,
+                    $handlerAnnotation->associationProperty,
+                    $event->getPayloadType()));
         }
 
-        $associationKey = (empty($handlerAnnotation->keyName)) ? $handlerAnnotation->associationProperty : $handlerAnnotation->keyName;
+        $associationKey = (empty($handlerAnnotation->keyName)) ? $handlerAnnotation->associationProperty
+                    : $handlerAnnotation->keyName;
         $startAnnotation = $reader->getMethodAnnotation($handlerMethod,
-            'Governor\Framework\Annotations\StartSaga');
+                \Governor\Framework\Annotations\StartSaga::class);
 
         if (null === $startAnnotation) {
             $sagaCreationPolicy = SagaCreationPolicy::NONE;
@@ -75,12 +76,12 @@ class SagaMethodMessageHandler implements Comparable
         }
 
         return new SagaMethodMessageHandler($sagaCreationPolicy,
-            $associationKey, $associationProperty, $handlerMethod, $reader);
+                $associationKey, $associationProperty, $handlerMethod, $reader);
     }
 
     private function __construct($creationPolicy, $associationKey,
-        $associationProperty, \ReflectionMethod $method = null,
-        AnnotationReader $reader = null)
+            $associationProperty, \ReflectionMethod $method = null,
+            AnnotationReader $reader = null)
     {
         $this->reader = $reader;
         $this->creationPolicy = $creationPolicy;
@@ -107,7 +108,7 @@ class SagaMethodMessageHandler implements Comparable
     public function isEndingHandler()
     {
         return $this->isHandlerAvailable() && null !== $this->reader->getMethodAnnotation($this->handlerMethod,
-                'Governor\Framework\Annotations\EndSaga');
+                        'Governor\Framework\Annotations\EndSaga');
     }
 
     public function invoke($target, EventMessageInterface $event)
@@ -133,9 +134,9 @@ class SagaMethodMessageHandler implements Comparable
             return null;
         }
 
-        $associationValue = $this->associationProperty->getValue($eventMessage->getPayload());        
+        $associationValue = $this->associationProperty->getValue($eventMessage->getPayload());
         return (null === $associationValue) ? null : new AssociationValue($this->associationKey,
-            $associationValue);
+                $associationValue);
     }
 
     public function compareTo($other)

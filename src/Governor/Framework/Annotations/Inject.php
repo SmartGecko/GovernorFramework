@@ -22,22 +22,13 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Saga;
+namespace Governor\Framework\Annotations;
 
 /**
- * Interface describing a mechanism to inject resources into Saga instances.
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @Annotation
+ * @Target("METHOD")
  */
-
-interface ResourceInjectorInterface
+final class Inject
 {
-
-    /**
-     * Inject required resources into the given <code>saga</code>.
-     *
-     * @param SagaInterface $saga The saga to inject resources into.
-     */
-    public function injectResources(SagaInterface $saga);
+    public $service;
 }

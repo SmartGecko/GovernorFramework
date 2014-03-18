@@ -8,6 +8,9 @@
 
 namespace Governor\Framework\Saga\Annotation;
 
+use JMS\Serializer\Annotation\Type;
+use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\PostDeserialize;
 use Rhumsaa\Uuid\Uuid;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\Saga\SagaInterface;
@@ -17,26 +20,29 @@ use Governor\Framework\Saga\Annotation\AssociationValuesImpl;
 /**
  * Implementation of the {@link Saga interface} that delegates incoming events to SagaEventHandler annotated methods.
  */
-abstract class AbstractAnnotatedSaga implements SagaInterface, \Serializable
+abstract class AbstractAnnotatedSaga implements SagaInterface
 {
 
     /**
+     * @Type ("Governor\Framework\Saga\Annotation\AssociationValuesImpl")
      * @var AssociationValuesInterface 
      */
     private $associationValues;
 
     /**
+     * @Type ("string")
      * @var string 
      */
     private $identifier;
 
     /**
+     * @Type ("boolean")
      * @var boolean 
      */
     private $isActive = true;
 
     /**
-     *
+     * @Exclude
      * @var SagaMehtodMessageHandlerInspector
      */
     private $inspector;
@@ -55,6 +61,14 @@ abstract class AbstractAnnotatedSaga implements SagaInterface, \Serializable
                 $this->identifier));
     }
 
+    /**
+     * @PostDeserialize
+     */
+    public function postDeserialize()
+    {
+        $this->inspector = new SagaMethodMessageHandlerInspector($this);
+    }
+    
     public function getSagaIdentifier()
     {
         return $this->identifier;
@@ -69,7 +83,7 @@ abstract class AbstractAnnotatedSaga implements SagaInterface, \Serializable
     }
 
     public final function handle(EventMessageInterface $event)
-    {
+    {        
         if ($this->isActive()) {
             // find and invoke handler
             $handler = $this->inspector->findHandlerMethod($this, $event);
@@ -104,7 +118,7 @@ abstract class AbstractAnnotatedSaga implements SagaInterface, \Serializable
      * @param AssociationValue $associationValue The value to associate this saga with.
      */
     public function associateWith(AssociationValue $associationValue)
-    {
+    {        
         $this->associationValues->add($associationValue);
     }
 
@@ -112,26 +126,11 @@ abstract class AbstractAnnotatedSaga implements SagaInterface, \Serializable
      * Removes the given association from this Saga. When the saga is committed, it can no longer be found using the
      * given association. If the given property wasn't registered with the saga, nothing happens.
      *
-     * @param AssociationValue $property the association value to remove from the saga.
+     * @param AssociationValue $associationValue the association value to remove from the saga.
      */
     protected function removeAssociationWith(AssociationValue $associationValue)
     {
         $this->associationValues->remove($associationValue);
-    }
-
-    public function serialize()
-    {
-        return serialize(array('associationValues' => $this->associationValues,
-            'identifier' => $this->identifier, 'isActive' => $this->isActive));
-    }
-
-    public function unserialize($serialized)
-    {
-        $data = unserialize($serialized);
-        $this->associationValues = $data['associationValues'];
-        $this->identifier = $data['identifier'];
-        $this->isActive = $data['isActive'];
-        $this->inspector = new SagaMethodMessageHandlerInspector($this);
     }
 
 }

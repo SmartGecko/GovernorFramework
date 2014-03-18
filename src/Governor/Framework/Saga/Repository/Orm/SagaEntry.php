@@ -21,7 +21,7 @@ use Governor\Framework\Serializer\SimpleSerializedType;
 class SagaEntry
 {
 
-    private $sagaId; 
+    private $sagaId;
     private $sagaType;
     private $revision;
     private $serializedSaga;
@@ -56,7 +56,7 @@ class SagaEntry
         if (null !== $this->saga) {
             return $this->saga;
         }
-        return $serializer->deserialize(new SimpleSerializedObject($serializedSaga,
+        return $serializer->deserialize(new SimpleSerializedObject($this->serializedSaga,
                         new SimpleSerializedType($this->sagaType,
                         $this->revision)));
     }
@@ -68,7 +68,7 @@ class SagaEntry
      */
     public function getSerializedSaga()
     {
-        return $this->serializedSaga; //NOSONAR
+        return $this->serializedSaga;
     }
 
     /**

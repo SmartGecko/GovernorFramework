@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\Saga\Annotation;
 
+use JMS\Serializer\Annotation\Type;
 use Governor\Framework\Saga\AssociationValue;
 use Governor\Framework\Saga\AssociationValuesInterface;
 
@@ -19,16 +20,19 @@ class AssociationValuesImpl implements AssociationValuesInterface
 {
 
     /**
+     * @Type ("array<Governor\Framework\Saga\AssociationValue>")
      * @var array
      */
     private $values;
 
     /**
+     * @Type ("array<Governor\Framework\Saga\AssociationValue>")
      * @var array
      */
     private $addedValues;
 
     /**
+     *@Type ("array<Governor\Framework\Saga\AssociationValue>")
      * @var array
      */
     private $removedValues;

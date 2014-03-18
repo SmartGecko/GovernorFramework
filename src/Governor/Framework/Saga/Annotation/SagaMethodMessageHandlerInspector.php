@@ -20,45 +20,43 @@ use Governor\Framework\Common\ReflectionUtils;
 class SagaMethodMessageHandlerInspector
 {
 
-    const SAGA_EVENT_HANDLER_ANNOTATION = 'Governor\Framework\Annotations\SagaEventHandler';
-
-    private $targetSaga;    
-    private $reader;    
+    private $targetSaga;
+    private $reader;
 
     public function __construct($targetSaga)
     {
         $this->targetSaga = $targetSaga;
-        $this->reader = new AnnotationReader();        
+        $this->reader = new AnnotationReader();
     }
 
     public function getMessageHandlers(EventMessageInterface $event)
     {
         $found = array();
         $reflectionClass = ReflectionUtils::getClass($this->targetSaga);
-        foreach (ReflectionUtils::getMethods($reflectionClass) as $method) {
+        foreach (ReflectionUtils::getMethods($reflectionClass) as $method) {            
             $annot = $this->reader->getMethodAnnotation($method,
-                self::SAGA_EVENT_HANDLER_ANNOTATION);
+                    \Governor\Framework\Annotations\SagaEventHandler::class);
 
             if (null !== $annot) {
-                $parameter = current($method->getParameters());               
+                $parameter = current($method->getParameters());
 
                 if (null !== $parameter->getClass() &&
-                    $parameter->getClass()->name === $event->getPayloadType()) {
+                        $parameter->getClass()->name === $event->getPayloadType()) {                    
                     $found[] = SagaMethodMessageHandler::getInstance($event,
-                            $method, $annot);
+                                    $method, $annot);
                 }
             }
-        }
-        
+        }                
+
         return $found;
     }
 
     public function findHandlerMethod(AbstractAnnotatedSaga $target,
-        EventMessageInterface $event)
+            EventMessageInterface $event)
     {
         foreach ($this->getMessageHandlers($event) as $handler) {
             $associationValue = $handler->getAssociationValue($event);
-            if ($target->getAssociationValues()->contains($associationValue)) {                
+            if ($target->getAssociationValues()->contains($associationValue)) {
                 return $handler;
             }
         }

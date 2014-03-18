@@ -68,6 +68,8 @@ class GovernorFrameworkExtension extends Extension
                 $definition->addArgument(new Reference('governor.serializer'));
                 break;
         }
+        
+        $definition->addMethodCall('setLogger', array(new Reference('logger')));
 
         $container->setDefinition($serviceId, $definition);
         $container->setAlias('governor.saga_repository', $serviceId);
@@ -100,6 +102,7 @@ class GovernorFrameworkExtension extends Extension
         $definition->addArgument(new Reference('governor.saga_repository'));
         $definition->addArgument(new Reference('governor.saga_factory'));
         $definition->addArgument($container->getParameter('governor.sagas'));
+        $definition->addMethodCall('setLogger', array(new Reference('logger')));
 
         $container->setDefinition('governor.saga_manager', $definition);
     }

@@ -9,6 +9,7 @@
 namespace Governor\Framework\Saga;
 
 use Governor\Framework\Domain\EventMessageInterface;
+
 /**
  * Description of GenericSagaFactoryTest
  *
@@ -26,13 +27,13 @@ class GenericSagaFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testSupports()
     {
-        $this->assertTrue($this->testSubject->supports('Governor\Framework\Saga\SupportedSaga'));
-        $this->assertFalse($this->testSubject->supports('Governor\Framework\Saga\UnsupportedSaga'));
+        $this->assertTrue($this->testSubject->supports(SupportedSaga::class));
+        $this->assertFalse($this->testSubject->supports(UnsupportedSaga::class));
     }
 
     public function testCreateInstance_Supported()
     {
-        $this->assertNotNull($this->testSubject->createSaga('Governor\Framework\Saga\SupportedSaga'));
+        $this->assertNotNull($this->testSubject->createSaga(SupportedSaga::class));
     }
 
     /**
@@ -40,7 +41,7 @@ class GenericSagaFactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateInstance_Unsupported()
     {
-        $this->testSubject->createSaga('Governor\Framework\Saga\UnsupportedSaga');
+        $this->testSubject->createSaga(UnsupportedSaga::class);
     }
 
 }

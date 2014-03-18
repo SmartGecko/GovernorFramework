@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\Saga;
 
+use JMS\Serializer\Annotation\Type;
 use Doctrine\Common\Comparable;
 
 /**
@@ -18,11 +19,13 @@ class AssociationValue implements Comparable
 {
 
     /**
+     * @Type ("string")
      * @var string
      */
     private $propertyKey;
 
     /**
+     * @Type ("string")
      * @var string
      */
     private $propertyValue;

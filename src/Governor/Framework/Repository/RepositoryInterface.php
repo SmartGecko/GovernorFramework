@@ -10,10 +10,11 @@ interface RepositoryInterface
     public function add(AggregateRootInterface $object);
 
     /**
-     * @param \Rhumsaa\Uuid\Uuid $id
+     * @param mixed $aggregateId
      * @param integer $expectedVersion
      *
      * @return \Governor\Framework\Domain\AggregateRootInterface
+     * @throws AggregateNotFoundException
      */
     public function load($aggregateId, $expectedVersion = null);
 

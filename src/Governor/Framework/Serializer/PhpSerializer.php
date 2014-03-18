@@ -17,14 +17,14 @@ class PhpSerializer extends AbstractSerializer
 {
 
     public function deserialize(SerializedObjectInterface $data)
-    {
+    {        
         return unserialize($data->getData());
     }
 
     public function serialize($object)
     {
-        $result = serialize($object);
-        return new SimpleSerializedObject($result, $this->typeForClass($object));
+        $result = serialize($object);        
+        return new SimpleSerializedObject($result, $this->typeForClass($object));        
     }
 
 }

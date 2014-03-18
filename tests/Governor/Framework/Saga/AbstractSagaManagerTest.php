@@ -32,11 +32,11 @@ class AbstractSagaManagerTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->mockSagaRepository = $this->getMock('Governor\Framework\Saga\SagaRepositoryInterface');
-        $this->mockSagaFactory = $this->getMock('Governor\Framework\Saga\SagaFactoryInterface');
-        $this->mockSaga1 = $this->getMock('Governor\Framework\Saga\SagaInterface');
-        $this->mockSaga2 = $this->getMock('Governor\Framework\Saga\SagaInterface');
-        $this->mockSaga3 = $this->getMock('Governor\Framework\Saga\SagaInterface');
+        $this->mockSagaRepository = $this->getMock(SagaRepositoryInterface::class);
+        $this->mockSagaFactory = $this->getMock(SagaFactoryInterface::class);
+        $this->mockSaga1 = $this->getMock(SagaInterface::class);
+        $this->mockSaga2 = $this->getMock(SagaInterface::class);
+        $this->mockSaga3 = $this->getMock(SagaInterface::class);
         $this->associationValue = new AssociationValue("association", "value");
         $this->associationValues = new AssociationValuesImpl();
         $this->associationValues->add($this->associationValue);
@@ -101,6 +101,8 @@ class AbstractSagaManagerTest extends \PHPUnit_Framework_TestCase
                 $this->mockSagaFactory,
                 array('Governor\Framework\Saga\SagaInterface'),
                 $this->sagaCreationPolicy, $this->associationValue);
+        
+        $this->testSubject->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
     }
 
     public function testSagasLoadedAndCommitted()

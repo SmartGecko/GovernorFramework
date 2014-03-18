@@ -16,6 +16,7 @@ namespace Governor\Framework\Common\Property;
 class PropertyAccessStrategy
 {
 
+    // !!! TODO consolidate and refactor 
     public static function getProperty($target, $propertyName)
     {
         $reflClass = new \ReflectionClass($target);
@@ -24,7 +25,7 @@ class PropertyAccessStrategy
             $methodName = sprintf('%s%s', $prefix, ucfirst($propertyName));
 
             foreach ($reflClass->getMethods() as $method) {
-                if (0 === strcmp($method->getName(), $methodName)) {
+                if (0 === strcmp($method->getName(), $methodName)) {                     
                     return new ResolvedProperty($method);                    
                 }
             }

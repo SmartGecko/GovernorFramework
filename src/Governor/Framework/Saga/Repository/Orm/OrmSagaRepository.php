@@ -8,6 +8,8 @@
 
 namespace Governor\Framework\Saga\Repository\Orm;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerAwareInterface;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
@@ -23,7 +25,7 @@ use Governor\Framework\Serializer\SimpleSerializedType;
  *
  * @author david
  */
-class OrmSagaRepository extends AbstractSagaRepository
+class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInterface
 {
 
     /**
@@ -41,6 +43,11 @@ class OrmSagaRepository extends AbstractSagaRepository
      */
     private $serializer;
     private $useExplicitFlush;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * Initializes a Saga Repository. 
@@ -61,7 +68,7 @@ class OrmSagaRepository extends AbstractSagaRepository
     }
 
     public function load($sagaId)
-    {        
+    {
         try {
             $result = $this->entityManager->createQuery("SELECT se FROM Governor\Framework\Saga\Repository\Orm\SagaEntry se WHERE se.sagaId = :sagaId")
                             ->setParameter(":sagaId", $sagaId)->getSingleResult();
@@ -75,9 +82,10 @@ class OrmSagaRepository extends AbstractSagaRepository
             if (null !== $this->injector) {
                 $this->injector->injectResources($loadedSaga);
             }
-            // if (logger.isDebugEnabled()) {
-            // logger.debug("Loaded saga id [{}] of type [{}]", sagaId, loadedSaga.getClass().getName());
-            // }
+
+            $this->logger->debug("Loaded saga id [{id}] of type [{type}]",
+                    array('id' => $sagaId, 'type' => get_class($loadedSaga)));
+
             return $loadedSaga;
         } catch (\Doctrine\ORM\NoResultException $ex) {
             return null;
@@ -96,12 +104,11 @@ class OrmSagaRepository extends AbstractSagaRepository
                             ':associationValue' => $associationValue->getPropertyValue(),
                             ':sagaType' => $sagaType, ':sagaId' => $sagaIdentifier))->execute();
 
-        /*         * if (0 === $updateCount && logger.isWarnEnabled()) {
-          logger.warn("Wanted to remove association value, but it was already gone: sagaId= {}, key={}, value={}",
-          new Object[]{sagaIdentifier,
-          associationValue.getKey(),
-          associationValue.getValue()});
-          } */
+        if (0 === $updateCount) {
+            $this->logger->warning("Wanted to remove association value, but it was already gone: sagaId= {sagaId}, key={key}, value={value}",
+                    array('sagaId' => $sagaIdentifier, 'key' => $associationValue->getPropertyKey(),
+                'value' => $associationValue->getPropertyValue()));
+        }
     }
 
     protected function typeOf($sagaClass)
@@ -147,8 +154,8 @@ class OrmSagaRepository extends AbstractSagaRepository
             $this->entityManager->createQuery("DELETE FROM Governor\Framework\Saga\Repository\Orm\SagaEntry se WHERE se.sagaId = :id")
                     ->setParameter(":id", $saga->getSagaIdentifier())->execute();
         } catch (NoResultException $ex) {
-            //   logger.info("Could not delete SagaEntry {}, it appears to have already been deleted.",
-            // saga.getSagaIdentifier());
+            $this->logger->info("Could not delete SagaEntry {id}, it appears to have already been deleted.",
+                    array('id' => $saga->getSagaIdentifier()));
         }
         $this->entityManager->flush();
     }
@@ -156,13 +163,10 @@ class OrmSagaRepository extends AbstractSagaRepository
     protected function updateSaga(SagaInterface $saga)
     {
         $entry = new SagaEntry($saga, $this->serializer);
-        //   if (logger.isDebugEnabled()) {
-        //  logger.debug("Updating saga id {} as {}", saga.getSagaIdentifier(), new String(entry.getSerializedSaga(),
-        //  Charset.forName("UTF-8")));
-        //  }
-        if ($this->useExplicitFlush) {
-            $this->entityManager->flush();
-        }
+
+        $this->logger->debug("Updating saga id {id} as {data}",
+                array('id' => $saga->getSagaIdentifier(), 'data' => $entry->getSerializedSaga()));
+
         $updateCount = $this->entityManager->createQuery(
                                 "UPDATE Governor\Framework\Saga\Repository\Orm\SagaEntry s " .
                                 "SET s.serializedSaga = :serializedSaga, s.revision = :revision " .
@@ -170,10 +174,16 @@ class OrmSagaRepository extends AbstractSagaRepository
                         ->setParameters(array(":serializedSaga" => $entry->getSerializedSaga(),
                             ":revision" => $entry->getRevision(),
                             ":sagaId" => $entry->getSagaId(),
-                            "sagaType" => $entry->getSagaType()))->execute();
+                            ":sagaType" => $entry->getSagaType()))->execute();
+
+        if ($this->useExplicitFlush) {
+            $this->entityManager->flush();
+            $this->entityManager->clear();
+        }
 
         if (0 === $updateCount) {
-            // logger.warn("Expected to be able to update a Saga instance, but no rows were found. Inserting instead.");
+            $this->logger->warning("Expected to be able to update a Saga instance, but no rows were found. Inserting instead.");
+
             $this->entityManager->persist($entry);
             if ($this->useExplicitFlush) {
                 $this->entityManager->flush();
@@ -185,13 +195,18 @@ class OrmSagaRepository extends AbstractSagaRepository
     {
         $entry = new SagaEntry($saga, $this->serializer);
         $this->entityManager->persist($entry);
-        /* if (logger.isDebugEnabled()) {
-          logger.debug("Storing saga id {} as {}", saga.getSagaIdentifier(), new String(entry.getSerializedSaga(),
-          Charset.forName("UTF-8")));
-          } */
+
+        $this->logger->debug("Storing saga id {id} as {data}",
+                array('id' => $saga->getSagaIdentifier(), 'data' => $entry->getSerializedSaga()));
+
         if ($this->useExplicitFlush) {
             $this->entityManager->flush();
         }
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
 }

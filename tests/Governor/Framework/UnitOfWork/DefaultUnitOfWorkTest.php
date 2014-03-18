@@ -36,15 +36,14 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->event1 = new GenericEventMessage(new TestMessage(1));
         $this->event2 = new GenericEventMessage(new TestMessage(1));
-        
-        $this->mockLogger = $this->getMock('Psr\Log\LoggerInterface');
 
+        $this->mockLogger = $this->getMock(\Psr\Log\LoggerInterface::class);
         $this->testSubject = new DefaultUnitOfWork($this->mockLogger);
-        $this->mockEventBus = $this->getMock('Governor\Framework\EventHandling\EventBusInterface');
-        $this->mockAggregateRoot = $this->getMock('Governor\Framework\Domain\AggregateRootInterface');
-        $this->listener1 = $this->getMock('Governor\Framework\EventHandling\EventListenerInterface');
-        $this->listener2 = $this->getMock('Governor\Framework\EventHandling\EventListenerInterface');
-        $this->callback = $this->getMock('Governor\Framework\UnitOfWork\SaveAggregateCallbackInterface');
+        $this->mockEventBus = $this->getMock(\Governor\Framework\EventHandling\EventBusInterface::class);
+        $this->mockAggregateRoot = $this->getMock(\Governor\Framework\Domain\AggregateRootInterface::class);
+        $this->listener1 = $this->getMock(\Governor\Framework\EventHandling\EventListenerInterface::class);
+        $this->listener2 = $this->getMock(\Governor\Framework\EventHandling\EventListenerInterface::class);
+        $this->callback = $this->getMock(SaveAggregateCallbackInterface::class);
         /*
 
           callback = mock(SaveAggregateCallback.class);
@@ -111,7 +110,7 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
     public function testUnitOfWorkRegistersListenerWithParent()
     {
-        $parentUoW = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkInterface');
+        $parentUoW = $this->getMock(UnitOfWorkInterface::class);
         $parentUoW->expects($this->once())
                 ->method('registerListener')
                 ->with($this->anything());
@@ -195,7 +194,7 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
     public function testUnitOfWorkRolledBackOnCommitFailure_ErrorOnPrepareCommit()
     {
-        $mockListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
+        $mockListener = $this->getMock(UnitOfWorkListenerInterface::class);
         $mockListener->expects($this->once())
                 ->method('onPrepareCommit')
                 ->with($this->anything(), $this->anything(), $this->anything())
@@ -229,7 +228,7 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
     public function testUnitOfWorkRolledBackOnCommitFailure_ErrorOnCommitAggregate()
     {
-        $mockListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
+        $mockListener = $this->getMock(UnitOfWorkListenerInterface::class);
 
         $this->callback->expects($this->once())
                 ->method('save')
@@ -273,7 +272,7 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
     public function testUnitOfWorkRolledBackOnCommitFailure_ErrorOnDispatchEvents()
     {
-        $mockListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
+        $mockListener = $this->getMock(UnitOfWorkListenerInterface::class);
 
         $mockListener->expects($this->once())
                 ->method('onEventRegistered')
@@ -318,8 +317,8 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
     public function testUnitOfWorkCleanupDelayedUntilOuterUnitOfWorkIsCleanedUp_InnerCommit()
     {
-        $outerListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
-        $innerListener = $this->getMock('Governor\Framework\UnitOfWork\UnitOfWorkListenerInterface');
+        $outerListener = $this->getMock(UnitOfWorkListenerInterface::class);
+        $innerListener = $this->getMock(UnitOfWorkListenerInterface::class);
 
         $outer = DefaultUnitOfWork::startAndGet($this->mockLogger);
         $inner = DefaultUnitOfWork::startAndGet($this->mockLogger);
@@ -334,7 +333,7 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
                 ->method('onCleanup');
 
         $inner->commit();
-        
+
         //$innerListener->expects($this->at(1))
 
         $outer->commit();
