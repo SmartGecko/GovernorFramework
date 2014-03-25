@@ -10,6 +10,8 @@ namespace Governor\Framework\CommandHandling;
 
 use Governor\Framework\Domain\MetaData;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
+use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
+use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 
 /**
@@ -26,9 +28,10 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()        
+    protected function setUp()
     {
-        $this->commandBus = new SimpleCommandBus($this->getMock('Psr\Log\LoggerInterface'));
+        $this->commandBus = new SimpleCommandBus();
+        $this->commandBus->setLogger($this->getMock('Psr\Log\LoggerInterface'));
     }
 
     /**
@@ -46,7 +49,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
     public function testDispatchCommand_NoHandlerSubscribed()
     {
         $this->commandBus->dispatch(new GenericCommandMessage(new TestCommand('hi'),
-            MetaData::emptyInstance()));
+                MetaData::emptyInstance()));
     }
 
     /**
@@ -56,88 +59,96 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
     {
         $commandHandler = new TestCommandHandler();
         $this->commandBus->subscribe(get_class(new TestCommand('hi')),
-            $commandHandler);
+                $commandHandler);
         $this->commandBus->unsubscribe(get_class(new TestCommand('hi')),
-            $commandHandler);
+                $commandHandler);
 
         $this->commandBus->dispatch(new GenericCommandMessage(new TestCommand('hi'),
-            MetaData::emptyInstance()));
+                MetaData::emptyInstance()));
     }
 
     public function testDispatchCommand_HandlerSubscribed()
     {
         $commandHandler = new TestCommandHandler();
-        $this->commandBus->subscribe('Governor\Framework\CommandHandling\TestCommand',
-            $commandHandler);
- 
+        $this->commandBus->subscribe(TestCommand::class, $commandHandler);
+
         $command = new TestCommand('hi');
-        
+
         $this->commandBus->dispatch(GenericCommandMessage::asCommandMessage($command),
                 new CommandCallback(function ($result) use ($command) {
-                $this->assertEquals ($command, $result->getPayload());                
-            }, function ($exception) {                
-                $this->fail('Exception not expected');
-            }));
+            $this->assertEquals($command, $result->getPayload());
+        },
+                function ($exception) {
+            $this->fail('Exception not expected');
+        }));
     }
 
-   
+    public function testDispatchCommand_ImplicitUnitOfWorkIsCommittedOnReturnValue()
+    {
+        //$spyUnitOfWorkFactory = spy(new DefaultUnitOfWorkFactory());
+        $command = new TestCommand("Say hi!");
+        $test = $this;
+
+        $this->commandBus->subscribe(TestCommand::class,
+                new CallbackCommandHandler(function (CommandMessageInterface $commandMessage,
+                UnitOfWorkInterface $unitOfWork) use ($test) {
+            $test->assertTrue(CurrentUnitOfWork::isStarted());
+            $test->assertTrue($unitOfWork->isStarted());
+            $test->assertNotNull(CurrentUnitOfWork::get());
+            $test->assertNotNull($unitOfWork);
+            $test->assertSame(CurrentUnitOfWork::get(), $unitOfWork);
+            return $commandMessage;
+        }));
+
+        $callback = new CommandCallback(function($result) use ($command) {
+            $this->assertEquals($command, $result->getPayload());
+        },
+                function ($exception) {
+            $this->fail("Did not expect exception");
+        });
+
+
+
+        $this->commandBus->dispatch(GenericCommandMessage::asCommandMessage($command),
+                $callback);
+        //verify(spyUnitOfWorkFactory).createUnitOfWork();
+        $this->assertFalse(CurrentUnitOfWork::isStarted());
+    }
+
+    public function testDispatchCommand_ImplicitUnitOfWorkIsRolledBackOnException()
+    {
+        $command = new TestCommand("Say hi!");
+        $test = $this;
+
+        $this->commandBus->subscribe(TestCommand::class,
+                new CallbackCommandHandler(function (CommandMessageInterface $commandMessage,
+                UnitOfWorkInterface $unitOfWork) use ($test) {
+            $test->assertTrue(CurrentUnitOfWork::isStarted());
+            $test->assertNotNull(CurrentUnitOfWork::get());
+
+            throw new \RuntimeException("exception");
+        }));
+
+        $callback = new CommandCallback(function($result) use ($command) {
+            $this->fail("Did not expect exception");
+        },
+                function ($exception) {
+            $this->assertEquals(\RuntimeException::class, get_class($exception));
+        });
+
+        $this->commandBus->dispatch(GenericCommandMessage::asCommandMessage($command),
+                $callback);
+
+        $this->assertFalse(CurrentUnitOfWork::isStarted());
+    }
+
+    public function testUnsubscribe_HandlerNotKnown()
+    {
+        $this->commandBus->unsubscribe(TestCommand::class,
+                new TestCommandHandler());
+    }
+
     /**
-      @Test
-      public void testDispatchCommand_ImplicitUnitOfWorkIsCommittedOnReturnValue() {
-      UnitOfWorkFactory spyUnitOfWorkFactory = spy(new DefaultUnitOfWorkFactory());
-      testSubject.setUnitOfWorkFactory(spyUnitOfWorkFactory);
-      testSubject.subscribe(String.class.getName(), new CommandHandler<String>() {
-      @Override
-      public Object handle(CommandMessage<String> command, UnitOfWork unitOfWork) throws Throwable {
-      assertTrue(CurrentUnitOfWork.isStarted());
-      assertTrue(unitOfWork.isStarted());
-      assertNotNull(CurrentUnitOfWork.get());
-      assertNotNull(unitOfWork);
-      assertSame(CurrentUnitOfWork.get(), unitOfWork);
-      return command;
-      }
-      });
-      testSubject.dispatch(GenericCommandMessage.asCommandMessage("Say hi!"),
-      new CommandCallback<CommandMessage<?>>() {
-      @Override
-      public void onSuccess(CommandMessage<?> result) {
-      assertEquals("Say hi!", result.getPayload());
-      }
-
-      @Override
-      public void onFailure(Throwable cause) {
-      fail("Did not expect exception");
-      }
-      });
-      verify(spyUnitOfWorkFactory).createUnitOfWork();
-      assertFalse(CurrentUnitOfWork.isStarted());
-      }
-
-      @Test
-      public void testDispatchCommand_ImplicitUnitOfWorkIsRolledBackOnException() {
-      testSubject.subscribe(String.class.getName(), new CommandHandler<String>() {
-      @Override
-      public Object handle(CommandMessage<String> command, UnitOfWork unitOfWork) throws Throwable {
-      assertTrue(CurrentUnitOfWork.isStarted());
-      assertNotNull(CurrentUnitOfWork.get());
-      throw new RuntimeException();
-      }
-      });
-      testSubject.dispatch(GenericCommandMessage.asCommandMessage("Say hi!"), new CommandCallback<Object>() {
-      @Override
-      public void onSuccess(Object result) {
-      fail("Expected exception");
-      }
-
-      @Override
-      public void onFailure(Throwable cause) {
-      assertEquals(RuntimeException.class, cause.getClass());
-      }
-      });
-      assertFalse(CurrentUnitOfWork.isStarted());
-      }
-
-
       @Test
       public void testDispatchCommand_UnitOfWorkIsCommittedOnCheckedException() {
       UnitOfWorkFactory mockUnitOfWorkFactory = mock(DefaultUnitOfWorkFactory.class);
@@ -166,14 +177,6 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
       });
 
       verify(mockUnitOfWork).commit();
-      }
-
-
-
-
-      @Test
-      public void testUnsubscribe_HandlerNotKnown() {
-      testSubject.unsubscribe(String.class.getName(), new MyStringCommandHandler());
       }
 
       @SuppressWarnings({"unchecked"})
@@ -337,9 +340,28 @@ class TestCommandHandler implements CommandHandlerInterface
 {
 
     public function handle(CommandMessageInterface $commandMessage,
-        UnitOfWorkInterface $unitOfWork)
+            UnitOfWorkInterface $unitOfWork)
     {
         return $commandMessage;
+    }
+
+}
+
+class CallbackCommandHandler implements CommandHandlerInterface
+{
+
+    private $callback;
+
+    function __construct(\Closure $callback)
+    {
+        $this->callback = $callback;
+    }
+
+    public function handle(CommandMessageInterface $commandMessage,
+            UnitOfWorkInterface $unitOfWork)
+    {
+        $cb = $this->callback;
+        return $cb($commandMessage, $unitOfWork);
     }
 
 }

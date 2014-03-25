@@ -14,7 +14,10 @@ namespace CommandHandlerExample;
 $loader = require_once __DIR__ . "/../vendor/autoload.php";
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 use Rhumsaa\Uuid\Uuid;
+use JMS\Serializer\Annotation\Type;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
@@ -31,7 +34,7 @@ use Governor\Framework\EventSourcing\GenericAggregateFactory;
 use Governor\Framework\Repository\NullLockManager;
 use Governor\Framework\Repository\RepositoryInterface;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
-use Governor\Framework\Serializer\PhpSerializer;
+use Governor\Framework\Serializer\JMSSerializer;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 
 AnnotationRegistry::registerLoader(array($loader, "loadClass"));
@@ -104,11 +107,13 @@ abstract class AbstractUserEvent
 {
 
     /**
+     * @Type("string")
      * @var string
      */
     private $identifier;
 
     /**
+     * @Type("string")
      * @var string
      */
     private $email;
@@ -215,8 +220,14 @@ class UserEventListener implements EventListenerInterface
 
 }
 
+// set up logging 
+$logger = new Logger('governor');
+$logger->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG));
+
+
 // 1. create a command bus and command gateway
 $commandBus = new SimpleCommandBus();
+$commandBus->setLogger($logger);
 $commandGateway = new DefaultCommandGateway($commandBus);
 
 $rootDirectory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'CommandHandlerExample';
@@ -225,10 +236,11 @@ echo sprintf("Initializing FileSystemEventStore in %s\n", $rootDirectory);
 
 // 2. initialize the event store
 $eventStore = new FilesystemEventStore(new SimpleEventFileResolver($rootDirectory),
-    new PhpSerializer());
+    new JMSSerializer());
 
 // 3. create the event bus
 $eventBus = new SimpleEventBus();
+$eventBus->setLogger($logger);
 
 // 4. create an event sourcing repository
 $repository = new EventSourcingRepository('CommandHandlerExample\User',
@@ -255,8 +267,10 @@ $commandGateway->send(new ChangeUserEmailCommand($aggregateIdentifier,
     'newemail@davidkalosi.com'));
 
 //8. read back aggregate from store
-$uow = DefaultUnitOfWork::startAndGet();
+$uow = DefaultUnitOfWork::startAndGet($logger);
 $aggregate = $repository->load($aggregateIdentifier);
 echo sprintf("User identifier:%s, email:%s, version:%s",
     $aggregate->getIdentifier(), $aggregate->getEmail(),
     $aggregate->getVersion());
+
+$uow->commit();

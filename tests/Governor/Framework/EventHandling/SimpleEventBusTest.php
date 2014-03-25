@@ -33,6 +33,7 @@ class SimpleEventBusTest extends \PHPUnit_Framework_TestCase
             array('handle'));
 
         $this->testSubject = new SimpleEventBus();
+        $this->testSubject->setLogger($this->getMock('Psr\Log\LoggerInterface'));
     }
 
     public function testEventIsDispatchedToSubscribedListeners()

@@ -72,7 +72,7 @@
 
 
         <!-- aggregate factory -->
-        <service id="governor.aggregate_factory" class="%governor.aggregate_factory.generic.class%">            
+        <service id="governor.aggregate_factory" class="%governor.aggregate_factory.generic.class%">
         </service>
 
         <!-- saga factory -->
@@ -85,11 +85,15 @@
         </service>
 
         <service id="governor.command_bus" class="%governor.command_bus.class%">
-            <argument type="service" id="logger"/>
+            <call method="setLogger">
+                <argument type="service" id="logger" />
+            </call>
         </service>
 
         <service id="governor.event_bus" class="%governor.event_bus.class%">
-            <argument type="service" id="logger"/>
+            <call method="setLogger">
+                <argument type="service" id="logger" />
+            </call>
         </service>
 
         <!-- serializers -->

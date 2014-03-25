@@ -10,7 +10,8 @@
         "psr/log": "@stable",
         "php": ">=5.3",        
         "symfony/proxy-manager-bridge":">=2.4",
-        "ocramius/proxy-manager": "0.5.*"
+        "ocramius/proxy-manager": "0.5.*",
+        "monolog/monolog": "1.8.0"
     },
     "require-dev": {
         "doctrine/common": ">=2.0,<2.5",

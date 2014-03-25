@@ -30,7 +30,7 @@ class LockingRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->mockLogger = $this->getMock('Psr\Log\LoggerInterface');
+        $this->mockLogger = $this->getMock(\Psr\Log\LoggerInterface::class);
         $this->mockEventBus = $this->getMock('Governor\Framework\EventHandling\EventBusInterface');
         $this->lockManager = $this->getMock('Governor\Framework\Repository\NullLockManager'); // new NullLockManager(); //spy(new OptimisticLockManager());        
 
