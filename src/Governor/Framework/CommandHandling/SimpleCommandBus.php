@@ -27,6 +27,7 @@ namespace Governor\Framework\CommandHandling;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
+use Governor\Framework\CommandHandling\Callbacks\NoOpCallback;
 
 /**
  * Simple command bus implementation.
@@ -37,7 +38,7 @@ use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
 {
 
-    /**     
+    /**
      * @var array
      */
     private $subscriptions = array();
@@ -53,25 +54,19 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     }
 
     public function dispatch(CommandMessageInterface $command,
-            CommandCallback $callback = null)
+            CommandCallbackInterface $callback = null)
     {
         $handler = $this->findCommandHandlerFor($command);
 
         if (null === $callback) {
-            $callback = new CommandCallback(function($result) {
-                
-            }, function ($err) {
-                
-            });
+            $callback = new NoOpCallback();
         }
 
         try {
             $result = $this->doDispatch($command, $handler);
             $callback->onSuccess($result);
-        } catch (\Exception $ex) {            
-            $callback->onFailure($ex);        
-            // !!! TODO remove the throw and reimplement error handling in command gateway
-            throw $ex;
+        } catch (\Exception $ex) {
+            $callback->onFailure($ex);
         }
     }
 

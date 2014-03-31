@@ -10,6 +10,7 @@ namespace Governor\Framework\CommandHandling;
 
 use Governor\Framework\Domain\MetaData;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
+use Governor\Framework\CommandHandling\Callbacks\ClosureCommandCallback;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
@@ -75,7 +76,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
         $command = new TestCommand('hi');
 
         $this->commandBus->dispatch(GenericCommandMessage::asCommandMessage($command),
-                new CommandCallback(function ($result) use ($command) {
+                new ClosureCommandCallback(function ($result) use ($command) {
             $this->assertEquals($command, $result->getPayload());
         },
                 function ($exception) {
@@ -100,7 +101,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
             return $commandMessage;
         }));
 
-        $callback = new CommandCallback(function($result) use ($command) {
+        $callback = new ClosureCommandCallback(function($result) use ($command) {
             $this->assertEquals($command, $result->getPayload());
         },
                 function ($exception) {
@@ -129,7 +130,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
             throw new \RuntimeException("exception");
         }));
 
-        $callback = new CommandCallback(function($result) use ($command) {
+        $callback = new ClosureCommandCallback(function($result) use ($command) {
             $this->fail("Did not expect exception");
         },
                 function ($exception) {

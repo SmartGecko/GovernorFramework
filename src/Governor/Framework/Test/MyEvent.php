@@ -22,48 +22,40 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling;
+namespace Governor\Framework\Test;
 
 /**
- * The callback is invoked when a command handler execution has finished. 
- * Depending on the outcome of the execution either the success or failure Closure function is invoked.
+ * Description of MyEvent
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-final class CommandCallback
+class MyEvent
 {
 
-    private $successCallback;
-    private $failureCallback;
+    private $someScalar;
+    private $someObject;
+    private $someArray;
 
-    public function __construct(\Closure $successCallback,
-        \Closure $failureCallback)
+    public function __construct($someScalar, $someObject, array $someArray)
     {
-        $this->successCallback = $successCallback;
-        $this->failureCallback = $failureCallback;
+        $this->someScalar = $someScalar;
+        $this->someObject = $someObject;
+        $this->someArray = $someArray;
     }
 
-    /**
-     * Invoked when command handling execution was successful.
-     *
-     * @param mixed $result The result of the command handling execution, if any.
-     */
-    public function onSuccess($result)
+    public function getSomeScalar()
     {
-        $cb = $this->successCallback;
-        $cb($result);
+        return $this->someScalar;
     }
 
-    /**
-     * Invoked when command handling execution resulted in an error.
-     *
-     * @param \Exception $exception The exception raised during command handling
-     */
-    public function onFailure($exception)
+    public function getSomeObject()
     {
-        $cb = $this->failureCallback;
-        $cb($exception);
+        return $this->someObject;
+    }
+
+    public function getSomeArray()
+    {
+        return $this->someArray;
     }
 
 }

@@ -11,7 +11,7 @@ interface CommandBusInterface
 {
 
     public function dispatch(CommandMessageInterface $command,
-        CommandCallback $callback = null);    
+        CommandCallbackInterface $callback = null);    
 
     /**
      * Subscribe the given <code>handler</code> to commands of type <code>commandType</code>.
