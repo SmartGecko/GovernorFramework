@@ -1,9 +1,25 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\CommandHandling;
@@ -24,8 +40,8 @@ class GenericCommandMessage implements CommandMessageInterface
     private $payload;
     private $metaData;
 
-    public function __construct($payload, MetaData $metaData, $id = null,
-        $commandName = null)
+    public function __construct($payload, MetaData $metaData = null, $id = null,
+            $commandName = null)
     {
         $this->id = (null === $id) ? Uuid::uuid1()->toString() : $id;
         $this->commandName = (null === $commandName) ? get_class($payload) : $commandName;
@@ -37,7 +53,7 @@ class GenericCommandMessage implements CommandMessageInterface
     {
         if (!is_object($command)) {
             throw new \InvalidArgumentException(sprintf('Commands must be objects but recieved an %s',
-                get_type($command)));
+                    get_type($command)));
         }
 
         if ($command instanceof CommandMessageInterface) {
@@ -53,8 +69,8 @@ class GenericCommandMessage implements CommandMessageInterface
             return $this;
         }
         return new GenericCommandMessage($this->payload,
-            $this->metaData->mergedWith($metadata), $this->id,
-            $this->commandName);
+                $this->metaData->mergeWith($metadata), $this->id,
+                $this->commandName);
     }
 
     public function getCommandName()
@@ -88,7 +104,7 @@ class GenericCommandMessage implements CommandMessageInterface
             return $this;
         }
         return new GenericCommandMessage($this->payload,
-            new MetaData($metadata), $this->id, $this->commandName);
+                new MetaData($metadata), $this->id, $this->commandName);
     }
 
 }

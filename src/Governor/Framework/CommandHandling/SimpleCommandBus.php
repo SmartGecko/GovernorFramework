@@ -48,6 +48,11 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
      */
     private $logger;
 
+    /**
+     * @var array
+     */
+    private $handlerInterceptors = array();
+
     public function __construct()
     {
         
@@ -76,9 +81,11 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
         $this->logger->debug("Dispatching command [{name}]",
                 array('name' => $command->getCommandName()));
         $unitOfWork = DefaultUnitOfWork::startAndGet($this->logger);
+        $chain = new DefaultInterceptorChain($command, $unitOfWork, $handler,
+                $this->handlerInterceptors);
 
         try {
-            $return = $handler->handle($command, $unitOfWork);
+            $return = $chain->proceed(); //$handler->handle($command, $unitOfWork);
         } catch (\Exception $ex) {
             $unitOfWork->rollback();
             throw $ex;
@@ -87,6 +94,17 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
         $unitOfWork->commit();
 
         return $return;
+    }
+
+    /**
+     * Registers the given list of interceptors to the command bus. All incoming commands will pass through the
+     * interceptors at the given order before the command is passed to the handler for processing.
+     *
+     * @param array $handlerInterceptors The interceptors to invoke when commands are handled
+     */
+    public function setHandlerInterceptors(array $handlerInterceptors)
+    {
+        $this->handlerInterceptors = $handlerInterceptors;
     }
 
     public function findCommandHandlerFor(CommandMessageInterface $command)

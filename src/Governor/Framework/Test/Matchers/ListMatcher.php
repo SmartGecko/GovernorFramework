@@ -122,7 +122,7 @@ abstract class ListMatcher extends BaseMatcher
         $this->describeCollectionType($description);
         $description->appendText(" of: ");
 
-        for ($t = 0; $t < count($this->matchers); $t++) {
+        for ($t = 0; $t < count($this->matchers); $t++) {            
             if ($t !== 0 && $t < count($this->matchers) - 1) {
                 $description->appendText(", ");
             } else if ($t === count($this->matchers) - 1 && $t > 0) {
@@ -130,10 +130,12 @@ abstract class ListMatcher extends BaseMatcher
                 $description->appendText($this->getLastSeparator());
                 $description->appendText(" ");
             }
+            
             $description->appendText("<");
             $this->matchers[$t]->describeTo($description);
             $description->appendText(">");
-            if (in_array($this->matchers[$t], $this->failedMatchers)) {
+
+            if (in_array($this->matchers[$t], $this->failedMatchers, true)) {
                 $description->appendText(" (");
                 $description->appendText($this->failedMatcherMessage());
                 $description->appendText(")");

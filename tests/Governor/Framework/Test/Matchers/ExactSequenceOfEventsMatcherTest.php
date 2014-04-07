@@ -25,6 +25,8 @@
 namespace Governor\Framework\Test\Matchers;
 
 use Hamcrest\Matcher;
+use Hamcrest\Description;
+use Hamcrest\StringDescription;
 
 /**
  * Description of ExactSequenceOfEventsMatcherTest
@@ -47,12 +49,12 @@ class ExactSequenceOfEventsMatcherTest extends \PHPUnit_Framework_TestCase
         $this->mockMatcher1 = \Phake::mock(Matcher::class);
         $this->mockMatcher2 = \Phake::mock(Matcher::class);
         $this->mockMatcher3 = \Phake::mock(Matcher::class);
-        $this->testSubject = Matchers::sequenceOf(array($this->mockMatcher1,
+        $this->testSubject = Matchers::exactSequenceOf(array($this->mockMatcher1,
                     $this->mockMatcher2, $this->mockMatcher3));
-        
-        $this->stubEvent1 = new StubEvent();
-        $this->stubEvent2 = new StubEvent();
-        $this->stubEvent3 = new StubEvent();
+
+        $this->stubEvent1 = new StubEvent1();
+        $this->stubEvent2 = new StubEvent2();
+        $this->stubEvent3 = new StubEvent3();
 
         \Phake::when($this->mockMatcher1)->matches(\Phake::anyParameters())->thenReturn(true);
         \Phake::when($this->mockMatcher2)->matches(\Phake::anyParameters())->thenReturn(true);
@@ -65,152 +67,154 @@ class ExactSequenceOfEventsMatcherTest extends \PHPUnit_Framework_TestCase
                     $this->stubEvent3)));
 
         \Phake::verify($this->mockMatcher1, \Phake::times(1))->matches($this->stubEvent1);
-     //   \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent2);
-      //  \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent3);
-        
-        /*
-          verify(mockMatcher1).matches(stubEvent1);
-          verify(mockMatcher1, never()).matches(stubEvent2);
-          verify(mockMatcher1, never()).matches(stubEvent3);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent3);
 
-          verify(mockMatcher2, never()).matches(stubEvent1);
-          verify(mockMatcher2).matches(stubEvent2);
-          verify(mockMatcher2, never()).matches(stubEvent3);
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher2, \Phake::times(1))->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent3);
 
-          verify(mockMatcher3, never()).matches(stubEvent1);
-          verify(mockMatcher3, never()).matches(stubEvent2);
-          verify(mockMatcher3).matches(stubEvent3); */
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher3, \Phake::times(1))->matches($this->stubEvent3);
     }
 
     public function testMatch_FullMatchAndNoMore()
     {
-        /*  $this->testSubject = Matchers::exactSequenceOf(array($this->mockMatcher1,
-          $this->mockMatcher2, $this->mockMatcher3, Matchers::andNoMore()));
-          $this->assertTrue($this->testSubject->matches(array($this->stubEvent1, $this->stubEvent2,
-          $this->stubEvent3)));
-          /*
-          verify(mockMatcher1).matches(stubEvent1);
-          verify(mockMatcher1, never()).matches(stubEvent2);
-          verify(mockMatcher1, never()).matches(stubEvent3);
+        $this->testSubject = Matchers::exactSequenceOf(array($this->mockMatcher1,
+                    $this->mockMatcher2, $this->mockMatcher3, Matchers::andNoMore()));
+        $this->assertTrue($this->testSubject->matches(array($this->stubEvent1, $this->stubEvent2,
+                    $this->stubEvent3)));
 
-          verify(mockMatcher2, never()).matches(stubEvent1);
-          verify(mockMatcher2).matches(stubEvent2);
-          verify(mockMatcher2, never()).matches(stubEvent3);
+        \Phake::verify($this->mockMatcher1, \Phake::times(1))->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent3);
 
-          verify(mockMatcher3, never()).matches(stubEvent1);
-          verify(mockMatcher3, never()).matches(stubEvent2);
-          verify(mockMatcher3).matches(stubEvent3); */
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher2, \Phake::times(1))->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent3);
+
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher3, \Phake::times(1))->matches($this->stubEvent3);
     }
 
     public function testMatch_ExcessIsRefused()
     {
-        /* $this->testSubject = Matchers::exactSequenceOf(array($this->mockMatcher1,
-          $this->mockMatcher2, $this->mockMatcher3, Matchers::andNoMore()));
-          $this->assertFalse($this->testSubject->matches(array($this->stubEvent1, $this->stubEvent2,
-          $this->stubEvent3, new StubEvent())));
+        $this->testSubject = Matchers::exactSequenceOf(array($this->mockMatcher1,
+                    $this->mockMatcher2, $this->mockMatcher3, Matchers::andNoMore()));
+        $this->assertFalse($this->testSubject->matches(array($this->stubEvent1, $this->stubEvent2,
+                    $this->stubEvent3, new StubEvent())));
 
-          /*  verify(mockMatcher1).matches(stubEvent1);
-          verify(mockMatcher1, never()).matches(stubEvent2);
-          verify(mockMatcher1, never()).matches(stubEvent3);
+        \Phake::verify($this->mockMatcher1, \Phake::times(1))->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent3);
 
-          verify(mockMatcher2, never()).matches(stubEvent1);
-          verify(mockMatcher2).matches(stubEvent2);
-          verify(mockMatcher2, never()).matches(stubEvent3);
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher2, \Phake::times(1))->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent3);
 
-          verify(mockMatcher3, never()).matches(stubEvent1);
-          verify(mockMatcher3, never()).matches(stubEvent2);
-          verify(mockMatcher3).matches(stubEvent3); */
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher3, \Phake::times(1))->matches($this->stubEvent3);
     }
 
-    /*
-      @Test
-      public void testMatch_FullMatchWithGaps() {
-      reset(mockMatcher2);
-      when(mockMatcher2.matches(any())).thenReturn(false);
+    public function testMatch_FullMatchWithGaps()
+    {
+        \Phake::reset($this->mockMatcher2);
+        \Phake::when($this->mockMatcher2)->matches(\Phake::anyParameters())->thenReturn(false);
 
-      assertFalse(testSubject.matches(Arrays.asList(stubEvent1, stubEvent2, stubEvent3)));
 
-      verify(mockMatcher1).matches(stubEvent1);
-      verify(mockMatcher1, never()).matches(stubEvent2);
-      verify(mockMatcher1, never()).matches(stubEvent3);
+        $this->assertFalse($this->testSubject->matches(array($this->stubEvent1, $this->stubEvent2,
+                    $this->stubEvent3)));
 
-      verify(mockMatcher2, never()).matches(stubEvent1);
-      verify(mockMatcher2).matches(stubEvent2);
-      verify(mockMatcher2, never()).matches(stubEvent3);
+        \Phake::verify($this->mockMatcher1, \Phake::times(1))->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent3);
 
-      verify(mockMatcher3, never()).matches(any());
-      }
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher2, \Phake::times(1))->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent3);
 
-      @Test
-      public void testMatch_MoreMatchersThanEvents() {
-      when(mockMatcher3.matches(null)).thenReturn(false);
-      assertFalse(testSubject.matches(Arrays.asList(stubEvent1, stubEvent2)));
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches(\Phake::anyParameters());
+    }
 
-      verify(mockMatcher1).matches(stubEvent1);
-      verify(mockMatcher1, never()).matches(stubEvent2);
-      verify(mockMatcher2, never()).matches(stubEvent1);
-      verify(mockMatcher2).matches(stubEvent2);
-      verify(mockMatcher3, never()).matches(stubEvent1);
-      verify(mockMatcher3, never()).matches(stubEvent2);
-      verify(mockMatcher3).matches(null);
-      }
+    public function testMatch_MoreMatchersThanEvents()
+    {
+        \Phake::when($this->mockMatcher3)->matches(null)->thenReturn(false);
+        $this->assertFalse($this->testSubject->matches(array($this->stubEvent1, $this->stubEvent2)));
 
-      @Test
-      public void testMatch_ExcessEventsIgnored() {
-      assertTrue(testSubject.matches(Arrays.asList(stubEvent1, stubEvent2, stubEvent3, new StubEvent())));
+        \Phake::verify($this->mockMatcher1, \Phake::times(1))->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent2);
 
-      verify(mockMatcher1).matches(stubEvent1);
-      verify(mockMatcher1, never()).matches(stubEvent2);
-      verify(mockMatcher2, never()).matches(stubEvent1);
-      verify(mockMatcher2).matches(stubEvent2);
-      verify(mockMatcher3, never()).matches(stubEvent1);
-      verify(mockMatcher3, never()).matches(stubEvent2);
-      verify(mockMatcher3).matches(stubEvent3);
-      }
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher2, \Phake::times(1))->matches($this->stubEvent2);
 
-      @Test
-      public void testDescribe() {
-      testSubject.matches(Arrays.asList(stubEvent1, stubEvent2));
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher3, \Phake::times(1))->matches(null);
+    }
 
-      doAnswer(new DescribingAnswer("A")).when(mockMatcher1).describeTo(isA(Description.class));
-      doAnswer(new DescribingAnswer("B")).when(mockMatcher2).describeTo(isA(Description.class));
-      doAnswer(new DescribingAnswer("C")).when(mockMatcher3).describeTo(isA(Description.class));
-      StringDescription description = new StringDescription();
-      testSubject.describeTo(description);
-      String actual = description.toString();
-      assertEquals("list with exact sequence of: <A>, <B> and <C>", actual);
-      }
+    public function testMatch_ExcessEventsIgnored()
+    {
+        $this->assertTrue($this->testSubject->matches(array($this->stubEvent1, $this->stubEvent2,
+                    $this->stubEvent3,
+                    new StubEvent())));
 
-      @Test
-      public void testDescribe_OneMatcherFailed() {
-      when(mockMatcher1.matches(any())).thenReturn(true);
-      when(mockMatcher2.matches(any())).thenReturn(false);
-      when(mockMatcher3.matches(any())).thenReturn(false);
+        \Phake::verify($this->mockMatcher1, \Phake::times(1))->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher1, \Phake::never())->matches($this->stubEvent2);
 
-      testSubject.matches(Arrays.asList(stubEvent1, stubEvent2));
+        \Phake::verify($this->mockMatcher2, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher2, \Phake::times(1))->matches($this->stubEvent2);
 
-      doAnswer(new DescribingAnswer("A")).when(mockMatcher1).describeTo(isA(Description.class));
-      doAnswer(new DescribingAnswer("B")).when(mockMatcher2).describeTo(isA(Description.class));
-      doAnswer(new DescribingAnswer("C")).when(mockMatcher3).describeTo(isA(Description.class));
-      StringDescription description = new StringDescription();
-      testSubject.describeTo(description);
-      String actual = description.toString();
-      assertEquals("list with exact sequence of: <A>, <B> (FAILED!) and <C>", actual);
-      }
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent1);
+        \Phake::verify($this->mockMatcher3, \Phake::never())->matches($this->stubEvent2);
+        \Phake::verify($this->mockMatcher3, \Phake::times(1))->matches($this->stubEvent3);
+    }
 
-      private static class DescribingAnswer implements Answer<Object> {
-      private String description;
+    public function testDescribe()
+    {
+        $this->testSubject->matches(array($this->stubEvent1, $this->stubEvent2));
 
-      public DescribingAnswer(String description) {
-      this.description = description;
-      }
+        \Phake::when($this->mockMatcher1)->describeTo(\Phake::anyParameters())->thenGetReturnByLambda(function (Description $description) {
+            $description->appendText("A");
+        });
+        \Phake::when($this->mockMatcher2)->describeTo(\Phake::anyParameters())->thenGetReturnByLambda(function (Description $description) {
+            $description->appendText("B");
+        });
+        \Phake::when($this->mockMatcher3)->describeTo(\Phake::anyParameters())->thenGetReturnByLambda(function (Description $description) {
+            $description->appendText("C");
+        });
 
-      @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
-      Description descriptionParameter = (Description) invocation.getArguments()[0];
-      descriptionParameter.appendText(this.description);
-      return Void.class;
-      }
-      }
-     */
+        $description = new StringDescription();
+        $this->testSubject->describeTo($description);
+        $actual = $description->__toString();
+        $this->assertEquals("list with exact sequence of: <A>, <B> and <C>",
+                $actual);
+    }
+
+    public function testDescribe_OneMatcherFailed()
+    {
+        \Phake::when($this->mockMatcher1)->matches(\Phake::anyParameters())->thenReturn(true);
+        \Phake::when($this->mockMatcher2)->matches(\Phake::anyParameters())->thenReturn(false);
+        \Phake::when($this->mockMatcher3)->matches(\Phake::anyParameters())->thenReturn(false);
+
+        $this->testSubject->matches(array($this->stubEvent1, $this->stubEvent2));
+
+        \Phake::when($this->mockMatcher1)->describeTo(\Phake::anyParameters())->thenGetReturnByLambda(function (Description $description) {
+            $description->appendText("A");
+        });
+        \Phake::when($this->mockMatcher2)->describeTo(\Phake::anyParameters())->thenGetReturnByLambda(function (Description $description) {
+            $description->appendText("B");
+        });
+        \Phake::when($this->mockMatcher3)->describeTo(\Phake::anyParameters())->thenGetReturnByLambda(function (Description $description) {
+            $description->appendText("C");
+        });
+        $description = new StringDescription();
+        $this->testSubject->describeTo($description);
+        $actual = $description->__toString();
+        $this->assertEquals("list with exact sequence of: <A>, <B> (FAILED!) and <C>",
+                $actual);
+    }
+
 }

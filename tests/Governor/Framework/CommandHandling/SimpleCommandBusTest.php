@@ -178,15 +178,16 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
       });
 
       verify(mockUnitOfWork).commit();
-      }
+      }*/
 
-      @SuppressWarnings({"unchecked"})
-      @Test
-      public void testInterceptorChain_CommandHandledSuccessfully() throws Throwable {
-      CommandHandlerInterceptor mockInterceptor1 = mock(CommandHandlerInterceptor.class);
-      final CommandHandlerInterceptor mockInterceptor2 = mock(CommandHandlerInterceptor.class);
-      final CommandHandler<String> commandHandler = mock(CommandHandler.class);
-      when(mockInterceptor1.handle(isA(CommandMessage.class), isA(UnitOfWork.class), isA(InterceptorChain.class)))
+      
+      public function testInterceptorChain_CommandHandledSuccessfully() 
+              {
+      $mockInterceptor1 = $this->getMock(CommandHandlerInterceptorInterface::class);
+      $mockInterceptor2 = $this->getMock(CommandHandlerInterceptorInterface::class);
+      $commandHandler = $this->getMock(CommandHandlerInterface::class);
+      
+     /* when(mockInterceptor1.handle(isA(CommandMessage.class), isA(UnitOfWork.class), isA(InterceptorChain.class)))
       .thenAnswer(new Answer<Object>() {
       @Override
       public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -195,6 +196,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
       (InterceptorChain) invocation.getArguments()[2]);
       }
       });
+      
       when(mockInterceptor2.handle(isA(CommandMessage.class), isA(UnitOfWork.class), isA(InterceptorChain.class)))
       .thenAnswer(new Answer<Object>() {
       @Override
@@ -224,9 +226,10 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
       isA(UnitOfWork.class), isA(InterceptorChain.class));
       inOrder.verify(mockInterceptor2).handle(isA(CommandMessage.class),
       isA(UnitOfWork.class), isA(InterceptorChain.class));
-      inOrder.verify(commandHandler).handle(isA(GenericCommandMessage.class), isA(UnitOfWork.class));
+      inOrder.verify(commandHandler).handle(isA(GenericCommandMessage.class), isA(UnitOfWork.class));*/
       }
 
+      /*
       @SuppressWarnings({"unchecked", "ThrowableInstanceNeverThrown"})
       @Test
       public void testInterceptorChain_CommandHandlerThrowsException() throws Throwable {
