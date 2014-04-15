@@ -42,8 +42,7 @@ class EqualFieldsMatcherTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->expectedEvent = new MyEvent($this->aggregateId, new \stdClass(),
-                array("a" => "b"));
+        $this->expectedEvent = new MyEvent($this->aggregateId, array("a" => "b"));
         $this->testSubject = Matchers::equalTo($this->expectedEvent);
     }
 
@@ -55,7 +54,7 @@ class EqualFieldsMatcherTest extends \PHPUnit_Framework_TestCase
     public function testMatches_EqualInstance()
     {
         $this->assertTrue($this->testSubject->matches(new MyEvent($this->aggregateId,
-                        new \stdClass(), array("a" => "b"))));
+                        array("a" => "b"))));
     }
 
     public function testMatches_WrongEventType()
@@ -66,15 +65,15 @@ class EqualFieldsMatcherTest extends \PHPUnit_Framework_TestCase
     public function testMatches_WrongFieldValue()
     {
         $this->assertFalse($this->testSubject->matches(new MyEvent($this->aggregateId,
-                        (object) array(1), array("a" => "b"))));
-        $this->assertEquals("someObject", $this->testSubject->getFailedField());
+                        array("a" => "c"))));
+        $this->assertEquals("someValue", $this->testSubject->getFailedField());
     }
 
     public function testMatches_WrongFieldValueInArray()
     {
         $this->assertFalse($this->testSubject->matches(new MyEvent($this->aggregateId,
-                        new \stdClass(), array("c" => "d"))));
-        $this->assertEquals("someArray", $this->testSubject->getFailedField());
+                        array("c" => "d"))));
+        $this->assertEquals("someValue", $this->testSubject->getFailedField());
     }
 
     public function testDescription_AfterSuccess()
@@ -98,10 +97,10 @@ class EqualFieldsMatcherTest extends \PHPUnit_Framework_TestCase
     public function testDescription_AfterMatchWithWrongFieldValue()
     {
         $this->testSubject->matches(new MyEvent($this->aggregateId,
-                new \stdClass(), array("c" => "d")));
+                array("c" => "d")));
         $description = new StringDescription();
         $this->testSubject->describeTo($description);
-        $this->assertEquals("Governor\Framework\Test\MyEvent (failed on field 'someArray')",
+        $this->assertEquals("Governor\Framework\Test\MyEvent (failed on field 'someValue')",
                 $description->__toString());
     }
 

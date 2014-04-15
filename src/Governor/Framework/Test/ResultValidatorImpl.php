@@ -50,7 +50,7 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
         $this->reporter = new Reporter();
     }
 
-    public function expectEvents($expectedEvents)
+    public function expectEvents(array $expectedEvents)
     {
         if (count($this->publishedEvents) !== count($this->storedEvents)) {
             $this->reporter->reportDifferenceInStoredVsPublished($this->storedEvents,
@@ -85,7 +85,7 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
         return $this;
     }
 
-    public function expectPublishedEvents($expectedEvents)
+    public function expectPublishedEvents(array $expectedEvents)
     {
         if (count($expectedEvents) !== count($this->publishedEvents)) {
             $this->reporter->reportWrongEvent($this->publishedEvents,
@@ -140,7 +140,7 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
         return $this;
     }
 
-    public function expectStoredEvents($expectedEvents)
+    public function expectStoredEvents(array $expectedEvents)
     {
         if (count($expectedEvents) !== cpunt($this->storedEvents)) {
             $this->reporter->reportWrongEvent($this->storedEvents,
@@ -198,6 +198,17 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
     public function onSuccess($result)
     {
         $this->actualReturnValue = $result;
+    }
+
+    /**
+     * Makes sure the execution phase has finishes without any Errors ir FixtureExecutionExceptions. If an error was
+     * recorded, it will be thrown immediately. This allow one to distinguish between failed tests, and tests in error.
+     */
+    public function assertValidRecording()
+    {
+        if ($this->actualException instanceof \Exception) {
+            throw $this->actualException;
+        }
     }
 
 }

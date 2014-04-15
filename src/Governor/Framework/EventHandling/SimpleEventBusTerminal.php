@@ -22,59 +22,28 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventSourcing;
-
-use Governor\Framework\Domain\DomainEventMessageInterface;
+namespace Governor\Framework\EventHandling;
 
 /**
- * Description of GenericAggregateFactory
+ * Description of SimpleEventBusTerminal
  *
  * @author david
  */
-class GenericAggregateFactory extends AbstractAggregateFactory
+class SimpleEventBusTerminal implements EventBusTerminalInterface
 {
 
-    /**
-     * @var string
-     */
-    private $aggregateType;
+    private $clusters = array();
 
-    /**
-     * @var string
-     */
-    private $typeIdentifier;
-
-    /**
-     * @var \ReflectionClass
-     */
-    private $reflClass;
-
-    function __construct($aggregateType)
-    {        
-        $this->reflClass = new \ReflectionClass($aggregateType);
-
-        if (!$this->reflClass->implementsInterface('Governor\Framework\EventSourcing\EventSourcedAggregateRootInterface')) {
-            throw new \InvalidArgumentException("The given aggregateType must be a subtype of EventSourcedAggregateRootInterface");
+    public function publish(array $events)
+    {
+        foreach ($this->clusters as $cluster) {     
+            $cluster->publish($events);
         }
-
-        $this->aggregateType = $aggregateType;
-        $this->typeIdentifier = $this->reflClass->getShortName();
     }
 
-    protected function doCreateAggregate($aggregateIdentifier,
-        DomainEventMessageInterface $firstEvent)
+    public function onClusterCreated(ClusterInterface $cluster)
     {        
-        return $this->reflClass->newInstanceWithoutConstructor();
-    }
-
-    public function getAggregateType()
-    {
-        return $this->aggregateType;
-    }
-
-    public function getTypeIdentifier()
-    {
-        return $this->typeIdentifier;
+        $this->clusters[] = $cluster;
     }
 
 }

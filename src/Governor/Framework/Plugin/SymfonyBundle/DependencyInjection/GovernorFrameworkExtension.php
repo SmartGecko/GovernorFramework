@@ -36,6 +36,12 @@ class GovernorFrameworkExtension extends Extension
                 new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
+        // configure command buses
+        $this->loadCommandBuses($config, $container);
+        // configure event buses
+        $this->loadEventBuses($config, $container);
+        // configure command gateways
+        $this->loadCommandGateways($config, $container);
         // configure repositories
         $this->loadRepositories($config, $container);
         //configure aggregate command handlers
@@ -46,6 +52,50 @@ class GovernorFrameworkExtension extends Extension
         $this->loadSagaRepository($config, $container);
         // configure saga manager
         $this->loadSagaManager($config, $container);
+    }
+
+    private function loadCommandBuses($config, ContainerBuilder $container)
+    {
+        foreach ($config['command_buses'] as $name => $bus) {
+            $definition = new Definition($bus['class']);
+            $definition->addMethodCall('setLogger',
+                    array(new Reference('logger')));
+
+            $container->setDefinition(sprintf("governor.command_bus.%s", $name),
+                    $definition);
+        }
+
+        if (!$container->hasDefinition('governor.command_bus.default')) {
+            throw new \RuntimeException("Missing default command bus configuration, a command bus with the name \"default\" has to be configured.");
+        }
+    }
+
+    private function loadEventBuses($config, ContainerBuilder $container)
+    {
+        foreach ($config['event_buses'] as $name => $bus) {
+            $definition = new Definition($bus['class']);
+            $definition->addMethodCall('setLogger',
+                    array(new Reference('logger')));
+
+            $container->setDefinition(sprintf("governor.event_bus.%s", $name),
+                    $definition);
+        }
+
+        if (!$container->hasDefinition('governor.event_bus.default')) {
+            throw new \RuntimeException("Missing default event bus configuration, an event bus with the name \"default\" has to be configured.");
+        }
+    }
+
+    private function loadCommandGateways($config, ContainerBuilder $container)
+    {
+        foreach ($config['command_gateways'] as $name => $gateway) {
+            $definition = new Definition($gateway['class']);
+            $definition->addArgument(new Reference(sprintf("governor.command_bus.%s",
+                            $gateway['command_bus'])));
+
+            $container->setDefinition(sprintf("governor.command_gateway.%s",
+                            $name), $definition);
+        }
     }
 
     private function loadSagaRepository($config, ContainerBuilder $container)
@@ -68,7 +118,7 @@ class GovernorFrameworkExtension extends Extension
                 $definition->addArgument(new Reference('governor.serializer'));
                 break;
         }
-        
+
         $definition->addMethodCall('setLogger', array(new Reference('logger')));
 
         $container->setDefinition($serviceId, $definition);
@@ -94,7 +144,8 @@ class GovernorFrameworkExtension extends Extension
 
         $container->setParameter('governor.sagas', $classes);
 
-        $busDefinition = $container->findDefinition('governor.event_bus');
+        $busDefinition = $container->findDefinition(sprintf("governor.event_bus.%s",
+                        $config['saga_manager']['event_bus']));
         $busDefinition->addMethodCall('subscribe',
                 array(new Reference('governor.saga_manager')));
 
@@ -136,9 +187,12 @@ class GovernorFrameworkExtension extends Extension
             ContainerBuilder $container)
     {
         $reader = new AnnotationReader();
-        $busDefinition = $container->findDefinition('governor.command_bus');
+
 
         foreach ($config['aggregate_command_handlers'] as $name => $parameters) {
+            $busDefinition = $container->findDefinition(sprintf("governor.command_bus.%s",
+                            $parameters['command_bus']));
+
             $reflectionClass = new \ReflectionClass($parameters['aggregate_root']);
 
             foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
@@ -188,6 +242,9 @@ class GovernorFrameworkExtension extends Extension
                             $parameters['type']));
             $repository->replaceArgument(0, $parameters['aggregate_root'])
                     ->setPublic(true);
+            $repository->replaceArgument(1,
+                    new Reference(sprintf("governor.event_bus.%s",
+                            $parameters['event_bus'])));
 
             $container->setDefinition(sprintf('%s.repository', $name),
                     $repository);

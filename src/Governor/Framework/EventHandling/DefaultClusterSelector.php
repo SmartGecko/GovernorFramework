@@ -22,40 +22,41 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Test;
+namespace Governor\Framework\EventHandling;
 
 /**
- * Description of MyEvent
- *
- * @author david
+ * ClusterSelector implementation that always selects the same cluster. This implementation
+ * can serve as delegate for other cluster selectors for event listeners that do not belong to a specific cluster.
  */
-class MyEvent
+class DefaultClusterSelector implements ClusterSelectorInterface
 {
 
-    private $someScalar;
-    private $someObject;
-    private $someArray;
+    const DEFAULT_CLUSTER_IDENTIFIER = "default";
 
-    public function __construct($someScalar, $someObject, array $someArray)
+    private $defaultCluster;
+
+    /**
+     * Initializes the DefaultClusterSelector to assign the given <code>defaultCluster</code> to each listener.
+     *
+     * @param defaultCluster The Cluster to assign to each listener
+     */
+    public function __construct(ClusterInterface $defaultCluster = null)
     {
-        $this->someScalar = $someScalar;
-        $this->someObject = $someObject;
-        $this->someArray = $someArray;
+        if (null !== $defaultCluster) {
+            $this->defaultCluster = $defaultCluster;
+        } else {
+            $this->defaultCluster = new SimpleCluster(self::DEFAULT_CLUSTER_IDENTIFIER);
+        }
     }
 
-    public function getSomeScalar()
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * This implementation always returns the same instance of {@link SimpleCluster}.
+     */
+    public function selectCluster(EventListenerInterface $eventListener)
     {
-        return $this->someScalar;
-    }
-
-    public function getSomeObject()
-    {
-        return $this->someObject;
-    }
-
-    public function getSomeArray()
-    {
-        return $this->someArray;
+        return $this->defaultCluster;
     }
 
 }

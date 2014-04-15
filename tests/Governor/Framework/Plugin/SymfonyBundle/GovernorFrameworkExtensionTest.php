@@ -41,7 +41,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
     public function testEventHandlers()
     {
-        $eventBus = $this->testSubject->get('governor.event_bus');
+        $eventBus = $this->testSubject->get('governor.event_bus.default');
 
         $this->assertInstanceOf('Governor\Framework\EventHandling\EventBusInterface',
             $eventBus);
@@ -51,7 +51,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
         $listeners = $reflProperty->getValue($eventBus);
 
-        $this->assertCount(1, $listeners);
+        $this->assertCount(2, $listeners);
         $this->assertContainsOnlyInstancesOf('Governor\Framework\EventHandling\EventListenerInterface',
             $listeners);
     }
@@ -80,15 +80,58 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
     public function createTestContainer()
     {
-        $config = array('governor' => array('repositories' => array('dummy1' => array(
-                        'aggregate_root' => 'Governor\Framework\Stubs\Dummy1Aggregate',
-                        'type' => 'orm'), 'dummy2' => array('aggregate_root' => 'Governor\Framework\Stubs\Dummy2Aggregate',
-                        'type' => 'orm'))
-                , 'aggregate_command_handlers' => array('dummy1' => array('aggregate_root' => 'Governor\Framework\Stubs\Dummy1Aggregate',
-                        'repository' => 'dummy1.repository'),
-                    'dummy2' => array('aggregate_root' => 'Governor\Framework\Stubs\Dummy2Aggregate',
-                        'repository' => 'dummy2.repository')), 'event_store' => array ('type' => 'null')
-            ));
+        $config = array(
+                    'governor' => array(
+                        'repositories' => array(
+                            'dummy1' => array(
+                                'aggregate_root' => 'Governor\Framework\Stubs\Dummy1Aggregate',
+                                'type' => 'orm'), 
+                            'dummy2' => array(
+                                'aggregate_root' => 'Governor\Framework\Stubs\Dummy2Aggregate',
+                                'type' => 'orm')
+                        ),
+                    'aggregate_command_handlers' => array(
+                        'dummy1' => array(
+                            'aggregate_root' => 'Governor\Framework\Stubs\Dummy1Aggregate',
+                            'repository' => 'dummy1.repository'
+                        ),
+                        'dummy2' => array(
+                            'aggregate_root' => 'Governor\Framework\Stubs\Dummy2Aggregate',
+                            'repository' => 'dummy2.repository'
+                        )
+                    ), 
+                    'event_store' => array (
+                        'type' => 'null'
+                    ),
+                    'command_buses' => array (
+                        'default' => array(
+                            'class' => 'Governor\Framework\CommandHandling\SimpleCommandBus'
+                        )
+                    ),
+                    'event_buses' => array(
+                        'default' => array (
+                            'class' => 'Governor\Framework\EventHandling\SimpleEventBus'
+                        )
+                    ),
+                    'command_gateways' => array(
+                        'default' => array (
+                            'class' => 'Governor\Framework\CommandHandling\Gateway\DefaultCommandGateway'
+                        )
+                    ),
+                    'saga_repository' => array(
+                        'type' => 'orm',
+                        'parameters' => array (
+                            'entity_manager' => 'default_entity_manager'
+                        )
+                    ),
+                    'saga_manager' => array(
+                        'type' => 'annotation',
+                        'saga_locations' => array (
+                            sys_get_temp_dir()
+                        ) 
+                    )
+                )
+            );
 
         $container = new ContainerBuilder(new ParameterBag(array(
             'kernel.debug' => false,

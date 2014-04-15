@@ -40,6 +40,32 @@ class DefaultCommandGatewayTest extends \PHPUnit_Framework_TestCase
         
         $this->testSubject->send($command);
     }
+    
+    public function testSendAndWait()
+    {
+        $command = new HelloCommand('Hi !!!');
+        
+        $this->mockCommandBus->expects($this->once())
+            ->method('dispatch')
+            ->with($this->anything());
+        
+        $result = $this->testSubject->sendAndWait($command);                
+    }
+    
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testSendAndWaitException()
+    {
+        $command = new HelloCommand('Hi !!!');
+        
+        $this->mockCommandBus->expects($this->once())
+            ->method('dispatch')
+            ->with($this->anything())
+            ->will($this->throwException(new \RuntimeException("exception")));
+        
+        $result = $this->testSubject->sendAndWait($command);                
+    }
 
 }
 

@@ -22,59 +22,32 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventSourcing;
+namespace Governor\Framework\Test;
 
-use Governor\Framework\Domain\DomainEventMessageInterface;
+use Governor\Framework\Annotations\EventHandler;
+use Governor\Framework\EventSourcing\Annotation\AbstractAnnotatedEntity;
 
 /**
- * Description of GenericAggregateFactory
+ * Description of MyEntity
  *
  * @author david
  */
-class GenericAggregateFactory extends AbstractAggregateFactory
+class MyEntity extends AbstractAnnotatedEntity
 {
 
-    /**
-     * @var string
-     */
-    private $aggregateType;
+    private $lastNumber;
 
     /**
-     * @var string
+     * @EventHandler
      */
-    private $typeIdentifier;
-
-    /**
-     * @var \ReflectionClass
-     */
-    private $reflClass;
-
-    function __construct($aggregateType)
-    {        
-        $this->reflClass = new \ReflectionClass($aggregateType);
-
-        if (!$this->reflClass->implementsInterface('Governor\Framework\EventSourcing\EventSourcedAggregateRootInterface')) {
-            throw new \InvalidArgumentException("The given aggregateType must be a subtype of EventSourcedAggregateRootInterface");
-        }
-
-        $this->aggregateType = $aggregateType;
-        $this->typeIdentifier = $this->reflClass->getShortName();
-    }
-
-    protected function doCreateAggregate($aggregateIdentifier,
-        DomainEventMessageInterface $firstEvent)
-    {        
-        return $this->reflClass->newInstanceWithoutConstructor();
-    }
-
-    public function getAggregateType()
+    public function handleMyEvent(MyEvent $event)
     {
-        return $this->aggregateType;
+        $this->lastNumber = $event->getSomeValue();
     }
 
-    public function getTypeIdentifier()
+    public function getLastNumber()
     {
-        return $this->typeIdentifier;
+        return $this->lastNumber;
     }
 
 }

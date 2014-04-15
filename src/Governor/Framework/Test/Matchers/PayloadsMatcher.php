@@ -22,59 +22,54 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventSourcing;
+namespace Governor\Framework\Test\Matchers;
 
-use Governor\Framework\Domain\DomainEventMessageInterface;
+use Hamcrest\Matcher;
+use Hamcrest\Description;
+use Governor\Framework\Domain\MessageInterface;
 
 /**
- * Description of GenericAggregateFactory
+ * Description of PayloadsMatcher
  *
  * @author david
  */
-class GenericAggregateFactory extends AbstractAggregateFactory
+class PayloadsMatcher extends BaseMatcher
 {
 
-    /**
-     * @var string
-     */
-    private $aggregateType;
+    private $matcher;
 
     /**
-     * @var string
+     * Constructs an instance that uses the given <code>matcher</code> to match the payloads.
+     *
+     * @param matcher             The matcher to match the payloads with
      */
-    private $typeIdentifier;
+    public function __construct(Matcher $matcher)
+    {
+        $this->matcher = $matcher;
+    }
 
-    /**
-     * @var \ReflectionClass
-     */
-    private $reflClass;
-
-    function __construct($aggregateType)
-    {        
-        $this->reflClass = new \ReflectionClass($aggregateType);
-
-        if (!$this->reflClass->implementsInterface('Governor\Framework\EventSourcing\EventSourcedAggregateRootInterface')) {
-            throw new \InvalidArgumentException("The given aggregateType must be a subtype of EventSourcedAggregateRootInterface");
+    public function matches($item)
+    {
+        if (!is_array($item)) {
+            return false;
         }
 
-        $this->aggregateType = $aggregateType;
-        $this->typeIdentifier = $this->reflClass->getShortName();
+        $payloads = array();
+        foreach ($item as $listItem) {
+            if ($listItem instanceof MessageInterface) {
+                $payloads[] = $listItem->getPayload();
+            } else {
+                $payloads[] = $item;
+            }
+        }
+        return $this->matcher->matches($payloads);
     }
 
-    protected function doCreateAggregate($aggregateIdentifier,
-        DomainEventMessageInterface $firstEvent)
-    {        
-        return $this->reflClass->newInstanceWithoutConstructor();
-    }
-
-    public function getAggregateType()
+    public function describeTo(Description $description)
     {
-        return $this->aggregateType;
-    }
-
-    public function getTypeIdentifier()
-    {
-        return $this->typeIdentifier;
+        $description->appendText("List with EventMessages with Payloads matching <");
+        $this->matcher->describeTo($description);
+        $description->appendText(">");
     }
 
 }

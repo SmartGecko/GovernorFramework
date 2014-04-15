@@ -11,12 +11,16 @@ class EventHandlerPass extends AbstractHandlerPass
 
     public function process(ContainerBuilder $container)
     {
-        $reader = new AnnotationReader();
-        $busDefinition = $container->findDefinition('governor.event_bus');
+        $reader = new AnnotationReader();        
 
         foreach ($container->findTaggedServiceIds('governor.event_handler') as $id => $attributes) {
+            $busDefinition = $container->findDefinition(sprintf("governor.event_bus.%s",
+                            isset($attributes['event_bus']) ? $attributes['event_bus']
+                                        : 'default'));
+            
             $definition = $container->findDefinition($id);
             $class = $definition->getClass();
+            
             $reflClass = new \ReflectionClass($class);
 
             foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {

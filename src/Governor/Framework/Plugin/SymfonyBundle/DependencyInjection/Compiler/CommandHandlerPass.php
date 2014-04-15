@@ -23,9 +23,12 @@ class CommandHandlerPass extends AbstractHandlerPass
     public function process(ContainerBuilder $container)
     {
         $reader = new AnnotationReader();
-        $busDefinition = $container->findDefinition('governor.command_bus');
 
         foreach ($container->findTaggedServiceIds('governor.command_handler') as $id => $attributes) {
+            $busDefinition = $container->findDefinition(sprintf("governor.command_bus.%s",
+                            isset($attributes['command_bus']) ? $attributes['command_bus']
+                                        : 'default'));
+
             $definition = $container->findDefinition($id);
             $class = $definition->getClass();
 
@@ -33,7 +36,7 @@ class CommandHandlerPass extends AbstractHandlerPass
 
             foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
                 $annot = $reader->getMethodAnnotation($method,
-                    'Governor\Framework\Annotations\CommandHandler');
+                        'Governor\Framework\Annotations\CommandHandler');
 
                 // not a handler
                 if (null === $annot) {
@@ -53,15 +56,15 @@ class CommandHandlerPass extends AbstractHandlerPass
                 $handlerId = $this->getHandlerIdentifier("governor.command_handler");
 
                 $container->register($handlerId,
-                        'Governor\Framework\CommandHandling\Handlers\AnnotatedCommandHandler')
-                    ->addArgument($commandClassName)
-                    ->addArgument($methodName)
-                    ->addArgument($commandTarget)
-                    ->setPublic(true)
-                    ->setLazy(true);
+                                'Governor\Framework\CommandHandling\Handlers\AnnotatedCommandHandler')
+                        ->addArgument($commandClassName)
+                        ->addArgument($methodName)
+                        ->addArgument($commandTarget)
+                        ->setPublic(true)
+                        ->setLazy(true);
 
                 $busDefinition->addMethodCall('subscribe',
-                    array($commandClassName, new Reference($handlerId)));
+                        array($commandClassName, new Reference($handlerId)));
             }
         }
     }

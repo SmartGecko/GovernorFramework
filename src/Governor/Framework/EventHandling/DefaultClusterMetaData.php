@@ -22,59 +22,40 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventSourcing;
-
-use Governor\Framework\Domain\DomainEventMessageInterface;
+namespace Governor\Framework\EventHandling;
 
 /**
- * Description of GenericAggregateFactory
+ * Description of DefaultClusterMetaData
  *
  * @author david
  */
-class GenericAggregateFactory extends AbstractAggregateFactory
+class DefaultClusterMetaData implements ClusterMetaDataInterface
 {
 
-    /**
-     * @var string
-     */
-    private $aggregateType;
+    private $properties = array();
 
-    /**
-     * @var string
-     */
-    private $typeIdentifier;
+    public function getProperty($key)
+    {
+        return isset($this->properties[$key]) ? $this->properties[$key] : null;
+    }
 
-    /**
-     * @var \ReflectionClass
-     */
-    private $reflClass;
-
-    function __construct($aggregateType)
-    {        
-        $this->reflClass = new \ReflectionClass($aggregateType);
-
-        if (!$this->reflClass->implementsInterface('Governor\Framework\EventSourcing\EventSourcedAggregateRootInterface')) {
-            throw new \InvalidArgumentException("The given aggregateType must be a subtype of EventSourcedAggregateRootInterface");
+    public function setProperty($key, $value)
+    {
+        if (null === $key) {
+            throw new \InvalidArgumentException("null is not allowed as key");
         }
 
-        $this->aggregateType = $aggregateType;
-        $this->typeIdentifier = $this->reflClass->getShortName();
+        $this->properties[$key] = $value;
     }
 
-    protected function doCreateAggregate($aggregateIdentifier,
-        DomainEventMessageInterface $firstEvent)
-    {        
-        return $this->reflClass->newInstanceWithoutConstructor();
-    }
-
-    public function getAggregateType()
+    public function removeProperty($key)
     {
-        return $this->aggregateType;
+        unset($this->properties[$key]);
     }
 
-    public function getTypeIdentifier()
+    public function isPropertySet($key)
     {
-        return $this->typeIdentifier;
+        return array_key_exists($key, $this->properties);
     }
 
 }

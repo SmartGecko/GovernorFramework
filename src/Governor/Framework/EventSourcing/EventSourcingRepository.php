@@ -69,10 +69,10 @@ class EventSourcingRepository extends LockingRepository
             $events = $decorator->decorateForRead($this->getTypeIdentifier(),
                 $id, $events);
         }
-
+        
         $aggregate = $this->factory->createAggregate($id, $events->peek());
         $unseenEvents = array();
-
+                
         $aggregate->initializeState(new CapturingEventStream($events,
             $unseenEvents, $exceptedVersion));
         if ($aggregate->isDeleted()) {
