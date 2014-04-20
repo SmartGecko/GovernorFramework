@@ -22,24 +22,44 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Test;
+namespace Governor\Framework\EventHandling\Amqp;
 
 /**
- * Utility class providing access to fixture instances in the Axon Test module.
+ * Description of DefaultAMQPConsumerConfiguration
+ *
+ * @author david
  */
-abstract class Fixtures
+class DefaultAMQPConsumerConfiguration implements AMQPConsumerConfigurationInterface
 {
 
-    /**
-     * Returns a new given-when-then style test fixture in configuration mode. See {@link
-     * org.axonframework.test.FixtureConfiguration} for more detailed usage information.
-     *
-     * @param string $aggregateType The aggregate under test     
-     * @return FixtureConfigurationInterface a new given-when-then style test fixture in configuration mode
+    /**     
+     * @var string
      */
-    public static function newGivenWhenThenFixture($aggregateType)
+    private $queueName;
+
+    /**
+     * Initializes the configuration with the given <code>queueName</code>.
+     *
+     * @param queueName The name of the Queue a cluster should connect to
+     */
+    public function __construct($queueName)
     {
-        return new GivenWhenThenTestFixture($aggregateType);
+        $this->queueName = $queueName;
+    }
+
+    public function getQueueName()
+    {
+        return $this->queueName;
+    }
+
+    public function getExclusive()
+    {
+        return true;
+    }
+
+    public function getPrefetchCount()
+    {
+        return null;
     }
 
 }

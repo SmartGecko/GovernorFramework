@@ -173,7 +173,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         return $this->given(array());
     }
 
-    public function given(array $domainEvents)
+    public function given(array $domainEvents = array())
     {
         $this->ensureRepositoryConfiguration();
         $this->clearGivenWhenState();
@@ -222,6 +222,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     {
         try {
             $this->finalizeConfiguration();
+            echo sprintf("BEFORE when %s - %s\n", count($this->storedEvents), count($this->publishedEvents));
             $resultValidator = new ResultValidatorImpl($this->storedEvents,
                     $this->publishedEvents);
             $this->commandBus->setHandlerInterceptors(array(new AggregateRegisteringInterceptor()));
@@ -231,6 +232,9 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
 
             $this->detectIllegalStateChanges();
             $resultValidator->assertValidRecording();
+            
+            echo sprintf("AFTER when %s - %s\n", count($this->storedEvents), count($this->publishedEvents));
+            
             return $resultValidator;
         } finally {
             //FixtureResourceParameterResolverFactory.clear();
@@ -254,14 +258,14 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
 
     // !!! TODO one reflection scanner 
     private function registerAggregateCommandHandlers()
-    {
+    {        
         $this->ensureRepositoryConfiguration();
-
-        if (!$this->explicitCommandHandlersSet) {
+        
+        if (!$this->explicitCommandHandlersSet) {     
             $reader = new \Doctrine\Common\Annotations\AnnotationReader();
             $reflectionClass = new \ReflectionClass($this->aggregateType);
 
-            foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+            foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {                
                 $annot = $reader->getMethodAnnotation($method,
                         'Governor\Framework\Annotations\CommandHandler');
 
@@ -277,7 +281,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                     continue;
                 }
 
-                $commandName = $commandParam->getClass()->name;
+                $commandName = $commandParam->getClass()->name;                
                 $this->commandBus->subscribe($commandName,
                         new AnnotatedAggregateCommandHandler($commandName,
                         $method->name, $this->aggregateType, $this->repository,
@@ -449,7 +453,7 @@ class RecordingEventBus implements EventBusInterface
     }
 
     public function publish(array $events)
-    {
+    {                             
         $this->fixture->publishedEvents = array_merge($this->fixture->publishedEvents,
                 $events);
     }
@@ -574,6 +578,7 @@ class RecordingEventStore implements EventStoreInterface
 
     public function readEvents($type, $identifier)
     {
+        echo $identifier . " ---- \n";
         if (null !== $identifier) {
             IdentifierValidator::validateIdentifier($identifier);
         }

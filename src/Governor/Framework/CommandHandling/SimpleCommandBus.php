@@ -85,9 +85,9 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
                 $this->handlerInterceptors);
 
         try {
-            $return = $chain->proceed(); //$handler->handle($command, $unitOfWork);
+            $return = $chain->proceed();
         } catch (\Exception $ex) {
-            $unitOfWork->rollback();
+            $unitOfWork->rollback($ex);
             throw $ex;
         }
 

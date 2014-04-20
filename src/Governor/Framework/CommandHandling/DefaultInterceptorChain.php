@@ -41,10 +41,10 @@ class DefaultInterceptorChain implements InterceptorChainInterface
      * Initialize the default interceptor chain to dispatch the given <code>command</code>, through the
      * <code>chain</code>, to the <code>handler</code>.
      *
-     * @param command    The command to dispatch through the interceptor chain
-     * @param unitOfWork The UnitOfWork the command is executed in
-     * @param handler    The handler for the command
-     * @param chain      The interceptor composing the chain
+     * @param CommandMessageInterface $command    The command to dispatch through the interceptor chain
+     * @param UnitOfWorkInterface $unitOfWork The UnitOfWork the command is executed in
+     * @param CommandHandlerInterface $handler    The handler for the command
+     * @param array $chain      The interceptor composing the chain
      */
     public function __construct(CommandMessageInterface $command,
             UnitOfWorkInterface $unitOfWork, CommandHandlerInterface $handler,
@@ -72,12 +72,7 @@ class DefaultInterceptorChain implements InterceptorChainInterface
             return $next->handle($this->command, $this->unitOfWork, $this);
         } else {
             return $this->handler->handle($this->command, $this->unitOfWork);
-        }
-        // if (chain.hasNext()) {
-        //   return chain.next().handle(commandProceedWith, unitOfWork, this);
-        //} else {
-        //  return handler.handle(commandProceedWith, unitOfWork);
-        //}
+        }       
     }
    
 }

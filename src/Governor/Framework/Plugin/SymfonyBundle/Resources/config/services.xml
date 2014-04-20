@@ -43,10 +43,17 @@
         <!-- resource injectors -->
         <parameter key="governor.resource_injector.null.class">Governor\Framework\Saga\NullResourceInjector</parameter>
         <parameter key="governor.resource_injector.container.class">Governor\Framework\Saga\ContainerAwareResourceInjector</parameter>
+        
+        <!-- AMQP terminal -->
+        <parameter key="governor.event_bus_terminal.amqp.class">Governor\Framework\EventHandling\Amqp\AMQPTerminal</parameter>
     </parameters>
 
     <services>
 
+        <service id="governor.event_bus_terminal.amqp" class="%governor.event_bus_terminal.amqp.class%">
+            <argument type="service" id="governor.serializer"/>
+        </service>
+        
         <service id="governor.resource_injector" class="%governor.resource_injector.container.class%">
             <call method="setContainer">
                 <argument type="service" id="service_container" />

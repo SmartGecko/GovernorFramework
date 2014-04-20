@@ -24,13 +24,21 @@
 
 namespace Governor\Framework\EventHandling;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerAwareInterface;
+
 /**
  * Description of ClusteringEventBus
  *
  * @author david
  */
-class ClusteringEventBus implements EventBusInterface
+class ClusteringEventBus implements EventBusInterface, LoggerAwareInterface
 {
+    
+    /**     
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var EventBusTerminalInterface
@@ -96,6 +104,11 @@ class ClusteringEventBus implements EventBusInterface
         }
 
         return $cluster;
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
 }

@@ -62,14 +62,14 @@ class Reporter
      * @param probableCause  An optional exception that might be the reason for wrong events
      */
     public function reportWrongEvent(array $actualEvents, array $expectedEvents,
-            \Exception $probableCause)
+            \Exception $probableCause = null)
     {
         $str = "The published events do not match the expected events";
         $str .= $this->appendEventOverview($expectedEvents, $actualEvents,
                 "Expected", "Actual");
         $str .= $this->appendProbableCause($probableCause);
 
-        throw new Exception($str);
+        throw new \Exception($str);
     }
 
     /**
@@ -175,7 +175,7 @@ class Reporter
         $str .= get_class($actualException) . "]>. Stacktrace follows: ";
         $str .= PHP_EOL . $this->writeStackTrace($actualException) . PHP_EOL;
 
-        throw new Exception($str);
+        throw new \Exception($str);
     }
 
     /**
@@ -194,7 +194,7 @@ class Reporter
         $str .= "In an event of type [" . $eventType . "], the property [";
         $str .= $field . "] ";
 
-        throw new Exception($str);
+        throw new \Exception($str);
 
         /*
           if (!eventType.equals(field.getDeclaringClass())) {
@@ -214,7 +214,7 @@ class Reporter
           throw new AxonAssertionError(sb.toString()); */
     }
 
-    private function appendProbableCause(\Exception $probableCause)
+    private function appendProbableCause(\Exception $probableCause = null)
     {
         $str = "";
 
@@ -253,15 +253,15 @@ class Reporter
 
     private function appendEventOverview(array $leftColumnEvents,
             array $rightColumnEvents, $leftColumnName, $rightColumnName)
-    {
-        $actualTypes = array(); //new ArrayList<String>(rightColumnEvents.size());
-        $expectedTypes = array(); //new ArrayList<String>(leftColumnEvents.size());
+    {        
+        $actualTypes = array(); 
+        $expectedTypes = array();
         $largestExpectedSize = strlen($leftColumnName);
 
         foreach ($rightColumnEvents as $event) {
             $actualTypes[] = $this->payloadContentType($event);
         }
-
+        
         foreach ($leftColumnEvents as $event) {
             $simpleName = $this->payloadContentType($event);
             if (strlen($simpleName) > $largestExpectedSize) {
@@ -276,44 +276,49 @@ class Reporter
         $str .= "  |  " . $rightColumnName . PHP_EOL;
         $str .= $this->pad(0, $largestExpectedSize, "-") . "--|--";
         $str .= $this->pad(0, $largestExpectedSize, "-") . PHP_EOL;
+        
+        $actualIterator = new \ArrayIterator($actualTypes);
+        $expectedIterator = new \ArrayIterator($expectedTypes);      
 
-        // Iterator<String> actualIterator = actualTypes.iterator();
-        //  Iterator<String> expectedIterator = expectedTypes.iterator();
-
-
-        /* while (actualIterator.hasNext() || expectedIterator.hasNext()) {
-          boolean difference;
-          String expected = "";
-          if (expectedIterator.hasNext()) {
-          expected = expectedIterator.next();
-          sb.append(expected);
-          pad(sb, expected.length(), largestExpectedSize, " ");
-          difference = !actualIterator.hasNext();
-          } else {
-          pad(sb, 0, largestExpectedSize, " ");
-          difference = true;
-          }
-          if (actualIterator.hasNext()) {
-          String actual = actualIterator.next();
-          difference = difference || !actual.equals(expected);
-          if (difference) {
-          sb.append(" <|> ");
-          } else {
-          sb.append("  |  ");
-          }
-          sb.append(actual);
-          } else {
-          sb.append(" <|> ");
-          }
-
-          sb.append(NEWLINE);
-          } */
+        while ($actualIterator->valid() || $expectedIterator->valid()) {
+            $expected = "";
+            $difference = false;
+            
+            if (null !== $expectedIterator->current()) {
+                $expected = $expectedIterator->current();
+                $str .= $expected;
+                $str .= $this->pad(strlen($expected), $largestExpectedSize, " ");
+            } else {
+                $str .= $this->pad(0, $largestExpectedSize, " ");
+                $difference = true;
+            }
+            
+            if (null !== $actualIterator->current()) {
+                $actual = $actualIterator->current();
+                $difference = $difference || !strcmp($expected, $actual) === 0;
+                
+                if ($difference) {
+                    $str .= " <|> ";
+                } else {
+                    $str .= "  |  ";
+                }
+                
+                $str .= $actual;
+            } else {
+                $str .= " <|> ";
+            }
+            
+            $str .= PHP_EOL;
+            
+            $actualIterator->next();
+            $expectedIterator->next();
+        }
 
         return $str;
     }
 
     private function payloadContentType($event)
-    {
+    {        
         if ($event instanceof EventMessageInterface) {
             return $event->getPayloadType();
         } else {

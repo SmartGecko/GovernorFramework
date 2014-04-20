@@ -48,9 +48,9 @@ class Configuration implements ConfigurationInterface
                                 ->scalarNode('directory')->end()
                             ->end()
                         ->end()
-                    ->end()                    
+                    ->end()
                 ->end()
-                ->arrayNode('saga_repository')                    
+                ->arrayNode('saga_repository')
                     ->children()
                         ->scalarNode('type')
                             ->defaultValue('orm')
@@ -63,10 +63,10 @@ class Configuration implements ConfigurationInterface
                         ->arrayNode('parameters')
                             ->children()
                                 ->scalarNode('entity_manager')->end()
-                                ->scalarNode('document_manager')->end()                                
+                                ->scalarNode('document_manager')->end()
                             ->end()
                         ->end()
-                    ->end()                    
+                    ->end()
                 ->end()
                 ->scalarNode('serializer')
                     ->defaultValue('jms')
@@ -75,7 +75,7 @@ class Configuration implements ConfigurationInterface
                         ->thenInvalid('Invalid serializer "%s", possible values are '.
                                            "[\"jms\"]")
                     ->end()
-                ->end()     
+                ->end()
                 ->arrayNode('saga_manager')
                     ->children()
                         ->scalarNode('type')->defaultValue('annotation')->end()
@@ -94,44 +94,45 @@ class Configuration implements ConfigurationInterface
 
         return $treeBuilder;
     }
-    
+
     private function addCommandBusesNode()
     {
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('command_buses');
-        
+
         $node
             ->useAttributeAsKey('name')
             ->prototype('array')
                 ->children()
-                    ->scalarNode('class')->isRequired()->end()                    
+                    ->scalarNode('class')->isRequired()->end()
                 ->end()
             ->end();
-        
+
         return $node;
     }
-    
+
     private function addEventBusesNode()
     {
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('event_buses');
-        
+
         $node
             ->useAttributeAsKey('name')
             ->prototype('array')
                 ->children()
-                    ->scalarNode('class')->isRequired()->end()                    
+                    ->scalarNode('class')->isRequired()->end()
+                    ->scalarNode('terminal')->end()
                 ->end()
             ->end();
-        
+
         return $node;
     }
-    
+
     private function addCommandGatewaysNode()
     {
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('command_gateways');
-        
+
         $node
             ->useAttributeAsKey('name')
             ->prototype('array')
@@ -140,7 +141,7 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode('command_bus')->defaultValue('default')->end()
                 ->end()
             ->end();
-        
+
         return $node;
     }
 

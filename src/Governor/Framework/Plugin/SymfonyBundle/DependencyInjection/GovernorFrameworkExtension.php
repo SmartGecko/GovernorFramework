@@ -77,6 +77,11 @@ class GovernorFrameworkExtension extends Extension
             $definition->addMethodCall('setLogger',
                     array(new Reference('logger')));
 
+            if (isset($bus['terminal'])) {
+                $definition->addArgument(null);
+                $definition->addArgument(new Reference($bus['terminal']));
+            }
+            
             $container->setDefinition(sprintf("governor.event_bus.%s", $name),
                     $definition);
         }

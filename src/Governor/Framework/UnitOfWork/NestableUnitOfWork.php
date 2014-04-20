@@ -100,8 +100,8 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface
     public function rollback(\Exception $ex = null)
     {
         if (null !== $ex) {
-            $this->logger->debug("Rollback requested for Unit Of Work due to exception. {} ",
-                    $ex->getMessage());
+            $this->logger->debug("Rollback requested for Unit Of Work due to exception. {exception} ",
+                    array('exception' => $ex->getMessage()));
         } else {
             $this->logger->debug("Rollback requested for Unit Of Work for unknown reason.");
         }

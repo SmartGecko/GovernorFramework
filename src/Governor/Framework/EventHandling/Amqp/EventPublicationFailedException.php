@@ -22,24 +22,14 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Test;
+namespace Governor\Framework\EventHandling\Amqp;
 
 /**
- * Utility class providing access to fixture instances in the Axon Test module.
+ * Description of EventPublicationFailedException
+ *
+ * @author david
  */
-abstract class Fixtures
+class EventPublicationFailedException extends \Exception
 {
-
-    /**
-     * Returns a new given-when-then style test fixture in configuration mode. See {@link
-     * org.axonframework.test.FixtureConfiguration} for more detailed usage information.
-     *
-     * @param string $aggregateType The aggregate under test     
-     * @return FixtureConfigurationInterface a new given-when-then style test fixture in configuration mode
-     */
-    public static function newGivenWhenThenFixture($aggregateType)
-    {
-        return new GivenWhenThenTestFixture($aggregateType);
-    }
-
+    
 }

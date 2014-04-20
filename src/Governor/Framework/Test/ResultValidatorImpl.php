@@ -27,6 +27,7 @@ namespace Governor\Framework\Test;
 use Hamcrest\Matcher;
 use Hamcrest\StringDescription;
 use Hamcrest\Core\IsNull;
+use Governor\Framework\Test\Matchers\EqualFieldsMatcher;
 use Governor\Framework\CommandHandling\CommandCallbackInterface;
 
 /**
@@ -43,19 +44,20 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
     private $actualException;
     private $reporter;
 
-    function __construct(array $storedEvents, array $publishedEvents)
+    function __construct(array &$storedEvents, array &$publishedEvents)
     {
-        $this->storedEvents = $storedEvents;
-        $this->publishedEvents = $publishedEvents;
+        $this->storedEvents = &$storedEvents;
+        $this->publishedEvents = &$publishedEvents;
         $this->reporter = new Reporter();
     }
 
     public function expectEvents(array $expectedEvents)
-    {
+    {      
         if (count($this->publishedEvents) !== count($this->storedEvents)) {
             $this->reporter->reportDifferenceInStoredVsPublished($this->storedEvents,
                     $this->publishedEvents, $this->actualException);
         }
+        
         return $this->expectPublishedEvents($expectedEvents);
     }
 
@@ -89,10 +91,10 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
     {
         if (count($expectedEvents) !== count($this->publishedEvents)) {
             $this->reporter->reportWrongEvent($this->publishedEvents,
-                    array($expectedEvents), $this->actualException);
+                    $expectedEvents, $this->actualException);
         }
 
-        foreach ($this->expectedEvents as $expectedEvent) {
+        foreach ($expectedEvents as $expectedEvent) {
             $actualEvent = current($this->publishedEvents);
             if (!$this->verifyEventEquality($expectedEvent,
                             $actualEvent->getPayload())) {
@@ -181,12 +183,14 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
         }
 
         $matcher = new EqualFieldsMatcher($expectedEvent);
+        
         if (!$matcher->matches($actualEvent)) {
             $this->reporter->reportDifferentEventContents(get_class($expectedEvent),
                     $matcher->getFailedField(),
                     $matcher->getFailedFieldActualValue(),
                     $matcher->getFailedFieldExpectedValue());
         }
+        
         return true;
     }
 

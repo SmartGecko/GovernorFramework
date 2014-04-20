@@ -53,7 +53,7 @@ class EqualFieldsMatcher extends BaseMatcher
     }
 
     public function matches($item)
-    {        
+    {
         return $this->expected instanceof $item && $this->matchesSafely($item);
     }
 
@@ -74,7 +74,7 @@ class EqualFieldsMatcher extends BaseMatcher
 
             $expectedFieldValue = $property->getValue($expectedValue);
             $actualFieldValue = $property->getValue($actual);
-            
+
             if ($expectedFieldValue != $actualFieldValue) {
                 $this->failedField = $property->name;
                 $this->failedFieldExpectedValue = $expectedFieldValue;
