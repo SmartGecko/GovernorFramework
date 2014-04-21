@@ -144,7 +144,7 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
 
     public function expectStoredEvents(array $expectedEvents)
     {
-        if (count($expectedEvents) !== cpunt($this->storedEvents)) {
+        if (count($expectedEvents) !== count($this->storedEvents)) {
             $this->reporter->reportWrongEvent($this->storedEvents,
                     $expectedEvents, $this->actualException);
         }

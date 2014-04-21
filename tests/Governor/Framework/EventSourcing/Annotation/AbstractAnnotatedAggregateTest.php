@@ -70,6 +70,11 @@ class LateIdentifiedAggregate extends AbstractAnnotatedAggregateRoot
         $this->aggregateIdentifier = "lateIdentifier";
     }
 
+    public function preInitializeState()
+    {
+        
+    }
+
 }
 
 class SimpleAggregateRoot extends AbstractAnnotatedAggregateRoot
@@ -112,6 +117,11 @@ class SimpleAggregateRoot extends AbstractAnnotatedAggregateRoot
     public function doSomething()
     {
         $this->apply(new StubDomainEvent());
+    }
+
+    public function preInitializeState()
+    {
+        
     }
 
 }

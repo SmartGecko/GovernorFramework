@@ -19,4 +19,6 @@ interface EventSourcedAggregateRootInterface extends AggregateRootInterface
 {
 
     public function initializeState(DomainEventStreamInterface $domainEventStream);
+    
+    public function preInitializeState();
 }

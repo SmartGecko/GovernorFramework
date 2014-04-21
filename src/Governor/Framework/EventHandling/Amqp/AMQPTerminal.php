@@ -61,7 +61,8 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     private $routingKeyResolver;
     private $waitForAck;
     private $publisherAckTimeout = 0;
-
+    private $clusters;
+    
     public function __construct(SerializerInterface $serializer,
             RoutingKeyResolverInterface $routingKeyResolver = null,
             AMQPMessageConverterInterface $messageConverter = null)
@@ -246,6 +247,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
             $config = new DefaultAMQPConsumerConfiguration($cluster->getName());
         }
 
+         $this->clusters[] = $cluster;
         //getListenerContainerLifecycleManager().registerCluster(cluster, config, messageConverter);
     }
 
@@ -255,6 +257,10 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
                 "guest", "guest");
         $channel = $conn->channel();
 
+        foreach ($this->clusters as $cluster) {            
+            $cluster->publish($events);
+        }
+        
         try {
             if ($this->waitForAck) {
                 $channel->confirm_select();
@@ -317,7 +323,7 @@ class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
         if ($this->isOpen) {
             try {
                 if ($this->isTransactional) {
-                    $this->channel . txCommit();
+                    $this->channel->tx_commit();
                 } else if ($this->waitForAck) {
                     $this->waitForConfirmations();
                 }

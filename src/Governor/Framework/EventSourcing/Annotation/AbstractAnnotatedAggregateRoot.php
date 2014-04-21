@@ -16,7 +16,7 @@ use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
  *
  * @author david
  */
-class AbstractAnnotatedAggregateRoot extends AbstractEventSourcedAggregateRoot
+abstract class AbstractAnnotatedAggregateRoot extends AbstractEventSourcedAggregateRoot
 {
 
     private $inspector;

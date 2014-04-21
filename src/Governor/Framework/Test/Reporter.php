@@ -50,7 +50,7 @@ class Reporter
                 "Stored events", "Published events");
         $str .= $this->appendProbableCause($probableCause);
 
-        throw new Exception($str);
+        throw new GovernorAssertionError($str);
     }
 
     /**
@@ -69,7 +69,7 @@ class Reporter
                 "Expected", "Actual");
         $str .= $this->appendProbableCause($probableCause);
 
-        throw new \Exception($str);
+        throw new GovernorAssertionError($str);
     }
 
     /**
@@ -122,7 +122,7 @@ class Reporter
         $str .= get_class($actualException) . "]>. Stack trace follows:" . PHP_EOL;
         $str .= $this->writeStackTrace($actualException) . PHP_EOL;
 
-        throw new Exception($str);
+        throw new GovernorAssertionError($str);
     }
 
     /**
@@ -140,16 +140,17 @@ class Reporter
         $str .= $this->describe($actualReturnValue) . ">";
         $str .= PHP_EOL;
 
-        throw new Exception($str);
+        throw new GovernorAssertionError($str);
     }
 
     /**
      * Report an error due to an unexpected return value, while an exception was expected.
      *
      * @param actualReturnValue The actual return value
-     * @param description       A description describing the expected value
+     * @param Description $description       A description describing the expected value
      */
-    public function reportUnexpectedReturnValue($actualReturnValue, Description $description)
+    public function reportUnexpectedReturnValue($actualReturnValue,
+            Description $description)
     {
         $str = "The command handler returned normally, but an exception was expected";
         $str .= PHP_EOL . PHP_EOL;
@@ -157,14 +158,14 @@ class Reporter
         $str .= $this->describe($actualReturnValue) . ">";
         $str .= PHP_EOL;
 
-        throw new Exception($str);
+        throw new GovernorAssertionError($str);
     }
 
     /**
      * Report an error due to a an exception of an unexpected type.
      *
-     * @param actualException The actual exception
-     * @param description     A description describing the expected value
+     * @param \Exception $actualException The actual exception
+     * @param Description $description     A description describing the expected value
      */
     public function reportWrongException(\Exception $actualException,
             Description $description)
@@ -175,7 +176,7 @@ class Reporter
         $str .= get_class($actualException) . "]>. Stacktrace follows: ";
         $str .= PHP_EOL . $this->writeStackTrace($actualException) . PHP_EOL;
 
-        throw new \Exception($str);
+        throw new GovernorAssertionError($str);
     }
 
     /**
@@ -194,24 +195,21 @@ class Reporter
         $str .= "In an event of type [" . $eventType . "], the property [";
         $str .= $field . "] ";
 
-        throw new \Exception($str);
-
-        /*
-          if (!eventType.equals(field.getDeclaringClass())) {
+        /* if (!strcmp($eventType.equals(field.getDeclaringClass())) {
           sb.append("(declared in [")
           .append(field.getDeclaringClass().getSimpleName())
           .append("]) ");
-          }
+          } */
 
-          sb.append("was not as expected.")
-          .append(NEWLINE)
-          .append("Expected <") //NOSONAR
-          .append(nullSafeToString(expected))
-          .append("> but got <")
-          .append(nullSafeToString(actual))
-          .append(">")
-          .append(NEWLINE);
-          throw new AxonAssertionError(sb.toString()); */
+        $str .= "was not as expected." . PHP_EOL;
+        $str .= "Expected <" . 
+                $this->nullSafeToString($expected) . 
+                "> but got <" . 
+                $this->nullSafeToString($actual) . 
+                ">" . 
+                PHP_EOL;
+
+        throw new GovernorAssertionError($str);
     }
 
     private function appendProbableCause(\Exception $probableCause = null)
@@ -253,15 +251,15 @@ class Reporter
 
     private function appendEventOverview(array $leftColumnEvents,
             array $rightColumnEvents, $leftColumnName, $rightColumnName)
-    {        
-        $actualTypes = array(); 
+    {
+        $actualTypes = array();
         $expectedTypes = array();
         $largestExpectedSize = strlen($leftColumnName);
 
         foreach ($rightColumnEvents as $event) {
             $actualTypes[] = $this->payloadContentType($event);
         }
-        
+
         foreach ($leftColumnEvents as $event) {
             $simpleName = $this->payloadContentType($event);
             if (strlen($simpleName) > $largestExpectedSize) {
@@ -276,14 +274,14 @@ class Reporter
         $str .= "  |  " . $rightColumnName . PHP_EOL;
         $str .= $this->pad(0, $largestExpectedSize, "-") . "--|--";
         $str .= $this->pad(0, $largestExpectedSize, "-") . PHP_EOL;
-        
+
         $actualIterator = new \ArrayIterator($actualTypes);
-        $expectedIterator = new \ArrayIterator($expectedTypes);      
+        $expectedIterator = new \ArrayIterator($expectedTypes);
 
         while ($actualIterator->valid() || $expectedIterator->valid()) {
             $expected = "";
             $difference = false;
-            
+
             if (null !== $expectedIterator->current()) {
                 $expected = $expectedIterator->current();
                 $str .= $expected;
@@ -292,24 +290,24 @@ class Reporter
                 $str .= $this->pad(0, $largestExpectedSize, " ");
                 $difference = true;
             }
-            
+
             if (null !== $actualIterator->current()) {
                 $actual = $actualIterator->current();
                 $difference = $difference || !strcmp($expected, $actual) === 0;
-                
+
                 if ($difference) {
                     $str .= " <|> ";
                 } else {
                     $str .= "  |  ";
                 }
-                
+
                 $str .= $actual;
             } else {
                 $str .= " <|> ";
             }
-            
+
             $str .= PHP_EOL;
-            
+
             $actualIterator->next();
             $expectedIterator->next();
         }
@@ -318,7 +316,7 @@ class Reporter
     }
 
     private function payloadContentType($event)
-    {        
+    {
         if ($event instanceof EventMessageInterface) {
             return $event->getPayloadType();
         } else {

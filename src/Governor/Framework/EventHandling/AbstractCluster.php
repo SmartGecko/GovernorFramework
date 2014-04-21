@@ -105,7 +105,7 @@ abstract class AbstractCluster implements ClusterInterface
     }
 
     public function publish(array $events)
-    {        
+    {                
         $this->doPublish($events, $this->getMembers());
     }
 

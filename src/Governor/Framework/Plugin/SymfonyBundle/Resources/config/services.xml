@@ -108,7 +108,7 @@
             <argument type="service" id="governor.event_bus.default"/>
             <argument type="service" id="governor.lock_manager"/>
             <argument type="service" id="governor.event_store"/>
-            <argument type="service" id="governor.aggregate_factory"/>
+            <!--<argument type="service" id="governor.aggregate_factory"/>-->
         </service>
     </services>
 </container>

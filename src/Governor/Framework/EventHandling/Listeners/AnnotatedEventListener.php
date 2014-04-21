@@ -53,8 +53,14 @@ class AnnotatedEventListener implements EventListenerInterface
             $reflMethod = new \ReflectionMethod($this->eventTarget,
                     $this->methodName);
 
-            $reflMethod->invokeArgs($this->eventTarget,
-                    array($event->getPayload()));
+            $arguments = array($event->getPayload());
+            
+            // !!! TODO more checks this is just temporary
+            if (2 === $reflMethod->getNumberOfParameters()) {
+                $arguments[] = $event;
+            }
+            
+            $reflMethod->invokeArgs($this->eventTarget, $arguments);
         } catch (\Exception $ex) {
             // ignore everything
         }

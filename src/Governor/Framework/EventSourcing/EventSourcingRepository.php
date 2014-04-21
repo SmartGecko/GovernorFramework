@@ -41,13 +41,13 @@ class EventSourcingRepository extends LockingRepository
      */
     public function __construct($className, EventBusInterface $eventBus,
         LockManagerInterface $lockManager, EventStoreInterface $eventStore,
-        AggregateFactoryInterface $factory)
+        AggregateFactoryInterface $factory = null)
     {
         $this->validateEventSourcedAggregate($className);
 
         parent::__construct($className, $eventBus, $lockManager);
         $this->eventStore = $eventStore;
-        $this->factory = $factory;
+        $this->factory = null === $factory ? new GenericAggregateFactory($className) : $factory;
         $this->conflictResolver = null;
     }
 

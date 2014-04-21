@@ -146,7 +146,7 @@ interface FixtureConfigurationInterface
     /**
      * Returns the event store used by this fixture. This event store is provided for wiring purposes only.
      *
-     * @return the event store used by this fixture
+     * @return \Governor\Framework\EventStore\EventStoreInterface the event store used by this fixture
      */
     public function getEventStore();
 

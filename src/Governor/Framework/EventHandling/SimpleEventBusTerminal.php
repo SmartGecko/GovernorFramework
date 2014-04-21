@@ -16,7 +16,7 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
@@ -36,13 +36,13 @@ class SimpleEventBusTerminal implements EventBusTerminalInterface
 
     public function publish(array $events)
     {
-        foreach ($this->clusters as $cluster) {     
+        foreach ($this->clusters as $cluster) {            
             $cluster->publish($events);
         }
     }
 
     public function onClusterCreated(ClusterInterface $cluster)
-    {        
+    {
         $this->clusters[] = $cluster;
     }
 

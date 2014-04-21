@@ -422,4 +422,9 @@ class TestAggregate extends AbstractEventSourcedAggregateRoot
         return $this->identifier;
     }
 
+    public function preInitializeState()
+    {
+        
+    }
+
 }

@@ -37,7 +37,8 @@ use Governor\Framework\Domain\AbstractAggregateRoot;
  */
 abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot implements EventSourcedAggregateRootInterface
 {
-
+    public abstract function preInitializeState();
+    
     public function initializeState(DomainEventStreamInterface $domainEventStream)
     {        
         if (0 !== $this->getUncommittedEventCount()) {

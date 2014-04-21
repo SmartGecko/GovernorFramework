@@ -62,8 +62,7 @@ class MyCommandHandler
      */
     public function handleTestCommand(TestCommand $testCommand)
     {
-        $aggregate = $this->repository->load($testCommand->getAggregateIdentifier(),
-                null);
+        $aggregate = $this->repository->load($testCommand->getAggregateIdentifier());
         $aggregate->doSomething();
     }
 

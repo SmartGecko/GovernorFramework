@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventSourcing;
 
+use Governor\Framework\Common\ReflectionUtils;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 
 /**
@@ -51,6 +52,10 @@ class GenericAggregateFactory extends AbstractAggregateFactory
 
     function __construct($aggregateType)
     {        
+        if (null === $aggregateType) {
+            throw new \InvalidArgumentException("Aggregate type not set.");
+        }
+        
         $this->reflClass = new \ReflectionClass($aggregateType);
 
         if (!$this->reflClass->implementsInterface('Governor\Framework\EventSourcing\EventSourcedAggregateRootInterface')) {
@@ -63,8 +68,11 @@ class GenericAggregateFactory extends AbstractAggregateFactory
 
     protected function doCreateAggregate($aggregateIdentifier,
         DomainEventMessageInterface $firstEvent)
-    {        
-        return $this->reflClass->newInstanceWithoutConstructor();
+    {                                
+        $aggregate = $this->reflClass->newInstanceWithoutConstructor();
+        $aggregate->preInitializeState();
+        
+        return $aggregate;
     }
 
     public function getAggregateType()

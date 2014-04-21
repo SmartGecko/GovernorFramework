@@ -47,11 +47,13 @@ use Governor\Framework\CommandHandling\CommandHandlerInterceptorInterface;
 use Governor\Framework\EventHandling\EventListenerInterface;
 use Governor\Framework\EventSourcing\EventSourcingRepository;
 use Governor\Framework\EventStore\EventStoreInterface;
+use Governor\Framework\EventStore\EventStoreException;
 use Governor\Framework\Domain\DomainEventStreamInterface;
 use Governor\Framework\Domain\SimpleDomainEventStream;
 use Governor\Framework\Repository\NullLockManager;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
+use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
 
 /**
  * Description of GivenWhenThenTestFixture
@@ -61,20 +63,20 @@ use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExecutorInterface
 {
 
-    public $logger;
-    public $repository;
-    public $commandBus;
-    public $eventBus;
-    public $aggregateIdentifier;
-    public $eventStore;
-    public $givenEvents;
-    public $storedEvents; //Deque<DomainEventMessage> storedEvents;
-    public $publishedEvents = array(); //List<EventMessage> publishedEvents;
-    public $sequenceNumber = 0;
-    public $workingAggregate;
-    public $reportIllegalStateChange = true;
-    public $aggregateType;
-    public $explicitCommandHandlersSet;
+    private $logger;
+    private $repository;
+    private $commandBus;
+    private $eventBus;
+    private $aggregateIdentifier;
+    private $eventStore;
+    private $givenEvents = array();
+    private $storedEvents = array(); //Deque<DomainEventMessage> storedEvents;
+    private $publishedEvents = array(); //List<EventMessage> publishedEvents;
+    private $sequenceNumber = 0;
+    private $workingAggregate;
+    private $reportIllegalStateChange = true;
+    private $aggregateType;
+    private $explicitCommandHandlersSet;
 
     /**
      * Initializes a new given-when-then style test fixture for the given <code>aggregateType</code>.
@@ -87,10 +89,11 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->logger->pushHandler(new StreamHandler('php://stdout',
                 Logger::DEBUG));
 
-        $this->eventBus = new RecordingEventBus($this);
+        $this->eventBus = new RecordingEventBus($this->publishedEvents);
         $this->commandBus = new SimpleCommandBus();
         $this->commandBus->setLogger($this->logger);
-        $this->eventStore = new RecordingEventStore($this);
+        $this->eventStore = new RecordingEventStore($this->storedEvents,
+                $this->givenEvents, $this->aggregateIdentifier);
 //FixtureResourceParameterResolverFactory.clear();
 //FixtureResourceParameterResolverFactory.registerResource(eventBus);
 //FixtureResourceParameterResolverFactory.registerResource(commandBus);
@@ -208,6 +211,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                 foreach ($this->storedEvents as $event) {
                     $this->givenEvents[] = $event;
                 }
+                
                 $this->storedEvents = array();
             }
             $this->publishedEvents = array();
@@ -221,8 +225,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     public function when($command, array $metaData = array())
     {
         try {
-            $this->finalizeConfiguration();
-            echo sprintf("BEFORE when %s - %s\n", count($this->storedEvents), count($this->publishedEvents));
+            $this->finalizeConfiguration();            
             $resultValidator = new ResultValidatorImpl($this->storedEvents,
                     $this->publishedEvents);
             $this->commandBus->setHandlerInterceptors(array(new AggregateRegisteringInterceptor()));
@@ -232,8 +235,6 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
 
             $this->detectIllegalStateChanges();
             $resultValidator->assertValidRecording();
-            
-            echo sprintf("AFTER when %s - %s\n", count($this->storedEvents), count($this->publishedEvents));
             
             return $resultValidator;
         } finally {
@@ -247,7 +248,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
             $this->registerRepository(new EventSourcingRepository($this->aggregateType,
                     $this->eventBus, new NullLockManager(), $this->eventStore,
                     new \Governor\Framework\EventSourcing\GenericAggregateFactory($this->aggregateType)));
-        }      
+        }
     }
 
     private function finalizeConfiguration()
@@ -258,14 +259,14 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
 
     // !!! TODO one reflection scanner 
     private function registerAggregateCommandHandlers()
-    {        
+    {
         $this->ensureRepositoryConfiguration();
-        
-        if (!$this->explicitCommandHandlersSet) {     
+
+        if (!$this->explicitCommandHandlersSet) {
             $reader = new \Doctrine\Common\Annotations\AnnotationReader();
             $reflectionClass = new \ReflectionClass($this->aggregateType);
 
-            foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {                
+            foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
                 $annot = $reader->getMethodAnnotation($method,
                         'Governor\Framework\Annotations\CommandHandler');
 
@@ -281,7 +282,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                     continue;
                 }
 
-                $commandName = $commandParam->getClass()->name;                
+                $commandName = $commandParam->getClass()->name;
                 $this->commandBus->subscribe($commandName,
                         new AnnotatedAggregateCommandHandler($commandName,
                         $method->name, $this->aggregateType, $this->repository,
@@ -365,7 +366,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
       } */
 
     private function clearGivenWhenState()
-    {
+    {        
         $this->storedEvents = array();
         $this->publishedEvents = array();
         $this->givenEvents = array();
@@ -397,65 +398,21 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->ensureRepositoryConfiguration();
         return $this->repository;
     }
-
-    /*
-
-      private static class ComparationEntry {
-
-      private final Object workingObject;
-      private final Object eventSourceObject;
-
-      public ComparationEntry(Object workingObject, Object eventSourceObject) {
-      this.workingObject = workingObject;
-      this.eventSourceObject = eventSourceObject;
-      }
-
-      @SuppressWarnings("RedundantIfStatement")
-      @Override
-      public boolean equals(Object o) {
-      if (this == o) {
-      return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-      return false;
-      }
-
-      ComparationEntry that = (ComparationEntry) o;
-
-      if (!eventSourceObject.equals(that.eventSourceObject)) {
-      return false;
-      }
-      if (!workingObject.equals(that.workingObject)) {
-      return false;
-      }
-
-      return true;
-      }
-
-      @Override
-      public int hashCode() {
-      int result = workingObject.hashCode();
-      result = 31 * result + eventSourceObject.hashCode();
-      return result;
-      }
-      }
-     */
 }
 
 class RecordingEventBus implements EventBusInterface
 {
 
-    private $fixture;
+    private $publishedEvents;
 
-    public function __construct(GivenWhenThenTestFixture $fixture)
+    public function __construct(array &$publishedEvents)
     {
-        $this->fixture = $fixture;
+        $this->publishedEvents = &$publishedEvents;
     }
 
     public function publish(array $events)
-    {                             
-        $this->fixture->publishedEvents = array_merge($this->fixture->publishedEvents,
-                $events);
+    {
+        $this->publishedEvents = array_merge($this->publishedEvents, $events);
     }
 
     public function subscribe(EventListenerInterface $eventListener)
@@ -481,7 +438,7 @@ class IdentifierValidatingRepository implements RepositoryInterface
     }
 
     public function load($aggregateIdentifier, $expectedVersion = null)
-    {
+    {        
         $aggregate = $this->delegate->load($aggregateIdentifier,
                 $expectedVersion);
         $this->validateIdentifier($aggregateIdentifier, $aggregate);
@@ -501,7 +458,7 @@ class IdentifierValidatingRepository implements RepositoryInterface
     }
 
     public function add(AggregateRootInterface $aggregate)
-    {
+    {        
         $this->delegate->add($aggregate);
     }
 
@@ -541,11 +498,16 @@ class ExecutionExceptionAwareCallback implements CommandCallbackInterface
 class RecordingEventStore implements EventStoreInterface
 {
 
-    private $fixture;
+    private $storedEvents;
+    private $givenEvents;
+    private $aggregateIdentifier;
 
-    public function __construct(GivenWhenThenTestFixture $fixture)
+    public function __construct(array &$storedEvents, array &$givenEvents,
+            &$aggregateIdentifier)
     {
-        $this->fixture = $fixture;
+        $this->storedEvents = &$storedEvents;
+        $this->givenEvents = &$givenEvents;
+        $this->aggregateIdentifier = &$aggregateIdentifier;        
     }
 
     public function appendEvents($type, DomainEventStreamInterface $events)
@@ -554,47 +516,45 @@ class RecordingEventStore implements EventStoreInterface
             $next = $events->next();
             IdentifierValidator::validateIdentifier($next->getAggregateIdentifier());
 
-            if (!empty($this->fixture->storedEvents)) {
-                $lastEvent = end($this->fixture->storedEvents);
+            if (!empty($this->storedEvents)) {                
+                $lastEvent = end($this->storedEvents);
 
                 if ($lastEvent->getAggregateIdentifier() !== $next->getAggregateIdentifier()) {
                     throw new EventStoreException("Writing events for an unexpected aggregate. This could " .
                     "indicate that a wrong aggregate is being triggered.");
-                } else if ($lastEvent->getScn() !== $next . getScn() - 1) {
+                } else if ($lastEvent->getScn() !== $next->getScn() - 1) {
                     throw new EventStoreException(sprintf("Unexpected sequence number on stored event. " .
                             "Expected %s, but got %s.",
                             $lastEvent->getScn() + 1, $next->getScn()));
                 }
             }
-
-            if (null === $this->fixture->aggregateIdentifier) {
-                $this->fixture->aggregateIdentifier = $next->getAggregateIdentifier();
+                   
+            if (null === $this->aggregateIdentifier) {
+                $this->aggregateIdentifier = $next->getAggregateIdentifier();
                 $this->injectAggregateIdentifier();
             }
 
-            $this->fixture->storedEvents[] = $next;
+            $this->storedEvents[] = $next;
         }
     }
 
     public function readEvents($type, $identifier)
-    {
-        echo $identifier . " ---- \n";
+    {                
         if (null !== $identifier) {
             IdentifierValidator::validateIdentifier($identifier);
         }
 
-        if (null !== $this->fixture->aggregateIdentifier && $this->fixture->aggregateIdentifier
-                !== $identifier) {
+        if (null !== $this->aggregateIdentifier && $this->aggregateIdentifier !== $identifier) {
             throw new EventStoreException("You probably want to use aggregateIdentifier() on your fixture " .
             "to get the aggregate identifier to use");
-        } else if (null === $this->fixture->aggregateIdentifier) {
-            $this->fixture->aggregateIdentifier = $identifier;
+        } else if (null === $this->aggregateIdentifier) {
+            $this->aggregateIdentifier = $identifier;
             $this->injectAggregateIdentifier();
         }
 
-        $allEvents = $this->fixture->givenEvents;
-        $allEvents = array_merge($allEvents, $this->fixture->storedEvents);
-
+        $allEvents = $this->givenEvents;
+        $allEvents = array_merge($allEvents, $this->storedEvents);
+                
         if (empty($allEvents)) {
             throw new AggregateNotFoundException($identifier,
             "No 'given' events were configured for this aggregate, " .
@@ -605,19 +565,18 @@ class RecordingEventStore implements EventStoreInterface
     }
 
     private function injectAggregateIdentifier()
-    {
-        $oldEvents = $this->fixture->givenEvents;
-        $this->fixture->givenEvents = array();
+    {        
+        $oldEvents = $this->givenEvents;        
+        $this->givenEvents = array();        
 
         foreach ($oldEvents as $oldEvent) {
             if (null !== $oldEvent->getAggregateIdentifier()) {
-                $this->fixture->givenEvents[] = new GenericDomainEventMessage($oldEvent->getIdentifier(),
-                        $oldEvent->getTimestamp(),
-                        $this->fixture->aggregateIdentifier,
+                $this->givenEvents[] = new GenericDomainEventMessage($oldEvent->getIdentifier(),
+                        $oldEvent->getTimestamp(), $this->aggregateIdentifier,
                         $oldEvent->getScn(), $oldEvent->getPayload(),
                         $oldEvent->getMetaData());
             } else {
-                $this->fixture->givenEvents[] = $oldEvent;
+                $this->givenEvents[] = $oldEvent;
             }
         }
     }

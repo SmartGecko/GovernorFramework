@@ -16,8 +16,8 @@ interface EventStoreInterface
     /**
      * Append the events in the given {@link DomainEventStreamInterface stream} to the event store.
      *
-     * @param type   The type descriptor of the object to store
-     * @param events The event stream containing the events to store
+     * @param string $type   The type descriptor of the object to store
+     * @param DomainEventStreamInterface $events The event stream containing the events to store
      * @throws EventStoreException if an error occurs while storing the events in the event stream
      */
     public function appendEvents($type, DomainEventStreamInterface $events);

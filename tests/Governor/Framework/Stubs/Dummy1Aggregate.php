@@ -44,6 +44,11 @@ class Dummy1Aggregate extends AbstractEventSourcedAggregateRoot
         
     }
 
+    public function preInitializeState()
+    {
+        
+    }
+
 }
 
 class CreateDummy1Command
