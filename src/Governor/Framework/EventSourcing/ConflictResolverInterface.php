@@ -8,6 +8,12 @@
 
 namespace Governor\Framework\EventSourcing;
 
+/**
+ * ConflictResolverInterface
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ */
 interface ConflictResolverInterface
 {
 
@@ -17,10 +23,10 @@ interface ConflictResolverInterface
      * {@link org.axonframework.repository.ConflictingModificationException} (or subtype) is thrown. If no conflicts
      * are detected, nothing happens.
      *
-     * @param appliedChanges   The list of the changes applied to the aggregate
-     * @param committedChanges The list of events that have been previously applied, but were unexpected by the command
+     * @param $appliedChanges   The list of the changes applied to the aggregate
+     * @param $committedChanges The list of events that have been previously applied, but were unexpected by the command
      *                         handler
-     * @throws org.axonframework.repository.ConflictingModificationException
+     * @throws \Governor\Framework\Repository\ConflictingModificationException
      *          if any conflicting changes are detected
      */
     public function resolveConflicts($appliedChanges, $committedChanges);

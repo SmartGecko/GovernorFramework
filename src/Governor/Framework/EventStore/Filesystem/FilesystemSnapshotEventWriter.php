@@ -1,9 +1,25 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\EventStore\Filesystem;
@@ -14,25 +30,38 @@ use Governor\Framework\EventStore\EventStoreException;
 
 /**
  * Description of FilesystemSnapshotEventWriter
- *
- * @author 255196
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class FilesystemSnapshotEventWriter
 {
 
+    /**
+     * @var \SplFileObject
+     */
     private $eventFile;
+
+    /**
+     * @var \SplFileObject
+     */
     private $snapshotEventFile;
+
+    /**
+     * @var SerializerInterface
+     */
     private $eventSerializer;
 
     /**
      * Creates a snapshot event writer that writes any given <code>snapshotEvent</code> to the given
      * <code>snapshotEventFile</code>.
      *
-     * @param eventFile         used to skip the number of bytes specified by the latest snapshot
-     * @param snapshotEventFile the file to read snapshots from
-     * @param eventSerializer   the serializer that is used to deserialize events in snapshot file
+     * @param \SplFileObject $eventFile         used to skip the number of bytes specified by the latest snapshot
+     * @param \SplFileObject $snapshotEventFile the file to read snapshots from
+     * @param SerializerInterface $eventSerializer   the serializer that is used to deserialize events in snapshot file
      */
-    public function __construct($eventFile, $snapshotEventFile,
+    public function __construct(\SplFileObject $eventFile,
+            \SplFileObject $snapshotEventFile,
             SerializerInterface $eventSerializer)
     {
         $this->eventFile = $eventFile;
@@ -48,14 +77,14 @@ class FilesystemSnapshotEventWriter
      */
     public function writeSnapshotEvent(DomainEventMessageInterface $snapshotEvent)
     {
-        try {            
+        try {
             $offset = $this->calculateOffset($snapshotEvent);
             $this->snapshotEventFile->fwrite(pack("N", $offset));
-            
+
             $eventMessageWriter = new FilesystemEventMessageWriter($this->snapshotEventFile,
                     $this->eventSerializer);
-           
-            $eventMessageWriter->writeEventMessage($snapshotEvent);             
+
+            $eventMessageWriter->writeEventMessage($snapshotEvent);
         } catch (\Exception $ex) {
             throw new EventStoreException("Error writing a snapshot event", 0,
             $ex);
@@ -76,12 +105,12 @@ class FilesystemSnapshotEventWriter
             $eventMessageReader = new FilesystemEventMessageReader($this->eventFile,
                     $this->eventSerializer);
 
-            $lastReadSequenceNumber = -1;                        
+            $lastReadSequenceNumber = -1;
             while ($lastReadSequenceNumber < $snapshotEvent->getScn()) {
                 $entry = $eventMessageReader->readEventMessage();
-                $lastReadSequenceNumber = $entry->getScn();                              
+                $lastReadSequenceNumber = $entry->getScn();
             }
-           
+
             return $this->eventFile->ftell();
         } catch (\Exception $ex) {
             throw $ex;

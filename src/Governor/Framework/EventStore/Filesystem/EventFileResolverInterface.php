@@ -9,12 +9,11 @@
 namespace Governor\Framework\EventStore\Filesystem;
 
 /**
- * Interface that allows basic access to InputStreams and appending OutputStreams to event logs for aggregates.
- * <p/>
- * The streams provided by these methods should be closed by the caller when it has finished using them.
- *
- * @author Allard Buijze
- * @since 0.5
+ * Interface that allows basic access to files storing event logs for aggregates.
+ * <p/> 
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface EventFileResolverInterface
 {
@@ -26,8 +25,8 @@ interface EventFileResolverInterface
      * <p/>
      * The caller of this method is responsible for closing the output stream when all data has been written to it.
      *
-     * @param type                The type of aggregate to open the stream for
-     * @param aggregateIdentifier the identifier of the aggregate
+     * @param string $type                The type of aggregate to open the stream for
+     * @param mixed $aggregateIdentifier the identifier of the aggregate
      * @return \SplFileObject 
      */
     public function openEventFileForWriting($type, $aggregateIdentifier);
@@ -39,8 +38,8 @@ interface EventFileResolverInterface
      * <p/>
      * The caller of this method is responsible for closing the output stream when all data has been written to it.
      *
-     * @param type                The type of aggregate to open the stream for
-     * @param aggregateIdentifier the identifier of the aggregate
+     * @param string $type                The type of aggregate to open the stream for
+     * @param mixed $aggregateIdentifier the identifier of the aggregate
      * @return \SplFileObject 
      */
     public function openSnapshotFileForWriting($type, $aggregateIdentifier);
@@ -51,8 +50,8 @@ interface EventFileResolverInterface
      * <p/>
      * The caller of this method is responsible for closing the input stream when done reading from it.
      *
-     * @param type                The type of aggregate to open the stream for
-     * @param aggregateIdentifier the identifier of the aggregate
+     * @param string $type                The type of aggregate to open the stream for
+     * @param mixed $aggregateIdentifier the identifier of the aggregate
      * @return \SplFileObject 
      */
     public function openEventFileForReading($type, $aggregateIdentifier);
@@ -63,8 +62,8 @@ interface EventFileResolverInterface
      * <p/>
      * The caller of this method is responsible for closing the input stream when done reading from it.
      *
-     * @param type                The type of aggregate to open the stream for
-     * @param aggregateIdentifier the identifier of the aggregate
+     * @param string $type                The type of aggregate to open the stream for
+     * @param mixed $aggregateIdentifier the identifier of the aggregate
      * @return \SplFileObject 
      */
     public function openSnapshotFileForReading($type, $aggregateIdentifier);
@@ -84,7 +83,7 @@ interface EventFileResolverInterface
      * given <code>type</code>.
      *
      * @param string $type                The type of aggregate
-     * @param string $aggregateIdentifier the identifier of the aggregate
+     * @param mixed $aggregateIdentifier the identifier of the aggregate
      * @return boolean <code>true</code> if a snapshot event log exists for the aggregate, <code>false</code> otherwise.
      */
     public function snapshotFileExists($type, $aggregateIdentifier);

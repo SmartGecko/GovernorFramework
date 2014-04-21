@@ -1,9 +1,25 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\EventStore\Filesystem;
@@ -13,24 +29,35 @@ use Governor\Framework\Serializer\SerializerInterface;
 
 /**
  * Description of FileSystemSnapshotEventReader
- *
- * @author david
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class FilesystemSnapshotEventReader
 {
 
+     /**
+     * @var \SplFileObject
+     */
     private $eventFile;
+     /**
+     * @var \SplFileObject
+     */
     private $snapshotEventFile;
+    
+    /**     
+     * @var SerializerInterface
+     */
     private $eventSerializer;
 
     /**
      * Creates a snapshot event reader that reads the latest snapshot from the <code>snapshotEventFile</code>.
      *
-     * @param eventFile         used to skip the number of bytes specified by the latest snapshot
-     * @param snapshotEventFile the file to read snapshots from
-     * @param eventSerializer   the serializer that is used to deserialize events in snapshot file
+     * @param \SplFileObject $eventFile         used to skip the number of bytes specified by the latest snapshot
+     * @param \SplFileObject $snapshotEventFile the file to read snapshots from
+     * @param SerializerInterface $eventSerializer   the serializer that is used to deserialize events in snapshot file
      */
-    public function __construct($eventFile, $snapshotEventFile,
+    public function __construct(\SplFileObject $eventFile, \SplFileObject $snapshotEventFile,
             SerializerInterface $eventSerializer)
     {
         $this->eventFile = $eventFile;
@@ -45,7 +72,7 @@ class FilesystemSnapshotEventReader
      * @param identifier the aggregate's identifier
      * @return The latest snapshot of the given aggregate identifier
      *
-     * @throws IOException when reading the <code>snapshotEventFile</code> or reading the <code>eventFile</code> failed
+     * @throws EventStoreException when reading the <code>snapshotEventFile</code> or reading the <code>eventFile</code> failed
      */
     public function readSnapshotEvent($type, $identifier)
     {

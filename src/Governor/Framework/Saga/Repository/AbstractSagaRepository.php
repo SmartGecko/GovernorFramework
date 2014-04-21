@@ -76,7 +76,7 @@ abstract class AbstractSagaRepository implements SagaRepositoryInterface
      * Returns the type identifier to use for the given <code>sagaClass</code>. This information is typically provided
      * by the Serializer, if the repository stores serialized instances.
      *
-     * @param string $sagaClass The type of saga to get the type identifier for.
+     * @param mixed $sagaClass The type of saga to get the type identifier for.
      * @return The type identifier to use for the given sagaClass
      */
     protected abstract function typeOf($sagaClass);

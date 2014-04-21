@@ -67,12 +67,15 @@ class AmqpDebugCommand extends ContainerAwareCommand
                 '#');
 
         $output->writeln($formatter->formatSection('*',
-                        'Waiting for logs. To exit press CTRL+C'));
+                        'Waiting for events. To exit press CTRL+C'));
 
-        $callback = function($msg) use($output) {
+        $callback = function($msg) use($output, $formatter) {
             $reader = new EventMessageReader(new JMSSerializer());
             $message = $reader->readEventMessage($msg->body);
 
+            $output->writeln($formatter->formatSection('*',
+                            sprintf("Recieved event with routing key %s",
+                                    $msg->delivery_info['routing_key'])));
             $output->writeln(array(' [x] ' . print_r($message, true)));
         };
 

@@ -28,6 +28,9 @@ use Hamcrest\Matcher;
 
 /**
  * Utility class containing static methods to obtain instances of (List) Matchers.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 abstract class Matchers
 {
@@ -36,8 +39,8 @@ abstract class Matchers
      * Matches a list of Messages if a list containing their respective payloads matches the given
      * <code>matcher</code>.
      *
-     * @param matcher The mather to match against the Message payloads
-     * @return a Matcher that matches against the Message payloads
+     * @param Matcher $matcher The mather to match against the Message payloads
+     * @return Matcher that matches against the Message payloads
      */
     public static function payloadsMatching(Matcher $matcher)
     {
@@ -47,8 +50,8 @@ abstract class Matchers
     /**
      * Matches a single Message if the given <code>payloadMatcher</code> matches that message's payload.
      *
-     * @param payloadMatcher The matcher to match against the Message's payload
-     * @return a Matcher that evaluates a Message's payload.
+     * @param Matcher $payloadMatcher The matcher to match against the Message's payload
+     * @return Matcher that evaluates a Message's payload.
      */
     public static function messageWithPayload(Matcher $payloadMatcher)
     {
@@ -58,8 +61,8 @@ abstract class Matchers
     /**
      * Matches a List where all the given matchers must match with at least one of the items in that list.
      *
-     * @param matchers the matchers that should match against one of the items in the List.
-     * @return a matcher that matches a number of matchers against a list
+     * @param array $matchers the matchers that should match against one of the items in the List.
+     * @return Matcher a matcher that matches a number of matchers against a list
      */
     public static function listWithAllOf(array $matchers)
     {
@@ -70,8 +73,8 @@ abstract class Matchers
      * Matches a List of Events where at least one of the given <code>matchers</code> matches any of the Events in that
      * list.
      *
-     * @param matchers the matchers that should match against one of the items in the List of Events.
-     * @return a matcher that matches a number of event-matchers against a list of events
+     * @param array $matchers the matchers that should match against one of the items in the List of Events.
+     * @return Matcher a matcher that matches a number of event-matchers against a list of events
      */
     public static function listWithAnyOf(array $matchers)
     {
@@ -85,8 +88,8 @@ abstract class Matchers
      * <p/>
      * To match the exact sequence of events (i.e. without gaps), use {@link #exactSequenceOf(org.hamcrest.Matcher[])}.
      *
-     * @param matchers the matchers to match against the list of events
-     * @return a matcher that matches a number of event-matchers against a list of events
+     * @param array $matchers the matchers to match against the list of events
+     * @return Matcher a matcher that matches a number of event-matchers against a list of events
      */
     public static function sequenceOf(array $matchers)
     {
@@ -105,8 +108,8 @@ abstract class Matchers
      * <p/>
      * To allow "gaps" of unmatched Events, use {@link #sequenceOf(org.hamcrest.Matcher[])} instead.
      *
-     * @param matchers the matchers to match against the list of events
-     * @return a matcher that matches a number of event-matchers against a list of events
+     * @param array $matchers the matchers to match against the list of events
+     * @return Matcher a matcher that matches a number of event-matchers against a list of events
      */
     public static function exactSequenceOf(array $matchers)
     {
@@ -116,7 +119,7 @@ abstract class Matchers
     /**
      * Matches an empty List of Events.
      *
-     * @return a matcher that matches an empty list of events
+     * @return Matcher a matcher that matches an empty list of events
      */
     public static function noEvents()
     {
@@ -126,7 +129,7 @@ abstract class Matchers
     /**
      * Matches an empty List of Commands.
      *
-     * @return a matcher that matches an empty list of Commands
+     * @return Matcher a matcher that matches an empty list of Commands
      */
     public static function noCommands()
     {
@@ -139,9 +142,8 @@ abstract class Matchers
      * event. All fields are compared, except for the aggregate identifier and sequence number, as they are generally
      * not set on the expected event.
      *
-     * @param expected The event with the expected field values
-     * @param <T>      The type of event to match against
-     * @return a matcher that matches based on the equality of field values
+     * @param mixed $expected The event with the expected field values     
+     * @return Matcher a matcher that matches based on the equality of field values
      */
     public static function equalTo($expected)
     {
@@ -152,7 +154,7 @@ abstract class Matchers
      * Matches against <code>null</code> or <code>void</code>. Can be used to make sure no trailing events remain when
      * using an Exact Sequence Matcher ({@link #exactSequenceOf(org.hamcrest.Matcher[])}).
      *
-     * @return a matcher that matches against "nothing".
+     * @return Matcher a matcher that matches against "nothing".
      */
     public static function andNoMore()
     {
@@ -163,7 +165,7 @@ abstract class Matchers
      * Matches against <code>null</code> or <code>void</code>. Can be used to make sure no trailing events remain when
      * using an Exact Sequence Matcher ({@link #exactSequenceOf(org.hamcrest.Matcher[])}).
      *
-     * @return a matcher that matches against "nothing".
+     * @return Matcher a matcher that matches against "nothing".
      */
     public static function nothing()
     {

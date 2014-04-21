@@ -163,13 +163,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         }
 
         if (null !== $exception) {
-            if ($this->suppressExceptions) {
-                $this->logger->error("An exception occurred while a Saga {name} was handling an Event {event}: {exception}",
-                        array('name' => get_class($saga), 'event' => $event->getPayloadType(),
-                    'exception' => $exception->getMessage()));
-            } else {
-                throw $exception;
-            }
+            $this->handleInvokationException($ex, $event, $saga);
         }
 
         return $saga;
@@ -181,13 +175,19 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         try {
             $saga->handle($event);
         } catch (\RuntimeException $ex) {
-            if ($this->suppressExceptions) {
-                $this->logger->error("An exception occurred while a Saga {name} was handling an Event {event}: {exception}",
-                        array('name' => get_class($saga), 'event' => $event->getPayloadType(),
-                    'exception' => $ex->getMessage()));
-            } else {
-                throw $ex;
-            }
+            $this->handleInvokationException($ex, $event, $saga);
+        }
+    }
+
+    private function handleInvokationException(\Exception $ex,
+            EventMessageInterface $event, SagaInterface $saga)
+    {
+        if ($this->suppressExceptions) {
+            $this->logger->error("An exception occurred while a Saga {name} was handling an Event {event}: {exception}",
+                    array('name' => get_class($saga), 'event' => $event->getPayloadType(),
+                'exception' => $ex->getMessage()));
+        } else {
+            throw $ex;
         }
     }
 
