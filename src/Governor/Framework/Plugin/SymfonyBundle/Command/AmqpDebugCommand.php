@@ -25,6 +25,7 @@
 namespace Governor\Framework\Plugin\SymfonyBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Governor\Framework\EventHandling\Io\EventMessageReader;
@@ -43,27 +44,36 @@ class AmqpDebugCommand extends ContainerAwareCommand
     {
         $this
                 ->setName('governor:amqp-debug')
+                ->addArgument("connection", InputArgument::OPTIONAL,
+                        "Name of the connection to use", "default")
                 ->setDescription('Displays events routed to the AMQP terminal.')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $connection = new \PhpAmqpLib\Connection\AMQPConnection("localhost", 5672,
-                "guest", "guest");
+        $formatter = $this->getHelperSet()->get('formatter');
+        $connection = $this->getContainer()->get(sprintf("governor.amqp_terminal.connection.%s",
+                        $input->getArgument("connection")));
+
         $channel = $connection->channel();
+
+        $output->writeln($formatter->formatSection('Connecting',
+                        'Using connection ' . $input->getArgument('connection')));
 
         list($queueName,, ) = $channel->queue_declare("", false, false, true,
                 false);
-        $channel->queue_bind($queueName, AMQPTerminal::DEFAULT_EXCHANGE_NAME, '#');
+        $channel->queue_bind($queueName, AMQPTerminal::DEFAULT_EXCHANGE_NAME,
+                '#');
 
-        $output->writeln(array(' [*] Waiting for logs. To exit press CTRL+C'));;
+        $output->writeln($formatter->formatSection('*',
+                        'Waiting for logs. To exit press CTRL+C'));
 
         $callback = function($msg) use($output) {
             $reader = new EventMessageReader(new JMSSerializer());
             $message = $reader->readEventMessage($msg->body);
-                        
-            $output->writeln(array(' [x] ' . print_r($message, true)));           
+
+            $output->writeln(array(' [x] ' . print_r($message, true)));
         };
 
         $channel->basic_consume($queueName, '', false, true, false, false,

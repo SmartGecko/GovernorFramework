@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventHandling\Amqp;
 
+use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage as RawMessage;
 use Psr\Log\LoggerAwareInterface;
@@ -50,7 +51,10 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
 
     const DEFAULT_EXCHANGE_NAME = "Governor.EventBus";
 
-    //  private ConnectionFactory connectionFactory;
+    /**
+     * @var AMQPConnection
+     */
+    private $connection;
     private $exchangeName = self::DEFAULT_EXCHANGE_NAME;
     private $isTransactional = false;
     private $isDurable = true;
@@ -62,7 +66,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     private $waitForAck;
     private $publisherAckTimeout = 0;
     private $clusters;
-    
+
     public function __construct(SerializerInterface $serializer,
             RoutingKeyResolverInterface $routingKeyResolver = null,
             AMQPMessageConverterInterface $messageConverter = null)
@@ -96,7 +100,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     {
         $rawMessage = new RawMessage($amqpMessage->getBody(),
                 $amqpMessage->getProperties());
-        
+
         $channel->basic_publish($rawMessage, $this->exchangeName,
                 $amqpMessage->getRoutingKey(), $amqpMessage->isMandatory(),
                 $amqpMessage->isImmediate());
@@ -109,6 +113,17 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
         } catch (\Exception $ex) {
             $this->logger->debug("Unable to rollback. The underlying channel might already be closed.");
         }
+    }
+
+    /**
+     * Sets the Connection providing the Channels to send messages on.
+     * <p/>     
+     *
+     * @param AMQPConnection $connection The connection to set
+     */
+    public function setConnection(AMQPConnection $connection)
+    {
+        $this->connection = $connection;        
     }
 
     /**
@@ -157,20 +172,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      */
     //   public void setPublisherAckTimeout(long publisherAckTimeout) {
     //       this.publisherAckTimeout = publisherAckTimeout;
-    //   }
-
-    /**
-     * Sets the ConnectionFactory providing the Connections and Channels to send messages on. The SpringAMQPTerminal
-     * does not cache or reuse connections. Providing a ConnectionFactory instance that caches connections will prevent
-     * new connections to be opened for each invocation to {@link #publish(org.axonframework.domain.EventMessage[])}
-     * <p/>
-     * Defaults to an autowired Connection Factory.
-     *
-     * @param connectionFactory The connection factory to set
-     */
-    //   public void setConnectionFactory(ConnectionFactory connectionFactory) {
-    //       this.connectionFactory = connectionFactory;
-    //  }
+    //   }  
 
     /**
      * Sets the Message Converter that creates AMQP Messages from Event Messages and vice versa. Setting this property
@@ -247,20 +249,23 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
             $config = new DefaultAMQPConsumerConfiguration($cluster->getName());
         }
 
-         $this->clusters[] = $cluster;
+        $this->clusters[] = $cluster;
         //getListenerContainerLifecycleManager().registerCluster(cluster, config, messageConverter);
     }
 
     public function publish(array $events)
     {
-        $conn = new \PhpAmqpLib\Connection\AMQPConnection("localhost", 5672,
-                "guest", "guest");
-        $channel = $conn->channel();
+        if (null === $this->connection) {
+            throw new \RuntimeException ("The AMQPTerminal has no connection configured.");
+        }
+        //$conn = new \PhpAmqpLib\Connection\AMQPConnection("localhost", 5672,
+          //      "guest", "guest");
+        $channel = $this->connection->channel();
 
-        foreach ($this->clusters as $cluster) {            
+        foreach ($this->clusters as $cluster) {
             $cluster->publish($events);
         }
-        
+
         try {
             if ($this->waitForAck) {
                 $channel->confirm_select();
@@ -270,7 +275,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
                 $this->doSendMessage($channel, $amqpMessage);
             }
             if (CurrentUnitOfWork::isStarted()) {
-            //    CurrentUnitOfWork::get()->registerListener(new ChannelTransactionUnitOfWorkListener($channel));
+                //    CurrentUnitOfWork::get()->registerListener(new ChannelTransactionUnitOfWorkListener($channel));
             } else if ($this->isTransactional) {
                 $channel->tx_commit();
             } else if ($this->waitForAck) {

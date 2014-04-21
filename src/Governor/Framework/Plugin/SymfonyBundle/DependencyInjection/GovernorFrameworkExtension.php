@@ -1,5 +1,27 @@
 <?php
 
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
+ */
+
 namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection;
 
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -36,6 +58,8 @@ class GovernorFrameworkExtension extends Extension
                 new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
+        //configure AMQP terminals
+        $this->loadAMQPTerminals($config, $container);
         // configure command buses
         $this->loadCommandBuses($config, $container);
         // configure event buses
@@ -52,6 +76,32 @@ class GovernorFrameworkExtension extends Extension
         $this->loadSagaRepository($config, $container);
         // configure saga manager
         $this->loadSagaManager($config, $container);
+    }
+
+    private function loadAMQPTerminals($config, ContainerBuilder $container)
+    {        
+        foreach ($config['amqp_terminals'] as $name => $terminal) {     
+            $connectionDefinition = new Definition($container->getParameter('governor.amqp_terminal.connection.class'),
+                    array(
+                $terminal['connection']['host'],
+                $terminal['connection']['port'],
+                $terminal['connection']['user'],
+                $terminal['connection']['password'],
+                $terminal['connection']['vhost']
+            ));
+
+            $container->setDefinition(sprintf("governor.amqp_terminal.connection.%s",
+                            $name), $connectionDefinition);
+
+            $definition = new Definition($container->getParameter('governor.event_bus_terminal.amqp.class'));
+            $definition->addArgument(new Reference('governor.serializer'));
+            $definition->addMethodCall('setConnection',
+                    array(new Reference(sprintf("governor.amqp_terminal.connection.%s",
+                                $name))));
+
+            $container->setDefinition(sprintf("governor.amqp_terminal.%s", $name),
+                    $definition);
+        }
     }
 
     private function loadCommandBuses($config, ContainerBuilder $container)
@@ -81,7 +131,7 @@ class GovernorFrameworkExtension extends Extension
                 $definition->addArgument(null);
                 $definition->addArgument(new Reference($bus['terminal']));
             }
-            
+
             $container->setDefinition(sprintf("governor.event_bus.%s", $name),
                     $definition);
         }
