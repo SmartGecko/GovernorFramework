@@ -85,4 +85,9 @@ class StubEventStore implements EventStoreInterface
         return new \Governor\Framework\Domain\SimpleDomainEventStream($this->storedEvents);
     }
 
+    public function setLogger(\Psr\Log\LoggerInterface $logger)
+    {
+        
+    }
+
 }

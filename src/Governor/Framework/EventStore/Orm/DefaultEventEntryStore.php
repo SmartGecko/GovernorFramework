@@ -1,9 +1,25 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\EventStore\Orm;
@@ -15,32 +31,44 @@ use Governor\Framework\Serializer\SerializedObjectInterface;
 /**
  * Description of DefaultEventEntryStore
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class DefaultEventEntryStore implements EventEntryStoreInterface
 {
 
-    public function fetchAggregateStream($aggregateType, $identifier, $firstscn,
+    /**
+     * The name of the DomainEventEntry entity to use when querying for domain events.
+     *
+     * @return string The entity name of the DomainEventEntry subclass to use
+     */
+    protected function domainEventEntryEntityName()
+    {
+        return "Governor\Framework\EventStore\Orm\DomainEventEntry";
+    }
+
+    /**
+     * The name of the SnapshotEventEntry entity to use when querying for snapshot events.
+     *
+     * @return string The entity name of the SnapshotEventEntry subclass to use
+     */
+    protected function snapshotEventEntryEntityName()
+    {
+        return "Governor\Framework\EventStore\Orm\SnapshotEventEntry";
+    }
+
+    public function fetchAggregateStream($aggregateType, $identifier, $firstScn,
             $batchSize, EntityManager $entityManager)
     {
-        $query = $entityManager->createQuery(
-                        "SELECT new Governor\Framework\Serializer\SimpleSerializedDomainEventData(" .
-                        "e.eventIdentifier, e.aggregateIdentifier, e.scn, " .
-                        "e.timestamp, e.payloadType, e.payloadRevision, e.payload, e.metaData) " .
-                        "FROM Governor\Framework\EventStore\Orm\DomainEventEntry e " .
-                        "WHERE e.aggregateIdentifier = :id AND e.type = :type " .
-                        "AND e.scn >= :seq " .
-                        "ORDER BY e.scn ASC")
-                ->setParameters(array(':id' => $identifier, ':type' => $aggregateType,
-            ':seq' => $firstscn));
-
-        return $query->iterate();
+        return new BatchingAggregateStreamIterator($firstScn, $identifier,
+                $aggregateType, $batchSize, $this->domainEventEntryEntityName(),
+                $entityManager);
     }
 
     public function fetchFiltered($whereClause, array $parameters, $batchSize,
             EntityManager $entityManager)
     {
-
+        
     }
 
     public function loadLastSnapshotEvent($aggregateType, $identifier,
@@ -50,15 +78,15 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
                 createQuery("SELECT new Governor\Framework\Serializer\SimpleSerializedDomainEventData(" .
                         "e.eventIdentifier, e.aggregateIdentifier, e.scn, " .
                         "e.timestamp, e.payloadType, e.payloadRevision, e.payload, e.metaData) " .
-                        "FROM Governor\Framework\EventStore\Orm\SnapshotEventEntry e " .
+                        "FROM " . $this->snapshotEventEntryEntityName() . " e " .
                         "WHERE e.aggregateIdentifier = :id AND e.type = :type " .
                         "ORDER BY e.scn DESC")
                 ->setFirstResult(0)
                 ->setMaxResults(1)
                 ->setParameters(array(':id' => $identifier, ':type' => $aggregateType));
-        
+
         $entries = $query->getResult();
-        
+
         if (count($entries) < 1) {
             return null;
         }
@@ -71,7 +99,7 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
             SerializedObjectInterface $serializedPayload,
             SerializedObjectInterface $serializedMetaData,
             EntityManager $entityManager)
-    {        
+    {
         $entityManager->persist(new DomainEventEntry($aggregateType, $event,
                 $serializedPayload, $serializedMetaData));
     }
@@ -92,10 +120,11 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
     {
         $redundantSnapshots = $this->findRedundantSnapshots($type,
                 $mostRecentSnapshotEvent, $maxSnapshotsArchived, $entityManager);
+                
         if (count($redundantSnapshots)) {
             $scnOfFirstToPrune = current($redundantSnapshots);
 
-            $entityManager->createQuery("DELETE FROM Governor\Framework\EventStore\Orm\SnapshotEventEntry e " .
+            $entityManager->createQuery("DELETE FROM " . $this->snapshotEventEntryEntityName() . " e " .
                             "WHERE e.type = :type " .
                             "AND e.aggregateIdentifier = :aggregateIdentifier " .
                             "AND e.scn <= :scnOfFirstToPrune")
@@ -109,12 +138,12 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
             EntityManager $entityManager)
     {
         $query = $entityManager->createQuery(
-                        "SELECT e.scn FROM Governor\Framework\EventStore\Orm\SnapshotEventEntry e " .
+                        "SELECT e.scn FROM " . $this->snapshotEventEntryEntityName() . " e " .
                         "WHERE e.type = :type AND e.aggregateIdentifier = :aggregateIdentifier " .
                         "ORDER BY e.scn DESC")
-                ->setFirstResult($maxSnapshotsArchived)
+                ->setFirstResult($maxSnapshotsArchived - 1)
                 ->setMaxResults(1)
-                ->setParameters(array(':type' => $type, ':aggregateIdentifier' => $snapshotEvent->getAggregateIdentifier()));
+                ->setParameters(array(':type' => $type, ':aggregateIdentifier' => $snapshotEvent->getAggregateIdentifier()));        
 
         return $query->getResult();
     }

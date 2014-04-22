@@ -58,7 +58,8 @@ use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
 /**
  * Description of GivenWhenThenTestFixture
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExecutorInterface
 {
@@ -211,7 +212,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                 foreach ($this->storedEvents as $event) {
                     $this->givenEvents[] = $event;
                 }
-                
+
                 $this->storedEvents = array();
             }
             $this->publishedEvents = array();
@@ -225,7 +226,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     public function when($command, array $metaData = array())
     {
         try {
-            $this->finalizeConfiguration();            
+            $this->finalizeConfiguration();
             $resultValidator = new ResultValidatorImpl($this->storedEvents,
                     $this->publishedEvents);
             $this->commandBus->setHandlerInterceptors(array(new AggregateRegisteringInterceptor()));
@@ -235,7 +236,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
 
             $this->detectIllegalStateChanges();
             $resultValidator->assertValidRecording();
-            
+
             return $resultValidator;
         } finally {
             //FixtureResourceParameterResolverFactory.clear();
@@ -366,7 +367,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
       } */
 
     private function clearGivenWhenState()
-    {        
+    {
         $this->storedEvents = array();
         $this->publishedEvents = array();
         $this->givenEvents = array();
@@ -398,6 +399,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->ensureRepositoryConfiguration();
         return $this->repository;
     }
+
 }
 
 class RecordingEventBus implements EventBusInterface
@@ -438,7 +440,7 @@ class IdentifierValidatingRepository implements RepositoryInterface
     }
 
     public function load($aggregateIdentifier, $expectedVersion = null)
-    {        
+    {
         $aggregate = $this->delegate->load($aggregateIdentifier,
                 $expectedVersion);
         $this->validateIdentifier($aggregateIdentifier, $aggregate);
@@ -458,7 +460,7 @@ class IdentifierValidatingRepository implements RepositoryInterface
     }
 
     public function add(AggregateRootInterface $aggregate)
-    {        
+    {
         $this->delegate->add($aggregate);
     }
 
@@ -507,7 +509,7 @@ class RecordingEventStore implements EventStoreInterface
     {
         $this->storedEvents = &$storedEvents;
         $this->givenEvents = &$givenEvents;
-        $this->aggregateIdentifier = &$aggregateIdentifier;        
+        $this->aggregateIdentifier = &$aggregateIdentifier;
     }
 
     public function appendEvents($type, DomainEventStreamInterface $events)
@@ -516,7 +518,7 @@ class RecordingEventStore implements EventStoreInterface
             $next = $events->next();
             IdentifierValidator::validateIdentifier($next->getAggregateIdentifier());
 
-            if (!empty($this->storedEvents)) {                
+            if (!empty($this->storedEvents)) {
                 $lastEvent = end($this->storedEvents);
 
                 if ($lastEvent->getAggregateIdentifier() !== $next->getAggregateIdentifier()) {
@@ -528,7 +530,7 @@ class RecordingEventStore implements EventStoreInterface
                             $lastEvent->getScn() + 1, $next->getScn()));
                 }
             }
-                   
+
             if (null === $this->aggregateIdentifier) {
                 $this->aggregateIdentifier = $next->getAggregateIdentifier();
                 $this->injectAggregateIdentifier();
@@ -539,7 +541,7 @@ class RecordingEventStore implements EventStoreInterface
     }
 
     public function readEvents($type, $identifier)
-    {                
+    {
         if (null !== $identifier) {
             IdentifierValidator::validateIdentifier($identifier);
         }
@@ -554,7 +556,7 @@ class RecordingEventStore implements EventStoreInterface
 
         $allEvents = $this->givenEvents;
         $allEvents = array_merge($allEvents, $this->storedEvents);
-                
+
         if (empty($allEvents)) {
             throw new AggregateNotFoundException($identifier,
             "No 'given' events were configured for this aggregate, " .
@@ -565,9 +567,9 @@ class RecordingEventStore implements EventStoreInterface
     }
 
     private function injectAggregateIdentifier()
-    {        
-        $oldEvents = $this->givenEvents;        
-        $this->givenEvents = array();        
+    {
+        $oldEvents = $this->givenEvents;
+        $this->givenEvents = array();
 
         foreach ($oldEvents as $oldEvent) {
             if (null !== $oldEvent->getAggregateIdentifier()) {

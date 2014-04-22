@@ -22,27 +22,30 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Test;
+namespace Governor\Framework\EventStore\Management;
+
+use Governor\Framework\EventStore\EventVisitorInterface;
 
 /**
- * Utility class providing access to fixture instances in the Axon Test module.
+ * Interface describing operations useful for management purposes. These operations are typically used in migration
+ * scripts when deploying new versions of applications.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-abstract class Fixtures
-{
+interface EventStoreManagementInterface {
 
     /**
-     * Returns a new given-when-then style test fixture in configuration mode. See {@link
-     * org.axonframework.test.FixtureConfiguration} for more detailed usage information.
+     * Loads all events available in the event store and calls
+     * {@link \Governor\Framework\EventStore\EventVisitorInterface::doWithEvent}
+     * for each event found. Events of a single aggregate are guaranteed to be ordered by their sequence number.
+     * <p/>
+     * Implementations are encouraged, though not required, to supply events in the absolute chronological order.
+     * <p/>
+     * Processing stops when the visitor throws an exception.
      *
-     * @param string $aggregateType The aggregate under test     
-     * @return FixtureConfigurationInterface a new given-when-then style test fixture in configuration mode
+     * @param EventVisitorInterface $visitor The visitor the receives each loaded event
      */
-    public static function newGivenWhenThenFixture($aggregateType)
-    {
-        return new GivenWhenThenTestFixture($aggregateType);
-    }
-
+    public function visitEvents(EventVisitorInterface $visitor);
+   
 }

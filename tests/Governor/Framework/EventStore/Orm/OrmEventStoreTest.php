@@ -11,6 +11,7 @@ namespace Governor\Framework\EventStore\Orm;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Rhumsaa\Uuid\Uuid;
+use Governor\Framework\EventStore\EventVisitorInterface;
 use Governor\Framework\Serializer\JMSSerializer;
 use Governor\Framework\Domain\MetaData;
 use Governor\Framework\Domain\SimpleDomainEventStream;
@@ -54,7 +55,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->entityManager = EntityManager::create(self::$dbParams,
-                self::$config);
+                        self::$config);
 
         $tool = new \Doctrine\ORM\Tools\SchemaTool($this->entityManager);
         $classes = array($this->entityManager->getClassMetadata('Governor\Framework\EventStore\Orm\DomainEventEntry'),
@@ -63,9 +64,8 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $tool->createSchema($classes);
 
         $this->testSubject = new OrmEventStore($this->entityManager,
-            new JMSSerializer(new NullRevisionResolver()));
+                new JMSSerializer(new NullRevisionResolver()));
 
-        // template = new TransactionTemplate(txManager);
         $this->aggregate1 = new StubAggregateRoot(Uuid::uuid1()->toString());
         for ($t = 0; $t < 10; $t++) {
             $this->aggregate1->changeState();
@@ -92,8 +92,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
 
     public function tearDown()
     {
-        // just to make sure
-        //DateTimeUtils.setCurrentMillisSystem();
+        
     }
 
     /**
@@ -102,20 +101,20 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
     public function testUniqueKeyConstraintOnEventIdentifier()
     {
         $emptySerializedObject = new SimpleSerializedObject('{}',
-            new SimpleSerializedType('stdClass'));
+                new SimpleSerializedType('stdClass'));
 
         //$firstEvent = $this->aggregate2->getUncommittedEvents()->next();        
         $this->entityManager->persist(new DomainEventEntry("type",
-            new GenericDomainEventMessage("someValue", 0,
-            $emptySerializedObject, MetaData::emptyInstance(), "a",
-            new \DateTime()), $emptySerializedObject, $emptySerializedObject));
+                new GenericDomainEventMessage("someValue", 0,
+                $emptySerializedObject, MetaData::emptyInstance(), "a",
+                new \DateTime()), $emptySerializedObject, $emptySerializedObject));
 
         $this->entityManager->flush();
 
         $this->entityManager->persist(new DomainEventEntry("type",
-            new GenericDomainEventMessage("anotherValue", 0,
-            $emptySerializedObject, MetaData::emptyInstance(), "a",
-            new \DateTime()), $emptySerializedObject, $emptySerializedObject));
+                new GenericDomainEventMessage("anotherValue", 0,
+                $emptySerializedObject, MetaData::emptyInstance(), "a",
+                new \DateTime()), $emptySerializedObject, $emptySerializedObject));
 
         $this->entityManager->flush();
     }
@@ -126,7 +125,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
     public function testStoreAndLoadEvents_BadIdentifierType()
     {
         $this->testSubject->appendEvents("type",
-            new SimpleDomainEventStream(array(
+                new SimpleDomainEventStream(array(
             new GenericDomainEventMessage(new \stdClass(), 1, new \stdClass()))));
     }
 
@@ -149,24 +148,24 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($this->testSubject);
 
         $this->testSubject->appendEvents("test",
-            $this->aggregate1->getUncommittedEvents());
+                $this->aggregate1->getUncommittedEvents());
         $this->entityManager->flush();
 
         $this->assertEquals($this->aggregate1->getUncommittedEventCount(),
-            $this->entityManager->createQuery("SELECT count(e) FROM Governor\Framework\EventStore\Orm\DomainEventEntry e")->getSingleScalarResult());
+                $this->entityManager->createQuery("SELECT count(e) FROM Governor\Framework\EventStore\Orm\DomainEventEntry e")->getSingleScalarResult());
 
         // we store some more events to make sure only correct events are retrieved
         $this->testSubject->appendEvents("test",
-            new SimpleDomainEventStream(array(
+                new SimpleDomainEventStream(array(
             new GenericDomainEventMessage($this->aggregate2->getIdentifier(), 0,
-                new \stdClass(), new MetaData(array("key" => "Value"))
+                    new \stdClass(), new MetaData(array("key" => "Value"))
         ))));
 
         $this->entityManager->flush();
         $this->entityManager->clear();
 
         $events = $this->testSubject->readEvents("test",
-            $this->aggregate1->getIdentifier());
+                $this->aggregate1->getIdentifier());
         $actualEvents = array();
 
         while ($events->hasNext()) {
@@ -174,11 +173,11 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
             $actualEvents[] = $event;
         }
         $this->assertEquals($this->aggregate1->getUncommittedEventCount(),
-            count($actualEvents));
+                count($actualEvents));
 
         /// we make sure persisted events have the same MetaData alteration logic
         $other = $this->testSubject->readEvents("test",
-            $this->aggregate2->getIdentifier());
+                $this->aggregate2->getIdentifier());
         $this->assertTrue($other->hasNext());
         $messageWithMetaData = $other->next();
 
@@ -252,11 +251,11 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $aggregateIdentifier = "id";
         for ($cc = 0; $cc < 110; $cc++) {
             $domainEvents[] = new GenericDomainEventMessage($aggregateIdentifier,
-                $cc, new \stdClass(), MetaData::emptyInstance());
+                    $cc, new \stdClass(), MetaData::emptyInstance());
         }
 
         $this->testSubject->appendEvents("test",
-            new SimpleDomainEventStream($domainEvents));
+                new SimpleDomainEventStream($domainEvents));
         $this->entityManager->flush();
         $this->entityManager->clear();
 
@@ -270,15 +269,13 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(110, $cc);
     }
 
-    /*
-      @DirtiesContext
-      @Test
-      @Transactional
-      public void testLoad_LargeAmountOfEventsInSmallBatches() {
-      testSubject.setBatchSize(10);
-      testLoad_LargeAmountOfEvents();
-      }
+    public function testLoad_LargeAmountOfEventsInSmallBatches()
+    {
+        $this->testSubject->setBatchSize(10);
+        $this->testLoad_LargeAmountOfEvents();
+    }
 
+    /*
       @Test
       @Transactional
       public void testEntireStreamIsReadOnUnserializableSnapshot_WithException() {
@@ -346,8 +343,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
       assertEquals(0L, stream.peek().getSequenceNumber());
       }
 
-      @Test
-      @Transactional
+
       public void testEntireStreamIsReadOnUnserializableSnapshot_WithError() {
       List<DomainEventMessage<String>> domainEvents = new ArrayList<DomainEventMessage<String>>(110);
       String aggregateIdentifier = "id";
@@ -423,14 +419,14 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $aggregateIdentifier = "id";
         for ($cc = 0; $cc < 110; $cc++) {
             $domainEvents[] = new GenericDomainEventMessage($aggregateIdentifier,
-                $cc, new \stdClass(), MetaData::emptyInstance());
+                    $cc, new \stdClass(), MetaData::emptyInstance());
         }
 
         $this->testSubject->appendEvents("test",
-            new SimpleDomainEventStream($domainEvents));
+                new SimpleDomainEventStream($domainEvents));
         $this->testSubject->appendSnapshotEvent("test",
-            new GenericDomainEventMessage($aggregateIdentifier, 30,
-            new \stdClass(), MetaData::emptyInstance()
+                new GenericDomainEventMessage($aggregateIdentifier, 30,
+                new \stdClass(), MetaData::emptyInstance()
         ));
 
         $this->entityManager->flush();
@@ -450,57 +446,60 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
     public function testLoadWithSnapshotEvent()
     {
         $this->testSubject->appendEvents("test",
-            $this->aggregate1->getUncommittedEvents());
+                $this->aggregate1->getUncommittedEvents());
         $this->aggregate1->commitEvents();
         $this->entityManager->flush();
         $this->entityManager->clear();
 
         $this->testSubject->appendSnapshotEvent("test",
-            $this->aggregate1->createSnapshotEvent());
+                $this->aggregate1->createSnapshotEvent());
         $this->entityManager->flush();
         $this->entityManager->clear();
 
         $this->aggregate1->changeState();
         $this->testSubject->appendEvents("test",
-            $this->aggregate1->getUncommittedEvents());
+                $this->aggregate1->getUncommittedEvents());
         $this->aggregate1->commitEvents();
 
         $actualEventStream = $this->testSubject->readEvents("test",
-            $this->aggregate1->getIdentifier());
+                $this->aggregate1->getIdentifier());
         $domainEvents = array();
 
         while ($actualEventStream->hasNext()) {
             $next = $actualEventStream->next();
             $domainEvents[] = $next;
             $this->assertEquals($this->aggregate1->getIdentifier(),
-                $next->getAggregateIdentifier());
+                    $next->getAggregateIdentifier());
         }
 
         $this->assertEquals(2, count($domainEvents));
     }
 
-    // @Test(expected = EventStreamNotFoundException.class)
-    //@Transactional
-
-    /*
+    /**
+     * @expectedException \Governor\Framework\EventStore\EventStreamNotFoundException
+     */
     public function testLoadNonExistent()
     {
-        $this->testSubject->readEvents("Stub", Uuid::uuid1()->toString());
-        //$this->fail('erer');
-    }*/
+        $stream = $this->testSubject->readEvents("Stub",
+                Uuid::uuid1()->toString());
+        //  $this->fail('error');
+    }
+
+    public function testVisitAllEvents()
+    {
+        $eventVisitor = \Phake::mock(EventVisitorInterface::class);
+
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream($this->createDomainEvents(77)));
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream($this->createDomainEvents(23)));
+
+        $this->testSubject->visitEvents($eventVisitor);
+
+        //\Phake::verify($eventVisitor, \Phake::times(100))->doWithEvent(\Phake::anyParameters());
+    }
 
     /*
-      @Test
-      @Transactional
-      public void testVisitAllEvents() {
-      EventVisitor eventVisitor = mock(EventVisitor.class);
-      testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(77)));
-      testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(23)));
-
-      testSubject.visitEvents(eventVisitor);
-      verify(eventVisitor, times(100)).doWithEvent(isA(DomainEventMessage.class));
-      }
-
       @Test
       @Transactional
       public void testVisitAllEvents_IncludesUnknownEventType() throws Exception {
@@ -615,47 +614,52 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
       + "but the message doesn't seem to mention 'DomainEventEntry': " + ex.getMessage(),
       writer.toString().toLowerCase().contains("domainevententry"));
       }
-      }
+      } */
 
-      @DirtiesContext
-      @Test
-      @Transactional
-      public void testPrunesSnaphotsWhenNumberOfSnapshotsExceedsConfiguredMaxSnapshotsArchived() {
-      testSubject.setMaxSnapshotsArchived(1);
+    public function testPrunesSnaphotsWhenNumberOfSnapshotsExceedsConfiguredMaxSnapshotsArchived()
+    {
+        $this->testSubject->setMaxSnapshotsArchived(1);
 
-      StubAggregateRoot aggregate = new StubAggregateRoot();
+        $aggregate = new StubAggregateRoot();
 
-      aggregate.changeState();
-      testSubject.appendEvents("type", aggregate.getUncommittedEvents());
-      aggregate.commitEvents();
-      entityManager.flush();
-      entityManager.clear();
+        $aggregate->changeState();
+        $this->testSubject->appendEvents("type",
+                $aggregate->getUncommittedEvents());
+        $aggregate->commitEvents();
+        $this->entityManager->flush();
+        $this->entityManager->clear();
 
-      testSubject.appendSnapshotEvent("type", aggregate.createSnapshotEvent());
-      entityManager.flush();
-      entityManager.clear();
+        $this->testSubject->appendSnapshotEvent("type",
+                $aggregate->createSnapshotEvent());
+        $this->entityManager->flush();
+        $this->entityManager->clear();
 
-      aggregate.changeState();
-      testSubject.appendEvents("type", aggregate.getUncommittedEvents());
-      aggregate.commitEvents();
-      entityManager.flush();
-      entityManager.clear();
+        $aggregate->changeState();
+        $this->testSubject->appendEvents("type",
+                $aggregate->getUncommittedEvents());
+        $aggregate->commitEvents();
+        $this->entityManager->flush();
+        $this->entityManager->clear();
 
-      testSubject.appendSnapshotEvent("type", aggregate.createSnapshotEvent());
-      entityManager.flush();
-      entityManager.clear();
+        $this->testSubject->appendSnapshotEvent("type",
+                $aggregate->createSnapshotEvent());
+        $this->entityManager->flush();
+        $this->entityManager->clear();
 
-      @SuppressWarnings({"unchecked"})
-      List<SnapshotEventEntry> snapshots =
-      entityManager.createQuery("SELECT e FROM SnapshotEventEntry e "
-      + "WHERE e.type = 'type' "
-      + "AND e.aggregateIdentifier = :aggregateIdentifier")
-      .setParameter("aggregateIdentifier", aggregate.getIdentifier().toString())
-      .getResultList();
-      assertEquals("archived snapshot count", 1L, snapshots.size());
-      assertEquals("archived snapshot sequence", 1L, snapshots.iterator().next().getSequenceNumber());
-      }
+        $snapshots = $this->entityManager->createQuery("SELECT e FROM Governor\Framework\EventStore\Orm\SnapshotEventEntry e " .
+                        "WHERE e.type = :type " .
+                        "AND e.aggregateIdentifier = :aggregateIdentifier")
+                ->setParameters(array(
+                    ":type" => "type", 
+                    ":aggregateIdentifier" => $aggregate->getIdentifier()
+                ))
+                ->getResult();
 
+        $this->assertCount(1, $snapshots);
+        $this->assertEquals(1, $snapshots[0]->getScn());
+    }
+
+    /*
       @SuppressWarnings({"PrimitiveArrayArgumentToVariableArgMethod", "unchecked"})
       @DirtiesContext
       @Test
@@ -756,24 +760,24 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
 
       private SerializedObject<byte[]> mockSerializedObject(byte[] bytes) {
       return new SimpleSerializedObject<byte[]>(bytes, byte[].class, "java.lang.String", "0");
-      }
+      } */
 
-      private List<DomainEventMessage<StubStateChangedEvent>> createDomainEvents(int numberOfEvents) {
-      List<DomainEventMessage<StubStateChangedEvent>> events = new ArrayList<DomainEventMessage<StubStateChangedEvent>>();
-      final Object aggregateIdentifier = UUID.randomUUID();
-      for (int t = 0; t < numberOfEvents; t++) {
-      events.add(new GenericDomainEventMessage<StubStateChangedEvent>(
-      aggregateIdentifier,
-      t,
-      new StubStateChangedEvent(), MetaData.emptyInstance()
-      ));
-      }
-      return events;
-      }
+    private function createDomainEvents($numberOfEvents)
+    {
+        $events = array();
+        $aggregateIdentifier = Uuid::uuid1()->toString();
 
+        for ($t = 0; $t < $numberOfEvents; $t++) {
+            $events[] = new GenericDomainEventMessage(
+                    $aggregateIdentifier, $t, new StubStateChangedEvent(),
+                    MetaData::emptyInstance()
+            );
+        }
 
+        return $events;
+    }
 
-
+    /*
 
       private static class StubUpcaster implements Upcaster<byte[]> {
 
@@ -837,8 +841,8 @@ class StubAggregateRoot extends AbstractAnnotatedAggregateRoot
     public function createSnapshotEvent()
     {
         return new GenericDomainEventMessage($this->getIdentifier(),
-            $this->getVersion(), new StubStateChangedEvent(),
-            MetaData::emptyInstance()
+                $this->getVersion(), new StubStateChangedEvent(),
+                MetaData::emptyInstance()
         );
     }
 

@@ -16,8 +16,8 @@ use Governor\Framework\Serializer\SerializedDomainEventDataInterface;
 /**
  * Interface describing the mechanism that stores Events into the backing data store.
  *
- * @author Allard Buijze
- * @since 1.2
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface EventEntryStoreInterface
 {
@@ -62,12 +62,12 @@ interface EventEntryStoreInterface
      *
      * @param string $aggregateType       The type identifier of the aggregate that generated the event
      * @param string $identifier          The identifier of the aggregate to load the snapshot for
-     * @param integer $firstSequenceNumber The sequence number of the first event to include in the batch
+     * @param integer $firstScn The sequence number of the first event to include in the batch
      * @param integer $batchSize           The number of entries to include in the batch (if available)
      * @param EntityManager $entityManager       The entity manager providing access to the data store
      * @return \Iterator a List of serialized representations of Events included in this batch
      */
-    public function fetchAggregateStream($aggregateType, $identifier, $firstscn,
+    public function fetchAggregateStream($aggregateType, $identifier, $firstScn,
         $batchSize, EntityManager $entityManager);
 
     /**

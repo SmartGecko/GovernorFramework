@@ -33,7 +33,8 @@ use Governor\Framework\Domain\AbstractAggregateRoot;
 /**
  * Description of AbstractEventSourcedAggregateRoot
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot implements EventSourcedAggregateRootInterface
 {

@@ -30,7 +30,9 @@ use Governor\Framework\Domain\EventMessageInterface;
 /**
  * The reporter generates extensive human readable reports of what the expected outcome of a test was, and what the
  * actual results were.
-
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class Reporter
 {

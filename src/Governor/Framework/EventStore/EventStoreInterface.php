@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventStore;
 
+use Psr\Log\LoggerAwareInterface;
 use Governor\Framework\Domain\DomainEventStreamInterface;
 
 /**
@@ -35,7 +36,7 @@ use Governor\Framework\Domain\DomainEventStreamInterface;
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface EventStoreInterface
+interface EventStoreInterface extends LoggerAwareInterface
 {
 
     /**

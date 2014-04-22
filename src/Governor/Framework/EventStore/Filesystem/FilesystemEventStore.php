@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\EventStore\Filesystem;
 
+use Psr\Log\LoggerInterface;
 use Governor\Framework\Repository\ConflictingModificationException;
 use Governor\Framework\Domain\DomainEventStreamInterface;
 use Governor\Framework\Domain\DomainEventMessageInterface;
@@ -33,6 +34,11 @@ class FilesystemEventStore implements EventStoreInterface, SnapshotEventStoreInt
      * @var EventFileResolverInterface 
      */
     private $fileResolver;
+    
+    /**     
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * 
@@ -117,6 +123,11 @@ class FilesystemEventStore implements EventStoreInterface, SnapshotEventStoreInt
                     $identifier);
         }
         return $snapshotEvent;
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
 }

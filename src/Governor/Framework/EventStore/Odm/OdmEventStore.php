@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\EventStore\Odm;
 
+use Psr\Log\LoggerInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Governor\Framework\EventStore\EventStreamNotFoundException;
 use Governor\Framework\Domain\GenericDomainEventMessage;
@@ -27,7 +28,16 @@ class OdmEventStore implements EventStoreInterface, SnapshotEventStoreInterface
 {
 
     private $documentManager;
+    
+    /**    
+     * @var SerializerInterface
+     */
     private $serializer;
+    
+    /**    
+     * @var LoggerInterface
+     */
+    private $logger;
 
     function __construct(DocumentManager $documentManager,
         SerializerInterface $serializer)
@@ -50,6 +60,11 @@ class OdmEventStore implements EventStoreInterface, SnapshotEventStoreInterface
         DomainEventMessageInterface $snapshotEvent)
     {
         
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
 }
