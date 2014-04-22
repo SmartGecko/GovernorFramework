@@ -233,6 +233,8 @@ class GovernorFrameworkExtension extends Extension
             case 'null':
                 break;
         }
+        
+        $definition->addMethodCall('setLogger', array(new Reference('logger')));
 
         $container->setDefinition($serviceId, $definition);
         $container->setAlias('governor.event_store', $serviceId);
