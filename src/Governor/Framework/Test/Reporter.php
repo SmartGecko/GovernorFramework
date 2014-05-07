@@ -45,7 +45,7 @@ class Reporter
      * @param probableCause   An exception that might be the cause of the failure
      */
     public function reportDifferenceInStoredVsPublished(array $storedEvents,
-            array $publishedEvents, \Exception $probableCause)
+            array $publishedEvents, \Exception $probableCause = null)
     {
         $str = "The stored events do not match the published events.";
         $str .= $this->appendEventOverview($storedEvents, $publishedEvents,
@@ -202,9 +202,9 @@ class Reporter
           .append(field.getDeclaringClass().getSimpleName())
           .append("]) ");
           } */
-
+        
         $str .= "was not as expected." . PHP_EOL;
-        $str .= "Expected <" . 
+        $str .= "Expected <" .                 
                 $this->nullSafeToString($expected) . 
                 "> but got <" . 
                 $this->nullSafeToString($actual) . 
@@ -239,6 +239,11 @@ class Reporter
         if (null === $value) {
             return "<null>";
         }
+        
+        if (is_array($value)) {
+            return print_r($value, true);
+        }
+        
         return $value;
     }
 

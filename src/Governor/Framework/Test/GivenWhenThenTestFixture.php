@@ -26,6 +26,7 @@ namespace Governor\Framework\Test;
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use Psr\Log\LoggerInterface;
 use Governor\Framework\Common\IdentifierValidator;
 use Governor\Framework\CommandHandling\Handlers\AnnotatedAggregateCommandHandler;
 use Governor\Framework\CommandHandling\Handlers\AnnotatedCommandHandler;
@@ -379,16 +380,31 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->reportIllegalStateChange = $reportIllegalStateChange;
     }
 
+    /**
+     * Returns the {@see CommandBusInterface} used by this fixture.
+     * 
+     * @return CommandBusInterface
+     */
     public function getCommandBus()
     {
         return $this->commandBus;
     }
 
+    /**
+     * Returns the {@see EventBusInterface} used by this fixture.
+     * 
+     * @return EventBusInterface
+     */
     public function getEventBus()
     {
         return $this->eventBus;
     }
 
+     /**
+     * Returns the {@see EventStoreInterface} used by this fixture.
+     * 
+     * @return EventStoreInterface
+     */
     public function getEventStore()
     {
         return $this->eventStore;
@@ -406,20 +422,28 @@ class RecordingEventBus implements EventBusInterface
 {
 
     private $publishedEvents;
+    private $eventListeners;
 
     public function __construct(array &$publishedEvents)
     {
         $this->publishedEvents = &$publishedEvents;
+        $this->eventListeners = array();
     }
 
     public function publish(array $events)
     {
         $this->publishedEvents = array_merge($this->publishedEvents, $events);
+        
+        foreach ($events as $event) {
+            foreach ($this->eventListeners as $eventListener) {
+                $eventListener->handle($event);
+            }
+        }
     }
 
     public function subscribe(EventListenerInterface $eventListener)
     {
-        
+        $this->eventListeners[] = $eventListener;
     }
 
     public function unsubscribe(EventListenerInterface $eventListener)
@@ -581,6 +605,11 @@ class RecordingEventStore implements EventStoreInterface
                 $this->givenEvents[] = $oldEvent;
             }
         }
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        
     }
 
 }
