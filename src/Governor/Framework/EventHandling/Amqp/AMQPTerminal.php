@@ -123,7 +123,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      */
     public function setConnection(AMQPConnection $connection)
     {
-        $this->connection = $connection;        
+        $this->connection = $connection;
     }
 
     /**
@@ -256,10 +256,10 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     public function publish(array $events)
     {
         if (null === $this->connection) {
-            throw new \RuntimeException ("The AMQPTerminal has no connection configured.");
+            throw new \RuntimeException("The AMQPTerminal has no connection configured.");
         }
         //$conn = new \PhpAmqpLib\Connection\AMQPConnection("localhost", 5672,
-          //      "guest", "guest");
+        //      "guest", "guest");
         $channel = $this->connection->channel();
 
         foreach ($this->clusters as $cluster) {
@@ -287,7 +287,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
             }
 
             throw new EventPublicationFailedException("Failed to dispatch Events to the Message Broker.",
-            $ex);
+            0, $ex);
         } finally {
             if (!CurrentUnitOfWork::isStarted()) {
                 $this->tryClose($channel);
