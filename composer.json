@@ -8,7 +8,7 @@
     "require": {
         "rhumsaa/uuid": "@stable",
         "psr/log": "@stable",
-        "php": ">=5.3",        
+        "php": ">=5.5",        
         "symfony/proxy-manager-bridge":">=2.4",
         "ocramius/proxy-manager": "0.5.*",
         "monolog/monolog": "1.8.0",

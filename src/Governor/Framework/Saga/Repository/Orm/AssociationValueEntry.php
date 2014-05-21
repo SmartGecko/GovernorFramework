@@ -45,9 +45,9 @@ class AssociationValueEntry
      * Initialize a new AssociationValueEntry for a saga with given <code>sagaIdentifier</code> and
      * <code>associationValue</code>.
      *
-     * @param sagaType         The type of Saga this association value belongs to
-     * @param sagaIdentifier   The identifier of the saga
-     * @param associationValue The association value for the saga
+     * @param string $sagaType         The type of Saga this association value belongs to
+     * @param string $sagaIdentifier   The identifier of the saga
+     * @param AssociationValue $associationValue The association value for the saga
      */
     public function __construct($sagaType, $sagaIdentifier,
             AssociationValue $associationValue)
@@ -61,7 +61,7 @@ class AssociationValueEntry
     /**
      * Returns the association value contained in this entry.
      *
-     * @return the association value contained in this entry
+     * @return AssociationValue the association value contained in this entry
      */
     public function getAssociationValue()
     {
@@ -72,7 +72,7 @@ class AssociationValueEntry
     /**
      * Returns the Saga Identifier contained in this entry.
      *
-     * @return the Saga Identifier contained in this entry
+     * @return string the Saga Identifier contained in this entry
      */
     public function getSagaIdentifier()
     {
@@ -82,7 +82,7 @@ class AssociationValueEntry
     /**
      * Returns the type (fully qualified class name) of the Saga this association value belongs to
      *
-     * @return the type (fully qualified class name) of the Saga
+     * @return string the type (fully qualified class name) of the Saga
      */
     public function getSagaType()
     {
@@ -92,7 +92,7 @@ class AssociationValueEntry
     /**
      * The unique identifier of this entry.
      *
-     * @return the unique identifier of this entry
+     * @return integer the unique identifier of this entry
      */
     public function getId()
     {
