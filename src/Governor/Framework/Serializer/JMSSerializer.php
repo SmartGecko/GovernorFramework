@@ -26,6 +26,7 @@ namespace Governor\Framework\Serializer;
 
 use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\SerializerBuilder;
+use JMS\Serializer\SerializerInterface;
 use Governor\Framework\Serializer\Handlers\RhumsaaUuidHandler;
 use Governor\Framework\Serializer\Handlers\AggregateReferenceHandler;
 
@@ -43,27 +44,27 @@ class JMSSerializer extends AbstractSerializer
      */
     private $serializer;
 
- 
-    public function __construct(RevisionResolverInterface $revisionResolver = null)
+    public function __construct(SerializerInterface $serializer,
+            RevisionResolverInterface $revisionResolver = null)
     {
         parent::__construct($revisionResolver);
-        $this->serializer = SerializerBuilder::create()
-                ->addDefaultHandlers()                
-                ->configureHandlers(function(HandlerRegistry $registry) {
-                    $registry->registerSubscribingHandler(new RhumsaaUuidHandler());
-                    $registry->registerSubscribingHandler(new AggregateReferenceHandler());
-                })->build();        
+        $this->serializer = $serializer;
+        /* $this->serializer = SerializerBuilder::create()
+          ->addDefaultHandlers()
+          ->configureHandlers(function(HandlerRegistry $registry) {
+          $registry->registerSubscribingHandler(new RhumsaaUuidHandler());       
+          })->build(); */
     }
 
     public function deserialize(SerializedObjectInterface $data)
-    {        
+    {
         return $this->serializer->deserialize($data->getData(),
-                $data->getContentType(), 'json');
+                        $data->getContentType(), 'json');
     }
 
     public function serialize($object)
     {
-        $result = $this->serializer->serialize($object, 'json');       
+        $result = $this->serializer->serialize($object, 'json');
         return new SimpleSerializedObject($result, $this->typeForClass($object));
     }
 

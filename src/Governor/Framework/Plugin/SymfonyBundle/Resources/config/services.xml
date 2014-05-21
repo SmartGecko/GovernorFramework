@@ -82,7 +82,8 @@
 
         <!-- serializers -->
         <service id="governor.serializer.jms" class="%governor.serializer.jms.class%">
-            <argument type="service" id="governor.revision_resolver"/>
+            <argument type="service" id="jms_serializer"/>
+            <argument type="service" id="governor.revision_resolver"/>            
         </service>     
 
         <service id="governor.repository.orm" class="%governor.repository.orm.class%" abstract="true" public="false">
@@ -106,6 +107,10 @@
             <argument type="service" id="governor.lock_manager"/>
             <argument type="service" id="governor.event_store"/>
             <!--<argument type="service" id="governor.aggregate_factory"/>-->
+        </service>
+        
+        <service id="my_handler" class="Governor\Framework\Serializer\Handlers\RhumsaaUuidHandler" public="false">
+            <tag name="jms_serializer.subscribing_handler" type="Rhumsaa\Uuid\Uuid" format="json"/>
         </service>
     </services>
 </container>
