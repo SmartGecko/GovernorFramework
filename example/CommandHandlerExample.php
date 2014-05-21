@@ -1,17 +1,32 @@
 <?php
 
-/**
- * This example shows the implementation for a "change email"
- * command on a User entity. The command accepts a user id
- * and a new email address. The change is delegated to the
- * user object where the "DomainObjectChanged" event is raised.
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * A listener picks up this event and displays the changed e-mail.
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace CommandHandlerExample;
 
-$loader = require_once __DIR__ . "/../vendor/autoload.php";
+$loader = require_once __DIR__ . DIRECTORY_SEPARATOR .
+        ".." . DIRECTORY_SEPARATOR . "vendor" . 
+        DIRECTORY_SEPARATOR . "autoload.php";
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Monolog\Logger;
@@ -38,9 +53,6 @@ use Governor\Framework\Serializer\JMSSerializer;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 
 AnnotationRegistry::registerLoader(array($loader, "loadClass"));
-
-// start default UOW
-//DefaultUnitOfWork::startAndGet();
 
 /**
  * Our aggregate.
@@ -248,9 +260,9 @@ $eventBus = new SimpleEventBus();
 $eventBus->setLogger($logger);
 
 // 4. create an event sourcing repository
-$repository = new EventSourcingRepository('CommandHandlerExample\User',
+$repository = new EventSourcingRepository(User::class,
     $eventBus, new NullLockManager(), $eventStore,
-    new GenericAggregateFactory('CommandHandlerExample\User'));
+    new GenericAggregateFactory(User::class));
 
 //5. create and register our commands
 $commandHandler = new UserCommandHandler($repository);
@@ -274,8 +286,8 @@ $commandGateway->send(new ChangeUserEmailCommand($aggregateIdentifier,
 //8. read back aggregate from store
 $uow = DefaultUnitOfWork::startAndGet($logger);
 $aggregate = $repository->load($aggregateIdentifier);
-echo sprintf("User identifier:%s, email:%s, version:%s",
+echo sprintf("\n\nUser identifier:%s, email:%s, version:%s\n\n",
     $aggregate->getIdentifier(), $aggregate->getEmail(),
     $aggregate->getVersion());
 
-$uow->commit();
+$uow->rollback();
