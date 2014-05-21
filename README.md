@@ -120,7 +120,7 @@ the annotations must be present in order to successfully deserialize the events.
 
 Our commands and events are implemented like this:
 
-```
+```php
 abstract class AbstractUserEvent
 {
 
@@ -209,7 +209,7 @@ The event listeners need to implement the ```Governor\Framework\EventHandling\Ev
 
 This simple listener that will listen for all events on the event bus and print their payload.
 
-```
+```php
 class UserEventListener implements EventListenerInterface
 {
 
@@ -234,7 +234,7 @@ Now we can complete the example by setting up the necessary infrastructure in th
 7. Register an event listener that will display the content of our events.
 8. Dispatch commands.
 
-```
+```php
 // set up logging 
 $logger = new Logger('governor');
 $logger->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG));
