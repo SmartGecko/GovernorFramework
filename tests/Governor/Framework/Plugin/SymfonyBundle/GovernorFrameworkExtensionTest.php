@@ -147,11 +147,12 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
         $container->registerExtension($loader);
         $container->set('doctrine.orm.default_entity_manager',
-            $this->getMock('Doctrine\ORM\EntityManager',
+            $this->getMock(\Doctrine\ORM\EntityManager::class,
                 array(
                 'find', 'flush', 'persist', 'remove'), array(), '', false));
 
-        $container->set('logger', $this->getMock('Psr\Log\LoggerInterface'));
+        $container->set('logger', $this->getMock(\Psr\Log\LoggerInterface::class));
+        $container->set('jms_serializer', $this->getMock(\JMS\Serializer\SerializerInterface::class));
         
         $this->addTaggedCommandHandlers($container);
         $this->addTaggedEventListeners($container);

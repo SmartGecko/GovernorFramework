@@ -16,7 +16,7 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
@@ -33,8 +33,8 @@ use Governor\Framework\Serializer\Handlers\AggregateReferenceHandler;
 /**
  * Serializer implementation using the JMS serializer component.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class JMSSerializer extends AbstractSerializer
 {
@@ -44,16 +44,25 @@ class JMSSerializer extends AbstractSerializer
      */
     private $serializer;
 
-    public function __construct(SerializerInterface $serializer,
-            RevisionResolverInterface $revisionResolver = null)
+    /**
+     * 
+     * @param RevisionResolverInterface $revisionResolver
+     * @param SerializerInterface $serializer
+     */
+    public function __construct(RevisionResolverInterface $revisionResolver = null,
+            SerializerInterface $serializer = null)
     {
         parent::__construct($revisionResolver);
-        $this->serializer = $serializer;
-        /* $this->serializer = SerializerBuilder::create()
-          ->addDefaultHandlers()
-          ->configureHandlers(function(HandlerRegistry $registry) {
-          $registry->registerSubscribingHandler(new RhumsaaUuidHandler());       
-          })->build(); */
+
+        if (null === $serializer) {
+            $this->serializer = SerializerBuilder::create()
+                            ->addDefaultHandlers()
+                            ->configureHandlers(function(HandlerRegistry $registry) {
+                                $registry->registerSubscribingHandler(new RhumsaaUuidHandler());                                
+                            })->build();
+        } else {
+            $this->serializer = $serializer;
+        }
     }
 
     public function deserialize(SerializedObjectInterface $data)
@@ -65,6 +74,7 @@ class JMSSerializer extends AbstractSerializer
     public function serialize($object)
     {
         $result = $this->serializer->serialize($object, 'json');
+
         return new SimpleSerializedObject($result, $this->typeForClass($object));
     }
 
