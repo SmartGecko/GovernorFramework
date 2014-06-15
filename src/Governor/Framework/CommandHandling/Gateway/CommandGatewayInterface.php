@@ -1,9 +1,25 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\CommandHandling\Gateway;
@@ -12,8 +28,10 @@ use Governor\Framework\Domain\MetaData;
 use Governor\Framework\CommandHandling\CommandCallbackInterface;
 
 /**
- *
- * @author david
+ * Command gateway interface definition.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface CommandGatewayInterface
 {
@@ -26,9 +44,9 @@ interface CommandGatewayInterface
      * Command Bus, unless Command already implements {@link org.axonframework.domain.Message}. In that case, a
      * CommandMessage is constructed from that message's payload and MetaData.
      *
-     * @param command  The command to dispatch
-     * @param callback The callback to notify when the command has been processed
-     * @param <R>      The type of result expected from command execution
+     * @param mixed $command  The command to dispatch
+     * @param CommandCallbackInterface $callback The callback to notify when the command has been processed
+     * @param MetaData $metaData      Metadata to be sent with the command
      */
     public function send($command, CommandCallbackInterface $callback = null,
             MetaData $metaData = null);
@@ -45,12 +63,10 @@ interface CommandGatewayInterface
      * <p/>
      * Note that the interrupted flag is set back on the thread if it has been interrupted while waiting.
      *
-     * @param command The command to dispatch
-     * @param <R>     The type of result expected from command execution
-     * @return the result of command execution, or <code>null</code> if the thread was interrupted while waiting for
-     *         the
-     *         command to execute
-     *
+     * @param mixed $command The command to dispatch
+     * @param MetaData $metaData      Metadata to be sent with the command
+     * @return the result of command execution.
+     * 
      * @throws org.axonframework.commandhandling.CommandExecutionException
      *          when an exception occurred while processing the command
      */

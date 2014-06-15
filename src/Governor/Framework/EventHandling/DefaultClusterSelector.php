@@ -33,25 +33,27 @@ class DefaultClusterSelector implements ClusterSelectorInterface
 
     const DEFAULT_CLUSTER_IDENTIFIER = "default";
 
+    /**     
+     * @var ClusterInterface
+     */
     private $defaultCluster;
 
     /**
      * Initializes the DefaultClusterSelector to assign the given <code>defaultCluster</code> to each listener.
      *
-     * @param defaultCluster The Cluster to assign to each listener
+     * @param ClusterInterface|null $defaultCluster The Cluster to assign to each listener
      */
     public function __construct(ClusterInterface $defaultCluster = null)
     {
         if (null !== $defaultCluster) {
             $this->defaultCluster = $defaultCluster;
         } else {
-            $this->defaultCluster = new SimpleCluster(self::DEFAULT_CLUSTER_IDENTIFIER);
+            $this->defaultCluster = new SimpleCluster(self::DEFAULT_CLUSTER_IDENTIFIER,
+                    new AnnotationOrderResolver()); // !!! TODO configure
         }
     }
 
     /**
-     * {@inheritDoc}
-     * <p/>
      * This implementation always returns the same instance of {@link SimpleCluster}.
      */
     public function selectCluster(EventListenerInterface $eventListener)

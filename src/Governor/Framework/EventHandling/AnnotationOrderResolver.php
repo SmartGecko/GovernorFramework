@@ -22,13 +22,40 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Annotations;
+namespace Governor\Framework\EventHandling;
+
+use Governor\Framework\Annotations\Order;
+use Doctrine\Common\Annotations\AnnotationReader;
 
 /**
- * @Annotation
- * @Target({"METHOD","PROPERTY"})
+ * Implementation of the OrderResolverInterface that uses the {@see Order} annotation to determine
+ * the event handler order.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-final class TargetAggregateIdentifier
+class AnnotationOrderResolver implements OrderResolverInterface
 {
+    /**     
+     * @var AnnotationReader
+     */
+    private $reader;
+    
+    function __construct()
+    {
+        $this->reader = new AnnotationReader();
+    }
+
+    
+    public function orderOf(EventListenerInterface $listener)
+    {               
+        $order = $this->reader->getClassAnnotation(new \ReflectionClass($listener), Order::class);
+
+        if (null === $order && $listener instanceof EventListenerProxyInterface) {
+            $order = $this->reader->getClassAnnotation(new \ReflectionClass($listener->getTargetType()), Order::class);            
+        }                
+        
+        return null === $order ? 0 : $order->value;
+    }
 
 }

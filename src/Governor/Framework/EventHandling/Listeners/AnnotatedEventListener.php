@@ -24,15 +24,17 @@
 
 namespace Governor\Framework\EventHandling\Listeners;
 
-use Governor\Framework\EventHandling\EventListenerInterface;
+use Governor\Framework\EventHandling\EventListenerProxyInterface;
 use Governor\Framework\Domain\EventMessageInterface;
 
 /**
- * Description of AnnotatedEventHandler
- *
- * @author 255196
+ * Implementation of the @see EventListenerProxyInterface interface that uses annotations
+ * to execute the correct event handler.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class AnnotatedEventListener implements EventListenerInterface
+class AnnotatedEventListener implements EventListenerProxyInterface
 {
 
     private $eventName;
@@ -73,6 +75,11 @@ class AnnotatedEventListener implements EventListenerInterface
                     get_class($this), $this->eventName,
                     $message->getPayloadType()));
         }
+    }
+
+    public function getTargetType()
+    {
+        return $this->eventTarget;
     }
 
 }

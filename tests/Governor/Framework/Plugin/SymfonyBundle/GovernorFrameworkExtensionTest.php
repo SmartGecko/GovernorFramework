@@ -9,6 +9,7 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\GovernorFrameworkExtension;
 use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler\CommandHandlerPass;
 use Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler\EventHandlerPass;
+use Governor\Framework\Repository\RepositoryInterface;
 use Governor\Framework\Annotations\EventHandler;
 use Governor\Framework\Annotations\CommandHandler;
 use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
@@ -28,10 +29,8 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
         $repo1 = $this->testSubject->get('dummy1.repository');
         $repo2 = $this->testSubject->get('dummy2.repository');
 
-        $this->assertInstanceOf('Governor\Framework\Repository\RepositoryInterface',
-            $repo1);
-        $this->assertInstanceOf('Governor\Framework\Repository\RepositoryInterface',
-            $repo2);
+        $this->assertInstanceOf(RepositoryInterface::class, $repo1);
+        $this->assertInstanceOf(RepositoryInterface::class, $repo2);
         $this->assertNotSame($repo1, $repo2);
         $this->assertEquals('Governor\Framework\Stubs\Dummy1Aggregate',
             $repo1->getClass());
@@ -118,6 +117,12 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
                             'class' => 'Governor\Framework\CommandHandling\Gateway\DefaultCommandGateway'
                         )
                     ),
+                    'clusters' => array(
+                        'default' => array (
+                            'class' => 'Governor\Framework\EventHandling\SimpleCluster',
+                            'order_resolver' => 'governor.order_resolver'
+                        )
+                    ),
                     'saga_repository' => array(
                         'type' => 'orm',
                         'parameters' => array (
@@ -129,7 +134,11 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
                         'saga_locations' => array (
                             sys_get_temp_dir()
                         ) 
-                    )
+                    ),
+                    'cluster_selector' => array(
+                        'class' => 'Governor\Framework\EventHandling\DefaultClusterSelector'
+                    ),
+                    'order_resolver' => 'annotation'
                 )
             );
 

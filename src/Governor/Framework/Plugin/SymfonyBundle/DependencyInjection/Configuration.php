@@ -27,6 +27,12 @@ namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
+/**
+ * Describes the configuration of the Governor Framework.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ */
 class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder()
@@ -43,6 +49,9 @@ class Configuration implements ConfigurationInterface
                         ->thenInvalid('Invalid command target resolver "%s", possible values are '.
                                        "[\"annotation\",\"metadata\"]")
                     ->end()
+                ->end()
+                ->scalarNode('order_resolver')
+                    ->defaultValue('annotation')
                 ->end()
                 ->scalarNode('lock_manager')
                     ->defaultValue('null')
@@ -107,24 +116,46 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('cluster_selector')
+                    ->children()
+                        ->scalarNode('class')->isRequired()->end()
+                        ->scalarNode('cluster')->defaultValue('default')->end()
+                    ->end()
+                ->end()
                 ->append($this->addRepositoriesNode())
                 ->append($this->addAggregateCommandHandlersNode())
                 ->append($this->addCommandBusesNode())
                 ->append($this->addEventBusesNode())
                 ->append($this->addCommandGatewaysNode())
                 ->append($this->addAMQPTerminalsNode())
+                ->append($this->addClustersNode())
             ->end();
 
         return $treeBuilder;
     }
 
+    private function addClustersNode()
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('clusters');
+        
+        $node->useAttributeAsKey('name')
+            ->prototype('array')
+                ->children()
+                    ->scalarNode('class')->isRequired()->end()
+                    ->scalarNode('order_resolver')->isRequired()->end()
+                ->end()
+            ->end();
+
+        return $node;
+    }
+    
     private function addCommandBusesNode()
     {
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('command_buses');
 
-        $node
-            ->useAttributeAsKey('name')
+        $node->useAttributeAsKey('name')
             ->prototype('array')
                 ->children()
                     ->scalarNode('class')->isRequired()->end()

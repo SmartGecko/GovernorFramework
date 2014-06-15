@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\Saga;
 
+use Governor\Framework\Saga\SagaInterface;
 use Governor\Framework\Saga\Annotation\AssociationValuesImpl;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\Domain\GenericEventMessage;
@@ -202,12 +203,9 @@ class TestableAbstractSagaManager extends AbstractSagaManager
                 $this->associationValue);
     }
 
+    public function getTargetType()
+    {
+        return SagaInterface::class;
+    }
+
 }
-
-/*
-      @Override
-      public Class<?> getTargetType() {
-      return Saga.class;
-      }
-
- */

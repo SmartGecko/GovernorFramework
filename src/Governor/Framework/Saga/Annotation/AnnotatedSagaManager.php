@@ -81,7 +81,7 @@ class AnnotatedSagaManager extends AbstractSagaManager
 
     public function getTargetType()
     {
-        //return getManagedSagaTypes().iterator().next();
+        return current($this->getManagedSagaTypes());        
     }
 
 }

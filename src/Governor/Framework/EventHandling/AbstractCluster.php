@@ -24,12 +24,15 @@
 
 namespace Governor\Framework\EventHandling;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerAwareInterface;
+
 /**
  * Description of AbstractCluster
  *
  * @author david
  */
-abstract class AbstractCluster implements ClusterInterface
+abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
 {
 
     /**
@@ -51,6 +54,11 @@ abstract class AbstractCluster implements ClusterInterface
      * @var OrderResolverInterface
      */
     private $orderResolver;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     protected function __construct($name,
             OrderResolverInterface $orderResolver = null)
@@ -82,7 +90,7 @@ abstract class AbstractCluster implements ClusterInterface
                     function ($a, $b) {
                 $orderA = $this->orderResolver->orderOf($a);
                 $orderB = $this->orderResolver->orderOf($b);
-
+             
                 if ($orderA === $orderB) {
                     return 0;
                 }
@@ -90,7 +98,7 @@ abstract class AbstractCluster implements ClusterInterface
                 return ($orderA < $orderB) ? -1 : 1;
             });
         }
-        
+
         return $listeners;
     }
 
@@ -105,7 +113,7 @@ abstract class AbstractCluster implements ClusterInterface
     }
 
     public function publish(array $events)
-    {                
+    {
         $this->doPublish($events, $this->getMembers());
     }
 
@@ -121,6 +129,11 @@ abstract class AbstractCluster implements ClusterInterface
         if ($this->eventListeners->contains($eventListener)) {
             $this->eventListeners->detach($eventListener);
         }
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
 }

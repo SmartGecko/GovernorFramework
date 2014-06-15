@@ -49,8 +49,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      */
     private $logger;
 
-    //private final IdentifierBasedLock lock = new IdentifierBasedLock();
-    //private Map<String, Saga> sagasInCreation = new ConcurrentHashMap<String, Saga>();
+    //private final IdentifierBasedLock lock = new IdentifierBasedLock();    
 
     public function __construct(SagaRepositoryInterface $sagaRepository,
             SagaFactoryInterface $sagaFactory, array $sagaTypes = array())
@@ -58,11 +57,6 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $this->sagaRepository = $sagaRepository;
         $this->sagaFactory = $sagaFactory;
         $this->sagaTypes = $sagaTypes;
-    }
-
-    public function getTargetType()
-    {
-        
     }
 
     public function handle(EventMessageInterface $event)
@@ -120,13 +114,6 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         foreach ($associationValues as $associationValue) {
             $sagas = $this->sagaRepository->find($sagaType, $associationValue);
         }
-
-        /*  foreach ($this->sagasInCreation as $id => $sagaInCreation) {
-          if ($sagaType === get_class($sagaInCreation) && $this->containsAny($sagaInCreation->getAssociationValues(),
-          $associationValues)) {
-          $sagas[] = $id;
-          }
-          } */
 
         $sagaOfTypeInvoked = false;
 
@@ -251,4 +238,8 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $this->logger = $logger;
     }
 
+    public function getManagedSagaTypes()
+    {
+        return $this->sagaTypes;
+    }
 }

@@ -40,7 +40,6 @@ class SimpleCluster extends AbstractCluster
 
     protected function doPublish(array $events, array $eventListeners)
     {
-
         try {
             foreach ($events as $event) {
                 foreach ($eventListeners as $listener) {

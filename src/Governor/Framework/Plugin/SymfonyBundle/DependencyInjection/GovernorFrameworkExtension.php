@@ -50,6 +50,10 @@ class GovernorFrameworkExtension extends Extension
                 new Alias(sprintf('governor.command_target_resolver.%s',
                         $config['command_target_resolver'])));
 
+        $container->setAlias('governor.order_resolver',
+                new Alias(sprintf('governor.order_resolver.%s',
+                        $config['order_resolver'])));
+
         $container->setAlias('governor.serializer',
                 new Alias(sprintf('governor.serializer.%s',
                         $config['serializer'])));
@@ -58,6 +62,10 @@ class GovernorFrameworkExtension extends Extension
                 new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
+        // configure clusters
+        $this->loadClusters($config, $container);
+        // configure cluster selector
+        $this->loadClusterSelector($config, $container);
         //configure AMQP terminals
         $this->loadAMQPTerminals($config, $container);
         // configure command buses
@@ -79,8 +87,8 @@ class GovernorFrameworkExtension extends Extension
     }
 
     private function loadAMQPTerminals($config, ContainerBuilder $container)
-    {        
-        foreach ($config['amqp_terminals'] as $name => $terminal) {     
+    {
+        foreach ($config['amqp_terminals'] as $name => $terminal) {
             $connectionDefinition = new Definition($container->getParameter('governor.amqp_terminal.connection.class'),
                     array(
                 $terminal['connection']['host'],
@@ -120,6 +128,30 @@ class GovernorFrameworkExtension extends Extension
         }
     }
 
+    private function loadClusterSelector($config, ContainerBuilder $container)
+    {
+        $definition = new Definition($config['cluster_selector']['class']);
+        $definition->addArgument(new Reference(sprintf('governor.cluster.%s',
+                        $config['cluster_selector']['cluster'])));
+        
+        $container->setDefinition("governor.cluster_selector", $definition);
+    }
+
+    private function loadClusters($config, ContainerBuilder $container)
+    {
+        foreach ($config['clusters'] as $name => $cluster) {
+            $definition = new Definition($cluster['class']);
+            $definition->addArgument($name);
+            $definition->addArgument(new Reference($cluster['order_resolver']));
+
+            $definition->addMethodCall('setLogger',
+                    array(new Reference('logger')));
+
+            $container->setDefinition(sprintf("governor.cluster.%s", $name),
+                    $definition);
+        }
+    }
+
     private function loadEventBuses($config, ContainerBuilder $container)
     {
         foreach ($config['event_buses'] as $name => $bus) {
@@ -128,7 +160,7 @@ class GovernorFrameworkExtension extends Extension
                     array(new Reference('logger')));
 
             if (isset($bus['terminal'])) {
-                $definition->addArgument(null);
+                $definition->addArgument(new Reference('governor.cluster_selector'));
                 $definition->addArgument(new Reference($bus['terminal']));
             }
 
@@ -233,7 +265,7 @@ class GovernorFrameworkExtension extends Extension
             case 'null':
                 break;
         }
-        
+
         $definition->addMethodCall('setLogger', array(new Reference('logger')));
 
         $container->setDefinition($serviceId, $definition);

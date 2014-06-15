@@ -28,15 +28,17 @@ namespace Governor\Framework\EventHandling;
  * Interface describing a mechanism that provides the order for any given Event Listener. Listeners with a lower order
  * should receive precedence over the instances with a higher value. The order of instances with default order is
  * undefined.
-
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface OrderResolverInterface {
 
     /**
      * Returns the order for the given <code>listener</code>.
      * <p/>
-     * Implementations should check whether the <code>listener</code> implements {@link EventListenerProxy}. In that
-     * case, use {@link org.axonframework.eventhandling.EventListenerProxy#getTargetType()} to get access to the actual
+     * Implementations should check whether the <code>listener</code> implements {@link EventListenerProxyInterface}. In that
+     * case, use {@link Governor\Framework\EventHandling\EventListenerProxyInterface#getTargetType()} to get access to the actual
      * type handling the events.
      *
      * @param EventListenerInterface $listener the listener to resolve the order for

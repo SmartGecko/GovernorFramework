@@ -26,9 +26,9 @@ namespace Governor\Framework\Annotations;
 
 /**
  * @Annotation
- * @Target({"METHOD","PROPERTY"})
+ * @Target("CLASS")
  */
-final class TargetAggregateIdentifier
+final class Order
 {
-
+    public $value;
 }

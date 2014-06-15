@@ -29,11 +29,13 @@ use Governor\Framework\Common\ReflectionUtils;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\EventHandling\EventListenerProxyInterface;
+use Governor\Framework\Annotations\EventHandler;
 
 /**
  * Description of AnnotatedEventListenerAdapter
- *
- * @author david
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class AnnotatedEventListenerAdapter implements EventListenerProxyInterface
 {
@@ -54,7 +56,7 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface
     }
 
     public function getTargetType()
-    {
+    {        
         return get_class($this->annotatedEventListener);
     }
 
@@ -63,8 +65,7 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface
         $reader = new AnnotationReader();
 
         foreach (ReflectionUtils::getMethods(new \ReflectionClass($this->annotatedEventListener)) as $method) {
-            $annot = $reader->getMethodAnnotation($method,
-                    'Governor\Framework\Annotations\EventHandler');
+            $annot = $reader->getMethodAnnotation($method, EventHandler::class);
 
             // not a handler
             if (null === $annot) {
