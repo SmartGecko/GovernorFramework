@@ -144,7 +144,7 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
 
     protected function storeAssociationValue(AssociationValue $associationValue,
             $sagaType, $sagaIdentifier)
-    {
+    {        
         $this->entityManager->persist(new AssociationValueEntry($sagaType,
                 $sagaIdentifier, $associationValue));
         if ($this->useExplicitFlush) {

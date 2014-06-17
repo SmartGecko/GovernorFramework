@@ -52,6 +52,8 @@ class AnnotatedSagaManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->manager = new AnnotatedSagaManager($this->sagaRepository,
                 new GenericSagaFactory(), array(MyTestSaga::class));
+        
+        $this->manager->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
     }
 
     private function repositoryContents($lookupValue, $sagaType)

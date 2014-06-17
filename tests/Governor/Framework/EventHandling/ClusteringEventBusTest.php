@@ -40,6 +40,7 @@ class ClusteringEventBusTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->eventBus = new ClusteringEventBus();
+        $this->eventBus->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
     }
 
     public function testEventIsPublishedToAllClustersWithDefaultConfiguration()
@@ -57,16 +58,18 @@ class ClusteringEventBusTest extends \PHPUnit_Framework_TestCase
 
     public function testEventSentToTerminal()
     {
-          $mockTerminal = \Phake::mock(EventBusTerminalInterface::class);
-          $this->eventBus = new ClusteringEventBus(null, $mockTerminal);
-          $mockEventListener = \Phake::mock(EventListenerInterface::class);
+        $mockTerminal = \Phake::mock(EventBusTerminalInterface::class);
+        $this->eventBus = new ClusteringEventBus(null, $mockTerminal);
+        $this->eventBus->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
 
-          $this->eventBus->subscribe($mockEventListener);
+        $mockEventListener = \Phake::mock(EventListenerInterface::class);
 
-          $this->eventBus->publish(array(new GenericEventMessage(new \stdClass())));
-          
-          \Phake::verify($mockTerminal, \Phake::times(1))->publish(\Phake::anyParameters());
-          \Phake::verify($mockEventListener, \Phake::never())->handle(\Phake::anyParameters());
+        $this->eventBus->subscribe($mockEventListener);
+
+        $this->eventBus->publish(array(new GenericEventMessage(new \stdClass())));
+
+        \Phake::verify($mockTerminal, \Phake::times(1))->publish(\Phake::anyParameters());
+        \Phake::verify($mockEventListener, \Phake::never())->handle(\Phake::anyParameters());
     }
 
 }

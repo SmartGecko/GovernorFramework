@@ -27,13 +27,16 @@ namespace Governor\Framework\EventHandling;
 /**
  * ClusterSelector implementation that always selects the same cluster. This implementation
  * can serve as delegate for other cluster selectors for event listeners that do not belong to a specific cluster.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class DefaultClusterSelector implements ClusterSelectorInterface
 {
 
     const DEFAULT_CLUSTER_IDENTIFIER = "default";
 
-    /**     
+    /**
      * @var ClusterInterface
      */
     private $defaultCluster;

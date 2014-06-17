@@ -32,9 +32,11 @@ use Governor\Framework\Serializer\SimpleSerializedType;
 use Governor\Framework\Serializer\MessageSerializer;
 
 /**
- * Description of EventMessageReader
+ * EventMessageReader converts a binary stream encoded with {@see EventMessageWriter} to the
+ * correct EventMessageInterface implementation.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class EventMessageReader
 {
@@ -44,11 +46,20 @@ class EventMessageReader
      */
     private $serializer;
 
+    /**
+     * @param SerializerInterface $serializer Serializer.
+     */
     public function __construct(SerializerInterface $serializer)
     {
         $this->serializer = new MessageSerializer($serializer);
     }
 
+    /**
+     * Reads the data and constructs the suitable EventMessageInterface implementation.
+     * 
+     * @param mixed $data Input data.
+     * @return GenericDomainEventMessage|GenericEventMessage
+     */
     public function readEventMessage($data)
     {
         $raw = unpack("ntype/a36identifier/a25timestamp", $data);

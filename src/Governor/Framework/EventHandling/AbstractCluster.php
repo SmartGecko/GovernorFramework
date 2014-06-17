@@ -29,8 +29,9 @@ use Psr\Log\LoggerAwareInterface;
 
 /**
  * Description of AbstractCluster
- *
- * @author david
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
 {
@@ -58,7 +59,7 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    protected $logger;
 
     protected function __construct($name,
             OrderResolverInterface $orderResolver = null)
@@ -90,7 +91,7 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
                     function ($a, $b) {
                 $orderA = $this->orderResolver->orderOf($a);
                 $orderB = $this->orderResolver->orderOf($b);
-             
+
                 if ($orderA === $orderB) {
                     return 0;
                 }
@@ -134,6 +135,17 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
+    }
+    
+    protected function getClassName(EventListenerInterface $eventListener)
+    {
+        if ($eventListener instanceof EventListenerProxyInterface) {
+            $listenerType = $eventListener->getTargetType();
+        } else {
+            $listenerType = get_class($eventListener);
+        }
+
+        return $listenerType;
     }
 
 }

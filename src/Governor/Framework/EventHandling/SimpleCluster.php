@@ -43,8 +43,15 @@ class SimpleCluster extends AbstractCluster
         try {
             foreach ($events as $event) {
                 foreach ($eventListeners as $listener) {
+                    $this->logger->debug("Dispatching Event {event} to EventListener {listener}",
+                            array(
+                                "event" => $event->getPayloadType(), 
+                                "listener" => $this->getClassName($listener)
+                            )
+                        );
+                    
                     $listener->handle($event);
-                }              
+                }
             }
         } catch (\Exception $ex) {
             throw $ex;

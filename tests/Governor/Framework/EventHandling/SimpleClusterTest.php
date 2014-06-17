@@ -40,6 +40,7 @@ class SimpleClusterTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->testSubject = new SimpleCluster("cluster");
+        $this->testSubject->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
         $this->eventListener = $this->getMock(EventListenerInterface::class);
     }
 

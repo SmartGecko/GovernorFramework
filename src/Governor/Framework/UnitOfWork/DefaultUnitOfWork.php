@@ -1,9 +1,25 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\UnitOfWork;
@@ -15,17 +31,20 @@ use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 
 /**
- * Description of DefaultUnitOfWork
- *
- * @author david
+ * DefaultUnitOfWork.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class DefaultUnitOfWork extends NestableUnitOfWork
 {
 
+    /**     
+     * @var AggregateRootInterface[] 
+     */
     private $registeredAggregates = array();
 
     /**
-     *
      * @var \SplObjectStorage
      */
     private $eventsToPublish;
@@ -34,6 +53,10 @@ class DefaultUnitOfWork extends NestableUnitOfWork
      * @var \Governor\Framework\UnitOfWork\UnitOfWorkListenerCollection
      */
     private $listeners;
+    
+    /**     
+     * @var integer
+     */
     private $dispatcherStatus;
 
     const STATUS_READY = 0;
@@ -47,6 +70,11 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         $this->logger = $logger;
     }
 
+    /**
+     * 
+     * @param LoggerInterface $logger
+     * @return UnitOfWorkInterface
+     */
     public static function startAndGet(LoggerInterface $logger)
     {
         $uow = new DefaultUnitOfWork($logger);
@@ -106,7 +134,8 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         $this->registeredAggregates[spl_object_hash($aggregateRoot)] = array($aggregateRoot,
             $saveAggregateCallback);
 
-        $this->logger->debug("Registering aggregate {aggregate}", array('aggregate' => get_class($aggregateRoot)));
+        $this->logger->debug("Registering aggregate {aggregate}",
+                array('aggregate' => get_class($aggregateRoot)));
         // listen for new events registered in the aggregate
         $aggregateRoot->addEventRegistrationCallback($eventRegistrationCallback);
         return $aggregateRoot;
@@ -132,15 +161,15 @@ class DefaultUnitOfWork extends NestableUnitOfWork
 
     private function eventsToPublishOn(EventMessageInterface $event,
             EventBusInterface $eventBus)
-    {        
+    {
         if (!$this->eventsToPublish->contains($eventBus)) {
-            $this->eventsToPublish->attach($eventBus, array($event));     
+            $this->eventsToPublish->attach($eventBus, array($event));
             return;
         }
 
-        $events = $this->eventsToPublish->offsetGet($eventBus);        
+        $events = $this->eventsToPublish->offsetGet($eventBus);
         $events[] = $event;
-        $this->eventsToPublish->offsetSet($eventBus, $events);        
+        $this->eventsToPublish->offsetSet($eventBus, $events);
     }
 
     private function invokeEventRegistrationListeners(EventMessageInterface $event)
@@ -150,7 +179,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
 
     public function publishEvent(EventMessageInterface $event,
             EventBusInterface $eventBus)
-    {                
+    {
         $event = $this->invokeEventRegistrationListeners($event);
         $this->eventsToPublishOn($event, $eventBus);
     }
@@ -169,10 +198,10 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         }
         $this->dispatcherStatus = self::STATUS_DISPATCHING;
         $this->eventsToPublish->rewind();
-                
+
         while ($this->eventsToPublish->valid()) {
             $bus = $this->eventsToPublish->current();
-            $events = $this->eventsToPublish->getInfo();                        
+            $events = $this->eventsToPublish->getInfo();
 
             foreach ($events as $event) {
                 $this->logger->debug("Publishing event [{event}] to event bus [{bus}]",
@@ -185,24 +214,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
 
             $this->eventsToPublish->next();
         }
-
-        /*
-          Map.Entry<EventBus, List<EventMessage<?>>> entry = iterator.next();
-          List<EventMessage<?>> messageList = entry.getValue();
-          EventMessage<?>[] messages = messageList.toArray(new EventMessage<?>[messageList.size()]);
-          if (logger.isDebugEnabled()) {
-          for (EventMessage message : messages) {
-          logger.debug("Publishing event [{}] to event bus [{}]",
-          message.getPayloadType().getName(),
-          entry.getKey());
-          }
-          }
-          // remove this entry before publication in case a new event is registered with the UoW while publishing
-          iterator.remove();
-          entry.getKey().publish(messages);
-          }
-          }
-         */
+       
         $this->logger->debug("All events successfully published.");
         $this->dispatcherStatus = self::STATUS_READY;
     }
@@ -224,11 +236,11 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     }
 
     private function eventsToPublish()
-    {        
+    {
         $events = array();
 
         $this->eventsToPublish->rewind();
-        while ($this->eventsToPublish->valid()) {            
+        while ($this->eventsToPublish->valid()) {
             $events = array_merge($events, $this->eventsToPublish->getInfo());
             $this->eventsToPublish->next();
         }
@@ -247,17 +259,18 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     }
 
     protected function saveAggregates()
-    {        
+    {
         $this->logger->debug("Persisting changes to aggregates");
-        foreach ($this->registeredAggregates as $aggregateEntry) {            
+        foreach ($this->registeredAggregates as $aggregateEntry) {
             list ($aggregate, $callback) = $aggregateEntry;
-                    
-            $this->logger->debug("Persisting changes to [{aggregate}], identifier: [{id}]",
-                    array('aggregate' => get_class($aggregate), 'id' => $aggregate->getIdentifier()));
 
-            //$aggregate->saveAggregate();            
+            $this->logger->debug("Persisting changes to [{aggregate}], identifier: [{id}]",
+                    array(
+                        'aggregate' => get_class($aggregate), 
+                        'id' => $aggregate->getIdentifier()
+                    ));
+                
             $callback->save($aggregate);
-            //entry.saveAggregate();
         }
         $this->logger->debug("Aggregates successfully persisted");
         $this->registeredAggregates = array();

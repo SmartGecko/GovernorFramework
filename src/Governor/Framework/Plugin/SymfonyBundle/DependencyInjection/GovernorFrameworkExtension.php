@@ -103,6 +103,7 @@ class GovernorFrameworkExtension extends Extension
 
             $definition = new Definition($container->getParameter('governor.event_bus_terminal.amqp.class'));
             $definition->addArgument(new Reference('governor.serializer'));
+            $definition->addArgument(new Reference($terminal['routing_key_resolver']));
             $definition->addMethodCall('setConnection',
                     array(new Reference(sprintf("governor.amqp_terminal.connection.%s",
                                 $name))));

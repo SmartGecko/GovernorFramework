@@ -27,9 +27,11 @@ namespace Governor\Framework\EventHandling\Amqp;
 use Governor\Framework\Domain\EventMessageInterface;
 
 /**
- * Description of NamespaceRoutingKeyResolver
- *
- * @author david
+ * Impementation of the {@see RoutingKeyResolverInterface} interface that creates an AMQP 
+ * routing key based on the FQCN of the message payload. 
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class NamespaceRoutingKeyResolver implements RoutingKeyResolverInterface
 {

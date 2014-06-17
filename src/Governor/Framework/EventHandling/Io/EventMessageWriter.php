@@ -30,9 +30,10 @@ use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 
 /**
- * Description of EventMessageWriter
+ * EventMessageWriter is responsible to convert an {@link EventMessageInterface} to a binary stream.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class EventMessageWriter
 {
@@ -42,11 +43,18 @@ class EventMessageWriter
      */
     private $serializer;
 
+    /**     
+     * @param SerializerInterface $serializer Serializer.
+     */
     public function __construct(SerializerInterface $serializer)
     {
         $this->serializer = new MessageSerializer($serializer);
     }
 
+    /**
+     * @param EventMessageInterface $event
+     * @return mixed
+     */
     public function writeEventMessage(EventMessageInterface $event)
     {
         if ($event instanceof DomainEventMessageInterface) {
@@ -78,7 +86,7 @@ class EventMessageWriter
                 $serializedPayload->getData(),
                 strlen($serializedMetaData->getData()),
                 $serializedMetaData->getData());
-        
+                
         return $data;
     }
 

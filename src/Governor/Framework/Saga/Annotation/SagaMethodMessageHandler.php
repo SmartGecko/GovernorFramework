@@ -1,9 +1,25 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\Saga\Annotation;
@@ -14,12 +30,14 @@ use Governor\Framework\Saga\AssociationValue;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\Saga\SagaCreationPolicy;
 use Governor\Framework\Annotations\SagaEventHandler;
+use Governor\Framework\Annotations\EndSaga;
 use Governor\Framework\Common\Property\PropertyAccessStrategy;
 
 /**
  * Description of SagaMethodMessageHandler
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class SagaMethodMessageHandler implements Comparable
 {
@@ -28,6 +46,10 @@ class SagaMethodMessageHandler implements Comparable
      * @var AnnotationReader
      */
     private $reader;
+
+    /**
+     * @var integer
+     */
     private $creationPolicy;
     private $handlerMethod;
     private $associationKey;
@@ -49,7 +71,7 @@ class SagaMethodMessageHandler implements Comparable
     {
         $reader = new AnnotationReader();
         $handlerAnnotation = $reader->getMethodAnnotation($handlerMethod,
-                \Governor\Framework\Annotations\SagaEventHandler::class);
+                SagaEventHandler::class);
 
         $associationProperty = PropertyAccessStrategy::getProperty($event->getPayload(),
                         $handlerAnnotation->associationProperty);
@@ -98,7 +120,7 @@ class SagaMethodMessageHandler implements Comparable
     /**
      * Indicates whether the inspected method is an Event Handler.
      *
-     * @return true if the saga has a handler
+     * @return boolean true if the saga has a handler
      */
     public function isHandlerAvailable()
     {
@@ -107,8 +129,9 @@ class SagaMethodMessageHandler implements Comparable
 
     public function isEndingHandler()
     {
-        return $this->isHandlerAvailable() && null !== $this->reader->getMethodAnnotation($this->handlerMethod,
-                        'Governor\Framework\Annotations\EndSaga');
+        return $this->isHandlerAvailable() &&
+                null !== $this->reader->getMethodAnnotation($this->handlerMethod,
+                        EndSaga::class);
     }
 
     public function invoke($target, EventMessageInterface $event)
@@ -125,8 +148,8 @@ class SagaMethodMessageHandler implements Comparable
      * The AssociationValue to find the saga instance with, or <code>null</code> if no AssociationValue can be found on
      * the given <code>eventMessage</code>.
      *
-     * @param eventMessage The event message containing the value of the association
-     * @return the AssociationValue to find the saga instance with, or <code>null</code> if none found
+     * @param EventMessageInterface $eventMessage The event message containing the value of the association
+     * @return AssociationValue The AssociationValue to find the saga instance with, or <code>null</code> if none found
      */
     public function getAssociationValue(EventMessageInterface $eventMessage)
     {
@@ -135,6 +158,7 @@ class SagaMethodMessageHandler implements Comparable
         }
 
         $associationValue = $this->associationProperty->getValue($eventMessage->getPayload());
+
         return (null === $associationValue) ? null : new AssociationValue($this->associationKey,
                 $associationValue);
     }

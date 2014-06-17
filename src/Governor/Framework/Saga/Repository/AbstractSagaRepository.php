@@ -46,6 +46,7 @@ abstract class AbstractSagaRepository implements SagaRepositoryInterface
         } else {            
             $sagaType = $this->typeOf($saga);
             $associationValues = $saga->getAssociationValues();
+            
             foreach ($associationValues->addedAssociations() as $av) {
                 $this->storeAssociationValue($av, $sagaType,
                         $saga->getSagaIdentifier());

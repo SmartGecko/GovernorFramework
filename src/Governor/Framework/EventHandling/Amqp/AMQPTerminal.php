@@ -37,34 +37,58 @@ use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 
 /**
- * Description of AMQPTerminal
- *
- * @author david
+ * Implementation of the {@see EventBusTerminalInterface} supporting the AMQP protocol.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
 {
+
+    const DEFAULT_EXCHANGE_NAME = "Governor.EventBus";
 
     /**
      * @var \Psr\Log\LoggerInterface
      */
     private $logger;
 
-    const DEFAULT_EXCHANGE_NAME = "Governor.EventBus";
-
     /**
      * @var AMQPConnection
      */
     private $connection;
+
+    /**
+     * @var string
+     */
     private $exchangeName = self::DEFAULT_EXCHANGE_NAME;
+
+    /**
+     * @var boolean
+     */
     private $isTransactional = false;
+
+    /**
+     * @var boolean
+     */
     private $isDurable = true;
     //  private ListenerContainerLifecycleManager listenerContainerLifecycleManager;
+
+    /**
+     * @var AMQPMessageConverterInterface
+     */
     private $messageConverter;
-    //  private ApplicationContext applicationContext;
+
+    /**
+     * @var SerializerInterface
+     */
     private $serializer;
     private $routingKeyResolver;
     private $waitForAck;
     private $publisherAckTimeout = 0;
+
+    /**
+     * @var ClusterInterface[]
+     */
     private $clusters;
 
     public function __construct(SerializerInterface $serializer,
@@ -91,9 +115,8 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * Does the actual publishing of the given <code>body</code> on the given <code>channel</code>. This method can be
      * overridden to change the properties used to send a message.
      *
-     * @param channel     The channel to dispatch the message on
-     * @param amqpMessage The AMQPMessage describing the characteristics of the message to publish
-     * @throws java.io.IOException when an error occurs while writing the message
+     * @param AMQPChannel $channel     The channel to dispatch the message on
+     * @param AMQPMessage $amqpMessage The AMQPMessage describing the characteristics of the message to publish     
      */
     protected function doSendMessage(AMQPChannel $channel,
             AMQPMessage $amqpMessage)
@@ -258,8 +281,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
         if (null === $this->connection) {
             throw new \RuntimeException("The AMQPTerminal has no connection configured.");
         }
-        //$conn = new \PhpAmqpLib\Connection\AMQPConnection("localhost", 5672,
-        //      "guest", "guest");
+        
         $channel = $this->connection->channel();
 
         foreach ($this->clusters as $cluster) {

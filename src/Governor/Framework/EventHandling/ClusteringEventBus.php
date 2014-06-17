@@ -29,14 +29,15 @@ use Psr\Log\LoggerAwareInterface;
 
 /**
  * Description of ClusteringEventBus
- *
- * @author david
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class ClusteringEventBus implements EventBusInterface, LoggerAwareInterface
 {
     
     /**     
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     private $logger;
 
@@ -55,8 +56,8 @@ class ClusteringEventBus implements EventBusInterface, LoggerAwareInterface
      * Initializes a <code>ClusteringEventBus</code> with the given <code>clusterSelector</code> and a
      * <code>terminal</code>.
      *
-     * @param clusterSelector The Cluster Selector that chooses the cluster for each of the subscribed event listeners
-     * @param terminal        The terminal responsible for publishing incoming events to each of the clusters
+     * @param ClusterSelectorInterface $clusterSelector The Cluster Selector that chooses the cluster for each of the subscribed event listeners
+     * @param EventBusTerminalInterface $terminal        The terminal responsible for publishing incoming events to each of the clusters
      */
     public function __construct(ClusterSelectorInterface $clusterSelector = null,
             EventBusTerminalInterface $terminal = null)
@@ -79,6 +80,11 @@ class ClusteringEventBus implements EventBusInterface, LoggerAwareInterface
     public function unsubscribe(EventListenerInterface $eventListener)
     {
         $this->clusterFor($eventListener)->unsubscribe($eventListener);
+    }        
+    
+    public function getCluster()
+    {
+        return current($this->clusters); /// !!! TODO motherfucking ugly hack
     }
 
     private function clusterFor(EventListenerInterface $eventListener)
@@ -99,6 +105,7 @@ class ClusteringEventBus implements EventBusInterface, LoggerAwareInterface
         }
 
         if (!in_array($cluster, $this->clusters, true)) {
+            $cluster->setLogger($this->logger);
             $this->clusters[] = $cluster;
             $this->terminal->onClusterCreated($cluster);
         }

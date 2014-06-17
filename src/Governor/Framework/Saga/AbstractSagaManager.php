@@ -37,19 +37,25 @@ use Governor\Framework\Domain\EventMessageInterface;
 abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareInterface
 {
 
+    /**     
+     * @var SagaRepositoryInterface
+     */
     private $sagaRepository;
+    /**     
+     * @var SagaFactoryInterface
+     */
     private $sagaFactory;
     private $sagaTypes = array();
+    
+    /**     
+     * @var boolean
+     */
     private $suppressExceptions = true;
-    private $synchronizeSagaAccess = true;
-    private $sagasInCreation = array();
 
     /**
      * @var LoggerInterface 
      */
-    private $logger;
-
-    //private final IdentifierBasedLock lock = new IdentifierBasedLock();    
+    private $logger;    
 
     public function __construct(SagaRepositoryInterface $sagaRepository,
             SagaFactoryInterface $sagaFactory, array $sagaTypes = array())
@@ -93,15 +99,14 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
 
     private function startNewSaga(EventMessageInterface $event, $sagaType,
             AssociationValue $associationValue)
-    {
+    {        
         $newSaga = $this->sagaFactory->createSaga($sagaType);
         $newSaga->associateWith($associationValue);
-        $this->preProcessSaga($newSaga);
-        $this->sagasInCreation[$newSaga->getSagaIdentifier()] = $newSaga;
+        $this->preProcessSaga($newSaga);     
 
         try {
             $this->doInvokeSaga($event, $newSaga);
-        } finally {
+        } finally {            
             $this->sagaRepository->add($newSaga);
         }
     }
@@ -142,10 +147,22 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $exception = null;
 
         try {
+            $this->logger->info("Saga {saga} is handling event {event}",
+                    array(
+                        'saga' => $sagaId, 
+                        'event' => $event->getPayloadType()
+                    )
+                );
             $saga->handle($event);
         } catch (\Exception $ex) {
             $exception = $ex;
         } finally {
+            $this->logger->info("Saga {saga} is commiting event {event}",
+                    array(
+                        'saga' => $sagaId, 
+                        'event' => $event->getPayloadType()
+                    )
+                );
             $this->commit($saga);
         }
 
@@ -184,7 +201,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      * @param SagaInterface $saga the Saga to commit.
      */
     protected function commit(SagaInterface $saga)
-    {
+    {        
         $this->sagaRepository->commit($saga);
     }
 
@@ -242,4 +259,5 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
     {
         return $this->sagaTypes;
     }
+
 }
