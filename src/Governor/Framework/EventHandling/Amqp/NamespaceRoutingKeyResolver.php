@@ -40,7 +40,7 @@ class NamespaceRoutingKeyResolver implements RoutingKeyResolverInterface
     {
         $reflClass = new \ReflectionClass($eventMessage->getPayloadType());
         
-        return strtr($reflClass->getNamespaceName(), '\\', '.');
+        return strtr($reflClass->getName(), '\\', '.');
     }
 
 }

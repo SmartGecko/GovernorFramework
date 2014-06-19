@@ -44,6 +44,8 @@ class AmqpDebugCommand extends ContainerAwareCommand
     {
         $this
                 ->setName('governor:amqp-debug')
+                ->addArgument("exchange", InputArgument::REQUIRED,
+                        "Name of the exchange to listen read from")
                 ->addArgument("connection", InputArgument::OPTIONAL,
                         "Name of the connection to use", "default")
                 ->setDescription('Displays events routed to the AMQP terminal.')
@@ -53,6 +55,7 @@ class AmqpDebugCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $formatter = $this->getHelperSet()->get('formatter');
+        $serializer = $this->getContainer()->get('governor.serializer');
         $connection = $this->getContainer()->get(sprintf("governor.amqp_terminal.connection.%s",
                         $input->getArgument("connection")));
 
@@ -63,14 +66,13 @@ class AmqpDebugCommand extends ContainerAwareCommand
 
         list($queueName,, ) = $channel->queue_declare("", false, false, true,
                 false);
-        $channel->queue_bind($queueName, AMQPTerminal::DEFAULT_EXCHANGE_NAME,
-                '#');
+        $channel->queue_bind($queueName, $input->getArgument('exchange'), '#');
 
         $output->writeln($formatter->formatSection('*',
                         'Waiting for events. To exit press CTRL+C'));
 
-        $callback = function($msg) use($output, $formatter) {
-            $reader = new EventMessageReader(new JMSSerializer());
+        $callback = function($msg) use($output, $formatter, $serializer) {
+            $reader = new EventMessageReader($serializer);
             $message = $reader->readEventMessage($msg->body);
 
             $output->writeln($formatter->formatSection('*',

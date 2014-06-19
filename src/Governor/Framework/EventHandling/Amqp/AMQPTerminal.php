@@ -123,6 +123,12 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     {
         $rawMessage = new RawMessage($amqpMessage->getBody(),
                 $amqpMessage->getProperties());
+        
+        $this->logger->debug("Publishing message to {exchange} with routing key {key}", 
+                array(
+                    'exchange' => $this->exchangeName,
+                    'key' => $amqpMessage->getRoutingKey()
+        ));
 
         $channel->basic_publish($rawMessage, $this->exchangeName,
                 $amqpMessage->getRoutingKey(), $amqpMessage->isMandatory(),

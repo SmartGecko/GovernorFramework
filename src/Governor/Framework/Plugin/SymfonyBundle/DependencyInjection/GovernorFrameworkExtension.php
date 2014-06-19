@@ -108,6 +108,9 @@ class GovernorFrameworkExtension extends Extension
                     array(new Reference(sprintf("governor.amqp_terminal.connection.%s",
                                 $name))));
 
+            $definition->addMethodCall('setLogger',
+                    array(new Reference('logger')));
+
             $container->setDefinition(sprintf("governor.amqp_terminal.%s", $name),
                     $definition);
         }
@@ -134,7 +137,7 @@ class GovernorFrameworkExtension extends Extension
         $definition = new Definition($config['cluster_selector']['class']);
         $definition->addArgument(new Reference(sprintf('governor.cluster.%s',
                         $config['cluster_selector']['cluster'])));
-        
+
         $container->setDefinition("governor.cluster_selector", $definition);
     }
 
