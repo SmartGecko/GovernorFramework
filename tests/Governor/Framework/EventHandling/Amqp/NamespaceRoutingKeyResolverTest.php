@@ -39,7 +39,7 @@ class NamespaceRoutingKeyResolverTest extends \PHPUnit_Framework_TestCase
         $this->testSubject = new NamespaceRoutingKeyResolver();
         $key = $this->testSubject->resolveRoutingKey(new GenericEventMessage(new NamespacesPayload()));
         
-        $this->assertEquals('Governor.Framework.EventHandling.Amqp', $key);        
+        $this->assertEquals('Governor.Framework.EventHandling.Amqp.NamespacesPayload', $key);        
     }
 }
 

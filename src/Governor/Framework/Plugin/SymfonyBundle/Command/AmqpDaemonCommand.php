@@ -38,12 +38,12 @@ use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
  *
  * @author david
  */
-class AmqpDemonCommand extends ContainerAwareCommand
+class AmqpDaemonCommand extends ContainerAwareCommand
 {
 
     protected function configure()
     {
-        $this->setName('governor:amqp-demon')
+        $this->setName('governor:amqp-daemon')
                 ->addArgument("queue", InputArgument::REQUIRED,
                         "Name of the queue to process messages from")
                 ->addArgument("connection", InputArgument::OPTIONAL,
@@ -70,22 +70,26 @@ class AmqpDemonCommand extends ContainerAwareCommand
             $reader = new EventMessageReader($serializer);
 
             try {
-                $message = $reader->readEventMessage($msg->body);
-
+                $message = $reader->readEventMessage($msg->body);    
+                
                 $output->write(sprintf("Procecssing %s from %s\n",
                                 $message->getPayloadType(),
                                 $input->getArgument("queue")));
 
                 $eventBus->getCluster()->publish(array($message));
-                $uow->commit();
+                $uow->commit();                                
+                
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             } catch (\Exception $ex) {
                 $uow->rollback();
                 $output->write(sprintf("Encountered %s while processing",
                                 $ex->getMessage()));
+                
+                throw $ex;
             }
         };
 
-        $channel->basic_consume($input->getArgument("queue"), '', false, true,
+        $channel->basic_consume($input->getArgument("queue"), '', false, false,
                 false, false, $callback);
 
         while (count($channel->callbacks)) {
