@@ -27,17 +27,29 @@ namespace Governor\Framework\Repository;
 use Governor\Framework\Domain\AggregateRootInterface;
 use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
 use Governor\Framework\EventHandling\EventBusInterface;
+use Governor\Framework\UnitOfWork\SaveAggregateCallbackInterface;
 
 /**
  * Description of AbstractRepository
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 abstract class AbstractRepository implements RepositoryInterface
 {
-
+    /**
+     * @var EventBusInterface 
+     */
     private $eventBus;
+    
+    /**     
+     * @var string
+     */
     private $className;
+    
+    /**    
+     * @var SaveAggregateCallbackInterface
+     */
     private $saveAggregateCallback;
 
     public function __construct($className, EventBusInterface $eventBus)
@@ -90,11 +102,8 @@ abstract class AbstractRepository implements RepositoryInterface
     {
         $reflClass = new \ReflectionClass($class);
 
-        if ($reflClass->name === $this->className) {
-            return true;
-        }
-
-        if ($reflClass->isSubclassOf($this->className)) {
+        if ($reflClass->name === $this->className || 
+                $reflClass->isSubclassOf($this->className)) {
             return true;
         }
 
@@ -126,9 +135,9 @@ abstract class AbstractRepository implements RepositoryInterface
      * Perform action that needs to be done directly after updating an aggregate and committing the aggregate's
      * uncommitted events.
      *
-     * @param aggregate The aggregate instance being saved
+     * @param AggregateRootInterface $aggregate The aggregate instance being saved
      */
-    protected function postSave(AggregateRootInterface $object)
+    protected function postSave(AggregateRootInterface $aggregate)
     {
         
     }
@@ -137,9 +146,9 @@ abstract class AbstractRepository implements RepositoryInterface
      * Perform action that needs to be done directly after deleting an aggregate and committing the aggregate's
      * uncommitted events.
      *
-     * @param aggregate The aggregate instance being saved
+     * @param AggregateRootInterface $aggregate The aggregate instance being saved
      */
-    protected function postDelete(AggregateRootInterface $object)
+    protected function postDelete(AggregateRootInterface $aggregate)
     {
         
     }

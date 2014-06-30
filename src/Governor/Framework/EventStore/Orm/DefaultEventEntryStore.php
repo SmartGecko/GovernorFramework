@@ -25,6 +25,8 @@
 namespace Governor\Framework\EventStore\Orm;
 
 use Doctrine\ORM\EntityManager;
+use Governor\Framework\EventStore\Orm\DomainEventEntry;
+use Governor\Framework\EventStore\Orm\SnapshotEventEntry;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\Serializer\SerializedObjectInterface;
 
@@ -44,7 +46,7 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
      */
     protected function domainEventEntryEntityName()
     {
-        return "Governor\Framework\EventStore\Orm\DomainEventEntry";
+        return DomainEventEntry::class;
     }
 
     /**
@@ -54,7 +56,7 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
      */
     protected function snapshotEventEntryEntityName()
     {
-        return "Governor\Framework\EventStore\Orm\SnapshotEventEntry";
+        return SnapshotEventEntry::class;
     }
 
     public function fetchAggregateStream($aggregateType, $identifier, $firstScn,

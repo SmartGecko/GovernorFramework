@@ -27,6 +27,9 @@ namespace Governor\Framework\EventHandling\Amqp;
 /**
  * Representation of an AMQP Message. Used by AMQP Based Terminals to define the settings to use when dispatching an
  * Event to an AMQP Message Broker.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class AMQPMessage
 {

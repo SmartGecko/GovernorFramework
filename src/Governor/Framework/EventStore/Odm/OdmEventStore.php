@@ -27,6 +27,9 @@ use Governor\Framework\Serializer\MessageSerializer;
 class OdmEventStore implements EventStoreInterface, SnapshotEventStoreInterface
 {
 
+    /**     
+     * @var DocumentManager
+     */
     private $documentManager;
     
     /**    

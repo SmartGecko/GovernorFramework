@@ -28,6 +28,9 @@ use Governor\Framework\Domain\EventMessageInterface;
 
 /**
  * Interface describing a mechanism that converts AMQP Messages from an Governor Messages and vice versa.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface AMQPMessageConverterInterface
 {
