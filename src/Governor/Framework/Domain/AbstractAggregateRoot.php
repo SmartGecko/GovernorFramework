@@ -103,7 +103,7 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
     }
 
     /**
-     * @return Governor\Framework\EventContainer
+     * @return EventContainer
      */
     private function getEventContainer()
     {

@@ -16,7 +16,7 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
@@ -119,10 +119,17 @@ class GovernorFrameworkExtension extends Extension
     private function loadCommandBuses($config, ContainerBuilder $container)
     {
         foreach ($config['command_buses'] as $name => $bus) {
+            $interceptors = array();
             $definition = new Definition($bus['class']);
             $definition->addMethodCall('setLogger',
                     array(new Reference('logger')));
 
+            foreach ($bus['interceptors'] as $interceptor) {
+                $interceptors[] = new Reference($interceptor);
+            }
+
+            $definition->addMethodCall('setHandlerInterceptors', array($interceptors));
+            
             $container->setDefinition(sprintf("governor.command_bus.%s", $name),
                     $definition);
         }

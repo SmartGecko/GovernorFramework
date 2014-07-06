@@ -22,15 +22,34 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore;
+namespace Governor\Framework\CommandHandling\Interceptors;
 
+use Symfony\Component\Validator\ConstraintViolationListInterface;
+use Governor\Framework\CommandHandling\StructuralCommandValidationFailedException;
 /**
- * Exception thrown by the Event store.
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * Description of ValidatorException
+ *
+ * @author david
  */
-
-class EventStoreException extends \Exception
+class ValidatorException extends StructuralCommandValidationFailedException
 {
+    /**     
+     * @var ConstraintViolationListInterface
+     */
+    private $list;
+    
+    public function __construct($message, ConstraintViolationListInterface $list)
+    {
+        parent::__construct($message);
+        $this->list = $list;
+    }
+    
+    /**     
+     * @return ConstraintViolationListInterface
+     */
+    public function getViolationList()
+    {
+        return $this->list;
+    }
+
 }

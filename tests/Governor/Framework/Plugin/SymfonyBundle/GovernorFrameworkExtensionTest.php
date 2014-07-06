@@ -162,6 +162,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
 
         $container->set('logger', $this->getMock(\Psr\Log\LoggerInterface::class));
         $container->set('jms_serializer', $this->getMock(\JMS\Serializer\SerializerInterface::class));
+        $container->set('validator', $this->getMock(\Symfony\Component\Validator\ValidatorInterface::class));
         
         $this->addTaggedCommandHandlers($container);
         $this->addTaggedEventListeners($container);

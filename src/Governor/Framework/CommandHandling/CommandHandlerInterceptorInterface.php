@@ -29,6 +29,9 @@ use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 /**
  * Workflow interface that allows for customized command handler invocation chains. A CommandHandlerInterceptor can add
  * customized behavior to command handler invocations, both before and after the invocation.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface CommandHandlerInterceptorInterface
 {

@@ -50,10 +50,17 @@
         <!-- AMQP terminal -->
         <parameter key="governor.event_bus_terminal.amqp.class">Governor\Framework\EventHandling\Amqp\AMQPTerminal</parameter>
         <parameter key="governor.amqp_terminal.connection.class">PhpAmqpLib\Connection\AMQPConnection</parameter>
-
+        
+        <!-- command interceptors -->
+        <parameter key="governor.interceptor.validator.class">Governor\Framework\CommandHandling\Intercetpors\ValidatorInterceptor</parameter>
+        
     </parameters>
 
     <services>
+        <service id="governor.interceptor.validator" class="%governor.interceptor.validator.class%">
+            <argument type="service" id="validator"/>
+        </service>
+        
         <service id="governor.order_resolver.annotation" class="%governor.order_resolver.annotation.class%"/>
         
         <service id="governor.resource_injector" class="%governor.resource_injector.container.class%">

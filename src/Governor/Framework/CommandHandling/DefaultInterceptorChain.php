@@ -28,13 +28,31 @@ use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 
 /**
  * Mechanism that takes care of interceptor and event handler execution.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class DefaultInterceptorChain implements InterceptorChainInterface
 {
 
+    /**     
+     * @var CommandMessageInterface
+     */
     private $command;
+    
+    /**     
+     * @var CommandHandlerInterface
+     */
     private $handler;
-    private $chain; //Iterator<? extends CommandHandlerInterceptor> chain;
+    
+    /**     
+     * @var \ArrayIterator
+     */
+    private $chain; 
+    
+    /**     
+     * @var UnitOfWorkInterface
+     */
     private $unitOfWork;
 
     /**

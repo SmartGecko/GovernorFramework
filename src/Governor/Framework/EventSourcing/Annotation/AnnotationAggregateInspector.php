@@ -1,13 +1,32 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\EventSourcing\Annotation;
 
+use Governor\Framework\Annotations\AggregateIdentifier;
+use Governor\Framework\Annotations\EventHandler;
+use Governor\Framework\Annotations\EventSourcedMember;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\Common\ReflectionUtils;
@@ -16,17 +35,25 @@ use Governor\Framework\EventSourcing\IncompatibleAggregateException;
 /**
  * Description of AnnotationAggregateInspector
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class AnnotationAggregateInspector
 {
 
-    const AGGREGATE_IDENTIFIER_ANNOTATION = 'Governor\Framework\Annotations\AggregateIdentifier';
-    const EVENT_HANDLER_ANNOTATION = 'Governor\Framework\Annotations\EventHandler';
-    const EVENT_SOURCED_MEMBER_ANNOTATION = 'Governor\Framework\Annotations\EventSourcedMember';
-
+    /**
+     * @var mixed
+     */
     private $targetObject;
+
+    /**
+     * @var \ReflectionClass
+     */
     private $reflectionClass;
+
+    /**
+     * @var AnnotationReader
+     */
     private $reader;
 
     public function __construct($targetObject)
@@ -40,7 +67,7 @@ class AnnotationAggregateInspector
     {
         foreach (ReflectionUtils::getProperties($this->reflectionClass) as $property) {
             $annot = $this->reader->getPropertyAnnotation($property,
-                self::AGGREGATE_IDENTIFIER_ANNOTATION);
+                    AggregateIdentifier::class);
 
             if (null !== $annot) {
                 $property->setAccessible(true);
@@ -49,9 +76,9 @@ class AnnotationAggregateInspector
         }
 
         throw new IncompatibleAggregateException(sprintf("The aggregate class [%s] does not specify an Identifier. " .
-            "Ensure that the field containing the aggregate " .
-            "identifier is annotated with @AggregateIdentifier.",
-            $this->reflectionClass->getName()));
+                "Ensure that the field containing the aggregate " .
+                "identifier is annotated with @AggregateIdentifier.",
+                $this->reflectionClass->getName()));
     }
 
     public function getChildEntities()
@@ -60,14 +87,14 @@ class AnnotationAggregateInspector
 
         foreach (ReflectionUtils::getProperties($this->reflectionClass) as $property) {
             $annot = $this->reader->getPropertyAnnotation($property,
-                self::EVENT_SOURCED_MEMBER_ANNOTATION);
+                    EventSourcedMember::class);
 
             if (null !== $annot) {
                 $property->setAccessible(true);
                 $child = $property->getValue($this->targetObject);
 
 
-                if (is_array($child)) {                    
+                if (is_array($child)) {
                     $entities = array_merge($entities, $child);
                 } else if ($child instanceof \IteratorAggregate) {
                     foreach ($child as $element) {
@@ -86,14 +113,15 @@ class AnnotationAggregateInspector
     {
         foreach (ReflectionUtils::getMethods($this->reflectionClass) as $method) {
             $annot = $this->reader->getMethodAnnotation($method,
-                self::EVENT_HANDLER_ANNOTATION);
+                    EventHandler::class);
 
             if (null !== $annot) {
                 $parameter = current($method->getParameters());
 
-                if (null !== $parameter->getClass() && $parameter->getClass()->name === $event->getPayloadType()) {
+                if (null !== $parameter->getClass() && $parameter->getClass()->name
+                        === $event->getPayloadType()) {
                     $method->invokeArgs($this->targetObject,
-                        array($event->getPayload()));
+                            array($event->getPayload()));
                 }
             }
         }

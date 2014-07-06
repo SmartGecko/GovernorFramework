@@ -22,15 +22,18 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore;
+namespace Governor\Framework\CommandHandling;
 
 /**
- * Exception thrown by the Event store.
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * Description of StructuralCommandValidationFailedException
+ *
+ * @author david
  */
-
-class EventStoreException extends \Exception
+class StructuralCommandValidationFailedException extends \RuntimeException
 {
+    public function __construct($message)
+    {
+        parent::__construct($message, 0, null);
+    }
+
 }

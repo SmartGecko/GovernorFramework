@@ -49,7 +49,7 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     private $logger;
 
     /**
-     * @var array
+     * @var CommandHandlerInterceptorInterface[]
      */
     private $handlerInterceptors = array();
 

@@ -159,6 +159,9 @@ class Configuration implements ConfigurationInterface
             ->prototype('array')
                 ->children()
                     ->scalarNode('class')->isRequired()->end()
+                    ->arrayNode('interceptors')
+                        ->prototype('scalar')->end()
+                    ->end()
                 ->end()
             ->end();
 
@@ -249,6 +252,12 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                         ->end()
+                     //   ->arrayNode('parameters')
+                       //     ->children()
+                         //       ->scalarNode('entity_manager')->end()
+                           //     ->scalarNode('document_manager')->end()
+                           // ->end()
+                        //->end()
                     ->end()
                 ->end();
 

@@ -25,8 +25,10 @@
 namespace Governor\Framework\CommandHandling;
 
 /**
- *
- * @author david
+ * Definition of the callback interface used by the command handling.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface CommandCallbackInterface
 {
@@ -34,14 +36,14 @@ interface CommandCallbackInterface
     /**
      * Invoked when command handling execution was successful.
      *
-     * @param result The result of the command handling execution, if any.
+     * @param mixed $result The result of the command handling execution, if any.
      */
     public function onSuccess($result);
 
     /**
      * Invoked when command handling execution resulted in an error.
      *
-     * @param cause The exception raised during command handling
+     * @param \Exception $cause The exception raised during command handling
      */
     public function onFailure(\Exception $cause);
 }
