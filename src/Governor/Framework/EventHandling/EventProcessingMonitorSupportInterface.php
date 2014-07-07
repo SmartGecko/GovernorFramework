@@ -22,32 +22,29 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore\Management;
-
-use Governor\Framework\EventStore\EventVisitorInterface;
+namespace Governor\Framework\EventHandling;
 
 /**
- * Interface describing operations useful for management purposes. These operations are typically used in migration
- * scripts when deploying new versions of applications.
+ * Interface indicating that the implementing class is capable of notifying monitors when event processing completes.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface EventStoreManagementInterface
+interface EventProcessingMonitorSupportInterface
 {
 
     /**
-     * Loads all events available in the event store and calls
-     * {@link \Governor\Framework\EventStore\EventVisitorInterface::doWithEvent}
-     * for each event found. Events of a single aggregate are guaranteed to be ordered by their sequence number.
-     * <p/>
-     * Implementations are encouraged, though not required, to supply events in the absolute chronological order.
-     * <p/>
-     * Processing stops when the visitor throws an exception.
+     * Subscribes the given <code>monitor</code>. If the monitor is already subscribed, nothing happens.
      *
-     * @param CriteriaInterface $criteria The criteria describing the events to select.
-     * @param EventVisitorInterface $visitor The visitor the receives each loaded event
+     * @param EventProcessingMonitorInterface $monitor The monitor to subscribe
      */
-    public function visitEvents(CriteriaInterface $criteria,
-            EventVisitorInterface $visitor);
+    public function subscribeEventProcessingMonitor(EventProcessingMonitorInterface $monitor);
+
+    /**
+     * Unsubscribed the given <code>monitor</code>. If the monitor was not subscribed, or was already unsubscribed,
+     * nothing happens.
+     *
+     * @param EventProcessingMonitorInterface $monitor The monitor to unsubscribe
+     */
+    public function unsubscribeEventProcessingMonitor(EventProcessingMonitorInterface $monitor);
 }

@@ -24,30 +24,30 @@
 
 namespace Governor\Framework\EventStore\Management;
 
-use Governor\Framework\EventStore\EventVisitorInterface;
-
 /**
- * Interface describing operations useful for management purposes. These operations are typically used in migration
- * scripts when deploying new versions of applications.
+ * Interface providing access to the criteria API of an Event Store.
+ * <p/>
+ * <em>Example:</em><br/>
+ * <pre>
+ *     $criteriaBuilder = $eventStore->newCriteriaBuilder();
+ *     // Timestamps are stored as ISO 8601 Strings.
+ *     $criteria = $criteriaBuilder->property("timeStamp")->greaterThan("2011-11-12");
+ *     $eventStore->visitEvents($criteria, $visitor);
+ * </pre>
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface EventStoreManagementInterface
+interface CriteriaBuilderInterface
 {
 
     /**
-     * Loads all events available in the event store and calls
-     * {@link \Governor\Framework\EventStore\EventVisitorInterface::doWithEvent}
-     * for each event found. Events of a single aggregate are guaranteed to be ordered by their sequence number.
-     * <p/>
-     * Implementations are encouraged, though not required, to supply events in the absolute chronological order.
-     * <p/>
-     * Processing stops when the visitor throws an exception.
+     * Returns a property instance that can be used to build criteria. The given <code>propertyName</code> must hold a
+     * valid value for the Event Store that returns that value. Typically, it requires the "indexed" values to be used,
+     * such as event identifier, aggregate identifier, timestamp, etc.
      *
-     * @param CriteriaInterface $criteria The criteria describing the events to select.
-     * @param EventVisitorInterface $visitor The visitor the receives each loaded event
+     * @param propertyName The name of the property to evaluate
+     * @return PropertyInterface a property instance that can be used to build expressions
      */
-    public function visitEvents(CriteriaInterface $criteria,
-            EventVisitorInterface $visitor);
+    public function property($propertyName);
 }

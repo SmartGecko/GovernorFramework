@@ -52,7 +52,7 @@
         <parameter key="governor.amqp_terminal.connection.class">PhpAmqpLib\Connection\AMQPConnection</parameter>
         
         <!-- command interceptors -->
-        <parameter key="governor.interceptor.validator.class">Governor\Framework\CommandHandling\Intercetpors\ValidatorInterceptor</parameter>
+        <parameter key="governor.interceptor.validator.class">Governor\Framework\CommandHandling\Interceptors\ValidatorInterceptor</parameter>
         
     </parameters>
 

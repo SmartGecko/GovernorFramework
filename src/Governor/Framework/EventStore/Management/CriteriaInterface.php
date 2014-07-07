@@ -24,30 +24,28 @@
 
 namespace Governor\Framework\EventStore\Management;
 
-use Governor\Framework\EventStore\EventVisitorInterface;
-
 /**
- * Interface describing operations useful for management purposes. These operations are typically used in migration
- * scripts when deploying new versions of applications.
+ * Interface describing the criteria that DomainEvent entries must match against. These criteria can be combined with
+ * other criteria using AND and OR operators.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface EventStoreManagementInterface
-{
+interface CriteriaInterface {
 
     /**
-     * Loads all events available in the event store and calls
-     * {@link \Governor\Framework\EventStore\EventVisitorInterface::doWithEvent}
-     * for each event found. Events of a single aggregate are guaranteed to be ordered by their sequence number.
-     * <p/>
-     * Implementations are encouraged, though not required, to supply events in the absolute chronological order.
-     * <p/>
-     * Processing stops when the visitor throws an exception.
+     * Returns a criteria instance where both <code>this</code> and given <code>criteria</code> must match.
      *
-     * @param CriteriaInterface $criteria The criteria describing the events to select.
-     * @param EventVisitorInterface $visitor The visitor the receives each loaded event
+     * @param CriteriaInterface $criteria The criteria that must match
+     * @return CriteriaInterface a criteria instance that matches if both <code>this</code> and <code>criteria</code> match
      */
-    public function visitEvents(CriteriaInterface $criteria,
-            EventVisitorInterface $visitor);
+    public function andX(CriteriaInterface $criteria);
+
+    /**
+     * Returns a criteria instance where either <code>this</code> or the given <code>criteria</code> must match.
+     *
+     * @param CriteriaInterface $criteria The criteria that must match if <code>this</code> doesn't match
+     * @return CriteriaInterface a criteria instance that matches if <code>this</code> or the given <code>criteria</code> match
+     */
+    public function orX(CriteriaInterface $criteria);
 }

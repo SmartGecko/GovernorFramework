@@ -22,32 +22,32 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore\Management;
-
-use Governor\Framework\EventStore\EventVisitorInterface;
+namespace Governor\Framework\EventHandling\Replay;
 
 /**
- * Interface describing operations useful for management purposes. These operations are typically used in migration
- * scripts when deploying new versions of applications.
+ * Interface indicating a component is aware of "replays". Typically, these will be Event Listeners that can rebuild
+ * their state based on Events stored in the Event Store.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface EventStoreManagementInterface
+interface ReplayAwareInterface
 {
 
     /**
-     * Loads all events available in the event store and calls
-     * {@link \Governor\Framework\EventStore\EventVisitorInterface::doWithEvent}
-     * for each event found. Events of a single aggregate are guaranteed to be ordered by their sequence number.
-     * <p/>
-     * Implementations are encouraged, though not required, to supply events in the absolute chronological order.
-     * <p/>
-     * Processing stops when the visitor throws an exception.
-     *
-     * @param CriteriaInterface $criteria The criteria describing the events to select.
-     * @param EventVisitorInterface $visitor The visitor the receives each loaded event
+     * Invoked when a replay is started.
      */
-    public function visitEvents(CriteriaInterface $criteria,
-            EventVisitorInterface $visitor);
+    public function beforeReplay();
+
+    /**
+     * Invoked when a replay has finished.
+     */
+    public function afterReplay();
+
+    /**
+     * Invoked when a replay has failed due to an exception.
+     *
+     * @param \Exception $cause The exception that stopped the replay;
+     */
+    public function onReplayFailed(\Exception $cause = null);
 }

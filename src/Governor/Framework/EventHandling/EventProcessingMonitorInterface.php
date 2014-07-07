@@ -22,32 +22,30 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore\Management;
-
-use Governor\Framework\EventStore\EventVisitorInterface;
+namespace Governor\Framework\EventHandling;
 
 /**
- * Interface describing operations useful for management purposes. These operations are typically used in migration
- * scripts when deploying new versions of applications.
+ * Interface describing a mechanism that listens for the results of events being processed. When subscribed to an
+ * object implementing {@link EventProcessingMonitorSupportInterface}, the monitor will be
+ * notified when events have been processed.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface EventStoreManagementInterface
-{
+interface EventProcessingMonitorInterface {
 
     /**
-     * Loads all events available in the event store and calls
-     * {@link \Governor\Framework\EventStore\EventVisitorInterface::doWithEvent}
-     * for each event found. Events of a single aggregate are guaranteed to be ordered by their sequence number.
-     * <p/>
-     * Implementations are encouraged, though not required, to supply events in the absolute chronological order.
-     * <p/>
-     * Processing stops when the visitor throws an exception.
+     * Invoked when one or more events have been successfully processed by the instance it was subscribed to.
      *
-     * @param CriteriaInterface $criteria The criteria describing the events to select.
-     * @param EventVisitorInterface $visitor The visitor the receives each loaded event
+     * @param array $eventMessages The messages that have been successfully processed
      */
-    public function visitEvents(CriteriaInterface $criteria,
-            EventVisitorInterface $visitor);
+    public function onEventProcessingCompleted(array $eventMessages);
+
+    /**
+     * Invoked when one or more events have failed processing by the instance it was subscribed to.
+     *
+     * @param array $eventMessages The message that failed
+     * @param \Exception|null cause         The cause of the failure
+     */
+    public function onEventProcessingFailed(array $eventMessages, \Exception $cause = null);
 }
