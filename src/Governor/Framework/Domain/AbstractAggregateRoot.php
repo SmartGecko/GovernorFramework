@@ -39,24 +39,24 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
     /**
      * @var integer
      */
-    private $version;
+    protected $version;
 
     /**
      * @var EventContainer
      */
-    private $eventContainer;
+    protected $eventContainer;
 
     /**
      *
      * @var boolean
      */
-    private $deleted;
+    protected $deleted;
 
     /**
      * @ORM\Column (type="integer", name="version")
      * @var integer
      */
-    private $lastEventScn;
+    protected $lastEventScn;
 
     protected function registerEvent($payload, MetaData $metaData = null)
     {

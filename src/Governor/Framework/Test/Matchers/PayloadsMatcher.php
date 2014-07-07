@@ -24,7 +24,7 @@
 
 namespace Governor\Framework\Test\Matchers;
 
-use Hamcrest\Matcher;
+use Hamcrest\BaseMatcher;
 use Hamcrest\Description;
 use Governor\Framework\Domain\MessageInterface;
 

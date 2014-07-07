@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventSourcing\Annotation;
 
+use Doctrine\ORM\Mapping as ORM;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
 
@@ -32,6 +33,7 @@ use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @ORM\MappedSuperclass
  */
 abstract class AbstractAnnotatedAggregateRoot extends AbstractEventSourcedAggregateRoot
 {

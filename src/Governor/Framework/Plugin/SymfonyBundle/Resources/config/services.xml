@@ -27,8 +27,7 @@
         <!-- aggregate factory -->
         <parameter key="governor.aggregate_factory.generic.class">Governor\Framework\EventSourcing\GenericAggregateFactory</parameter>
 
-        <!-- event store classes -->
-        <parameter key="governor.event_store.null.class">Governor\Framework\EventStore\NullEventStore</parameter>
+        <!-- event store classes -->        
         <parameter key="governor.event_store.orm.class">Governor\Framework\EventStore\Orm\OrmEventStore</parameter>
         <parameter key="governor.event_store.odm.class">Governor\Framework\EventStore\Odm\OdmEventStore</parameter>
         <parameter key="governor.event_store.filesystem.class">Governor\Framework\EventStore\Filesystem\FilesystemEventStore</parameter>

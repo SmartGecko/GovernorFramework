@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\Saga;
 
+use Governor\Framework\Annotations\Inject;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\Common\ReflectionUtils;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -31,7 +32,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
 /**
  * An implementation of the ResourceInjectorInterface which uses the Symfony service container to inject resources.
- * It scans the Saga for methods annotated with an @Inject annotation.
+ * It scans the Saga for methods annotated with an Inject annotation.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
@@ -57,7 +58,7 @@ class ContainerAwareResourceInjector implements ResourceInjectorInterface, Conta
         $this->reader = new AnnotationReader();
     }
 
-     /**
+    /**
      * {@inheritDoc}     
      */
     public function injectResources(SagaInterface $saga)
@@ -66,10 +67,10 @@ class ContainerAwareResourceInjector implements ResourceInjectorInterface, Conta
 
         foreach (ReflectionUtils::getMethods($reflClass) as $reflMethod) {
             if (null !== $annot = $this->reader->getMethodAnnotation($reflMethod,
-                    \Governor\Framework\Annotations\Inject::class)) {
-                
+                    Inject::class)) {
+
                 $service = $this->container->get($annot->service);
-                $reflMethod->invokeArgs ($saga, array($service));
+                $reflMethod->invokeArgs($saga, array($service));
             }
         }
     }
