@@ -98,10 +98,7 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
                             'aggregate_root' => 'Governor\Framework\Stubs\Dummy2Aggregate',
                             'repository' => 'dummy2.repository'
                         )
-                    ), 
-                    'event_store' => array (
-                        'type' => 'null'
-                    ),
+                    ),                   
                     'command_buses' => array (
                         'default' => array(
                             'class' => 'Governor\Framework\CommandHandling\SimpleCommandBus'

@@ -258,6 +258,10 @@ class GovernorFrameworkExtension extends Extension
 
     private function loadEventStore($config, ContainerBuilder $container)
     {
+        if (!array_key_exists('event_store', $config)) {
+            return;
+        }
+        
         $definition = new Definition($container->getParameter(sprintf("governor.event_store.%s.class",
                                 $config['event_store']['type'])));
         $serviceId = sprintf('governor.event_store.%s',
@@ -272,9 +276,7 @@ class GovernorFrameworkExtension extends Extension
                 $definition->addArgument(new Reference('governor.serializer'));
                 break;
             case 'odm':
-                break;
-            case 'null':
-                break;
+                break;           
         }
 
         $definition->addMethodCall('setLogger', array(new Reference('logger')));
