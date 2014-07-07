@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\Saga\Repository\Orm;
 
+use Doctrine\ORM\Mapping as ORM;
 use Governor\Framework\Saga\AssociationValue;
 
 /**
@@ -31,14 +32,42 @@ use Governor\Framework\Saga\AssociationValue;
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @ORM\Entity
+ * @ORM\Table(name="governor_association_values")
  */
 class AssociationValueEntry
 {
 
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer", name="id")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @var integer
+     */
     private $id;
+
+    /**
+     * @ORM\Column(type="string", name="saga_id")
+     * @var string 
+     */
     private $sagaId;
+
+    /**
+     * @ORM\Column(type="string", name="association_key")
+     * @var string 
+     */
     private $associationKey;
+
+    /**
+     * @ORM\Column(type="string", name="association_value")
+     * @var string 
+     */
     private $associationValue;
+
+    /**
+     * @ORM\Column(type="string", name="saga_type")
+     * @var string 
+     */
     private $sagaType;
 
     /**

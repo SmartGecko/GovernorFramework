@@ -24,10 +24,15 @@
 
 namespace Governor\Framework\EventStore\Orm;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * Description of DomainEventEntry
- *
- * @author david
+ * ORM class representing a stored domain event.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @ORM\Entity
+ * @ORM\Table(name="governor_events")
  */
 class DomainEventEntry extends AbstractEventEntry
 {

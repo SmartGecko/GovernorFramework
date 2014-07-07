@@ -8,9 +8,12 @@
 
 namespace Governor\Framework\EventStore\Orm;
 
+use Rhumsaa\Uuid\Uuid;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
-use Rhumsaa\Uuid\Uuid;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Governor\Framework\EventStore\Management\CriteriaInterface;
 use Governor\Framework\EventStore\EventVisitorInterface;
 use Governor\Framework\Serializer\JMSSerializer;
 use Governor\Framework\Domain\MetaData;
@@ -47,8 +50,9 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
             'memory' => true
         );
 
-        self::$config = Setup::createConfiguration(true);
-        self::$config->setMetadataDriverImpl(new \Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver(self::getMappingDirectories()));
+        self::$config = Setup::createConfiguration(true);        
+        self::$config->setMetadataDriverImpl(new AnnotationDriver(new AnnotationReader()));
+        //self::$config->setMetadataDriverImpl(new \Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver(self::getMappingDirectories()));
         //self::$config->setSQLLogger(new \Doctrine\DBAL\Logging\EchoSQLLogger());
     }
 
@@ -487,6 +491,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
 
     public function testVisitAllEvents()
     {
+        $criteria = \Phake::mock(CriteriaInterface::class);
         $eventVisitor = \Phake::mock(EventVisitorInterface::class);
 
         $this->testSubject->appendEvents("test",
@@ -494,7 +499,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $this->testSubject->appendEvents("test",
                 new SimpleDomainEventStream($this->createDomainEvents(23)));
 
-        $this->testSubject->visitEvents($eventVisitor);
+        $this->testSubject->visitEvents($criteria, $eventVisitor);
 
         //\Phake::verify($eventVisitor, \Phake::times(100))->doWithEvent(\Phake::anyParameters());
     }

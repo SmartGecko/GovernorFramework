@@ -29,6 +29,7 @@ use Psr\Log\LoggerInterface;
 use Governor\Framework\Common\IdentifierValidator;
 use Governor\Framework\EventStore\EventVisitorInterface;
 use Governor\Framework\EventStore\EventStreamNotFoundException;
+use Governor\Framework\EventStore\Management\CriteriaInterface;
 use Governor\Framework\EventStore\Management\EventStoreManagementInterface;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\DomainEventStreamInterface;
@@ -142,7 +143,7 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
         $this->entryStore->persistSnapshot($type, $snapshotEvent,
                 $serializedPayload, $serializedMetaData, $this->entityManager);
 
-        if ($this->maxSnapshotsArchived > 0) {            
+        if ($this->maxSnapshotsArchived > 0) {
             $this->entryStore->pruneSnapshots($type, $snapshotEvent,
                     $this->maxSnapshotsArchived, $this->entityManager);
         }
@@ -188,7 +189,8 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
         $this->logger = $logger;
     }
 
-    public function visitEvents(EventVisitorInterface $visitor)
+    public function visitEvents(CriteriaInterface $criteria,
+            EventVisitorInterface $visitor)
     {
         
     }

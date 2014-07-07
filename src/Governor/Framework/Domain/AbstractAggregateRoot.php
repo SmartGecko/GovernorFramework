@@ -24,6 +24,15 @@
 
 namespace Governor\Framework\Domain;
 
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Base implementation of the AggregateRootInterface
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @ORM\MappedSuperclass
+ */
 abstract class AbstractAggregateRoot implements AggregateRootInterface
 {
 
@@ -44,7 +53,7 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
     private $deleted;
 
     /**
-     *
+     * @ORM\Column (type="integer", name="version")
      * @var integer
      */
     private $lastEventScn;

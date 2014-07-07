@@ -24,57 +24,75 @@
 
 namespace Governor\Framework\EventStore\Orm;
 
+use Doctrine\ORM\Mapping as ORM;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\Serializer\SerializedObjectInterface;
 use Governor\Framework\Serializer\SimpleSerializedObject;
 use Governor\Framework\Serializer\SimpleSerializedType;
 
 /**
- * Description of AbstractEventEntry 
-*/
+ * Abstract base class that defines the ORM entry for storing events in the event store.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @ORM\MappedSuperclass
+ */
 abstract class AbstractEventEntry
 {
-    /**     
+
+    /**
+     * @ORM\Id
+     * @ORM\Column(name="type", type="string")
      * @var string
      */
     private $type;
-    
-    /**     
+
+    /**
+     * @ORM\Id
+     * @ORM\Column(name="aggregate_id", type="string")
      * @var mixed
      */
     private $aggregateIdentifier;
-    
-    /**     
+
+    /**
+     * @ORM\Id
+     * @ORM\Column(name="scn", type="integer")
      * @var integer
      */
     private $scn;
-    
-    /**     
+
+    /**
+     * @ORM\Column(name="event_id", type="string", unique=true)
      * @var string
      */
     private $eventIdentifier;
-    
-    /**     
+
+    /**
+     * @ORM\Column(name="created_at", type="datetime")
      * @var \DateTime
      */
     private $timestamp;
-    
-    /**     
+
+    /**
+     * @ORM\Column(name="payload_type", type="string")
      * @var string
      */
     private $payloadType;
-    
-    /**     
+
+    /**
+     * @ORM\Column(name="payload", type="text")
      * @var mixed
      */
     private $payload;
-    
-    /**     
+
+    /**
+     * @ORM\Column(name="payload_revision", type="string", nullable=true)
      * @var string
-     */    
+     */
     private $payloadRevision;
-    
-    /**     
+
+    /**
+     * @ORM\Column(name="metadata", type="text")
      * @var mixed
      */
     private $metaData;
@@ -88,7 +106,8 @@ abstract class AbstractEventEntry
      * @param SerializedObjectInterface $metaData The serialized metaData of the Event
      */
     public function __construct($type, DomainEventMessageInterface $event,
-        SerializedObjectInterface $payload, SerializedObjectInterface $metaData)
+            SerializedObjectInterface $payload,
+            SerializedObjectInterface $metaData)
     {
         $this->eventIdentifier = $event->getIdentifier();
         $this->type = $type;
@@ -150,13 +169,14 @@ abstract class AbstractEventEntry
     public function getPayload()
     {
         return new SimpleSerializedObject($this->payload,
-            new SimpleSerializedType($this->payloadType, $this->payloadRevision));
+                new SimpleSerializedType($this->payloadType,
+                $this->payloadRevision));
     }
 
     public function getMetaData()
     {
         return new SimpleSerializedObject($this->metaData,
-            new SimpleSerializedType('Governor\Framework\Domain\Metadata'));
+                new SimpleSerializedType('Governor\Framework\Domain\Metadata'));
     }
 
 }
