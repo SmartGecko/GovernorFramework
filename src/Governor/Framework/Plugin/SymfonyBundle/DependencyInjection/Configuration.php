@@ -73,6 +73,7 @@ class Configuration implements ConfigurationInterface
                         ->arrayNode('parameters')
                             ->children()
                                 ->scalarNode('entity_manager')->end()
+                                ->scalarNode('entry_store')->end()
                                 ->scalarNode('document_manager')->end()
                                 ->scalarNode('directory')->end()
                             ->end()

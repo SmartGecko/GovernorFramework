@@ -22,28 +22,19 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore\Orm;
+namespace Governor\Framework\EventStore\Orm\Criteria;
 
-use Doctrine\ORM\Mapping as ORM;
-use Governor\Framework\Domain\DomainEventMessageInterface;
-use Governor\Framework\Serializer\SerializedObjectInterface;
-
+use Governor\Framework\EventStore\Management\CriteriaBuilderInterface;
 /**
- * ORM class representing a stored domain event.
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
- * @ORM\Entity
- * @ORM\Table(name="governor_events")
+ * Description of OrmCriteriaBuilder
+ *
+ * @author david
  */
-class DomainEventEntry extends AbstractEventEntry
+class OrmCriteriaBuilder implements CriteriaBuilderInterface
 {
-
-    public function __construct($type, DomainEventMessageInterface $event,
-            SerializedObjectInterface $payload,
-            SerializedObjectInterface $metaData)
+    public function property($propertyName)
     {
-        parent::__construct($type, $event, $payload, $metaData);
+        
     }
 
 }

@@ -59,6 +59,51 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
         return SnapshotEventEntry::class;
     }
 
+    /**
+     * Allows for customization of the DomainEventEntry to store. Subclasses may choose to override this method to
+     * use a different entity configuration.
+     * <p/>
+     * When overriding this method, also make sure the {@link #domainEventEntryEntityName()} method is overridden to
+     * return the correct entity name.
+     *
+     * @param string $aggregateType      The type identifier of the aggregate
+     * @param DomainEventMessageInterface $event              The event to be stored
+     * @param SerializedObjectInterface $serializedPayload  The serialized payload of the event
+     * @param SerializedObjectInterface $serializedMetaData The serialized meta data of the event
+     * @return mixed an ORM entity, ready to be stored using the entity manager
+     */
+    protected function createDomainEventEntry($aggregateType,
+            DomainEventMessageInterface $event,
+            SerializedObjectInterface $serializedPayload,
+            SerializedObjectInterface $serializedMetaData)
+    {
+
+        return new DomainEventEntry($aggregateType, $event, $serializedPayload,
+                $serializedMetaData);
+    }
+
+    /**
+     * Allows for customization of the SnapshotEventEntry to store. Subclasses may choose to override this method to
+     * use a different entity configuration.
+     * <p/>
+     * When overriding this method, also make sure the {@link #snapshotEventEntryEntityName()} method is overridden to
+     * return the correct entity name.
+     *
+     * @param string $aggregateType      The type identifier of the aggregate
+     * @param DomainEventMessageInterface $snapshotEvent      The snapshot event to be stored
+     * @param SerializedObjectInterface $serializedPayload  The serialized payload of the event
+     * @param SerializedObjectInterface $serializedMetaData The serialized meta data of the event
+     * @return mixed an ORM entity, ready to be stored using the entity manager     
+     */
+    protected function createSnapshotEventEntry($aggregateType,
+            DomainEventMessageInterface $snapshotEvent,
+            SerializedObjectInterface $serializedPayload,
+            SerializedObjectInterface $serializedMetaData)
+    {
+        return new SnapshotEventEntry($aggregateType, $snapshotEvent,
+                $serializedPayload, $serializedMetaData);
+    }
+
     public function fetchAggregateStream($aggregateType, $identifier, $firstScn,
             $batchSize, EntityManager $entityManager)
     {
@@ -102,8 +147,8 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
             SerializedObjectInterface $serializedMetaData,
             EntityManager $entityManager)
     {
-        $entityManager->persist(new DomainEventEntry($aggregateType, $event,
-                $serializedPayload, $serializedMetaData));
+        $entityManager->persist($this->createDomainEventEntry($aggregateType,
+                        $event, $serializedPayload, $serializedMetaData));
     }
 
     public function persistSnapshot($aggregateType,
@@ -112,8 +157,8 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
             SerializedObjectInterface $serializedMetaData,
             EntityManager $entityManager)
     {
-        $entityManager->persist(new SnapshotEventEntry($aggregateType,
-                $snapshotEvent, $serializedPayload, $serializedMetaData));
+        $entityManager->persist($this->createSnapshotEventEntry($aggregateType,
+                        $snapshotEvent, $serializedPayload, $serializedMetaData));
     }
 
     public function pruneSnapshots($type,
@@ -122,7 +167,7 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
     {
         $redundantSnapshots = $this->findRedundantSnapshots($type,
                 $mostRecentSnapshotEvent, $maxSnapshotsArchived, $entityManager);
-                
+
         if (count($redundantSnapshots)) {
             $scnOfFirstToPrune = current($redundantSnapshots);
 
@@ -145,7 +190,7 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
                         "ORDER BY e.scn DESC")
                 ->setFirstResult($maxSnapshotsArchived - 1)
                 ->setMaxResults(1)
-                ->setParameters(array(':type' => $type, ':aggregateIdentifier' => $snapshotEvent->getAggregateIdentifier()));        
+                ->setParameters(array(':type' => $type, ':aggregateIdentifier' => $snapshotEvent->getAggregateIdentifier()));
 
         return $query->getResult();
     }

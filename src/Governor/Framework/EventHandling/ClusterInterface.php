@@ -28,8 +28,11 @@ namespace Governor\Framework\EventHandling;
  * A cluster represents a group of Event Listeners that are treated as a single group by the {@link
  * ClusteringEventBus}. This allows attributes and behavior (e.g. transaction management, asynchronous processing,
  * distribution) to be applied over a whole group at once.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface ClusterInterface
+interface ClusterInterface extends EventProcessingMonitorSupportInterface
 {
 
     /**

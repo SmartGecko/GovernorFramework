@@ -26,7 +26,10 @@ namespace Governor\Framework\EventHandling\Replay;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
+use Governor\Framework\EventHandling\EventProcessingMonitorInterface;
 use Governor\Framework\EventStore\Management\EventStoreManagementInterface;
+use Governor\Framework\EventStore\Management\CriteriaBuilderInterface;
+use Governor\Framework\EventStore\Management\CriteriaInterface;
 use Governor\Framework\EventHandling\ClusterInterface;
 use Governor\Framework\EventHandling\EventListenerInterface;
 
@@ -38,61 +41,134 @@ use Governor\Framework\EventHandling\EventListenerInterface;
 class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
 {
 
-    /**     
+    const STATUS_LIVE = 0;
+    const STATUS_REPLAYING = 1;
+    const STATUS_PROCESSING_BACKLOG = 2;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
-    
+
     /**
      * @var ClusterInterface
      */
     private $delegate;
-    
-    /**     
+
+    /**
      * @var EventStoreManagementInterface
      */
     private $replayingEventStore;
-    
     //private final int commitThreshold;
-    //private final IncomingMessageHandler incomingMessageHandler;
-    //private final Set<ReplayAware> replayAwareListeners = new CopyOnWriteArraySet<ReplayAware>();
+    private $incomingMessageHandler;
 
-    //private volatile Status status = Status.LIVE;
-    //private final EventProcessingListeners eventHandlingListeners = new EventProcessingListeners();
-    
-    public function getMembers()
+    /**
+     * @var SplObjectStorage
+     */
+    private $replayAwareListeners; //new CopyOnWriteArraySet<ReplayAware>();
+    private $status = self::STATUS_LIVE;
+    private $eventHandlingListeners;
+
+    public function __construct(ClusterInterface $delegate,
+            EventStoreManagementInterface $eventStore,
+            IncomingMessageHandlerInterface $incomingMessageHandler)
+    {
+        $this->delegate = $delegate;
+        $this->replayingEventStore = $eventStore;
+        $this->incomingMessageHandler = $incomingMessageHandler;
+
+        $this->eventHandlingListeners = new EventProcessingListeners();
+        $this->replayAwareListeners = new \SplObjectStorage();
+
+        //this.delegate.subscribeEventProcessingMonitor(eventHandlingListeners);
+    }
+
+    /**
+     * Returns a CriteriaBuilder that allows the construction of criteria for this EventStore implementation
+     *
+     * @return CriteriaBuilderInterface a builder to create Criteria for this Event Store.
+     */
+    public function newCriteriaBuilder()
+    {
+        return $this->replayingEventStore->newCriteriaBuilder();
+    }
+
+    public function startReplay(CriteriaInterface $criteria = null)
     {
         
+    }
+
+    /**
+     * Indicates whether this cluster is in replay mode. While in replay mode, EventMessages published to this cluster
+     * are forwarded to the IncomingMessageHandler.
+     *
+     * @return boolean <code>true</code> if this cluster is in replay mode, <code>false</code> otherwise.
+     */
+    public function isInReplayMode()
+    {
+        return $this->status !== self::STATUS_LIVE;
+    }
+
+    public function getMembers()
+    {
+        return $this->delegate->getMembers();
     }
 
     public function getMetaData()
     {
-        
+        return $this->delegate->getMetaData();
     }
 
     public function getName()
     {
-        
+        return $this->delegate->getName();
     }
 
     public function publish(array $events)
     {
-        
+        if ($this->status === self::STATUS_LIVE) {
+            $this->delegate->publish($events);
+        } else {
+            $this->logger->debug("Cluster is in replaying: sending message to process backlog");
+            $acknowledgedMessages = $this->incomingMessageHandler->onIncomingMessages($this->delegate,
+                    $events);
+            if (null !== $acknowledgedMessages && !empty($acknowledgedMessages)) {
+                $this->eventHandlingListeners->onEventProcessingCompleted($acknowledgedMessages);
+            }
+        }
     }
 
     public function subscribe(EventListenerInterface $eventListener)
     {
-        
+        $this->delegate->subscribe($eventListener);
+
+        if ($eventListener instanceof ReplayAwareInterface) {
+            $this->replayAwareListeners->attach($eventListener);
+        }
     }
 
     public function unsubscribe(EventListenerInterface $eventListener)
     {
-        
+        if ($eventListener instanceof ReplayAwareInterface) {
+            $this->replayAwareListeners->detach($eventListener);
+        }
+
+        $this->delegate->unsubscribe($eventListener);
     }
 
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
+    }
+
+    public function subscribeEventProcessingMonitor(EventProcessingMonitorInterface $monitor)
+    {
+        //$this->eventHandlingListeners-
+    }
+
+    public function unsubscribeEventProcessingMonitor(EventProcessingMonitorInterface $monitor)
+    {
+        
     }
 
 }

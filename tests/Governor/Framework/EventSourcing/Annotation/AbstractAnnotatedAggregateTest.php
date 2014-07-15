@@ -17,7 +17,11 @@ use Governor\Framework\Annotations\EventHandler;
 /**
  * Description of AbstractAnnotatedAggregateTest
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @covers \Governor\Framework\Annotations\AggregateIdentifier
+ * @covers \Governor\Framework\Annotations\EventSourcedMember
+ * @covers \Governor\Framework\Annotations\EventHandler
  */
 class AbstractAnnotatedAggregateTest extends \PHPUnit_Framework_TestCase
 {

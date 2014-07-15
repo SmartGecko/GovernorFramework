@@ -2,6 +2,7 @@ language: php
 
 php:
   - 5.5
+  - hhvm
 
 before_script:
   - phpenv config-add myconfig.ini

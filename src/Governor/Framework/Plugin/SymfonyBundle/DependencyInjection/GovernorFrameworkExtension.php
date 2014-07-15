@@ -128,8 +128,9 @@ class GovernorFrameworkExtension extends Extension
                 $interceptors[] = new Reference($interceptor);
             }
 
-            $definition->addMethodCall('setHandlerInterceptors', array($interceptors));
-            
+            $definition->addMethodCall('setHandlerInterceptors',
+                    array($interceptors));
+
             $container->setDefinition(sprintf("governor.command_bus.%s", $name),
                     $definition);
         }
@@ -261,7 +262,7 @@ class GovernorFrameworkExtension extends Extension
         if (!array_key_exists('event_store', $config)) {
             return;
         }
-        
+
         $definition = new Definition($container->getParameter(sprintf("governor.event_store.%s.class",
                                 $config['event_store']['type'])));
         $serviceId = sprintf('governor.event_store.%s',
@@ -274,9 +275,14 @@ class GovernorFrameworkExtension extends Extension
                 $definition->addArgument(new Reference(sprintf('doctrine.orm.%s',
                                 $config['event_store']['parameters']['entity_manager'])));
                 $definition->addArgument(new Reference('governor.serializer'));
+
+                if (isset($config['event_store']['parameters']['entry_store'])) {
+                    $definition->addArgument(new Reference($config['event_store']['parameters']['entry_store']));
+                }
+
                 break;
             case 'odm':
-                break;           
+                break;
         }
 
         $definition->addMethodCall('setLogger', array(new Reference('logger')));

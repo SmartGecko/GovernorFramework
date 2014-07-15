@@ -79,7 +79,7 @@ class BatchingAggregateStreamIterator implements \Iterator
 
         $firstBatch = $this->fetchBatch($firstScn);
         $this->currentBatchSize = count($firstBatch);
-        $this->currentBatch = new \ArrayIterator($firstBatch); // iterator ?
+        $this->currentBatch = new \ArrayIterator($firstBatch);
 
         if ($this->currentBatch->valid()) {
             $this->next = $this->currentBatch->current();

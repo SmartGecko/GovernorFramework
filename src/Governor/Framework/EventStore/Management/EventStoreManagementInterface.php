@@ -50,4 +50,11 @@ interface EventStoreManagementInterface
      */
     public function visitEvents(CriteriaInterface $criteria,
             EventVisitorInterface $visitor);
+    
+    /**
+     * Returns a CriteriaBuilderInterface that allows the construction of criteria for this EventStore implementation
+     *
+     * @return CriteriaBuilderInterface a builder to create Criteria for this Event Store.          
+     */
+    public function newCriteriaBuilder();
 }

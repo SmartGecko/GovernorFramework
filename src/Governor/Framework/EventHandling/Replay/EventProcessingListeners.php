@@ -22,28 +22,48 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore\Orm;
+namespace Governor\Framework\EventHandling\Replay;
 
-use Doctrine\ORM\Mapping as ORM;
-use Governor\Framework\Domain\DomainEventMessageInterface;
-use Governor\Framework\Serializer\SerializedObjectInterface;
+use Governor\Framework\EventHandling\EventProcessingMonitorInterface;
 
 /**
- * ORM class representing a stored domain event.
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
- * @ORM\Entity
- * @ORM\Table(name="governor_events")
+ * Description of EventProcessingListeners
+ *
+ * @author david
  */
-class DomainEventEntry extends AbstractEventEntry
+class EventProcessingListeners implements EventProcessingMonitorInterface
 {
 
-    public function __construct($type, DomainEventMessageInterface $event,
-            SerializedObjectInterface $payload,
-            SerializedObjectInterface $metaData)
+    private $delegates;
+
+    function __construct($delegates)
     {
-        parent::__construct($type, $event, $payload, $metaData);
+        $this->delegates = $delegates;
     }
 
+    public function onEventProcessingCompleted(array $eventMessages)
+    {
+        /*   if (status != Status.REPLAYING) {
+          for (EventProcessingMonitor delegate : delegates) {
+          delegate.onEventProcessingCompleted(eventMessages);
+          }
+          } */
+    }
+
+    public function onEventProcessingFailed(array $eventMessages,
+            \Exception $cause = null)
+    {
+        
+    }
+
+    /*
+
+
+      public void onEventProcessingFailed(List<? extends EventMessage> eventMessages, Throwable cause) {
+      if (status != Status.REPLAYING) {
+      for (EventProcessingMonitor delegate : delegates) {
+      delegate.onEventProcessingFailed(eventMessages, cause);
+      }
+      }
+      } */
 }

@@ -9,6 +9,7 @@
 namespace Governor\Framework\EventSourcing;
 
 use Rhumsaa\Uuid\Uuid;
+use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\MetaData;
@@ -18,7 +19,8 @@ use Governor\Framework\Stubs\StubAggregate;
 /**
  * Description of AbstractEventSourcedEntityTest
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class AbstractEventSourcedEntityTest extends \PHPUnit_Framework_TestCase
 {
@@ -32,7 +34,7 @@ class AbstractEventSourcedEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testRecursivelyApplyEvent()
     {
-        $aggregateRoot = $this->getMockForAbstractClass('Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot');
+        $aggregateRoot = $this->getMockForAbstractClass(AbstractEventSourcedAggregateRoot::class);
         $this->testSubject->registerAggregateRoot($aggregateRoot);
 
         $this->testSubject->handleRecursively($this->domainEvent(new StubDomainEvent()));
@@ -50,7 +52,7 @@ class AbstractEventSourcedEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testApplyDelegatesToAggregateRoot()
     {
-        $aggregateRoot = $this->getMockBuilder('Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot')
+        $aggregateRoot = $this->getMockBuilder(AbstractEventSourcedAggregateRoot::class)
                 ->disableOriginalConstructor()
                 ->setMethods(array('apply'))
                 ->getMockForAbstractClass();
@@ -69,8 +71,8 @@ class AbstractEventSourcedEntityTest extends \PHPUnit_Framework_TestCase
      */
     public function testDuplicateAggregateRootRegistration_DifferentAggregate()
     {
-        $aggregateRoot1 = $this->getMockForAbstractClass('Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot');
-        $aggregateRoot2 = $this->getMockForAbstractClass('Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot');
+        $aggregateRoot1 = $this->getMockForAbstractClass(AbstractEventSourcedAggregateRoot::class);
+        $aggregateRoot2 = $this->getMockForAbstractClass(AbstractEventSourcedAggregateRoot::class);
 
         $this->testSubject->registerAggregateRoot($aggregateRoot1);
         $this->testSubject->registerAggregateRoot($aggregateRoot2);
@@ -78,7 +80,7 @@ class AbstractEventSourcedEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testDuplicateAggregateRootRegistration_SameAggregate()
     {
-        $aggregateRoot = $this->getMockForAbstractClass('Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot');
+        $aggregateRoot = $this->getMockForAbstractClass(AbstractEventSourcedAggregateRoot::class);
         $this->testSubject->registerAggregateRoot($aggregateRoot);
         $this->testSubject->registerAggregateRoot($aggregateRoot);
     }

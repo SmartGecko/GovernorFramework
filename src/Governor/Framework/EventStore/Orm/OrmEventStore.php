@@ -81,12 +81,20 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
      */
     private $logger;
 
+    /**
+     * Creates a new instance of the OrmEventStore. 
+     * 
+     * @param EntityManager $entityManager ORM entity manager.
+     * @param SerializerInterface $serializer Serializer implementation.
+     * @param EventEntryStoreInterface|null $entryStore Entry store implementation
+     */
     public function __construct(EntityManager $entityManager,
-            SerializerInterface $serializer)
+            SerializerInterface $serializer,
+            EventEntryStoreInterface $entryStore = null)
     {
         $this->entityManager = $entityManager;
         $this->serializer = new MessageSerializer($serializer);
-        $this->entryStore = new DefaultEventEntryStore();
+        $this->entryStore = null === $entryStore ? new DefaultEventEntryStore() : $entryStore;
     }
 
     /**
@@ -191,6 +199,11 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
 
     public function visitEvents(CriteriaInterface $criteria,
             EventVisitorInterface $visitor)
+    {
+        
+    }
+
+    public function newCriteriaBuilder()
     {
         
     }

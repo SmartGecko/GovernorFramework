@@ -30,14 +30,30 @@ use Governor\Framework\Domain\MetaData;
 /**
  * Description of GenericCommandMessage
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class GenericCommandMessage implements CommandMessageInterface
 {
 
+    /**
+     * @var string
+     */
     private $id;
+
+    /**
+     * @var string
+     */
     private $commandName;
+
+    /**
+     * @var mixed
+     */
     private $payload;
+
+    /**
+     * @var MetaData
+     */
     private $metaData;
 
     public function __construct($payload, MetaData $metaData = null, $id = null,
@@ -52,8 +68,8 @@ class GenericCommandMessage implements CommandMessageInterface
     public static function asCommandMessage($command)
     {
         if (!is_object($command)) {
-            throw new \InvalidArgumentException(sprintf('Commands must be objects but recieved an %s',
-                    get_type($command)));
+            throw new \InvalidArgumentException(sprintf("Command paylod must be an object, but is of type \"%s\"",
+                    gettype($command)));
         }
 
         if ($command instanceof CommandMessageInterface) {

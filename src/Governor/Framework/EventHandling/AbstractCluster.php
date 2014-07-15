@@ -55,6 +55,7 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
      * @var OrderResolverInterface
      */
     private $orderResolver;
+    private $subscribedMonitors;
 
     /**
      * @var LoggerInterface
@@ -72,6 +73,7 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
         $this->eventListeners = new \SplObjectStorage();
         $this->clusterMetaData = new DefaultClusterMetaData();
         $this->orderResolver = $orderResolver;
+        $this->subscribedMonitors = new EventProcessingMonitorCollection();
     }
 
     protected abstract function doPublish(array $events, array $eventListeners);
@@ -136,7 +138,7 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
     {
         $this->logger = $logger;
     }
-    
+
     protected function getClassName(EventListenerInterface $eventListener)
     {
         if ($eventListener instanceof EventListenerProxyInterface) {
@@ -146,6 +148,16 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
         }
 
         return $listenerType;
+    }
+
+    public function subscribeEventProcessingMonitor(EventProcessingMonitorInterface $monitor)
+    {
+        $this->subscribedMonitors->subscribeEventProcessingMonitor($monitor);
+    }
+
+    public function unsubscribeEventProcessingMonitor(EventProcessingMonitorInterface $monitor)
+    {
+        $this->subscribedMonitors->unsubscribeEventProcessingMonitor($monitor);
     }
 
 }
