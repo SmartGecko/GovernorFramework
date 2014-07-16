@@ -24,24 +24,34 @@
 
 namespace Governor\Framework\EventStore\Orm\Criteria;
 
-use Governor\Framework\EventStore\Management\CriteriaBuilderInterface;
+use Governor\Framework\EventStore\Management\CriteriaInterface;
 
 /**
- * Description of OrmCriteriaBuilder
+ * Abstract implementation of the Criteria interface for the ORM Event Store.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class OrmCriteriaBuilder implements CriteriaBuilderInterface
+abstract class OrmCriteria implements CriteriaInterface
 {
 
-    /**     
-     * @param string $propertyName
-     * @return OrmProperty
-     */
-    public function property($propertyName)
+    public function andX(CriteriaInterface $criteria)
     {
-        return new OrmProperty($propertyName);
+        return new BinaryOperator($this, "AND", $criteria);
     }
 
+    public function orX(CriteriaInterface $criteria)
+    {
+        return new BinaryOperator($this, "OR", $criteria);
+    }
+
+    /**
+     * Parses the criteria to a JPA compatible where clause and parameter values.
+     *
+     * @param string $entryKey    The variable assigned to the entry in the whereClause
+     * @param string $whereClause The buffer to write the where clause to.
+     * @param ParameterRegistry $parameters  The registry where parameters and assigned values can be registered.
+     */
+    public abstract function parse($entryKey, &$whereClause,
+            ParameterRegistry $parameters);
 }

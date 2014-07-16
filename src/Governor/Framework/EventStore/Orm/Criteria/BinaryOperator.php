@@ -24,24 +24,53 @@
 
 namespace Governor\Framework\EventStore\Orm\Criteria;
 
-use Governor\Framework\EventStore\Management\CriteriaBuilderInterface;
-
 /**
- * Description of OrmCriteriaBuilder
+ * Description of BinaryOperator
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class OrmCriteriaBuilder implements CriteriaBuilderInterface
+class BinaryOperator extends OrmCriteria
 {
 
-    /**     
-     * @param string $propertyName
-     * @return OrmProperty
+    /**
+     * @var OrmCriteria
      */
-    public function property($propertyName)
+    private $criteria1;
+
+    /**
+     * @var OrmCriteria
+     */
+    private $criteria2;
+
+    /**
+     * @var string
+     */
+    private $operator;
+
+    /**
+     * Initializes a binary operator that matches against two criteria
+     *
+     * @param OrmCriteria $criteria1 One of the criteria to match
+     * @param string $operator  The binary operator to check the criteria with
+     * @param OrmCriteria $criteria2 One of the criteria to match
+     */
+    public function __construct(OrmCriteria $criteria1, $operator,
+            OrmCriteria $criteria2)
     {
-        return new OrmProperty($propertyName);
+        $this->criteria1 = $criteria1;
+        $this->operator = $operator;
+        $this->criteria2 = $criteria2;
+    }
+
+    public function parse($entryKey, &$whereClause,
+            ParameterRegistry $parameters)
+    {
+        $whereClause .= "(";
+        $this->criteria1->parse($entryKey, $whereClause, $parameters);
+        $whereClause .= ") " . $this->operator . " (";
+        $this->criteria2->parse($entryKey, $whereClause, $parameters);
+        $whereClause .= ")";
     }
 
 }

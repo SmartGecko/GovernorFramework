@@ -24,24 +24,57 @@
 
 namespace Governor\Framework\EventStore\Orm\Criteria;
 
-use Governor\Framework\EventStore\Management\CriteriaBuilderInterface;
-
 /**
- * Description of OrmCriteriaBuilder
+ * Description of CollectionOperator
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class OrmCriteriaBuilder implements CriteriaBuilderInterface
+class CollectionOperator extends OrmCriteria
 {
 
-    /**     
-     * @param string $propertyName
-     * @return OrmProperty
+    /**
+     * @var OrmProperty
      */
-    public function property($propertyName)
+    private $property;
+
+    /**
+     * @var mixed
+     */
+    private $expression;
+
+    /**
+     * @var string
+     */
+    private $operator;
+
+    /**
+     * Initializes the operator matching given <code>property</code> against the given <code>expression</code> using
+     * the given <code>operator</code>.
+     *
+     * @param OrmProperty $property   The property to match
+     * @param string $operator   The JPA operator to match the property against the expression
+     * @param string $expression The expression to match against
+     */
+    public function __construct(OrmProperty $property, $operator, $expression)
     {
-        return new OrmProperty($propertyName);
+        $this->property = $property;
+        $this->expression = $expression;
+        $this->operator = $operator;
+    }
+
+    public function parse($entryKey, &$whereClause,
+            ParameterRegistry $parameters)
+    {
+        $this->property->parse($entryKey, $whereClause);
+        $whereClause .= sprintf(" %s ", $this->operator);
+
+        if ($this->expression instanceof OrmProperty) {
+            $this->expression->parse($entryKey, $whereClause);
+        } else {
+            $whereClause .= sprintf("(%s)",
+                    $parameters->register($this->expression));
+        }
     }
 
 }

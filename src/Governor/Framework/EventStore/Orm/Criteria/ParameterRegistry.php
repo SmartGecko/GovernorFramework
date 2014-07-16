@@ -24,24 +24,43 @@
 
 namespace Governor\Framework\EventStore\Orm\Criteria;
 
-use Governor\Framework\EventStore\Management\CriteriaBuilderInterface;
-
 /**
- * Description of OrmCriteriaBuilder
+ * Description of ParameterRegistry
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class OrmCriteriaBuilder implements CriteriaBuilderInterface
+class ParameterRegistry
 {
-
-    /**     
-     * @param string $propertyName
-     * @return OrmProperty
+    /**    
+     * @var array
      */
-    public function property($propertyName)
+    private $parameters = array();
+
+    /**
+     * Registers the given <code>expression</code> as parameter and returns the value to use to refer to this
+     * expression.
+     *
+     * @param mixed $expression The expression to parameterize in the query
+     * @return string The placeholder to use in the query to refer to the given parameter
+     */
+    public function register($expression)
     {
-        return new OrmProperty($propertyName);
+        $paramName = "param" . count($this->parameters);
+        $this->parameters[$paramName] = $expression;
+
+        return ":" . $paramName;
+    }
+
+    /**
+     * Returns a map containing the key-value pairs, where each key is the parameter name, and the value the expression
+     * to be inserted as parameter.
+     *
+     * @return array an array containing the parameters
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
     }
 
 }

@@ -24,24 +24,53 @@
 
 namespace Governor\Framework\EventStore\Orm\Criteria;
 
-use Governor\Framework\EventStore\Management\CriteriaBuilderInterface;
-
 /**
- * Description of OrmCriteriaBuilder
+ * Description of Equals
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class OrmCriteriaBuilder implements CriteriaBuilderInterface
+class NotEquals extends OrmCriteria
 {
 
-    /**     
-     * @param string $propertyName
-     * @return OrmProperty
+    /**
+     * @var OrmProperty
      */
-    public function property($propertyName)
+    private $propertyName;
+
+    /**
+     * @var mixed
+     */
+    private $expression;
+
+    /**
+     * Initializes an Equals operator matching the given <code>property</code> against the given
+     * <code>expression</code>.
+     *
+     * @param property   The property to match
+     * @param expression The expression to match against. May be <code>null</code>.
+     */
+    public function __construct(OrmProperty $property, $expression)
     {
-        return new OrmProperty($propertyName);
+        $this->propertyName = $property;
+        $this->expression = $expression;
+    }
+
+    public function parse($entryKey, &$whereClause,
+            ParameterRegistry $parameters)
+    {
+        $this->propertyName->parse($entryKey, $whereClause);
+
+        if (null === $this->expression) {
+            $whereClause .= " IS NOT NULL";
+        } else {
+            $whereClause .= " <> ";
+            if ($this->expression instanceof OrmProperty) {
+                $this->expression->parse($entryKey, $whereClause);
+            } else {
+                $whereClause .= $parameters->register($this->expression);
+            }
+        }
     }
 
 }

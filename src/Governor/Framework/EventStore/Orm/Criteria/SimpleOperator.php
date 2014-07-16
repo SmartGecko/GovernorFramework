@@ -24,24 +24,47 @@
 
 namespace Governor\Framework\EventStore\Orm\Criteria;
 
-use Governor\Framework\EventStore\Management\CriteriaBuilderInterface;
-
 /**
- * Description of OrmCriteriaBuilder
+ * Description of SimpleOperator
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class OrmCriteriaBuilder implements CriteriaBuilderInterface
+class SimpleOperator extends OrmCriteria
 {
 
-    /**     
-     * @param string $propertyName
-     * @return OrmProperty
+    /**
+     * @var OrmProperty
      */
-    public function property($propertyName)
+    private $propertyName;
+    
+    /**     
+     * @var string
+     */
+    private $operator;
+    
+    /**     
+     * @var mixed
+     */
+    private $expression;
+
+    function __construct(OrmProperty $propertyName, $operator, $expression)
     {
-        return new OrmProperty($propertyName);
+        $this->propertyName = $propertyName;
+        $this->operator = $operator;
+        $this->expression = $expression;
+    }
+
+    public function parse($entryKey, &$whereClause, ParameterRegistry $parameters)
+    {
+        $this->propertyName->parse($entryKey, $whereClause);
+        $whereClause .= sprintf(" %s ", $this->operator);        
+        
+        if ($this->expression instanceof OrmProperty) {
+            $this->expression->parse($entryKey, $whereClause);
+        } else {
+            $whereClause .= $parameters->register($this->expression);
+        }
     }
 
 }
