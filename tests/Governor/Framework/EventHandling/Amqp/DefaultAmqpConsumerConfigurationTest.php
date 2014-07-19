@@ -22,46 +22,30 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventHandling\Replay;
-
-use Governor\Framework\EventHandling\ClusterInterface;
-use Governor\Framework\Domain\DomainEventMessageInterface;
+namespace Governor\Framework\EventHandling\Amqp;
 
 /**
- * Description of DiscardingIncomingMessageHandler
+ * Description of DefaultAmqpConsumerConfigurationTest
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class DiscardingIncomingMessageHandler implements IncomingMessageHandlerInterface
+class DefaultAmqpConsumerConfigurationTest extends \PHPUnit_Framework_TestCase
 {
 
-    public function onIncomingMessages(ClusterInterface $destination,
-            array $messages)
+    public function testUsesDefaultSettings()
     {
-        return $messages;
+        $testSubject = new DefaultAmqpConsumerConfiguration("QueueName");
+
+        $this->assertEquals("QueueName", $testSubject->getQueueName());
+        $this->assertEquals(true, $testSubject->getExclusive());
+        $this->assertNull($testSubject->getPrefetchCount());
     }
 
-    public function onReplayFailed(ClusterInterface $destination,
-            \Exception $cause)
+    public function testNullQueueAllowed()
     {
-        
-    }
-
-    public function prepareForReplay(ClusterInterface $destination)
-    {
-        
-    }
-
-    public function processBacklog(ClusterInterface $destination)
-    {
-        
-    }
-
-    public function releaseMessage(ClusterInterface $destination,
-            DomainEventMessageInterface $message)
-    {
-        return null;
+        $testSubject = new DefaultAmqpConsumerConfiguration(null);
+        $this->assertNull($testSubject->getQueueName());
     }
 
 }

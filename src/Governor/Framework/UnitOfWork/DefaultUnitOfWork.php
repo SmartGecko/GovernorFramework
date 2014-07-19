@@ -39,7 +39,7 @@ use Governor\Framework\Domain\DomainEventMessageInterface;
 class DefaultUnitOfWork extends NestableUnitOfWork
 {
 
-    /**     
+    /**
      * @var AggregateRootInterface[] 
      */
     private $registeredAggregates = array();
@@ -53,8 +53,8 @@ class DefaultUnitOfWork extends NestableUnitOfWork
      * @var \Governor\Framework\UnitOfWork\UnitOfWorkListenerCollection
      */
     private $listeners;
-    
-    /**     
+
+    /**
      * @var integer
      */
     private $dispatcherStatus;
@@ -92,6 +92,10 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         $this->publishEvents();
         $this->commitInnerUnitOfWork();
 
+        if ($this->isTransactional()) {
+            $this->notifyListenersPrepareTransactionCommit(null);
+        }
+        
         $this->notifyListenersAfterCommit();
     }
 
@@ -214,7 +218,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
 
             $this->eventsToPublish->next();
         }
-       
+
         $this->logger->debug("All events successfully published.");
         $this->dispatcherStatus = self::STATUS_READY;
     }
@@ -233,6 +237,16 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         }
 
         $this->listeners->onPrepareCommit($this, $list, $this->eventsToPublish());
+    }
+
+    /**
+     * Send a {@link UnitOfWorkListener#afterCommit(UnitOfWork)} notification to all registered listeners.
+     *
+     * @param mixed $transaction The object representing the transaction to about to be committed
+     */
+    protected function notifyListenersPrepareTransactionCommit($transaction)
+    {
+        $this->listeners->onPrepareTransactionCommit($this, $transaction);
     }
 
     private function eventsToPublish()
@@ -266,10 +280,10 @@ class DefaultUnitOfWork extends NestableUnitOfWork
 
             $this->logger->debug("Persisting changes to [{aggregate}], identifier: [{id}]",
                     array(
-                        'aggregate' => get_class($aggregate), 
-                        'id' => $aggregate->getIdentifier()
-                    ));
-                
+                'aggregate' => get_class($aggregate),
+                'id' => $aggregate->getIdentifier()
+            ));
+
             $callback->save($aggregate);
         }
         $this->logger->debug("Aggregates successfully persisted");

@@ -26,7 +26,7 @@ namespace Governor\Framework\EventHandling\Amqp;
 
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Message\AMQPMessage as RawMessage;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Governor\Framework\Serializer\SerializerInterface;
@@ -82,14 +82,26 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * @var SerializerInterface
      */
     private $serializer;
+
+    /**
+     * @var RoutingKeyResolverInterface
+     */
     private $routingKeyResolver;
+
+    /**
+     * @var boolean
+     */
     private $waitForAck;
+
+    /**
+     * @var integer
+     */
     private $publisherAckTimeout = 0;
 
     /**
      * @var ClusterInterface[]
      */
-    private $clusters;
+    private $clusters = array();
 
     public function __construct(SerializerInterface $serializer,
             RoutingKeyResolverInterface $routingKeyResolver = null,
@@ -121,7 +133,7 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     protected function doSendMessage(AMQPChannel $channel,
             AmqpMessage $amqpMessage)
     {
-        $rawMessage = new AMQPMessage($amqpMessage->getBody(),
+        $rawMessage = new RawMessage($amqpMessage->getBody(),
                 $amqpMessage->getProperties());
 
         $this->logger->debug("Publishing message to {exchange} with routing key {key}",
@@ -164,13 +176,16 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * Transactional behavior cannot be enabled if {@link #setWaitForPublisherAck(boolean)} has been set to
      * <code>true</code>.
      *
-     * @param transactional whether dispatching should be transactional or not
+     * @param boolean $transactional whether dispatching should be transactional or not
      */
-    /*   public void setTransactional(boolean transactional) {
-      Assert.isTrue(!waitForAck || !transactional,
-      "Cannot set transactional behavior when 'waitForServerAck' is enabled.");
-      isTransactional = transactional;
-      } */
+    public function setTransactional($transactional)
+    {
+        if (!$this->waitForAck || !$transactional) {
+            $this->isTransactional = $transactional;
+        } else {
+            throw new \LogicException("Cannot set transactional behavior when 'waitForServerAck' is enabled.");
+        }
+    }
 
     /**
      * Enables or diables the RabbitMQ specific publisher acknowledgements (confirms). When confirms are enabled, the
@@ -290,11 +305,12 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
                 $channel->confirm_select();
             }
             foreach ($events as $event) {
-                $amqpMessage = $this->messageConverter->createAmqpPMessage($event);
+                $amqpMessage = $this->messageConverter->createAmqpMessage($event);
                 $this->doSendMessage($channel, $amqpMessage);
             }
             if (CurrentUnitOfWork::isStarted()) {
-                //    CurrentUnitOfWork::get()->registerListener(new ChannelTransactionUnitOfWorkListener($channel));
+                CurrentUnitOfWork::get()->registerListener(new ChannelTransactionUnitOfWorkListener($this->logger,
+                        $channel, $this));
             } else if ($this->isTransactional) {
                 $channel->tx_commit();
             } else if ($this->waitForAck) {
@@ -324,45 +340,78 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
 class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
 {
 
-    private $isOpen;
+    /**
+     * @var AMQPChannel 
+     */
     private $channel;
+    
+    /**
+     * @var AmqpTerminal 
+     */
+    private $terminal;
+    
+    /**
+     * @var LoggerInterface 
+     */
+    private $logger;
 
-    public function __construct(AMQPChannel $channel)
+    public function __construct(LoggerInterface $logger, AMQPChannel $channel,
+            AmqpTerminal $terminal)
     {
+        $this->logger = $logger;
         $this->channel = $channel;
+        $this->terminal = $terminal;
         $this->isOpen = true;
+    }
+
+    private function getTerminalProperty($propertyName)
+    {
+        $reflClass = new \ReflectionClass($this->terminal);
+        $property = $reflClass->getProperty($propertyName);
+        $property->setAccessible(true);
+
+        return $property->getValue($this->terminal);
+    }
+
+    private function closeTerminal()
+    {
+        $reflClass = new \ReflectionClass($this->terminal);
+        $method = $reflClass->getMethod('tryClose');
+        $method->setAccessible(true);
+
+        $method->invoke($this->terminal, $this->channel);
     }
 
     public function onPrepareTransactionCommit(UnitOfWorkInterface $unitOfWork,
             $transaction)
-    {
-        //   if ((isTransactional || waitForAck) && isOpen && !channel.isOpen()) {
-        //      throw new EventPublicationFailedException(
-        //              "Unable to Commit UnitOfWork changes to AMQP: Channel is closed.", channel.getCloseReason());
-        // }
+    {        
+        if (($this->getTerminalProperty('isTransactional') || $this->getTerminalProperty('waitForAck'))
+                && !$this->isOpen) { //&& !$this->channel->()) {
+            throw new EventPublicationFailedException(
+            "Unable to Commit UnitOfWork changes to AMQP: Channel is closed.");
+        }
     }
 
     public function afterCommit(UnitOfWorkInterface $unitOfWork)
     {
         if ($this->isOpen) {
             try {
-                if ($this->isTransactional) {
+                if ($this->getTerminalProperty('isTransactional')) {
                     $this->channel->tx_commit();
-                } else if ($this->waitForAck) {
+                } else if ($this->getTerminalProperty('waitForAck')) {
                     $this->waitForConfirmations();
                 }
             } catch (\Exception $ex) {
-                //logger.warn("Unable to commit transaction on channel.");             
+                $this->logger->warn("Unable to commit transaction on channel.");
             }
-
-            //$terminal->tryClose($channel);
+            $this->closeTerminal();
         }
     }
 
     private function waitForConfirmations()
     {
-        try {
-            $channel->waitForConfirmsOrDie($publisherAckTimeout);
+        try {            
+            $this->channel->wait_for_pending_acks($this->getTerminalProperty('publisherAckTimeout'));
         } catch (\Exception $ex) {
             throw new EventPublicationFailedException("Failed to receive acknowledgements for all events");
         }
@@ -371,16 +420,16 @@ class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
     public function onRollback(UnitOfWorkInterface $unitOfWork,
             \Exception $failureCause = null)
     {
-        /* try {
-          if (isTransactional) {
-          channel.txRollback();
-          }
-          } catch (IOException e) {
-          logger.warn("Unable to rollback transaction on channel.", e);
-          }
-          tryClose(channel);
-          isOpen = false; */
+        try {
+            if ($this->getTerminalProperty('isTransactional')) {
+                $this->channel->tx_rollback();
+            }
+        } catch (\Exception $ex) {
+            $this->logger->warn("Unable to rollback transaction on channel.",
+                    $ex);
+        }
 
+        $this->closeTerminal();
         $this->isOpen = false;
     }
 

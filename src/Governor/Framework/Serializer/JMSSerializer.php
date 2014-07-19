@@ -26,7 +26,7 @@ namespace Governor\Framework\Serializer;
 
 use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\SerializerBuilder;
-use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface as JMSSerailizerInterface;
 use Governor\Framework\Serializer\Handlers\RhumsaaUuidHandler;
 use Governor\Framework\Serializer\Handlers\AggregateReferenceHandler;
 
@@ -40,7 +40,7 @@ class JMSSerializer extends AbstractSerializer
 {
 
     /**
-     * @var JMS\Serializer\Serializer
+     * @var JMSSerailizerInterface
      */
     private $serializer;
 
@@ -50,7 +50,7 @@ class JMSSerializer extends AbstractSerializer
      * @param SerializerInterface $serializer
      */
     public function __construct(RevisionResolverInterface $revisionResolver = null,
-            SerializerInterface $serializer = null)
+            JMSSerailizerInterface $serializer = null)
     {
         parent::__construct($revisionResolver);
 
