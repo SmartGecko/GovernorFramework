@@ -36,7 +36,8 @@ use Governor\Framework\EventHandling\EventListenerInterface;
 /**
  * Description of ReplayingCluster
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
 {
@@ -77,7 +78,7 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
         $this->replayingEventStore = $eventStore;
         $this->incomingMessageHandler = $incomingMessageHandler;
 
-        $this->eventHandlingListeners = new EventProcessingListeners();
+        $this->eventHandlingListeners = new EventProcessingListeners(array());
         $this->replayAwareListeners = new \SplObjectStorage();
 
         //this.delegate.subscribeEventProcessingMonitor(eventHandlingListeners);
@@ -94,8 +95,25 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
     }
 
     public function startReplay(CriteriaInterface $criteria = null)
-    {
+    {        
+        $this->incomingMessageHandler->prepareForReplay($this->delegate);        
+        $this->status = self::STATUS_REPLAYING;
+        $visitor = new ReplayingEventVisitor($this->delegate);
+                    
+        foreach ($this->replayAwareListeners as $replayAwareListener) {            
+            $replayAwareListener->beforeReplay();
+        }
+           
+        $this->replayingEventStore->visitEvents($visitor, $criteria);
         
+        foreach ($this->replayAwareListeners as $replayAwareListener) {            
+            $replayAwareListener->afterReplay();
+        }
+        
+        $this->status = self::STATUS_PROCESSING_BACKLOG;        
+        $this->incomingMessageHandler->processBacklog($this->delegate);
+        
+        $this->status = self::STATUS_LIVE;
     }
 
     /**
@@ -139,17 +157,17 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
     }
 
     public function subscribe(EventListenerInterface $eventListener)
-    {
+    {             
         $this->delegate->subscribe($eventListener);
 
-        if ($eventListener instanceof ReplayAwareInterface) {
+        if ($eventListener instanceof ReplayAwareInterface) {                   
             $this->replayAwareListeners->attach($eventListener);
         }
     }
 
     public function unsubscribe(EventListenerInterface $eventListener)
-    {
-        if ($eventListener instanceof ReplayAwareInterface) {
+    {        
+        if ($eventListener instanceof ReplayAwareInterface) {            
             $this->replayAwareListeners->detach($eventListener);
         }
 

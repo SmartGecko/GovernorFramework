@@ -115,7 +115,8 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
     public function fetchFiltered($whereClause, array $parameters, $batchSize,
             EntityManager $entityManager)
     {
-        
+        return new BatchingIterator($whereClause, $parameters, $batchSize,
+                $this->domainEventEntryEntityName(), $entityManager);
     }
 
     public function loadLastSnapshotEvent($aggregateType, $identifier,

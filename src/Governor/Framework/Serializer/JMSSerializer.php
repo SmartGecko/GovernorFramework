@@ -58,7 +58,7 @@ class JMSSerializer extends AbstractSerializer
             $this->serializer = SerializerBuilder::create()
                             ->addDefaultHandlers()
                             ->configureHandlers(function(HandlerRegistry $registry) {
-                                $registry->registerSubscribingHandler(new RhumsaaUuidHandler());                                
+                                $registry->registerSubscribingHandler(new RhumsaaUuidHandler());
                             })->build();
         } else {
             $this->serializer = $serializer;
@@ -67,8 +67,12 @@ class JMSSerializer extends AbstractSerializer
 
     public function deserialize(SerializedObjectInterface $data)
     {
-        return $this->serializer->deserialize($data->getData(),
-                        $data->getContentType(), 'json');
+        try {
+            return $this->serializer->deserialize($data->getData(),
+                            $data->getContentType(), 'json');
+        } catch (\Exception $ex) {
+            throw new UnknownSerializedTypeException($data->getType(), $ex);
+        }
     }
 
     public function serialize($object)

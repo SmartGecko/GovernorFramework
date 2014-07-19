@@ -13,7 +13,7 @@ use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Governor\Framework\EventStore\Management\CriteriaInterface;
+use Governor\Framework\EventStore\Orm\Criteria\OrmCriteria;
 use Governor\Framework\EventStore\EventVisitorInterface;
 use Governor\Framework\Serializer\JMSSerializer;
 use Governor\Framework\Domain\MetaData;
@@ -50,9 +50,8 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
             'memory' => true
         );
 
-        self::$config = Setup::createConfiguration(true);        
+        self::$config = Setup::createConfiguration(true);
         self::$config->setMetadataDriverImpl(new AnnotationDriver(new AnnotationReader()));
-        //self::$config->setMetadataDriverImpl(new \Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver(self::getMappingDirectories()));
         //self::$config->setSQLLogger(new \Doctrine\DBAL\Logging\EchoSQLLogger());
     }
 
@@ -62,8 +61,10 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
                         self::$config);
 
         $tool = new \Doctrine\ORM\Tools\SchemaTool($this->entityManager);
-        $classes = array($this->entityManager->getClassMetadata('Governor\Framework\EventStore\Orm\DomainEventEntry'),
-            $this->entityManager->getClassMetadata('Governor\Framework\EventStore\Orm\SnapshotEventEntry'));
+        $classes = array(
+            $this->entityManager->getClassMetadata(\Governor\Framework\EventStore\Orm\DomainEventEntry::class),
+            $this->entityManager->getClassMetadata(\Governor\Framework\EventStore\Orm\SnapshotEventEntry::class)
+        );
 
         $tool->createSchema($classes);
 
@@ -79,19 +80,6 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $this->aggregate2->changeState();
         $this->aggregate2->changeState();
         $this->aggregate2->changeState();
-    }
-
-    private static function getMappingDirectories()
-    {
-
-        $path = array('..', '..', '..', '..', '..', 'src',
-            'Governor', 'Framework', 'Plugin', 'SymfonyBundle', 'Resources', 'config',
-            'doctrine');
-
-        return array(
-            __DIR__ . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path)
-            => 'Governor\Framework'
-        );
     }
 
     public function tearDown()
@@ -133,19 +121,22 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
             new GenericDomainEventMessage(new \stdClass(), 1, new \stdClass()))));
     }
 
-    /*
-      @Transactional
-      @Test(expected = UnknownSerializedTypeException.class)
-      public void testUnknownSerializedTypeCausesException() {
-      testSubject.appendEvents("type", aggregate1.getUncommittedEvents());
-      entityManager.flush();
-      entityManager.clear();
-      entityManager.createQuery("UPDATE DomainEventEntry e SET e.payloadType = :type")
-      .setParameter("type", "unknown")
-      .executeUpdate();
+    /**
+     * @expectedException Governor\Framework\Serializer\UnknownSerializedTypeException
+     */
+    public function testUnknownSerializedTypeCausesException()
+    {
+        $this->testSubject->appendEvents("type",
+                $this->aggregate1->getUncommittedEvents());
+        $this->entityManager->flush();
+        $this->entityManager->clear();
 
-      testSubject.readEvents("type", aggregate1.getIdentifier());
-      } */
+        $this->entityManager->createQuery("UPDATE Governor\Framework\EventStore\Orm\DomainEventEntry e SET e.payloadType = :type")
+                ->setParameter(":type", "unknown")->execute();
+
+        $this->testSubject->readEvents("type",
+                $this->aggregate1->getIdentifier());
+    }
 
     public function testStoreAndLoadEvents()
     {
@@ -486,12 +477,11 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
     {
         $stream = $this->testSubject->readEvents("Stub",
                 Uuid::uuid1()->toString());
-        //  $this->fail('error');
     }
 
     public function testVisitAllEvents()
     {
-        $criteria = \Phake::mock(CriteriaInterface::class);
+        $criteria = \Phake::mock(OrmCriteria::class);
         $eventVisitor = \Phake::mock(EventVisitorInterface::class);
 
         $this->testSubject->appendEvents("test",
@@ -499,47 +489,59 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
         $this->testSubject->appendEvents("test",
                 new SimpleDomainEventStream($this->createDomainEvents(23)));
 
-        $this->testSubject->visitEvents($criteria, $eventVisitor);
+        $this->testSubject->visitEvents($eventVisitor, $criteria);
 
-        //\Phake::verify($eventVisitor, \Phake::times(100))->doWithEvent(\Phake::anyParameters());
+        \Phake::verify($eventVisitor, \Phake::times(100))->doWithEvent(\Phake::anyParameters());
+    }
+
+    public function testVisitAllEvents_IncludesUnknownEventType()
+    {
+        $eventVisitor = \Phake::mock(EventVisitorInterface::class);
+
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream($this->createDomainEvents(10)));
+
+        $eventMessage = new GenericDomainEventMessage("test", 0, new \stdClass());
+
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream(array($eventMessage)));
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream($this->createDomainEvents(10)));
+        // we upcast the event to two instances, one of which is an unknown class
+        //$this->testSubject->setUpcasterChain(new LazyUpcasterChain(Arrays.<Upcaster>asList(new StubUpcaster())));
+        $this->testSubject->visitEvents($eventVisitor);
+
+        \Phake::verify($eventVisitor, \Phake::times(21))->doWithEvent(\Phake::anyParameters());
+    }
+
+    public function testVisitEvents_AfterTimestamp()
+    {
+        $eventVisitor = \Phake::mock(EventVisitorInterface::class);
+
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream($this->createDomainEvents(11)));
+        sleep(1);
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream($this->createDomainEvents(12)));
+        sleep(1);
+
+        $now = new \DateTime();
+        sleep(1);
+        
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream($this->createDomainEvents(13)));
+
+        $this->testSubject->appendEvents("test",
+                new SimpleDomainEventStream($this->createDomainEvents(14)));
+
+        $criteriaBuilder = $this->testSubject->newCriteriaBuilder();
+        $this->testSubject->visitEvents($eventVisitor,
+                $criteriaBuilder->property("timestamp")->greaterThan($now));
+
+        \Phake::verify($eventVisitor, \Phake::times(13 + 14))->doWithEvent(\Phake::anyParameters());
     }
 
     /*
-      @Test
-      @Transactional
-      public void testVisitAllEvents_IncludesUnknownEventType() throws Exception {
-      EventVisitor eventVisitor = mock(EventVisitor.class);
-      testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(10)));
-      final GenericDomainEventMessage eventMessage = new GenericDomainEventMessage<String>("test", 0, "test");
-      testSubject.appendEvents("test", new SimpleDomainEventStream(eventMessage));
-      testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(10)));
-      // we upcast the event to two instances, one of which is an unknown class
-      testSubject.setUpcasterChain(new LazyUpcasterChain(Arrays.<Upcaster>asList(new StubUpcaster())));
-      testSubject.visitEvents(eventVisitor);
-
-      verify(eventVisitor, times(21)).doWithEvent(isA(DomainEventMessage.class));
-      }
-
-      @Test
-      @Transactional
-      public void testVisitEvents_AfterTimestamp() {
-      EventVisitor eventVisitor = mock(EventVisitor.class);
-      DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 12, 59, 59, 999).getMillis());
-      testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(11)));
-      DateTime onePM = new DateTime(2011, 12, 18, 13, 0, 0, 0);
-      DateTimeUtils.setCurrentMillisFixed(onePM.getMillis());
-      testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(12)));
-      DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 0).getMillis());
-      testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(13)));
-      DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 1).getMillis());
-      testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(14)));
-      DateTimeUtils.setCurrentMillisSystem();
-
-      CriteriaBuilder criteriaBuilder = testSubject.newCriteriaBuilder();
-      testSubject.visitEvents(criteriaBuilder.property("timeStamp").greaterThan(onePM), eventVisitor);
-      verify(eventVisitor, times(13 + 14)).doWithEvent(isA(DomainEventMessage.class));
-      }
-
       @Test
       @Transactional
       public void testVisitEvents_BetweenTimestamps() {
@@ -655,7 +657,7 @@ class OrmEventStoreTest extends \PHPUnit_Framework_TestCase
                         "WHERE e.type = :type " .
                         "AND e.aggregateIdentifier = :aggregateIdentifier")
                 ->setParameters(array(
-                    ":type" => "type", 
+                    ":type" => "type",
                     ":aggregateIdentifier" => $aggregate->getIdentifier()
                 ))
                 ->getResult();

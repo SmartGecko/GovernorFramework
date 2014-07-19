@@ -56,26 +56,34 @@ class SequenceMatcher extends ListMatcher
         $currentMatcher = null;
 
         if ($matcherIterator->valid()) {
-            $currentMatcher = $matcherIterator->current();
+            $currentMatcher = $matcherIterator->current();            
         }
 
         while ($itemIterator->valid() && null !== $currentMatcher) {
             $hasMatch = $currentMatcher->matches($itemIterator->current());
+
             if ($hasMatch) {
                 $matcherIterator->next();
-
+                
                 if ($matcherIterator->valid()) {
                     $currentMatcher = $matcherIterator->current();
                 } else {
                     $currentMatcher = null;
                 }
             }
+
+            $itemIterator->next();
         }
+
+        //echo sprintf("%s->%s, %s->%s\n", $itemIterator->key(), $itemIterator->count(),
+        //      $matcherIterator->key(), $matcherIterator->count());
 
         if (null !== $currentMatcher && !$currentMatcher->matches(null)) {
             $this->reportFailed($currentMatcher);
             return false;
         }
+        
+        $matcherIterator->next();
 
         return $this->matchRemainder($matcherIterator);
     }

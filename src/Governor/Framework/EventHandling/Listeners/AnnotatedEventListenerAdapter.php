@@ -29,6 +29,7 @@ use Governor\Framework\Common\ReflectionUtils;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\EventHandling\EventListenerProxyInterface;
+use Governor\Framework\EventHandling\Replay\ReplayAwareInterface;
 use Governor\Framework\Annotations\EventHandler;
 
 /**
@@ -37,7 +38,7 @@ use Governor\Framework\Annotations\EventHandler;
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class AnnotatedEventListenerAdapter implements EventListenerProxyInterface
+class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, ReplayAwareInterface
 {
 
     /**
@@ -46,22 +47,31 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface
     private $eventBus;
     private $annotatedEventListener;
 
+    /**
+     * @var ReplayAwareInterface
+     */
+    private $replayAware;
+
     public function __construct($annotatedEventListener,
             EventBusInterface $eventBus)
     {
         $this->eventBus = $eventBus;
         $this->annotatedEventListener = $annotatedEventListener;
 
+        if ($annotatedEventListener instanceof ReplayAwareInterface) {
+            $this->replayAware = $annotatedEventListener;
+        }
+
         $this->eventBus->subscribe($this);
     }
 
     public function getTargetType()
-    {        
+    {
         return get_class($this->annotatedEventListener);
     }
 
     public function handle(EventMessageInterface $event)
-    {        
+    {
         $reader = new AnnotationReader();
 
         foreach (ReflectionUtils::getMethods(new \ReflectionClass($this->annotatedEventListener)) as $method) {
@@ -82,9 +92,31 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface
             $eventClassName = $eventParam->getClass()->name;
 
             if ($eventClassName === $event->getPayloadType()) {
-                $listener = new AnnotatedEventListener($eventClassName, $method->name, $this->annotatedEventListener);
+                $listener = new AnnotatedEventListener($eventClassName,
+                        $method->name, $this->annotatedEventListener);
                 $listener->handle($event);
             }
+        }
+    }
+
+    public function afterReplay()
+    {
+        if (null !== $this->replayAware) {
+            $this->replayAware->afterReplay();
+        }
+    }
+
+    public function beforeReplay()
+    {
+        if (null !== $this->replayAware) {
+            $this->replayAware->beforeReplay();
+        }
+    }
+
+    public function onReplayFailed(\Exception $cause = null)
+    {
+        if (null !== $this->replayAware) {
+            $this->replayAware->onReplayFailed($cause);
         }
     }
 

@@ -24,39 +24,12 @@
 
 namespace Governor\Framework\Test\Matchers;
 
-use Hamcrest\Matcher;
-use Hamcrest\BaseMatcher;
-use Hamcrest\Description;
-use Governor\Framework\Domain\MessageInterface;
-
 /**
- * Matcher that matches any message (e.g. Event, Command) who's payload matches the given matcher.
+ * Description of StubEvent3
+ *
+ * @author david
  */
-class PayloadMatcher extends BaseMatcher
+class StubEvent5 extends StubEvent
 {
-
-    private $payloadMatcher;
-
-    /**
-     * Constructs an instance with the given <code>payloadMatcher</code>.
-     *
-     * @param Matcher $payloadMatcher The matcher that must match the Message's payload.
-     */
-    public function __construct(Matcher $payloadMatcher)
-    {
-        $this->payloadMatcher = $payloadMatcher;
-    }
-
-    public function matches($item)
-    {
-        return $item instanceof MessageInterface && $this->payloadMatcher->matches($item->getPayload());
-    }
-
-    public function describeTo(Description $description)
-    {
-        $description->appendText("Message with payload <");
-        $this->payloadMatcher->describeTo($description);
-        $description->appendText(">");
-    }
-
+    //put your code here
 }

@@ -45,12 +45,12 @@ interface EventStoreManagementInterface
      * <p/>
      * Processing stops when the visitor throws an exception.
      *
-     * @param CriteriaInterface $criteria The criteria describing the events to select.
      * @param EventVisitorInterface $visitor The visitor the receives each loaded event
+     * @param CriteriaInterface $criteria The criteria describing the events to select.     
      */
-    public function visitEvents(CriteriaInterface $criteria,
-            EventVisitorInterface $visitor);
-    
+    public function visitEvents(EventVisitorInterface $visitor,
+            CriteriaInterface $criteria = null);
+
     /**
      * Returns a CriteriaBuilderInterface that allows the construction of criteria for this EventStore implementation
      *

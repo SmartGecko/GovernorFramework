@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\Test\Matchers;
 
+use Hamcrest\Matcher;
 use Hamcrest\BaseMatcher;
 use Hamcrest\Description;
 use Governor\Framework\Domain\MessageInterface;
@@ -41,7 +42,7 @@ class PayloadsMatcher extends BaseMatcher
     /**
      * Constructs an instance that uses the given <code>matcher</code> to match the payloads.
      *
-     * @param matcher             The matcher to match the payloads with
+     * @param Matcher $matcher             The matcher to match the payloads with
      */
     public function __construct(Matcher $matcher)
     {
@@ -55,6 +56,7 @@ class PayloadsMatcher extends BaseMatcher
         }
 
         $payloads = array();
+        
         foreach ($item as $listItem) {
             if ($listItem instanceof MessageInterface) {
                 $payloads[] = $listItem->getPayload();
@@ -62,6 +64,7 @@ class PayloadsMatcher extends BaseMatcher
                 $payloads[] = $item;
             }
         }
+        
         return $this->matcher->matches($payloads);
     }
 

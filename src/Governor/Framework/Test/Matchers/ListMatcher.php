@@ -79,11 +79,11 @@ abstract class ListMatcher extends BaseMatcher
      * @return boolean true if no matchers remain or all matchers succeeded
      */
     protected function matchRemainder(\Iterator $matcherIterator)
-    {
-        while ($matcherIterator->valid()) {
+    {        
+        while ($matcherIterator->valid()) {            
             $matcher = $matcherIterator->current();
 
-            if (!$matcher->matches(null)) {
+            if (!$matcher->matches(null)) {                
                 $this->failedMatchers[] = $matcher;
                 return false;
             }

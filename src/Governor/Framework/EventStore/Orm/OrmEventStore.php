@@ -31,6 +31,8 @@ use Governor\Framework\EventStore\EventVisitorInterface;
 use Governor\Framework\EventStore\EventStreamNotFoundException;
 use Governor\Framework\EventStore\Management\CriteriaInterface;
 use Governor\Framework\EventStore\Management\EventStoreManagementInterface;
+use Governor\Framework\EventStore\Orm\Criteria\OrmCriteriaBuilder;
+use Governor\Framework\EventStore\Orm\Criteria\ParameterRegistry;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\DomainEventStreamInterface;
 use Governor\Framework\Domain\DomainEventMessageInterface;
@@ -197,15 +199,31 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
         $this->logger = $logger;
     }
 
-    public function visitEvents(CriteriaInterface $criteria,
-            EventVisitorInterface $visitor)
+    public function visitEvents(EventVisitorInterface $visitor,
+            CriteriaInterface $criteria = null)
     {
-        
+        $whereClause = "";
+        $parameters = array();
+
+        if (null !== $criteria) {
+            $paramRegistry = new ParameterRegistry();
+            $criteria->parse('e', $whereClause, $paramRegistry);
+            $parameters = $paramRegistry->getParameters();
+        }
+
+        $batch = $this->entryStore->fetchFiltered($whereClause, $parameters,
+                $this->batchSize, $this->entityManager);
+        $eventStream = new OrmDomainEventStream($this->serializer, $batch, null,
+                null);
+
+        while ($eventStream->hasNext()) {
+            $visitor->doWithEvent($eventStream->next());
+        }
     }
 
     public function newCriteriaBuilder()
     {
-        
+        return new OrmCriteriaBuilder();
     }
 
 }

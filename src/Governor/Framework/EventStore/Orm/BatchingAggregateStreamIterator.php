@@ -25,6 +25,7 @@
 namespace Governor\Framework\EventStore\Orm;
 
 use Doctrine\ORM\EntityManager;
+use Governor\Framework\Serializer\SerializedDomainEventDataInterface;
 
 /**
  * The BatchingAggregateStreamIterator iterates over the event stream in batches.
@@ -64,8 +65,20 @@ class BatchingAggregateStreamIterator implements \Iterator
      * @var integer
      */
     private $currentBatchSize;
+    
+    /**     
+     * @var \Iterator
+     */
     private $currentBatch;
+    
+    /**     
+     * @var SerializedDomainEventDataInterface
+     */
     private $next;
+    
+    /**     
+     * @var integer
+     */
     private $scn;
 
     public function __construct($firstScn, $id, $typeId, $batchSize,
