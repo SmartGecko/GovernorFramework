@@ -29,7 +29,7 @@ namespace Governor\Framework\EventHandling\Amqp;
  *
  * @author david
  */
-class DefaultAMQPConsumerConfiguration implements AMQPConsumerConfigurationInterface
+class DefaultAmqpConsumerConfiguration implements AmqpConsumerConfigurationInterface
 {
 
     /**     

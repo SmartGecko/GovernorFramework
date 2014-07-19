@@ -31,7 +31,7 @@ namespace Governor\Framework\EventHandling\Amqp;
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class AMQPMessage
+class AmqpMessage
 {
 
     /**

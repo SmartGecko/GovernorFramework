@@ -33,11 +33,11 @@ use Governor\Framework\Serializer\SerializerInterface;
  *
  * @author david
  */
-class DefaultAMQPMessageConverter implements AMQPMessageConverterInterface
+class DefaultAmqpMessageConverter implements AmqpMessageConverterInterface
 {
 
     private $serializer;
-    private $outingKeyResolver;
+    private $routingKeyResolver;
     private $durable;
 
     /**
@@ -59,7 +59,7 @@ class DefaultAMQPMessageConverter implements AMQPMessageConverterInterface
         $this->durable = $durable;
     }
 
-    public function createAMQPMessage(EventMessageInterface $eventMessage)
+    public function createAmqpMessage(EventMessageInterface $eventMessage)
     {
         $writer = new EventMessageWriter($this->serializer);
         
@@ -67,16 +67,16 @@ class DefaultAMQPMessageConverter implements AMQPMessageConverterInterface
         $routingKey = $this->routingKeyResolver->resolveRoutingKey($eventMessage);
 
         if ($this->durable) {
-            return new AMQPMessage($body, $routingKey,
+            return new AmqpMessage($body, $routingKey,
                     array('delivery_mode' => 2), false, false);
         }
 
-        return new AMQPMessage($body, $routingKey);
+        return new AmqpMessage($body, $routingKey);
     }
 
-    public function readAMQPMessage($messageBody, array $headers)
+    public function readAmqpMessage($messageBody, array $headers)
     {
         return null;      
     }
-
+  
 }

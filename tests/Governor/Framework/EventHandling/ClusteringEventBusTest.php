@@ -30,7 +30,8 @@ use Governor\Framework\Domain\GenericEventMessage;
 /**
  * Description of ClusteringEventBusTest
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class ClusteringEventBusTest extends \PHPUnit_Framework_TestCase
 {

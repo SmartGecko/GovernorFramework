@@ -26,6 +26,7 @@ namespace Governor\Framework\EventHandling\Replay;
 
 use Governor\Framework\Annotations\EventHandler;
 use Governor\Framework\Domain\GenericDomainEventMessage;
+use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\EventHandling\Listeners\AnnotatedEventListenerAdapter;
 use Governor\Framework\EventHandling\ClusterInterface;
 use Governor\Framework\EventHandling\ClusteringEventBus;
@@ -37,7 +38,8 @@ use Governor\Framework\EventStore\Orm\Criteria\OrmCriteriaBuilder;
 /**
  * Description of ReplayingClusterTest
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class ReplayingClusterTest extends \PHPUnit_Framework_TestCase
 {
@@ -75,6 +77,8 @@ class ReplayingClusterTest extends \PHPUnit_Framework_TestCase
 
         $this->testSubject = new ReplayingCluster($this->delegateCluster,
                 $this->mockEventStore, $this->mockMessageHandler);
+
+        $this->testSubject->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
 
         for ($i = 0; $i < 10; $i++) {
             $this->messages[] = new GenericDomainEventMessage("id", $i,
@@ -179,14 +183,15 @@ class ReplayingClusterTest extends \PHPUnit_Framework_TestCase
 
         $criteria = $this->testSubject->newCriteriaBuilder()->property("abc")->isNot(false);
         $this->testSubject->startReplay($criteria);
-        
+
         \Phake::inOrder(
                 \Phake::verify($this->mockMessageHandler)->prepareForReplay(\Phake::anyParameters()),
                 \Phake::verify($this->mockEventStore)->visitEvents(\Phake::anyParameters()),
                 \Phake::verify($this->delegateCluster, \Phake::times(10))->publish(\Phake::anyParameters()),
+//                \Phake::verify($this->mockMessageHandler, \Phake::times(10))->releaseMessage(\Phake::anyParameters()),
                 \Phake::verify($this->mockMessageHandler)->processBacklog(\Phake::anyParameters())
         );
-        
+
         /*
           inOrder.verify(mockEventStore).visitEvents(refEq(criteria), isA(EventVisitor.class));
           for (int i = 0; i < 10; i++) {
@@ -196,87 +201,40 @@ class ReplayingClusterTest extends \PHPUnit_Framework_TestCase
           inOrder.verify(mockMessageHandler).processBacklog(delegateCluster); */
     }
 
+    public function testEventReceivedDuringReplay()
+    {
+        $concurrentMessage = new GenericEventMessage(new Payload("Concurrent MSG"));
+        $self = $this;
+
+        \Phake::when($this->mockEventStore)->visitEvents(\Phake::anyParameters())
+                ->thenGetReturnByLambda(function ($visitor, $criteria) use ($concurrentMessage, $self) {
+                    $self->assertTrue($self->testSubject->isInReplayMode());
+                    $self->testSubject->publish(array($concurrentMessage));
+
+                    foreach ($self->messages as $message) {
+                        $visitor->doWithEvent($message);
+                    }
+                });
+      
+        $listener = \Phake::mock(ReplayAwareListenerInterface::class);
+        $this->testSubject->subscribe($listener);
+        $this->testSubject->startReplay();
+
+        \Phake::inOrder(
+                \Phake::verify($this->mockMessageHandler)->prepareForReplay(\Phake::anyParameters()),
+                \Phake::verify($listener)->beforeReplay(),
+                \Phake::verify($this->mockEventStore)->visitEvents(\Phake::anyParameters()),
+                \Phake::verify($this->mockMessageHandler)->onIncomingMessages(\Phake::anyParameters()),
+                \Phake::verify($this->delegateCluster, \Phake::times(10))->publish(\Phake::anyParameters()),
+                \Phake::verify($listener)->afterReplay(),
+                \Phake::verify($this->mockMessageHandler)->processBacklog(\Phake::anyParameters())
+        );
+        
+        \Phake::verify($this->delegateCluster, \Phake::never())->publish($concurrentMessage);
+        \Phake::verify($this->delegateCluster)->subscribe($listener);      
+    }
+
     /*
-
-      @Test
-      public void testTransactionRolledBackOnException() {
-      doAnswer(new Answer() {
-      @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
-      EventVisitor visitor = (EventVisitor) invocation.getArguments()[0];
-      for (DomainEventMessage message : messages) {
-      visitor.doWithEvent(message);
-      }
-      return null;
-      }
-      }).when(mockEventStore).visitEvents(isA(EventVisitor.class));
-
-      final MockException toBeThrown = new MockException();
-      doThrow(toBeThrown).when(delegateCluster).publish(messages.get(5));
-
-      try {
-      testSubject.startReplay();
-      fail("Expected exception");
-      } catch (ReplayFailedException e) {
-      assertSame("Got an exception, but the wrong one", toBeThrown, e.getCause());
-      }
-
-      InOrder inOrder = inOrder(mockEventStore, mockTransactionManager, delegateCluster, mockMessageHandler);
-
-      inOrder.verify(mockMessageHandler).prepareForReplay(isA(Cluster.class));
-      inOrder.verify(mockTransactionManager).startTransaction();
-      inOrder.verify(mockEventStore).visitEvents(isA(EventVisitor.class));
-      for (int i = 0; i < 5; i++) {
-      inOrder.verify(delegateCluster).publish(isA(DomainEventMessage.class));
-      inOrder.verify(mockMessageHandler).releaseMessage(eq(delegateCluster), isA(DomainEventMessage.class));
-      }
-      inOrder.verify(mockMessageHandler).onReplayFailed(delegateCluster, toBeThrown);
-      inOrder.verify(mockTransactionManager).rollbackTransaction(anyObject());
-
-      verify(mockMessageHandler, never()).processBacklog(delegateCluster);
-      assertFalse(testSubject.isInReplayMode());
-      }
-
-      @Test
-      public void testEventReceivedDuringReplay() {
-      final GenericEventMessage<String> concurrentMessage = new GenericEventMessage<String>("Concurrent MSG");
-      doAnswer(new Answer() {
-      @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
-      EventVisitor visitor = (EventVisitor) invocation.getArguments()[0];
-      assertTrue(testSubject.isInReplayMode());
-      testSubject.publish(concurrentMessage);
-      for (DomainEventMessage message : messages) {
-      visitor.doWithEvent(message);
-      }
-      return null;
-      }
-      }).when(mockEventStore).visitEvents(isA(EventVisitor.class));
-
-      final ReplayAwareListener listener = mock(ReplayAwareListener.class);
-      testSubject.subscribe(listener);
-      testSubject.startReplay();
-
-      InOrder inOrder = inOrder(mockEventStore, mockTransactionManager, delegateCluster, mockMessageHandler,
-      listener);
-
-      inOrder.verify(mockMessageHandler).prepareForReplay(isA(Cluster.class));
-      inOrder.verify(mockTransactionManager).startTransaction();
-      inOrder.verify(listener).beforeReplay();
-      inOrder.verify(mockEventStore).visitEvents(isA(EventVisitor.class));
-      inOrder.verify(mockMessageHandler).onIncomingMessages(delegateCluster, concurrentMessage);
-      for (int i = 0; i < 10; i++) {
-      inOrder.verify(delegateCluster).publish(isA(DomainEventMessage.class));
-      inOrder.verify(mockMessageHandler).releaseMessage(eq(delegateCluster), isA(DomainEventMessage.class));
-      }
-      inOrder.verify(listener).afterReplay();
-      inOrder.verify(mockMessageHandler).processBacklog(delegateCluster);
-      inOrder.verify(mockTransactionManager).commitTransaction(anyObject());
-
-      verify(delegateCluster, never()).publish(concurrentMessage);
-      verify(delegateCluster).subscribe(listener);
-      }
-
       @Test
       public void testIntermediateTransactionsCommitted() {
       testSubject = new ReplayingCluster(delegateCluster, mockEventStore, mockTransactionManager, 5,

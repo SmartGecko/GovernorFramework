@@ -22,47 +22,45 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Test\Matchers;
+namespace Governor\Framework\EventHandling\Replay;
 
-use Hamcrest\Matcher;
-use Hamcrest\BaseMatcher;
-use Hamcrest\Description;
-use Governor\Framework\Domain\MessageInterface;
+use Governor\Framework\EventHandling\ClusterInterface;
+use Governor\Framework\Domain\DomainEventMessageInterface;
 
 /**
- * Matcher that matches any message (e.g. Event, Command) who's payload matches the given matcher.
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * Description of DiscardingIncomingMessageHandler
+ *
+ * @author david
  */
-class PayloadMatcher extends BaseMatcher
+class DiscardingIncomingMessageHandler implements IncomingMessageHandlerInterface
 {
 
-    /**     
-     * @var Matcher
-     */
-    private $payloadMatcher;
-
-    /**
-     * Constructs an instance with the given <code>payloadMatcher</code>.
-     *
-     * @param Matcher $payloadMatcher The matcher that must match the Message's payload.
-     */
-    public function __construct(Matcher $payloadMatcher)
+    public function onIncomingMessages(ClusterInterface $destination,
+            array $messages)
     {
-        $this->payloadMatcher = $payloadMatcher;
+        return $messages;
     }
 
-    public function matches($item)
+    public function onReplayFailed(ClusterInterface $destination,
+            \Exception $cause)
     {
-        return $item instanceof MessageInterface && $this->payloadMatcher->matches($item->getPayload());
+        
     }
 
-    public function describeTo(Description $description)
+    public function prepareForReplay(ClusterInterface $destination)
     {
-        $description->appendText("Message with payload <");
-        $this->payloadMatcher->describeTo($description);
-        $description->appendText(">");
+        
+    }
+
+    public function processBacklog(ClusterInterface $destination)
+    {
+        
+    }
+
+    public function releaseMessage(ClusterInterface $destination,
+            DomainEventMessageInterface $message)
+    {
+        return null;
     }
 
 }

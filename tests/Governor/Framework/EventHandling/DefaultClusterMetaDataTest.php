@@ -27,7 +27,8 @@ namespace Governor\Framework\EventHandling;
 /**
  * Description of DefaultClusterMetaDataTest
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class DefaultClusterMetaDataTest extends \PHPUnit_Framework_TestCase
 {

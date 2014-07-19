@@ -32,17 +32,17 @@ use Governor\Framework\Domain\EventMessageInterface;
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface AMQPMessageConverterInterface
+interface AmqpMessageConverterInterface
 {
 
     /**
-     * Creates an AMQPMessage from given <code>eventMessage</code>.
+     * Creates an AmqpMessage from given <code>eventMessage</code>.
      *
      * @param EventMessageInterface $eventMessage The EventMessage to create the AMQP Message from
-     * @return AMQPMessage An AMQP Message containing the data and characteristics of the Message to send to the AMQP Message
+     * @return AmqpMessage An AMQP Message containing the data and characteristics of the Message to send to the AMQP Message
      *         Broker.
      */
-    public function createAMQPMessage(EventMessageInterface $eventMessage);
+    public function createAmqpMessage(EventMessageInterface $eventMessage);
 
     /**
      * Reconstruct an EventMessage from the given <code>messageBody</code> and <code>headers</code>.
@@ -51,5 +51,5 @@ interface AMQPMessageConverterInterface
      * @param array $headers     The headers attached to the AMQP Message
      * @return EventMessageInterface The Event Message to publish on the local clusters
      */
-    public function readAMQPMessage($messageBody, array $headers);
+    public function readAmqpMessage($messageBody, array $headers);
 }

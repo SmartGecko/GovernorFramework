@@ -26,7 +26,7 @@ namespace Governor\Framework\EventHandling\Amqp;
 
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Message\AMQPMessage as RawMessage;
+use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Governor\Framework\Serializer\SerializerInterface;
@@ -42,7 +42,7 @@ use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
+class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
 {
 
     const DEFAULT_EXCHANGE_NAME = "Governor.EventBus";
@@ -93,12 +93,12 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
 
     public function __construct(SerializerInterface $serializer,
             RoutingKeyResolverInterface $routingKeyResolver = null,
-            AMQPMessageConverterInterface $messageConverter = null)
+            AmqpMessageConverterInterface $messageConverter = null)
     {
         $this->serializer = $serializer;
         $this->routingKeyResolver = null === $routingKeyResolver ? new NamespaceRoutingKeyResolver()
                     : $routingKeyResolver;
-        $this->messageConverter = null === $messageConverter ? new DefaultAMQPMessageConverter($this->serializer,
+        $this->messageConverter = null === $messageConverter ? new DefaultAmqpMessageConverter($this->serializer,
                 $this->routingKeyResolver, $this->isDurable) : $messageConverter;
     }
 
@@ -116,18 +116,18 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * overridden to change the properties used to send a message.
      *
      * @param AMQPChannel $channel     The channel to dispatch the message on
-     * @param AMQPMessage $amqpMessage The AMQPMessage describing the characteristics of the message to publish     
+     * @param AmqpMessage $amqpMessage The AMQPMessage describing the characteristics of the message to publish     
      */
     protected function doSendMessage(AMQPChannel $channel,
-            AMQPMessage $amqpMessage)
+            AmqpMessage $amqpMessage)
     {
-        $rawMessage = new RawMessage($amqpMessage->getBody(),
+        $rawMessage = new AMQPMessage($amqpMessage->getBody(),
                 $amqpMessage->getProperties());
-        
-        $this->logger->debug("Publishing message to {exchange} with routing key {key}", 
+
+        $this->logger->debug("Publishing message to {exchange} with routing key {key}",
                 array(
-                    'exchange' => $this->exchangeName,
-                    'key' => $amqpMessage->getRoutingKey()
+            'exchange' => $this->exchangeName,
+            'key' => $amqpMessage->getRoutingKey()
         ));
 
         $channel->basic_publish($rawMessage, $this->exchangeName,
@@ -226,31 +226,22 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * #setMessageConverter(org.axonframework.eventhandling.amqp.AMQPMessageConverter) MessageConverter} is provided.
      * In that case, the message converter must add the properties to reflect the required durability setting.
      *
-     * @param durable whether or not messages should be durable
+     * @param boolean $durable whether or not messages should be durable
      */
-    //  public void setDurable(boolean durable) {
-    //       isDurable = durable;
-    //   }
-
+    public function setDurable($durable)
+    {
+        $this->isDurable = $durable;
+    }
 
     /**
      * Sets the name of the exchange to dispatch published messages to. Defaults to "{@value #DEFAULT_EXCHANGE_NAME}".
      *
-     * @param exchangeName the name of the exchange to dispatch messages to
+     * @param string $exchangeName the name of the exchange to dispatch messages to
      */
-    //   public void setExchangeName(String exchangeName) {
-    //       this.exchangeName = exchangeName;
-    //  }
-
-    /**
-     * Sets the name of the exchange to dispatch published messages to. Defaults to the exchange named "{@value
-     * #DEFAULT_EXCHANGE_NAME}".
-     *
-     * @param exchange the exchange to dispatch messages to
-     */
-//    public void setExchange(Exchange exchange) {
-//        this.exchangeName = exchange.getName();
-    //  }
+    public function setExchangeName($exchangeName)
+    {
+        $this->exchangeName = $exchangeName;
+    }
 
     /**
      * Sets the ListenerContainerLifecycleManager that creates and manages the lifecycle of Listener Containers for the
@@ -272,10 +263,10 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     {
         $clusterMetaData = $cluster->getMetaData();
 
-        if ($clusterMetaData->getProperty(AMQPConsumerConfigurationInterface::AMQP_CONFIG_PROPERTY) instanceof AMQPConsumerConfigurationInterface) {
-            $config = $clusterMetaData->getProperty(AMQPConsumerConfigurationInterface::AMQP_CONFIG_PROPERTY);
+        if ($clusterMetaData->getProperty(AmqpConsumerConfigurationInterface::AMQP_CONFIG_PROPERTY) instanceof AmqpConsumerConfigurationInterface) {
+            $config = $clusterMetaData->getProperty(AmqpConsumerConfigurationInterface::AMQP_CONFIG_PROPERTY);
         } else {
-            $config = new DefaultAMQPConsumerConfiguration($cluster->getName());
+            $config = new DefaultAmqpConsumerConfiguration($cluster->getName());
         }
 
         $this->clusters[] = $cluster;
@@ -287,7 +278,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
         if (null === $this->connection) {
             throw new \RuntimeException("The AMQPTerminal has no connection configured.");
         }
-        
+
         $channel = $this->connection->channel();
 
         foreach ($this->clusters as $cluster) {
@@ -299,7 +290,7 @@ class AMQPTerminal implements EventBusTerminalInterface, LoggerAwareInterface
                 $channel->confirm_select();
             }
             foreach ($events as $event) {
-                $amqpMessage = $this->messageConverter->createAMQPMessage($event);
+                $amqpMessage = $this->messageConverter->createAmqpPMessage($event);
                 $this->doSendMessage($channel, $amqpMessage);
             }
             if (CurrentUnitOfWork::isStarted()) {
@@ -363,7 +354,8 @@ class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
             } catch (\Exception $ex) {
                 //logger.warn("Unable to commit transaction on channel.");             
             }
-            $terminal->tryClose($channel);
+
+            //$terminal->tryClose($channel);
         }
     }
 
@@ -388,6 +380,8 @@ class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
           }
           tryClose(channel);
           isOpen = false; */
+
+        $this->isOpen = false;
     }
 
 }

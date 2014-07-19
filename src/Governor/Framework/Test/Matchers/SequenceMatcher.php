@@ -32,8 +32,11 @@ use Hamcrest\Description;
  * matcher matched.
  * <p/>
  * If the number of items is larger than the number of matchers, the excess items are not evaluated. Use {@link
- * Matchers#exactSequenceOf(org.hamcrest.Matcher[])} to match the sequence exactly. If the last item of the list
+ * Matchers#exactSequenceOf(Hamcrest\Matcher[])} to match the sequence exactly. If the last item of the list
  * has been evaluated, and Matchers still remain, they are evaluated against a <code>null</code> value.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class SequenceMatcher extends ListMatcher
 {

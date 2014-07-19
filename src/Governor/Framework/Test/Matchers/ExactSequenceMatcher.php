@@ -32,8 +32,11 @@ use Hamcrest\Description;
  * and so forth.
  * <p/>
  * If the number of Events is larger than the number of matchers, the excess events are not evaluated. Use {@link
- * Matchers#exactSequenceOf(org.hamcrest.Matcher[])} to match the sequence exactly. If there are more matchers
+ * Matchers#exactSequenceOf(Hamcrest\Matcher[])} to match the sequence exactly. If there are more matchers
  * than Events, the remainder of matchers is evaluated against a <code>null</code> value.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class ExactSequenceMatcher extends ListMatcher
 {
