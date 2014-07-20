@@ -47,7 +47,7 @@
         <parameter key="governor.resource_injector.container.class">Governor\Framework\Saga\ContainerAwareResourceInjector</parameter>
 
         <!-- AMQP terminal -->
-        <parameter key="governor.event_bus_terminal.amqp.class">Governor\Framework\EventHandling\Amqp\AMQPTerminal</parameter>
+        <parameter key="governor.event_bus_terminal.amqp.class">Governor\Framework\EventHandling\Amqp\AmqpTerminal</parameter>
         <parameter key="governor.amqp_terminal.connection.class">PhpAmqpLib\Connection\AMQPConnection</parameter>
         
         <!-- command interceptors -->
