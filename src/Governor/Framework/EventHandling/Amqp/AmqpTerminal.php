@@ -33,8 +33,6 @@ use Governor\Framework\Serializer\SerializerInterface;
 use Governor\Framework\EventHandling\ClusterInterface;
 use Governor\Framework\EventHandling\EventBusTerminalInterface;
 use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
-use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
-use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 
 /**
  * Implementation of the {@see EventBusTerminalInterface} supporting the AMQP protocol.
@@ -333,104 +331,6 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
-    }
-
-}
-
-class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
-{
-
-    /**
-     * @var AMQPChannel 
-     */
-    private $channel;
-    
-    /**
-     * @var AmqpTerminal 
-     */
-    private $terminal;
-    
-    /**
-     * @var LoggerInterface 
-     */
-    private $logger;
-
-    public function __construct(LoggerInterface $logger, AMQPChannel $channel,
-            AmqpTerminal $terminal)
-    {
-        $this->logger = $logger;
-        $this->channel = $channel;
-        $this->terminal = $terminal;
-        $this->isOpen = true;
-    }
-
-    private function getTerminalProperty($propertyName)
-    {
-        $reflClass = new \ReflectionClass($this->terminal);
-        $property = $reflClass->getProperty($propertyName);
-        $property->setAccessible(true);
-
-        return $property->getValue($this->terminal);
-    }
-
-    private function closeTerminal()
-    {
-        $reflClass = new \ReflectionClass($this->terminal);
-        $method = $reflClass->getMethod('tryClose');
-        $method->setAccessible(true);
-
-        $method->invoke($this->terminal, $this->channel);
-    }
-
-    public function onPrepareTransactionCommit(UnitOfWorkInterface $unitOfWork,
-            $transaction)
-    {        
-        if (($this->getTerminalProperty('isTransactional') || $this->getTerminalProperty('waitForAck'))
-                && !$this->isOpen) { //&& !$this->channel->()) {
-            throw new EventPublicationFailedException(
-            "Unable to Commit UnitOfWork changes to AMQP: Channel is closed.");
-        }
-    }
-
-    public function afterCommit(UnitOfWorkInterface $unitOfWork)
-    {
-        if ($this->isOpen) {
-            try {
-                if ($this->getTerminalProperty('isTransactional')) {
-                    $this->channel->tx_commit();
-                } else if ($this->getTerminalProperty('waitForAck')) {
-                    $this->waitForConfirmations();
-                }
-            } catch (\Exception $ex) {
-                $this->logger->warn("Unable to commit transaction on channel.");
-            }
-            $this->closeTerminal();
-        }
-    }
-
-    private function waitForConfirmations()
-    {
-        try {            
-            $this->channel->wait_for_pending_acks($this->getTerminalProperty('publisherAckTimeout'));
-        } catch (\Exception $ex) {
-            throw new EventPublicationFailedException("Failed to receive acknowledgements for all events");
-        }
-    }
-
-    public function onRollback(UnitOfWorkInterface $unitOfWork,
-            \Exception $failureCause = null)
-    {
-        try {
-            if ($this->getTerminalProperty('isTransactional')) {
-                $this->channel->tx_rollback();
-            }
-        } catch (\Exception $ex) {
-            $this->logger->warn("Unable to rollback transaction on channel.",
-                    $ex);
-        }
-
-        $this->closeTerminal();
-        $this->isOpen = false;
     }
 
 }
