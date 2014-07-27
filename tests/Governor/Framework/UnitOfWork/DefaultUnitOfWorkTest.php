@@ -1,14 +1,33 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\UnitOfWork;
 
 use Governor\Framework\Domain\GenericEventMessage;
+use Governor\Framework\EventHandling\EventListenerInterface;
+use Governor\Framework\Domain\AggregateRootInterface;
+use Governor\Framework\EventHandling\EventBusInterface;
 
 /**
  * Description of DefaultUnitOfWorkTest
@@ -37,12 +56,11 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->event1 = new GenericEventMessage(new TestMessage(1));
         $this->event2 = new GenericEventMessage(new TestMessage(1));
 
-        $this->mockLogger = $this->getMock(\Psr\Log\LoggerInterface::class);
-        $this->testSubject = new DefaultUnitOfWork($this->mockLogger);
-        $this->mockEventBus = $this->getMock(\Governor\Framework\EventHandling\EventBusInterface::class);
-        $this->mockAggregateRoot = $this->getMock(\Governor\Framework\Domain\AggregateRootInterface::class);
-        $this->listener1 = $this->getMock(\Governor\Framework\EventHandling\EventListenerInterface::class);
-        $this->listener2 = $this->getMock(\Governor\Framework\EventHandling\EventListenerInterface::class);
+        $this->testSubject = new DefaultUnitOfWork();
+        $this->mockEventBus = $this->getMock(EventBusInterface::class);
+        $this->mockAggregateRoot = $this->getMock(AggregateRootInterface::class);
+        $this->listener1 = $this->getMock(EventListenerInterface::class);
+        $this->listener2 = $this->getMock(EventListenerInterface::class);
         $this->callback = $this->getMock(SaveAggregateCallbackInterface::class);
         /*
 
@@ -65,48 +83,52 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
                 "A UnitOfWork was not properly cleared");
     }
 
-    /*
-      @SuppressWarnings("unchecked")
-      @Test
-      public void testTransactionBoundUnitOfWorkLifecycle() {
-      UnitOfWorkListener mockListener = mock(UnitOfWorkListener.class);
-      TransactionManager<Object> mockTransactionManager = mock(TransactionManager.class);
-      when(mockTransactionManager.startTransaction()).thenReturn(new Object());
-      UnitOfWork uow = DefaultUnitOfWork.startAndGet(mockTransactionManager);
-      uow.registerListener(mockListener);
-      verify(mockTransactionManager).startTransaction();
-      verifyZeroInteractions(mockListener);
+    public function testTransactionBoundUnitOfWorkLifecycle()
+    {
+        $mockListener = \Phake::mock(UnitOfWorkListenerInterface::class);
+        $mockTransactionManager = \Phake::mock(TransactionManagerInterface::class);
 
-      uow.commit();
+        \Phake::when($mockTransactionManager)->startTransaction()->thenReturn(new \stdClass());
 
-      InOrder inOrder = inOrder(mockListener, mockTransactionManager);
-      inOrder.verify(mockListener).onPrepareCommit(eq(uow), anySet(), anyList());
-      inOrder.verify(mockListener).onPrepareTransactionCommit(eq(uow), any());
-      inOrder.verify(mockTransactionManager).commitTransaction(any());
-      inOrder.verify(mockListener).afterCommit(eq(uow));
-      inOrder.verify(mockListener).onCleanup(uow);
-      verifyNoMoreInteractions(mockListener, mockTransactionManager);
-      }
+        $uow = DefaultUnitOfWork::startAndGet($mockTransactionManager);
+        $uow->registerListener($mockListener);
 
-      @SuppressWarnings("unchecked")
-      @Test
-      public void testTransactionBoundUnitOfWorkLifecycle_Rollback() {
-      UnitOfWorkListener mockListener = mock(UnitOfWorkListener.class);
-      TransactionManager<Object> mockTransactionManager = mock(TransactionManager.class);
-      when(mockTransactionManager.startTransaction()).thenReturn(new Object());
-      UnitOfWork uow = DefaultUnitOfWork.startAndGet(mockTransactionManager);
-      uow.registerListener(mockListener);
-      verify(mockTransactionManager).startTransaction();
-      verifyZeroInteractions(mockListener);
+        \Phake::verify($mockTransactionManager)->startTransaction();
+        \Phake::verifyNoInteraction($mockListener);
 
-      uow.rollback();
+        $uow->commit();
 
-      InOrder inOrder = inOrder(mockListener, mockTransactionManager);
-      inOrder.verify(mockTransactionManager).rollbackTransaction(any());
-      inOrder.verify(mockListener).onRollback(eq(uow), any(Throwable.class));
-      inOrder.verify(mockListener).onCleanup(uow);
-      verifyNoMoreInteractions(mockListener, mockTransactionManager);
-      } */
+        \Phake::inOrder(
+                \Phake::verify($mockListener)->onPrepareCommit(\Phake::anyParameters()),
+                \Phake::verify($mockListener)->onPrepareTransactionCommit(\Phake::equalTo($uow),
+                        \Phake::anyParameters()),
+                \Phake::verify($mockTransactionManager)->commitTransaction(\Phake::anyParameters()),
+                \Phake::verify($mockListener)->afterCommit(\Phake::equalTo($uow)),
+                \Phake::verify($mockListener)->onCleanup(\Phake::equalTo($uow))
+        );
+    }
+
+    public function testTransactionBoundUnitOfWorkLifecycle_Rollback()
+    {
+        $mockListener = \Phake::mock(UnitOfWorkListenerInterface::class);
+        $mockTransactionManager = \Phake::mock(TransactionManagerInterface::class);
+
+        \Phake::when($mockTransactionManager)->startTransaction()->thenReturn(new \stdClass());
+
+        $uow = DefaultUnitOfWork::startAndGet($mockTransactionManager);
+        $uow->registerListener($mockListener);
+
+        \Phake::verify($mockTransactionManager)->startTransaction();
+        \Phake::verifyNoInteraction($mockListener);
+
+        $uow->rollback();
+
+        \Phake::inOrder(
+                \Phake::verify($mockTransactionManager)->rollbackTransaction(\Phake::anyParameters()),
+                \Phake::verify($mockListener)->onRollback(\Phake::anyParameters()),
+                \Phake::verify($mockListener)->onCleanup(\Phake::equalTo($uow))
+        );
+    }
 
     public function testUnitOfWorkRegistersListenerWithParent()
     {

@@ -27,7 +27,8 @@ namespace Governor\Framework\EventHandling;
 /**
  * Description of SimpleCluster
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class SimpleCluster extends AbstractCluster
 {
@@ -39,17 +40,17 @@ class SimpleCluster extends AbstractCluster
     }
 
     protected function doPublish(array $events, array $eventListeners)
-    {
+    {        
         try {
             foreach ($events as $event) {
-                foreach ($eventListeners as $listener) {
-                    $this->logger->debug("Dispatching Event {event} to EventListener {listener}",
+                $this->logger->debug("Dispatching Event {event} to {count} listeners",
                             array(
                                 "event" => $event->getPayloadType(), 
-                                "listener" => $this->getClassName($listener)
+                                "count" => count($eventListeners)
                             )
                         );
                     
+                foreach ($eventListeners as $listener) {                    
                     $listener->handle($event);
                 }
             }

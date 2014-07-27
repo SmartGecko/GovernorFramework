@@ -98,7 +98,7 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
     {        
         $this->incomingMessageHandler->prepareForReplay($this->delegate);        
         $this->status = self::STATUS_REPLAYING;
-        $visitor = new ReplayingEventVisitor($this->delegate);
+        $visitor = new ReplayingEventVisitor($this->delegate, $this->logger);
                     
         foreach ($this->replayAwareListeners as $replayAwareListener) {            
             $replayAwareListener->beforeReplay();

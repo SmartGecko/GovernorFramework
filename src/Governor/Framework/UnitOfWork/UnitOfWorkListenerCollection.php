@@ -51,7 +51,7 @@ class UnitOfWorkListenerCollection implements UnitOfWorkListenerInterface
 
     public function onPrepareCommit(UnitOfWorkInterface $unitOfWork,
         array $aggregateRoots, array $events)
-    {
+    {        
         foreach ($this->listeners as $listener) {
             $listener->onPrepareCommit($unitOfWork, $aggregateRoots, $events);
         }

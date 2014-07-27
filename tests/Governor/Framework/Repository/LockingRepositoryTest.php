@@ -25,12 +25,10 @@ class LockingRepositoryTest extends \PHPUnit_Framework_TestCase
 
     private $testSubject;
     private $mockEventBus;
-    private $mockLogger;
     private $lockManager;
 
     public function setUp()
     {
-        $this->mockLogger = $this->getMock(\Psr\Log\LoggerInterface::class);
         $this->mockEventBus = $this->getMock('Governor\Framework\EventHandling\EventBusInterface');
         $this->lockManager = $this->getMock('Governor\Framework\Repository\NullLockManager'); // new NullLockManager(); //spy(new OptimisticLockManager());        
 
@@ -50,7 +48,7 @@ class LockingRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testStoreNewAggregate()
     {
-        DefaultUnitOfWork::startAndGet($this->mockLogger);
+        DefaultUnitOfWork::startAndGet();
         $aggregate = new StubAggregate();
         $aggregate->doSomething();
 
@@ -66,7 +64,7 @@ class LockingRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadAndStoreAggregate()
     {
-        DefaultUnitOfWork::startAndGet($this->mockLogger);
+        DefaultUnitOfWork::startAndGet();
         $aggregate = new StubAggregate();
         $aggregate->doSomething();
 
@@ -82,7 +80,7 @@ class LockingRepositoryTest extends \PHPUnit_Framework_TestCase
 
         CurrentUnitOfWork::commit();
 
-        DefaultUnitOfWork::startAndGet($this->mockLogger);
+        DefaultUnitOfWork::startAndGet();
         $loadedAggregate = $this->testSubject->load($aggregate->getIdentifier(),
             0);
         //verify(lockManager).obtainLock(aggregate.getIdentifier());

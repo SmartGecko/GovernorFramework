@@ -80,7 +80,9 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     {
         $this->logger->debug("Dispatching command [{name}]",
                 array('name' => $command->getCommandName()));
-        $unitOfWork = DefaultUnitOfWork::startAndGet($this->logger);
+        $unitOfWork = DefaultUnitOfWork::startAndGet();
+        $unitOfWork->setLogger($this->logger);
+        
         $chain = new DefaultInterceptorChain($command, $unitOfWork, $handler,
                 $this->handlerInterceptors);
 

@@ -39,7 +39,7 @@ class GenericOrmRepositoryTest extends \PHPUnit_Framework_TestCase
 
         $this->aggregateId = "123";
         $this->aggregate = new StubDoctrineAggregate($this->aggregateId);
-        DefaultUnitOfWork::startAndGet($this->getMock('Psr\Log\LoggerInterface'));
+        DefaultUnitOfWork::startAndGet();
     }
 
     public function tearDown()

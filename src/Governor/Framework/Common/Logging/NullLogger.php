@@ -22,21 +22,62 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\UnitOfWork;
+namespace Governor\Framework\Common\Logging;
 
-use Governor\Framework\Domain\AggregateRootInterface;
+use Psr\Log\LoggerInterface;
 
 /**
+ * Null object implementation of the LoggerInterface.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface SaveAggregateCallbackInterface
+class NullLogger implements LoggerInterface
 {
 
-    /**
-     * 
-     * @param AggregateRootInterface $aggregate
-     */
-    public function save(AggregateRootInterface $aggregate);
+    public function alert($message, array $context = array())
+    {
+        
+    }
+
+    public function critical($message, array $context = array())
+    {
+        
+    }
+
+    public function debug($message, array $context = array())
+    {
+        
+    }
+
+    public function emergency($message, array $context = array())
+    {
+        
+    }
+
+    public function error($message, array $context = array())
+    {
+        
+    }
+
+    public function info($message, array $context = array())
+    {
+        
+    }
+
+    public function log($level, $message, array $context = array())
+    {
+        
+    }
+
+    public function notice($message, array $context = array())
+    {
+        
+    }
+
+    public function warning($message, array $context = array())
+    {
+        
+    }
+
 }

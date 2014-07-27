@@ -24,7 +24,6 @@
 
 namespace Governor\Framework\UnitOfWork;
 
-use Psr\Log\LoggerInterface;
 use Governor\Framework\Domain\AggregateRootInterface;
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\Domain\EventMessageInterface;
@@ -59,32 +58,44 @@ class DefaultUnitOfWork extends NestableUnitOfWork
      */
     private $dispatcherStatus;
 
+    /**
+     * @var TransactionManagerInterface 
+     */
+    private $transactionManager;
+
+    /**
+     * @var mixed
+     */
+    private $transaction;
+
     const STATUS_READY = 0;
     const STATUS_DISPATCHING = 1;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(TransactionManagerInterface $transactionManager = null)
     {
+        parent::__construct();
+
         $this->listeners = new UnitOfWorkListenerCollection();
         $this->eventsToPublish = new \SplObjectStorage();
         $this->dispatcherStatus = self::STATUS_READY;
-        $this->logger = $logger;
+        $this->transactionManager = $transactionManager;
     }
 
     /**
      * 
-     * @param LoggerInterface $logger
+     * @param TransactionManagerInterface $transactionManager
      * @return UnitOfWorkInterface
      */
-    public static function startAndGet(LoggerInterface $logger)
+    public static function startAndGet(TransactionManagerInterface $transactionManager = null)
     {
-        $uow = new DefaultUnitOfWork($logger);
+        $uow = new DefaultUnitOfWork($transactionManager);
         $uow->start();
         return $uow;
     }
 
     public function isTransactional()
     {
-        return false;
+        return null !== $this->transactionManager;
     }
 
     protected function doCommit()
@@ -94,8 +105,9 @@ class DefaultUnitOfWork extends NestableUnitOfWork
 
         if ($this->isTransactional()) {
             $this->notifyListenersPrepareTransactionCommit(null);
+            $this->transactionManager->commitTransaction($this->transaction);
         }
-        
+
         $this->notifyListenersAfterCommit();
     }
 
@@ -104,7 +116,13 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         $this->registeredAggregates = array();
         $this->eventsToPublish = new \SplObjectStorage();
 
-        $this->notifyListenersRollback($ex);
+        try {
+            if (null !== $this->transaction) {
+                $this->transactionManager->rollbackTransaction($this->transaction);
+            }
+        } finally {
+            $this->notifyListenersRollback($ex);
+        }
     }
 
     protected function notifyListenersRollback(\Exception $ex = null)
@@ -225,7 +243,9 @@ class DefaultUnitOfWork extends NestableUnitOfWork
 
     protected function doStart()
     {
-        
+        if ($this->isTransactional()) {
+            $this->transaction = $this->transactionManager->startTransaction();
+        }
     }
 
     protected function notifyListenersPrepareCommit()

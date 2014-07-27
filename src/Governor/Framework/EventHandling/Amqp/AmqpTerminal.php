@@ -46,7 +46,7 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     const DEFAULT_EXCHANGE_NAME = "Governor.EventBus";
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     private $logger;
 
@@ -195,13 +195,16 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * See <a href="http://www.rabbitmq.com/confirms.html">RabbitMQ Documentation</a> for more information about
      * publisher acknowledgements.
      *
-     * @param waitForPublisherAck whether or not to enab;e server acknowledgements (confirms)
+     * @param boolean waitForPublisherAck whether or not to enab;e server acknowledgements (confirms)
      */
-    /*  public void setWaitForPublisherAck(boolean waitForPublisherAck) {
-      Assert.isTrue(!waitForPublisherAck || !isTransactional,
-      "Cannot set 'waitForPublisherAck' when using transactions.");
-      this.waitForAck = waitForPublisherAck;
-      } */
+    public function setWaitForPublisherAck($waitForPublisherAck)
+    {
+        if (!$waitForPublisherAck || !$this->isTransactional) {
+            $this->waitForAck = $waitForPublisherAck;
+        } else {
+            throw new \LogicException("Cannot set 'waitForPublisherAck' when using transactions.");
+        }
+    }
 
     /**
      * Sets the maximum amount of time (in milliseconds) the publisher may wait for the acknowledgement of published
@@ -210,11 +213,12 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * <p/>
      * This setting is only used when {@link #setWaitForPublisherAck(boolean)} is set to <code>true</code>.
      *
-     * @param publisherAckTimeout The number of milliseconds to wait for confirms, or 0 to wait indefinitely.
+     * @param integer publisherAckTimeout The number of milliseconds to wait for confirms, or 0 to wait indefinitely.
      */
-    //   public void setPublisherAckTimeout(long publisherAckTimeout) {
-    //       this.publisherAckTimeout = publisherAckTimeout;
-    //   }  
+    public function setPublisherAckTimeout($publisherAckTimeout)
+    {
+        $this->publisherAckTimeout = $publisherAckTimeout;
+    }
 
     /**
      * Sets the Message Converter that creates AMQP Messages from Event Messages and vice versa. Setting this property
@@ -293,6 +297,10 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
         }
 
         $channel = $this->connection->channel();
+
+        if ($this->isTransactional) {
+            $channel->tx_select();
+        }
 
         foreach ($this->clusters as $cluster) {
             $cluster->publish($events);

@@ -24,19 +24,37 @@
 
 namespace Governor\Framework\UnitOfWork;
 
-use Governor\Framework\Domain\AggregateRootInterface;
-
 /**
- *
+ * Interface towards a mechanism that manages transactions
+ * <p/>
+ * Typically, this will involve opening database transactions or connecting to external systems.
+ * 
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-interface SaveAggregateCallbackInterface
+interface TransactionManagerInterface
 {
+    /**
+     * Starts a transaction. The return value is an object representing the transaction status and must be passed as an
+     * argument when invoking {@link #commitTransaction(Object)} or {@link #rollbackTransaction(Object)}.
+     * <p/>
+     * The returned object must never be <code>null</code> if a transaction was successfully created.
+     *
+     * @return mixed The object representing the transaction status
+     */
+    public function startTransaction();
 
     /**
-     * 
-     * @param AggregateRootInterface $aggregate
+     * Commits the transaction identifier by given <code>transactionStatus</code>.
+     *
+     * @param mixed $transactionStatus The status object provided by {@link #startTransaction()}.
      */
-    public function save(AggregateRootInterface $aggregate);
+    public function commitTransaction($transactionStatus);
+
+    /**
+     * Rolls back the transaction identifier by given <code>transactionStatus</code>.
+     *
+     * @param mixed $transactionStatus The status object provided by {@link #startTransaction()}.
+     */
+    public function rollbackTransaction($transactionStatus);
 }

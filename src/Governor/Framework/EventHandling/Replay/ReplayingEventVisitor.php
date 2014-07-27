@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventHandling\Replay;
 
+use Psr\Log\LoggerInterface;
 use Governor\Framework\EventHandling\ClusterInterface;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\EventStore\EventVisitorInterface;
@@ -42,13 +43,22 @@ class ReplayingEventVisitor implements EventVisitorInterface
      */
     private $delegate;
 
-    function __construct(ClusterInterface $delegate)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    function __construct(ClusterInterface $delegate, LoggerInterface $logger)
     {
         $this->delegate = $delegate;
+        $this->logger = $logger;
     }
 
     public function doWithEvent(DomainEventMessageInterface $domainEvent)
     {
+    /*    $this->logger->debug(sprintf("Visiting event %s with payload %s",
+                        $domainEvent->getIdentifier(),
+                        $domainEvent->getPayloadType()));*/
         $this->delegate->publish(array($domainEvent));
     }
 

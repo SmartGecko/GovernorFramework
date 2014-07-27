@@ -28,10 +28,12 @@ use Psr\Log\LoggerInterface;
 use PhpAmqpLib\Channel\AMQPChannel;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
+
 /**
  * Description of ChannelTransactionUnitOfWorkListener
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
 {
@@ -88,7 +90,7 @@ class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
             $transaction)
     {
         if (($this->getTerminalProperty('isTransactional') || $this->getTerminalProperty('waitForAck'))
-                && !$this->isOpen) { //&& !$this->channel->()) {
+                && $this->isOpen && null === $this->channel->getChannelId()) {
             throw new EventPublicationFailedException(
             "Unable to Commit UnitOfWork changes to AMQP: Channel is closed.");
         }

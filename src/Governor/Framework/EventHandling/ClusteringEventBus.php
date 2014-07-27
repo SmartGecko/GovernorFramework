@@ -68,7 +68,7 @@ class ClusteringEventBus implements EventBusInterface, LoggerAwareInterface
     }
 
     public function publish(array $events)
-    {
+    {        
         $this->terminal->publish($events);
     }
 

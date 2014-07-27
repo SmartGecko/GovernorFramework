@@ -24,19 +24,26 @@
 
 namespace Governor\Framework\UnitOfWork;
 
-use Governor\Framework\Domain\AggregateRootInterface;
-
 /**
+ * Description of NullTransactionManager
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-interface SaveAggregateCallbackInterface
+class NullTransactionManager implements TransactionManagerInterface
 {
+    public function commitTransaction($transactionStatus)
+    {
+        
+    }
 
-    /**
-     * 
-     * @param AggregateRootInterface $aggregate
-     */
-    public function save(AggregateRootInterface $aggregate);
+    public function rollbackTransaction($transactionStatus)
+    {
+        
+    }
+
+    public function startTransaction()
+    {
+        return "no transaction";
+    }
+
 }
