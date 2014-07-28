@@ -35,6 +35,7 @@ use Governor\Framework\Saga\AssociationValue;
 use Governor\Framework\Saga\SagaInterface;
 use Governor\Framework\Serializer\SerializerInterface;
 use Governor\Framework\Serializer\SimpleSerializedType;
+use Governor\Framework\Common\Logging\NullLogger;
 
 /**
  * Description of OrmSagaRepository
@@ -86,6 +87,8 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
         $this->injector = $injector;
         $this->serializer = $serializer;
         $this->useExplicitFlush = $useExplicitFlush;
+        
+        $this->logger = new NullLogger();
     }
 
     public function load($sagaId)
@@ -115,7 +118,7 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
 
     protected function removeAssociationValue(AssociationValue $associationValue,
             $sagaType, $sagaIdentifier)
-    {
+    {        
         $updateCount = $this->entityManager->createQuery("DELETE FROM " . 
                                 " Governor\Framework\Saga\Repository\Orm\AssociationValueEntry ae " .
                                 "WHERE ae.associationKey = :associationKey " .

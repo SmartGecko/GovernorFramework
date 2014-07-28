@@ -57,11 +57,11 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->event2 = new GenericEventMessage(new TestMessage(1));
 
         $this->testSubject = new DefaultUnitOfWork();
-        $this->mockEventBus = $this->getMock(EventBusInterface::class);
-        $this->mockAggregateRoot = $this->getMock(AggregateRootInterface::class);
-        $this->listener1 = $this->getMock(EventListenerInterface::class);
-        $this->listener2 = $this->getMock(EventListenerInterface::class);
-        $this->callback = $this->getMock(SaveAggregateCallbackInterface::class);
+        $this->mockEventBus = \Phake::mock(EventBusInterface::class);
+        $this->mockAggregateRoot = \Phake::mock(AggregateRootInterface::class);
+        $this->listener1 = \Phake::mock(EventListenerInterface::class);
+        $this->listener2 = \Phake::mock(EventListenerInterface::class);
+        $this->callback = \Phake::mock(SaveAggregateCallbackInterface::class);
         /*
 
           callback = mock(SaveAggregateCallback.class);
@@ -132,23 +132,21 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
     public function testUnitOfWorkRegistersListenerWithParent()
     {
-        $parentUoW = $this->getMock(UnitOfWorkInterface::class);
-        $parentUoW->expects($this->once())
-                ->method('registerListener')
-                ->with($this->anything());
-
+        $parentUoW = \Phake::mock(UnitOfWorkInterface::class);
         CurrentUnitOfWork::set($parentUoW);
-        $innerUow = DefaultUnitOfWork::startAndGet($this->mockLogger);
+        $innerUow = DefaultUnitOfWork::startAndGet();
         $innerUow->rollback();
         $parentUoW->rollback();
         CurrentUnitOfWork::clear($parentUoW);
+
+        \Phake::verify($parentUoW)->registerListener(\Phake::anyParameters()); //UnitOfWorkListener       
     }
 
     public function testInnerUnitOfWorkRolledBackWithOuter()
     {
         $isRolledBack = false;
-        $outer = DefaultUnitOfWork::startAndGet($this->mockLogger);
-        $inner = DefaultUnitOfWork::startAndGet($this->mockLogger);
+        $outer = DefaultUnitOfWork::startAndGet();
+        $inner = DefaultUnitOfWork::startAndGet();
 
         $inner->registerListener(new RollbackTestAdapter(function (UnitOfWorkInterface $uow, \Exception $ex = null) use (&$isRolledBack) {
             $isRolledBack = true;
@@ -167,8 +165,8 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
     public function testInnerUnitOfWorkCommittedBackWithOuter()
     {
         $isCommitted = false;
-        $outer = DefaultUnitOfWork::startAndGet($this->mockLogger);
-        $inner = DefaultUnitOfWork::startAndGet($this->mockLogger);
+        $outer = DefaultUnitOfWork::startAndGet();
+        $inner = DefaultUnitOfWork::startAndGet();
 
         $inner->registerListener(new AfterCommitTestAdapter(function (UnitOfWorkInterface $uow) use (&$isCommitted) {
             $isCommitted = true;
@@ -216,25 +214,8 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
     public function testUnitOfWorkRolledBackOnCommitFailure_ErrorOnPrepareCommit()
     {
-        $mockListener = $this->getMock(UnitOfWorkListenerInterface::class);
-        $mockListener->expects($this->once())
-                ->method('onPrepareCommit')
-                ->with($this->anything(), $this->anything(), $this->anything())
-                ->will($this->throwException(new \RuntimeException('phpunit')));
-
-        $mockListener->expects($this->once())
-                ->method('onRollback')
-                ->with($this->anything(),
-                        $this->callback(function ($subject) {
-                            return $subject instanceof \RuntimeException;
-                        }));
-
-        $mockListener->expects($this->never())
-                ->method('afterCommit');
-
-        $mockListener->expects($this->once())
-                ->method('onCleanup')
-                ->with($this->anything());
+        $mockListener = \Phake::mock(UnitOfWorkListenerInterface::class);
+        \Phake::when($mockListener)->onPrepareCommit(\Phake::anyParameters())->thenThrow(new \RuntimeException('phpunit'));
 
         $this->testSubject->registerListener($mockListener);
         $this->testSubject->start();
@@ -246,35 +227,16 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
             $this->assertInstanceOf('\RuntimeException', $ex);
             $this->assertEquals('phpunit', $ex->getMessage());
         }
+
+        \Phake::verify($mockListener)->onRollback(\Phake::anyParameters());
+        \Phake::verify($mockListener, \Phake::never())->afterCommit(\Phake::anyParameters());
+        \Phake::verify($mockListener)->onCleanup(\Phake::anyParameters());
     }
 
     public function testUnitOfWorkRolledBackOnCommitFailure_ErrorOnCommitAggregate()
     {
-        $mockListener = $this->getMock(UnitOfWorkListenerInterface::class);
-
-        $this->callback->expects($this->once())
-                ->method('save')
-                ->with($this->anything())
-                ->will($this->throwException(new \RuntimeException('phpunit')));
-
-        $mockListener->expects($this->once())
-                ->method('onPrepareCommit')
-                ->with($this->anything(), $this->anything(), $this->anything());
-
-
-        $mockListener->expects($this->once())
-                ->method('onRollback')
-                ->with($this->anything(),
-                        $this->callback(function ($subject) {
-                            return $subject instanceof \RuntimeException;
-                        }));
-
-        $mockListener->expects($this->never())
-                ->method('afterCommit');
-
-        $mockListener->expects($this->once())
-                ->method('onCleanup')
-                ->with($this->anything());
+        $mockListener = \Phake::mock(UnitOfWorkListenerInterface::class);
+        \Phake::when($this->callback)->save(\Phake::anyParameters())->thenThrow(new \RuntimeException('phpunit'));
 
         $this->testSubject->registerListener($mockListener);
         $this->testSubject->registerAggregate($this->mockAggregateRoot,
@@ -290,36 +252,19 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals('phpunit', $ex->getMessage(),
                     "Got an exception, but the wrong one");
         }
+
+        \Phake::verify($mockListener)->onPrepareCommit(\Phake::anyParameters());
+        \Phake::verify($mockListener)->onRollback(\Phake::anyParameters());
+        \Phake::verify($mockListener, \Phake::never())->afterCommit(\Phake::anyParameters());
+        \Phake::verify($mockListener)->onCleanup(\Phake::anyParameters());
     }
 
     public function testUnitOfWorkRolledBackOnCommitFailure_ErrorOnDispatchEvents()
     {
-        $mockListener = $this->getMock(UnitOfWorkListenerInterface::class);
+        $mockListener = \Phake::mock(UnitOfWorkListenerInterface::class);
 
-        $mockListener->expects($this->once())
-                ->method('onEventRegistered')
-                ->with($this->anything(), $this->anything())
-                ->will($this->returnValue(new GenericEventMessage(new TestMessage(1))));
-
-        $this->mockEventBus->expects($this->once())
-                ->method('publish')
-                ->with($this->anything())
-                ->will($this->throwException(new \RuntimeException('phpunit')));
-
-        $mockListener->expects($this->once())
-                ->method('onPrepareCommit')
-                ->with($this->anything(), $this->anything(), $this->anything());
-
-
-        $mockListener->expects($this->once())
-                ->method('onRollback')
-                ->with($this->anything(),
-                        $this->callback(function ($subject) {
-                            return $subject instanceof \RuntimeException;
-                        }));
-
-        $mockListener->expects($this->never())
-                ->method('afterCommit');
+        \Phake::when($mockListener)->onEventRegistered(\Phake::anyParameters())->thenReturn(new GenericEventMessage(new TestMessage(1)));
+        \Phake::when($this->mockEventBus)->publish(\Phake::anyParameters())->thenThrow(new \RuntimeException('phpunit'));
 
         $this->testSubject->start();
         $this->testSubject->registerListener($mockListener);
@@ -335,70 +280,63 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals('phpunit', $ex->getMessage(),
                     "Got an exception, but the wrong one");
         }
+
+        \Phake::verify($mockListener)->onPrepareCommit(\Phake::anyParameters());
+        \Phake::verify($mockListener)->onRollback(\Phake::anyParameters());
+        \Phake::verify($mockListener, \Phake::never())->afterCommit(\Phake::anyParameters());
+        \Phake::verify($mockListener)->onCleanup(\Phake::anyParameters());
     }
 
     public function testUnitOfWorkCleanupDelayedUntilOuterUnitOfWorkIsCleanedUp_InnerCommit()
     {
-        $outerListener = $this->getMock(UnitOfWorkListenerInterface::class);
-        $innerListener = $this->getMock(UnitOfWorkListenerInterface::class);
+        $outerListener = \Phake::mock(UnitOfWorkListenerInterface::class);
+        $innerListener = \Phake::mock(UnitOfWorkListenerInterface::class);
 
         $outer = DefaultUnitOfWork::startAndGet($this->mockLogger);
         $inner = DefaultUnitOfWork::startAndGet($this->mockLogger);
 
         $outer->registerListener($outerListener);
         $inner->registerListener($innerListener);
-
-        $innerListener->expects($this->once())
-                ->method('afterCommit');
-
-        $innerListener->expects($this->once())
-                ->method('onCleanup');
-
         $inner->commit();
 
-        //$innerListener->expects($this->at(1))
+        \Phake::verify($innerListener, \Phake::never())->afterCommit(\Phake::anyParameters());
+        \Phake::verify($innerListener, \Phake::never())->onCleanup(\Phake::anyParameters());
 
         $outer->commit();
 
-        /*
-          UnitOfWork outer = DefaultUnitOfWork.startAndGet();
-          UnitOfWork inner = DefaultUnitOfWork.startAndGet();
-          inner.registerListener(innerListener);
-          outer.registerListener(outerListener);
-          inner.commit();
-          verify(innerListener, never()).afterCommit(isA(UnitOfWork.class));
-          verify(innerListener, never()).onCleanup(isA(UnitOfWork.class));
-          outer.commit();
+        \Phake::inOrder(
+                \Phake::verify($innerListener)->afterCommit(\Phake::anyParameters()),
+                \Phake::verify($outerListener)->afterCommit(\Phake::anyParameters()),
+                \Phake::verify($innerListener)->onCleanup(\Phake::anyParameters()),
+                \Phake::verify($outerListener)->onCleanup(\Phake::anyParameters())
+        );
+    }
 
-          InOrder inOrder = inOrder(innerListener, outerListener);
-          inOrder.verify(innerListener).afterCommit(isA(UnitOfWork.class));
-          inOrder.verify(outerListener).afterCommit(isA(UnitOfWork.class));
-          inOrder.verify(innerListener).onCleanup(isA(UnitOfWork.class));
-          inOrder.verify(outerListener).onCleanup(isA(UnitOfWork.class)); */
+    public function testUnitOfWorkCleanupDelayedUntilOuterUnitOfWorkIsCleanedUp_InnerRollback()
+    {
+        $outerListener = \Phake::mock(UnitOfWorkListenerInterface::class);
+        $innerListener = \Phake::mock(UnitOfWorkListenerInterface::class);
+
+        $outer = DefaultUnitOfWork::startAndGet();
+        $inner = DefaultUnitOfWork::startAndGet();
+
+        $inner->registerListener($innerListener);
+        $outer->registerListener($outerListener);
+        $inner->rollback();
+
+        \Phake::verify($innerListener, \Phake::never())->afterCommit(\Phake::anyParameters());
+        \Phake::verify($innerListener, \Phake::never())->onCleanup(\Phake::anyParameters());
+        $outer->commit();
+
+        \Phake::inOrder(
+                \Phake::verify($innerListener)->onRollback(\Phake::anyParameters()),
+                \Phake::verify($outerListener)->afterCommit(\Phake::anyParameters()),
+                \Phake::verify($innerListener)->onCleanup(\Phake::anyParameters()),
+                \Phake::verify($outerListener)->onCleanup(\Phake::anyParameters())
+        );
     }
 
     /*
-      @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored", "NullableProblems"})
-      @Test
-      public void testUnitOfWorkCleanupDelayedUntilOuterUnitOfWorkIsCleanedUp_InnerRollback() {
-      UnitOfWorkListener outerListener = mock(UnitOfWorkListener.class);
-      UnitOfWorkListener innerListener = mock(UnitOfWorkListener.class);
-      UnitOfWork outer = DefaultUnitOfWork.startAndGet();
-      UnitOfWork inner = DefaultUnitOfWork.startAndGet();
-      inner.registerListener(innerListener);
-      outer.registerListener(outerListener);
-      inner.rollback();
-      verify(innerListener, never()).afterCommit(isA(UnitOfWork.class));
-      verify(innerListener, never()).onCleanup(isA(UnitOfWork.class));
-      outer.commit();
-
-      InOrder inOrder = inOrder(innerListener, outerListener);
-      inOrder.verify(innerListener).onRollback(isA(UnitOfWork.class), (Throwable) isNull());
-      inOrder.verify(outerListener).afterCommit(isA(UnitOfWork.class));
-      inOrder.verify(innerListener).onCleanup(isA(UnitOfWork.class));
-      inOrder.verify(outerListener).onCleanup(isA(UnitOfWork.class));
-      }
-
       @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored", "NullableProblems"})
       @Test
       public void testUnitOfWorkCleanupDelayedUntilOuterUnitOfWorkIsCleanedUp_InnerCommit_OuterRollback() {

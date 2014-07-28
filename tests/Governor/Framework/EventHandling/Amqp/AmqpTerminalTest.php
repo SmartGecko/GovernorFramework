@@ -198,7 +198,6 @@ class AmqpTerminalTest extends \PHPUnit_Framework_TestCase
         \Phake::when($channel)->wait_for_pending_acks()->thenReturn(null);
         \Phake::when($this->connection)->channel()->thenReturn($channel);
 
-
         $message = new GenericEventMessage(new Payload("Message"));
 
         \Phake::when($this->serializer)->serialize(\Phake::equalTo($message->getPayload()))
@@ -221,46 +220,53 @@ class AmqpTerminalTest extends \PHPUnit_Framework_TestCase
         \Phake::verify($channel)->wait_for_pending_acks(123);
     }
 
-    /*
-      @Test(expected = IllegalArgumentException.class)
-      public void testCannotSetPublisherAcksAfterTransactionalSetting() {
-      testSubject.setTransactional(true);
-      testSubject.setWaitForPublisherAck(true);
-      }
-
-      @Test(expected = IllegalArgumentException.class)
-      public void testCannotSetTransactionalBehaviorAfterPublisherAcks() {
-      testSubject.setTransactional(false);
-
-      testSubject.setWaitForPublisherAck(true);
-      testSubject.setTransactional(true);
-      }
-
-      @Test
-      public void testSendMessageWithPublisherAck_NoActiveUnitOfWork() throws InterruptedException, IOException {
-      testSubject.setTransactional(false);
-      testSubject.setWaitForPublisherAck(true);
-
-      Connection connection = mock(Connection.class);
-      when(connectionFactory.createConnection()).thenReturn(connection);
-      Channel channel = mock(Channel.class);
-
-      when(channel.waitForConfirms()).thenReturn(true);
-      when(connection.createChannel(false)).thenReturn(channel);
-      GenericEventMessage<String> message = new GenericEventMessage<String>("Message");
-      when(serializer.serialize(message.getPayload(), byte[].class))
-      .thenReturn(new SimpleSerializedObject<byte[]>("Message".getBytes(UTF_8), byte[].class, "String", "0"));
-      when(serializer.serialize(message.getMetaData(), byte[].class))
-      .thenReturn(new SerializedMetaData<byte[]>(new byte[0], byte[].class));
-
-      testSubject.publish(message);
-      verify(channel).confirmSelect();
-      verify(channel).basicPublish(eq("mockExchange"), eq("java.lang"),
-      eq(false), eq(false),
-      any(AMQP.BasicProperties.class), isA(byte[].class));
-      verify(channel).waitForConfirmsOrDie();
-      }
+    /**
+     * @expectedException \LogicException
      */
+    public function testCannotSetPublisherAcksAfterTransactionalSetting()
+    {
+        $this->testSubject->setTransactional(true);
+        $this->testSubject->setWaitForPublisherAck(true);
+    }
+
+    /**
+     * @expectedException \LogicException
+     */
+    public function testCannotSetTransactionalBehaviorAfterPublisherAcks()
+    {
+        $this->testSubject->setTransactional(false);
+
+        $this->testSubject->setWaitForPublisherAck(true);
+        $this->testSubject->setTransactional(true);
+    }
+
+    public function testSendMessageWithPublisherAck_NoActiveUnitOfWork()
+    {
+        $this->testSubject->setTransactional(false);
+        $this->testSubject->setWaitForPublisherAck(true);
+
+        $channel = \Phake::mock(AMQPChannel::class);
+
+        \Phake::when($channel)->wait_for_pending_acks()->thenReturn(null);
+        \Phake::when($this->connection)->channel()->thenReturn($channel);
+
+        $message = new GenericEventMessage(new Payload("Message"));
+
+        \Phake::when($this->serializer)->serialize(\Phake::equalTo($message->getPayload()))
+                ->thenReturn(new SimpleSerializedObject(json_encode($message->getPayload()),
+                        new SimpleSerializedType(Payload::class)));
+
+        \Phake::when($this->serializer)->serialize(\Phake::equalTo($message->getMetaData()))
+                ->thenReturn(new SimpleSerializedObject(json_encode(array('metadata' => array())),
+                        new SimpleSerializedType(MetaData::class)));
+
+        $this->testSubject->publish(array($message));
+
+        \Phake::verify($channel)->confirm_select();
+        \Phake::verify($channel)->basic_publish(\Phake::anyParameters());
+        \Phake::verify($channel)->wait_for_pending_acks(\Phake::anyParameters());
+    }
+
 }
 
 class Payload

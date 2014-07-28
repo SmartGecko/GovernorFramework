@@ -67,7 +67,7 @@ class AssociationValuesImplTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($this->testSubject->removedAssociations());
     }
 
-    public function testContaines()
+    public function testContains()
     {
         $this->assertFalse($this->testSubject->contains($this->associationValue));
         $this->testSubject->add($this->associationValue);

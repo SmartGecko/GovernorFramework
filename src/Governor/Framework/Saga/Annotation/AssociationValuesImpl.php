@@ -8,7 +8,7 @@
 
 namespace Governor\Framework\Saga\Annotation;
 
-use JMS\Serializer\Annotation\Type;
+use JMS\Serializer\Annotation as JMS;
 use Governor\Framework\Saga\AssociationValue;
 use Governor\Framework\Saga\AssociationValuesInterface;
 
@@ -20,19 +20,19 @@ class AssociationValuesImpl implements AssociationValuesInterface
 {
 
     /**
-     * @Type ("array<Governor\Framework\Saga\AssociationValue>")
+     * @JMS\Type ("array<Governor\Framework\Saga\AssociationValue>")
      * @var array
      */
     private $values;
 
     /**
-     * @Type ("array<Governor\Framework\Saga\AssociationValue>")
+     * @JMS\Exclude
      * @var array
      */
     private $addedValues;
 
     /**
-     *@Type ("array<Governor\Framework\Saga\AssociationValue>")
+     * @JMS\Exclude
      * @var array
      */
     private $removedValues;
@@ -40,6 +40,15 @@ class AssociationValuesImpl implements AssociationValuesInterface
     public function __construct()
     {
         $this->values = array();
+        $this->addedValues = array();
+        $this->removedValues = array();
+    }
+    
+    /**
+     * @JMS\PostDeserialize
+     */
+    public function postDeserialize()
+    {
         $this->addedValues = array();
         $this->removedValues = array();
     }
@@ -116,7 +125,7 @@ class AssociationValuesImpl implements AssociationValuesInterface
             $removed = false;
         }
 
-        if ($removed) {
+        if ($removed) {          
             if ($this->inCollection($associationValue, $this->addedValues)) {
                 $this->addedValues = array_udiff($this->addedValues,
                     array($associationValue),

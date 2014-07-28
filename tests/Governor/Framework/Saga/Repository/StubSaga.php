@@ -22,72 +22,32 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Saga;
+namespace Governor\Framework\Saga\Repository;
 
-use Governor\Framework\Domain\EventMessageInterface;
+use JMS\Serializer\Annotation\Type;
+use Governor\Framework\Saga\Annotation\AbstractAnnotatedSaga;
 
 /**
- * Description of GenericSagaFactoryTest
+ * Description of StubSaga
  *
  * @author david
  */
-class GenericSagaFactoryTest extends \PHPUnit_Framework_TestCase
+class StubSaga extends AbstractAnnotatedSaga
 {
-
-    private $testSubject;
-
-    public function setUp()
-    {
-        $this->testSubject = new GenericSagaFactory();
-    }
-
-    public function testSupports()
-    {
-        $this->assertTrue($this->testSubject->supports(SupportedSaga::class));
-        $this->assertFalse($this->testSubject->supports(UnsupportedSaga::class));
-    }
-
-    public function testCreateInstance_Supported()
-    {
-        $this->assertNotNull($this->testSubject->createSaga(SupportedSaga::class));
-    }
-
     /**
-     * @expectedException InvalidArgumentException
+     * @Type("integer")
+     * @var integer 
      */
-    public function testCreateInstance_Unsupported()
+    public $counter = 0;
+
+    public function __construct($identifier)
     {
-        $this->testSubject->createSaga(UnsupportedSaga::class);
+        parent::__construct($identifier);
     }
 
-}
-
-class SupportedSaga implements SagaInterface
-{
-
-    public function getSagaIdentifier()
+    public function end()
     {
-        return "supported";
+        parent::end();
     }
 
-    public function getAssociationValues()
-    {
-        return new AssociationValuesImpl();
-    }
-
-    public function handle(EventMessageInterface $event)
-    {
-        
-    }
-
-    public function isActive()
-    {
-        return true;
-    }
-
-}
-
-class UnsupportedSaga
-{
-    
 }

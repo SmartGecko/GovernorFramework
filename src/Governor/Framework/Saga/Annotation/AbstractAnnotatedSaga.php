@@ -24,14 +24,15 @@
 
 namespace Governor\Framework\Saga\Annotation;
 
+use Rhumsaa\Uuid\Uuid;
 use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\PostDeserialize;
-use Rhumsaa\Uuid\Uuid;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\Saga\SagaInterface;
 use Governor\Framework\Saga\AssociationValue;
 use Governor\Framework\Saga\Annotation\AssociationValuesImpl;
+use Governor\Framework\Saga\AssociationValuesInterface;
 
 /**
  * Implementation of the {@link Saga interface} that delegates incoming events to SagaEventHandler annotated methods.
@@ -147,9 +148,9 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
      *
      * @param AssociationValue $associationValue the association value to remove from the saga.
      */
-    protected function removeAssociationWith(AssociationValue $associationValue)
+    public function removeAssociationWith(AssociationValue $associationValue)
     {
-        $this->associationValues->remove($associationValue);
+        $this->associationValues->remove($associationValue);    
     }
 
 }

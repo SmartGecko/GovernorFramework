@@ -26,6 +26,7 @@ namespace Governor\Framework\EventHandling;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
+use Governor\Framework\Common\Logging\NullLogger;
 
 /**
  * Simple in memory event bus implementation.
@@ -49,6 +50,7 @@ class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
     function __construct()
     {
         $this->listeners = new \SplObjectStorage();
+        $this->logger = new NullLogger();
     }
 
     public function publish(array $events)
