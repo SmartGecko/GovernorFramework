@@ -31,8 +31,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->commandBus = new SimpleCommandBus();
-        $this->commandBus->setLogger($this->getMock('Psr\Log\LoggerInterface'));
+        $this->commandBus = new SimpleCommandBus();        
     }
 
     /**

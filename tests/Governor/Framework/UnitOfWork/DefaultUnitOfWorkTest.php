@@ -45,7 +45,8 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
     private $event2;
     private $listener1;
     private $listener2;
-    private $callback;
+    private $callback1;
+    private $callback2;
 
     public function setUp()
     {
@@ -61,20 +62,25 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->mockAggregateRoot = \Phake::mock(AggregateRootInterface::class);
         $this->listener1 = \Phake::mock(EventListenerInterface::class);
         $this->listener2 = \Phake::mock(EventListenerInterface::class);
-        $this->callback = \Phake::mock(SaveAggregateCallbackInterface::class);
-        /*
+        $this->callback1 = \Phake::mock(SaveAggregateCallbackInterface::class);
+        $this->callback2 = \Phake::mock(SaveAggregateCallbackInterface::class);
 
-          callback = mock(SaveAggregateCallback.class);
-          doAnswer(new PublishEvent(event1)).doAnswer(new PublishEvent(event2))
-          .when(callback).save(mockAggregateRoot);
-          doAnswer(new Answer() {
-          @Override
-          public Object answer(InvocationOnMock invocation) throws Throwable {
-          listener1.handle((EventMessage) invocation.getArguments()[0]);
-          listener2.handle((EventMessage) invocation.getArguments()[0]);
-          return null;
-          }
-          }).when(mockEventBus).publish(isA(EventMessage.class)); */
+        $self = $this;
+
+        \Phake::when($this->callback1)->save($this->mockAggregateRoot)->thenGetReturnByLambda(function ($aggregate) use($self) {
+            CurrentUnitOfWork::get()->publishEvent($self->event1,
+                    $self->mockEventBus);
+            CurrentUnitOfWork::get()->publishEvent($self->event2,
+                    $self->mockEventBus);
+        });
+
+        \Phake::when($this->mockEventBus)->publish(\Phake::anyParameters())->thenGetReturnByLambda(function ($event) use($self) {
+            $self->listener1->handle($event[0]);
+            $self->listener2->handle($event[0]);
+
+            $self->listener1->handle($event[1]);
+            $self->listener2->handle($event[1]);
+        });
     }
 
     public function tearDown()
@@ -182,34 +188,32 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
                 "The UnitOfWork haven't been correctly cleared");
     }
 
-// !!! TODO 
     public function testSagaEventsDoNotOvertakeRegularEvents()
     {
         $this->testSubject->start();
+        $self = $this;
 
-        /*
-          doAnswer(new Answer() {
-          @Override
-          public Object answer(InvocationOnMock invocation) throws Throwable {
-          DefaultUnitOfWork uow = new DefaultUnitOfWork();
-          uow.start();
-          uow.registerAggregate(mockAggregateRoot, mockEventBus, callback);
-          uow.commit();
-          return null;
-          }
-          }).when(listener1).handle(event1); */
+        \Phake::when($this->listener1)->handle($this->event1)->thenGetReturnByLambda(function ($event) use($self) {
+            $uow = new DefaultUnitOfWork();
+            $uow->start();
+            $uow->registerAggregate($self->mockAggregateRoot,
+                    $self->mockEventBus, $self->callback2);
+            $uow->commit();
+
+            return null;
+        });
 
         $this->testSubject->registerAggregate($this->mockAggregateRoot,
-                $this->mockEventBus, $this->callback);
+                $this->mockEventBus, $this->callback1);
 
         $this->testSubject->commit();
 
-        /*
-          InOrder inOrder = inOrder(listener1, listener2, callback);
-          inOrder.verify(listener1, times(1)).handle(event1);
-          inOrder.verify(listener2, times(1)).handle(event1);
-          inOrder.verify(listener1, times(1)).handle(event2);
-          inOrder.verify(listener2, times(1)).handle(event2); */
+        \Phake::inOrder(
+                \Phake::verify($this->listener1, \Phake::times(1))->handle($this->event1),
+                \Phake::verify($this->listener2, \Phake::times(1))->handle($this->event1),
+                \Phake::verify($this->listener1, \Phake::times(1))->handle($this->event2),
+                \Phake::verify($this->listener2, \Phake::times(1))->handle($this->event2)
+        );
     }
 
     public function testUnitOfWorkRolledBackOnCommitFailure_ErrorOnPrepareCommit()
@@ -236,11 +240,11 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
     public function testUnitOfWorkRolledBackOnCommitFailure_ErrorOnCommitAggregate()
     {
         $mockListener = \Phake::mock(UnitOfWorkListenerInterface::class);
-        \Phake::when($this->callback)->save(\Phake::anyParameters())->thenThrow(new \RuntimeException('phpunit'));
+        \Phake::when($this->callback1)->save(\Phake::anyParameters())->thenThrow(new \RuntimeException('phpunit'));
 
         $this->testSubject->registerListener($mockListener);
         $this->testSubject->registerAggregate($this->mockAggregateRoot,
-                $this->mockEventBus, $this->callback);
+                $this->mockEventBus, $this->callback1);
         $this->testSubject->start();
 
         try {
@@ -336,63 +340,33 @@ class DefaultUnitOfWorkTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /*
-      @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored", "NullableProblems"})
-      @Test
-      public void testUnitOfWorkCleanupDelayedUntilOuterUnitOfWorkIsCleanedUp_InnerCommit_OuterRollback() {
-      UnitOfWorkListener outerListener = mock(UnitOfWorkListener.class);
-      UnitOfWorkListener innerListener = mock(UnitOfWorkListener.class);
-      UnitOfWork outer = DefaultUnitOfWork.startAndGet();
-      UnitOfWork inner = DefaultUnitOfWork.startAndGet();
-      inner.registerListener(innerListener);
-      outer.registerListener(outerListener);
-      inner.commit();
-      verify(innerListener, never()).afterCommit(isA(UnitOfWork.class));
-      verify(innerListener, never()).onCleanup(isA(UnitOfWork.class));
-      outer.rollback();
-      verify(outerListener, never()).onPrepareCommit(isA(UnitOfWork.class),
-      anySetOf(AggregateRoot.class),
-      anyListOf(EventMessage.class));
+    public function testUnitOfWorkCleanupDelayedUntilOuterUnitOfWorkIsCleanedUp_InnerCommit_OuterRollback()
+    {
+        $outerListener = \Phake::mock(UnitOfWorkListenerInterface::class);
+        $innerListener = \Phake::mock(UnitOfWorkListenerInterface::class);
 
-      InOrder inOrder = inOrder(innerListener, outerListener);
-      inOrder.verify(innerListener).onPrepareCommit(isA(UnitOfWork.class),
-      anySetOf(AggregateRoot.class),
-      anyListOf(EventMessage.class));
+        $outer = DefaultUnitOfWork::startAndGet();
+        $inner = DefaultUnitOfWork::startAndGet();
 
-      inOrder.verify(innerListener).onRollback(isA(UnitOfWork.class), (Throwable) isNull());
-      inOrder.verify(outerListener).onRollback(isA(UnitOfWork.class), (Throwable) isNull());
-      inOrder.verify(innerListener).onCleanup(isA(UnitOfWork.class));
-      inOrder.verify(outerListener).onCleanup(isA(UnitOfWork.class));
-      }
+        $inner->registerListener($innerListener);
+        $outer->registerListener($outerListener);
 
-      private static class ReturnParameterAnswer implements Answer<Object> {
+        $inner->commit();
 
-      private final int parameterIndex;
+        \Phake::verify($innerListener, \Phake::never())->afterCommit(\Phake::anyParameters());
+        \Phake::verify($innerListener, \Phake::never())->onCleanup(\Phake::anyParameters());
+        $outer->rollback();
 
-      private ReturnParameterAnswer(int parameterIndex) {
-      this.parameterIndex = parameterIndex;
-      }
+        \Phake::verify($outerListener, \Phake::never())->onPrepareCommit(\Phake::anyParameters());
 
-      @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
-      return invocation.getArguments()[parameterIndex];
-      }
-      }
-
-      private class PublishEvent implements Answer {
-
-      private final EventMessage event;
-
-      private PublishEvent(EventMessage event) {
-      this.event = event;
-      }
-
-      @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
-      CurrentUnitOfWork.get().publishEvent(event, mockEventBus);
-      return null;
-      }
-      } */
+        \Phake::inOrder(
+                \Phake::verify($innerListener)->onPrepareCommit(\Phake::anyParameters()),
+                \Phake::verify($innerListener)->onRollback(\Phake::anyParameters()),
+                \Phake::verify($outerListener)->onRollback(\Phake::anyParameters()),
+                \Phake::verify($innerListener)->onCleanup(\Phake::anyParameters()),
+                \Phake::verify($outerListener)->onCleanup(\Phake::anyParameters())
+        );
+    }
 }
 
 class TestMessage

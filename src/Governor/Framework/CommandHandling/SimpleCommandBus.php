@@ -26,6 +26,7 @@ namespace Governor\Framework\CommandHandling;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
+use Governor\Framework\Common\Logging\NullLogger;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 use Governor\Framework\CommandHandling\Callbacks\NoOpCallback;
 
@@ -55,7 +56,7 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
 
     public function __construct()
     {
-        
+        $this->logger = new NullLogger();
     }
 
     public function dispatch(CommandMessageInterface $command,
