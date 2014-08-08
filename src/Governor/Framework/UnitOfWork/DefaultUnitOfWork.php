@@ -49,7 +49,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     private $eventsToPublish;
 
     /**
-     * @var \Governor\Framework\UnitOfWork\UnitOfWorkListenerCollection
+     * @var UnitOfWorkListenerCollection
      */
     private $listeners;
 
