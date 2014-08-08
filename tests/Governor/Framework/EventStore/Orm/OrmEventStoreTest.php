@@ -853,11 +853,6 @@ class StubAggregateRoot extends AbstractAnnotatedAggregateRoot
         );
     }
 
-    public function preInitializeState()
-    {
-        
-    }
-
 }
 
 class StubStateChangedEvent

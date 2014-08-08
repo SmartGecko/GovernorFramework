@@ -63,9 +63,4 @@ class StubAggregate extends AbstractEventSourcedAggregateRoot
         return null;
     }
 
-    public function preInitializeState()
-    {
-        
-    }
-
 }

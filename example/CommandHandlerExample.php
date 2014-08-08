@@ -113,11 +113,6 @@ class User extends AbstractEventSourcedAggregateRoot
         return $this->email;
     }
 
-    public function preInitializeState()
-    {
-        
-    }
-
 }
 
 abstract class AbstractUserEvent

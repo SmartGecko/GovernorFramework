@@ -38,15 +38,15 @@ interface CommandHandlerInterceptorInterface
 
     /**
      * The handle method is invoked each time a command is dispatched through the command bus that the
-     * CommandHandlerInterceptor is declared on. The incoming command and contextual information can be found in the
+     * CommandHandlerInterceptorInterface is declared on. The incoming command and contextual information can be found in the
      * given <code>unitOfWork</code>.
      * <p/>
      * The interceptor is responsible for the continuation of the dispatch process by invoking the {@link
-     * org.axonframework.commandhandling.InterceptorChain#proceed(CommandMessage)} method on the given
+     * InterceptorChain#proceed(CommandMessage)} method on the given
      * <code>interceptorChain</code>.
      * <p/>
      * Any information gathered by interceptors may be attached to the unitOfWork. This information is made
-     * available to the CommandCallback provided by the dispatching component.
+     * available to the CommandCallbackInterface provided by the dispatching component.
      * <p/>
      * Interceptors are highly recommended not to change the type of the command handling result, as the dispatching
      * component might expect a result of a specific type.
@@ -54,9 +54,7 @@ interface CommandHandlerInterceptorInterface
      * @param CommandMessageInterface $commandMessage   The command being dispatched
      * @param UnitOfWorkInterface $unitOfWork       The UnitOfWork in which
      * @param InterceptorChainInterface $interceptorChain The interceptor chain that allows this interceptor to proceed the dispatch process
-     * @return the result of the command handler. May have been modified by interceptors.
-     *
-     * @throws Throwable any exception that occurs while handling the command
+     * @return mixed the result of the command handler. May have been modified by interceptors.
      */
     public function handle(CommandMessageInterface $commandMessage,
             UnitOfWorkInterface $unitOfWork,

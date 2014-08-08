@@ -9,6 +9,7 @@
 namespace Governor\Framework\Stubs;
 
 use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
+use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\Annotations\CommandHandler;
 
 /**
@@ -39,12 +40,7 @@ class Dummy1Aggregate extends AbstractEventSourcedAggregateRoot
         return $this->id;
     }
 
-    protected function handle(\Governor\Framework\Domain\DomainEventMessageInterface $event)
-    {
-        
-    }
-
-    public function preInitializeState()
+    protected function handle(DomainEventMessageInterface $event)
     {
         
     }

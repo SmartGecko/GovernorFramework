@@ -1,16 +1,33 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\CommandHandling;
 
 /**
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface CommandTargetResolverInterface
 {
@@ -19,10 +36,8 @@ interface CommandTargetResolverInterface
      * Returns the Aggregate Identifier and optionally the expected version of the aggregate on which the given {@code
      * command} should be executed. The version may be {@code null} if no specific version is required.
      *
-     * @param command The command from which to extract the identifier and version
+     * @param CommandMessageInterface $command The command from which to extract the identifier and version
      * @return \Governor\Framework\CommandHandling\VersionedAggregateIdentifier
-     *
-     * @throws IllegalArgumentException if the command is not formatted correctly to extract this information
      */
     public function resolveTarget(CommandMessageInterface $command);
 }

@@ -27,8 +27,11 @@ namespace Governor\Framework\CommandHandling;
 /**
  * The interceptor chain manages the flow of a command through a chain of interceptors and ultimately to the command
  * handler. Interceptors may continue processing via this chain by calling the {@link #proceed()} or {@link
- * #proceed(CommandMessage)} methods. Alternatively, they can block
+ * #proceed(CommandMessageInterface)} methods. Alternatively, they can block
  * processing by returning without calling either of these methods.
+ * 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface InterceptorChainInterface
 {
@@ -36,10 +39,8 @@ interface InterceptorChainInterface
      * If the command is null then it signals the Interceptor Chain to continue processing the incoming (original) command
      * otherwise it will continue processing the given command.
      *
-     * @param command The command being executed
-     * @return The return value of the command execution, if any
-     *
-     * @throws Throwable any exceptions thrown by interceptors or the command handler
+     * @param CommandMessageInterface $command The command being executed
+     * @return mixed The return value of the command execution, if any
      */
     public function proceed(CommandMessageInterface $command = null);
 }

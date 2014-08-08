@@ -32,8 +32,14 @@ namespace Governor\Framework\CommandHandling;
  */
 class VersionedAggregateIdentifier
 {
-
+    /**     
+     * @var string
+     */
     private $identifier;
+    
+    /**     
+     * @var integer
+     */
     private $version;
 
     /**

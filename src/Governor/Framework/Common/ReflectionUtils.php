@@ -67,7 +67,7 @@ class ReflectionUtils
     /**
      * Returns a reflection class for the object. If the object is an Orm Proxy it returns the parent class.
      * 
-     * @param string|mixed $class
+     * @param string|mixed $object
      */
     public static function getClass ($object)
     {

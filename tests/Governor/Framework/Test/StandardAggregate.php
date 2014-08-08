@@ -109,11 +109,6 @@ class StandardAggregate extends AbstractAnnotatedAggregateRoot
         return $this->identifier;
     }
 
-    public function preInitializeState()
-    {
-        
-    }
-
     /*
       static class Factory extends AbstractAggregateFactory<StandardAggregate> {
 

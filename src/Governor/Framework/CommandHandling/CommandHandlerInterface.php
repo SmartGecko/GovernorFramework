@@ -25,13 +25,20 @@
 namespace Governor\Framework\CommandHandling;
 
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
+
 /**
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 interface CommandHandlerInterface
 {
 
+    /**
+     * 
+     * @param CommandMessageInterface $commandMessage Instance of a CommandMessageInterface.
+     * @param UnitOfWorkInterface $unitOfWork Unit of work assigned to this handler.
+     */
     public function handle(CommandMessageInterface $commandMessage,
-        UnitOfWorkInterface $unitOfWork);
+            UnitOfWorkInterface $unitOfWork);
 }

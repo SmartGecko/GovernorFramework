@@ -34,9 +34,4 @@ class Dummy2Aggregate extends  AbstractEventSourcedAggregateRoot
         
     }
 
-    public function preInitializeState()
-    {
-        
-    }
-
 }

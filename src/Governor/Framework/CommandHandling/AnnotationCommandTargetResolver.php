@@ -24,21 +24,24 @@
 
 namespace Governor\Framework\CommandHandling;
 
+use Governor\Framework\Annotations\TargetAggregateIdentifier;
+use Governor\Framework\Annotations\TargetAggregateVersion;
 use Governor\Framework\Common\ReflectionUtils;
 use Doctrine\Common\Annotations\AnnotationReader;
 
 /**
- * Description of AnnotationCommandTargetResolver
+ * Implementation of the {@see CommandTargetResolverInterface} that uses annotations to resolve its target.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class AnnotationCommandTargetResolver implements CommandTargetResolverInterface
 {
 
     /**
      * 
-     * @param \Governor\Framework\CommandHandling\CommandMessageInterface $command
-     * @return \Governor\Framework\CommandHandling\VersionedAggregateIdentifier
+     * @param CommandMessageInterface $command
+     * @return VersionedAggregateIdentifier
      * @throws \InvalidArgumentException
      */
     public function resolveTarget(CommandMessageInterface $command)
@@ -52,30 +55,30 @@ class AnnotationCommandTargetResolver implements CommandTargetResolverInterface
         if (null === $id) {
             throw new \InvalidArgumentException(
             sprintf("Invalid command. It does not identify the target aggregate. " .
-                "Make sure at least one of the fields or methods in the [%s] class contains the " .
-                "@TargetAggregateIdentifier annotation and that it returns a non-null value.",
-                $command->getPayloadType()));
+                    "Make sure at least one of the fields or methods in the [%s] class contains the " .
+                    "@TargetAggregateIdentifier annotation and that it returns a non-null value.",
+                    $command->getPayloadType()));
         }
 
         return new VersionedAggregateIdentifier($id, $version);
     }
 
     private function getAnnotatedTargetValue($annotationName,
-        CommandMessageInterface $command, AnnotationReader $reader,
-        \ReflectionClass $reflClass)
-    {            
+            CommandMessageInterface $command, AnnotationReader $reader,
+            \ReflectionClass $reflClass)
+    {
         foreach (ReflectionUtils::getProperties($reflClass) as $property) {
             if (null !== $annot = $reader->getPropertyAnnotation($property,
-                $annotationName)) {
+                    $annotationName)) {
                 $property->setAccessible(true);
 
                 return $property->getValue($command->getPayload());
             }
         }
 
-        foreach (ReflectionUtils::getMethods($reflClass) as $method) {            
+        foreach (ReflectionUtils::getMethods($reflClass) as $method) {
             if (null !== $annot = $reader->getMethodAnnotation($method,
-                $annotationName)) {
+                    $annotationName)) {
                 $method->setAccessible(true);
 
                 return $method->invoke($command->getPayload());
@@ -86,17 +89,17 @@ class AnnotationCommandTargetResolver implements CommandTargetResolverInterface
     }
 
     private function findIdentifier(CommandMessageInterface $command,
-        AnnotationReader $reader, \ReflectionClass $reflClass)
+            AnnotationReader $reader, \ReflectionClass $reflClass)
     {
-        return $this->getAnnotatedTargetValue('Governor\Framework\Annotations\TargetAggregateIdentifier',
-                $command, $reader, $reflClass);
+        return $this->getAnnotatedTargetValue(TargetAggregateIdentifier::class,
+                        $command, $reader, $reflClass);
     }
 
     private function findVersion(CommandMessageInterface $command,
-        AnnotationReader $reader, \ReflectionClass $reflClass)
+            AnnotationReader $reader, \ReflectionClass $reflClass)
     {
-        return $this->getAnnotatedTargetValue('Governor\Framework\Annotations\TargetAggregateVersion',
-                $command, $reader, $reflClass);
+        return $this->getAnnotatedTargetValue(TargetAggregateVersion::class,
+                        $command, $reader, $reflClass);
     }
 
 }

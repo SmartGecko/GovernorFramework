@@ -70,7 +70,6 @@ class GenericAggregateFactory extends AbstractAggregateFactory
         DomainEventMessageInterface $firstEvent)
     {                                
         $aggregate = $this->reflClass->newInstanceWithoutConstructor();
-        $aggregate->preInitializeState();
         
         return $aggregate;
     }

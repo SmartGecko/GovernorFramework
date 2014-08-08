@@ -27,31 +27,19 @@ namespace Governor\Framework\CommandHandling\Callbacks;
 use Governor\Framework\CommandHandling\CommandCallbackInterface;
 
 /**
- * Callback that does absolutely nothing when invoked. For performance reasons, an instance of this callback can be
- * obtained using <code>NoOpCallback.INSTANCE</code>. A generics-compatible alternative is provided by
- * <code>NoOpCallback.&lt;C&gt;instance()</code>.
+ * Callback that does absolutely nothing when invoked.
  *
- * @author Allard Buijze
- * @since 0.6
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 final class NoOpCallback implements CommandCallbackInterface
 {
 
-    /**
-     * {@inheritDoc}
-     * <p/>
-     * This implementation does nothing.
-     */
     public function onSuccess($result)
     {
         
     }
 
-    /**
-     * {@inheritDoc}
-     * <p/>
-     * This implementation does nothing.
-     */
     public function onFailure(\Exception $cause)
     {
         

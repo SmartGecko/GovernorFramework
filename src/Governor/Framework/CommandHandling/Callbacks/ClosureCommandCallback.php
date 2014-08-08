@@ -36,11 +36,18 @@ use Governor\Framework\CommandHandling\CommandCallbackInterface;
 final class ClosureCommandCallback implements CommandCallbackInterface
 {
 
+    /**
+     * @var \Closure 
+     */
     private $successCallback;
+
+    /**
+     * @var \Closure 
+     */
     private $failureCallback;
 
     public function __construct(\Closure $successCallback,
-        \Closure $failureCallback)
+            \Closure $failureCallback)
     {
         $this->successCallback = $successCallback;
         $this->failureCallback = $failureCallback;
