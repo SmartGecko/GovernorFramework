@@ -31,7 +31,7 @@ class AnnotatedCommandHandler extends AbstractAnnotatedCommandHandler
         UnitOfWorkInterface $unitOfWork)
     {
         $this->verifyCommandMessage($commandMessage);
-        $this->invoke($commandMessage);
+        return $this->invoke($commandMessage);
     }
 
     protected function invoke(CommandMessageInterface $message)

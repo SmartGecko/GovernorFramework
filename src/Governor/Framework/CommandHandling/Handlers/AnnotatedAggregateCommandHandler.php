@@ -66,7 +66,7 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
                 $this->handleConstructor($commandMessage, $unitOfWork);
                 break;
             default:
-                $this->handleMethod($commandMessage, $unitOfWork);
+                return $this->handleMethod($commandMessage, $unitOfWork);
         }
     }
 
@@ -87,7 +87,7 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
             $versionedId->getVersion());
         
         $reflectionMethod = new \ReflectionMethod($aggregate, $this->methodName);
-        $reflectionMethod->invokeArgs($aggregate, array($commandMessage->getPayload()));
+        return $reflectionMethod->invokeArgs($aggregate, array($commandMessage->getPayload()));
     }
 
     public static function subscribe($className, RepositoryInterface $repository, 
