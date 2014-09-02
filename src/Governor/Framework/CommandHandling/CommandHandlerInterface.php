@@ -38,6 +38,8 @@ interface CommandHandlerInterface
      * 
      * @param CommandMessageInterface $commandMessage Instance of a CommandMessageInterface.
      * @param UnitOfWorkInterface $unitOfWork Unit of work assigned to this handler.
+     * 
+     * @return mixed
      */
     public function handle(CommandMessageInterface $commandMessage,
             UnitOfWorkInterface $unitOfWork);

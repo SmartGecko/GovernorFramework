@@ -69,8 +69,8 @@ class DefaultInterceptorChain implements InterceptorChainInterface
             array $chain)
     {
         $this->command = $command;
-        $this->handler = $handler;
-        $this->chain = new \ArrayIterator($chain);
+        $this->handler = $handler;       
+        $this->chain = new \ArrayIterator($chain);        
         $this->unitOfWork = $unitOfWork;
     }
 
@@ -85,10 +85,10 @@ class DefaultInterceptorChain implements InterceptorChainInterface
 
         if ($this->chain->valid()) {
             $next = $this->chain->current();
-            $this->chain->next();
+            $this->chain->next();                        
 
             return $next->handle($this->command, $this->unitOfWork, $this);
-        } else {
+        } else {            
             return $this->handler->handle($this->command, $this->unitOfWork);
         }       
     }

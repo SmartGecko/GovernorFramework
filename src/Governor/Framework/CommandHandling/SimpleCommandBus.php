@@ -94,7 +94,7 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
             throw $ex;
         }
 
-        $unitOfWork->commit();
+        $unitOfWork->commit();                
 
         return $return;
     }

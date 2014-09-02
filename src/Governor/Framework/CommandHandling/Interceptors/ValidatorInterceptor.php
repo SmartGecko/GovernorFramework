@@ -57,7 +57,7 @@ class ValidatorInterceptor implements CommandHandlerInterceptorInterface
             UnitOfWorkInterface $unitOfWork,
             InterceptorChainInterface $interceptorChain)
     {
-        $interceptorChain->proceed($this->doHandle($command));
+        return $interceptorChain->proceed($this->doHandle($command));
     }
 
     private function doHandle(CommandMessageInterface $command)

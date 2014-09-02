@@ -39,8 +39,8 @@ class AnnotatedCommandHandler extends AbstractAnnotatedCommandHandler
         $reflectionMethod = new \ReflectionMethod($this->commandTarget,
             $this->methodName);
 
-        return $reflectionMethod->invokeArgs($this->commandTarget,
-                array($message->getPayload()));
+        return  $reflectionMethod->invokeArgs($this->commandTarget,
+                array($message->getPayload()));                       
     }
 
 }
