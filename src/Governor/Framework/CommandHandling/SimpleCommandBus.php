@@ -53,10 +53,32 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
      * @var CommandHandlerInterceptorInterface[]
      */
     private $handlerInterceptors = array();
+    
+    /**     
+     * @var CommandDispatchInterceptorInterface 
+     */
+    private $dispatchInterceptors = array();
 
     public function __construct()
     {
         $this->logger = new NullLogger();
+    }
+    
+    /**
+     * Invokes all the dispatch interceptors.
+     *
+     * @param CommandMessageInterface $command The original command being dispatched
+     * @return CommandMessageInterface The command to actually dispatch
+     */
+    protected function intercept(CommandMessageInterface $command) 
+    {
+        $commandToDispatch = $command;
+        
+        foreach ($this->dispatchInterceptors as $interceptor) {
+            $commandToDispatch = $interceptor->dispatch($commandToDispatch);
+        }
+        
+        return $commandToDispatch;
     }
 
     public function dispatch(CommandMessageInterface $command,
@@ -67,6 +89,8 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
         if (null === $callback) {
             $callback = new NoOpCallback();
         }
+        
+        $command = $this->intercept($command);
 
         try {
             $result = $this->doDispatch($command, $handler);
@@ -108,6 +132,17 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     public function setHandlerInterceptors(array $handlerInterceptors)
     {
         $this->handlerInterceptors = $handlerInterceptors;
+    }
+    
+    /**
+     * Registers the given list of dispatch interceptors to the command bus. All incoming commands will pass through
+     * the interceptors at the given order before the command is dispatched toward the command handler.
+     *
+     * @param array $dispatchInterceptors The interceptors to invoke when commands are dispatched
+     */
+    public function setDispatchInterceptors(array $dispatchInterceptors) 
+    {
+        $this->dispatchInterceptors = $dispatchInterceptors;
     }
 
     public function findCommandHandlerFor(CommandMessageInterface $command)

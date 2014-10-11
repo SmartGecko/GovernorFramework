@@ -119,17 +119,26 @@ class GovernorFrameworkExtension extends Extension
     private function loadCommandBuses($config, ContainerBuilder $container)
     {
         foreach ($config['command_buses'] as $name => $bus) {
-            $interceptors = array();
+            $handlerInterceptors = array();
+            $dispatchInterceptors = array();
+            
             $definition = new Definition($bus['class']);
             $definition->addMethodCall('setLogger',
                     array(new Reference('logger')));
 
-            foreach ($bus['interceptors'] as $interceptor) {
-                $interceptors[] = new Reference($interceptor);
+            foreach ($bus['handler_interceptors'] as $interceptor) {
+                $handlerInterceptors[] = new Reference($interceptor);
+            }
+            
+            foreach ($bus['dispatch_interceptors'] as $interceptor) {
+                $dispatchInterceptors[] = new Reference($interceptor);
             }
 
             $definition->addMethodCall('setHandlerInterceptors',
-                    array($interceptors));
+                    array($handlerInterceptors));
+            
+            $definition->addMethodCall('setDispatchInterceptors',
+                    array($dispatchInterceptors));
 
             $container->setDefinition(sprintf("governor.command_bus.%s", $name),
                     $definition);

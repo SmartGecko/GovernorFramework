@@ -67,7 +67,7 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
                 $this->logger->debug("This Unit Of Work is nested. Commit will be finalized by outer Unit Of Work.");
             }
         } catch (\RuntimeException $ex) {
-            $this->logger->debug("An error occurred while committing this UnitOfWork. Performing rollback...");
+            $this->logger->debug("An error occurred while committing this UnitOfWork. Performing rollback...");            
             $this->doRollback($ex);
             $this->stop();
             if (null === $this->outerUnitOfWork) {

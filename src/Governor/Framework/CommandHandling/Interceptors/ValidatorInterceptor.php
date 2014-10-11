@@ -27,6 +27,7 @@ namespace Governor\Framework\CommandHandling\Interceptors;
 use Symfony\Component\Validator\ValidatorInterface;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterceptorInterface;
+use Governor\Framework\CommandHandling\CommandDispatchInterceptorInterface;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 use Governor\Framework\CommandHandling\InterceptorChainInterface;
 
@@ -40,7 +41,7 @@ use Governor\Framework\CommandHandling\InterceptorChainInterface;
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class ValidatorInterceptor implements CommandHandlerInterceptorInterface
+class ValidatorInterceptor implements CommandHandlerInterceptorInterface, CommandDispatchInterceptorInterface
 {
 
     /**
@@ -70,6 +71,11 @@ class ValidatorInterceptor implements CommandHandlerInterceptorInterface
         }
 
         return $command;
+    }
+
+    public function dispatch(CommandMessageInterface $command)
+    {
+        return $this->doHandle($command);
     }
 
 }

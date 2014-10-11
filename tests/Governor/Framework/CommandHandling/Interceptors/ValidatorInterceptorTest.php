@@ -87,6 +87,13 @@ class ValidatorInterceptorTest extends \PHPUnit_Framework_TestCase
                 $this->mockInterceptorChain);
     }
     
+    public function testValidateAnnotatedObjectDispatch_LegalValue() 
+    {
+        $commandMessage = new GenericCommandMessage(new AnnotatedInstance("abc"));
+        
+        $this->testSubject->dispatch($commandMessage);
+    }
+    
 }
 
 class AnnotatedInstance
