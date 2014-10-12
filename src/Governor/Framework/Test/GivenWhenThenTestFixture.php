@@ -39,6 +39,7 @@ use Governor\Framework\Repository\RepositoryInterface;
 use Governor\Framework\Repository\AggregateNotFoundException;
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\CommandHandling\SimpleCommandBus;
+use Governor\Framework\CommandHandling\CommandBusInterface;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 use Governor\Framework\CommandHandling\InterceptorChainInterface;
 use Governor\Framework\CommandHandling\GenericCommandMessage;
