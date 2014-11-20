@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\Test;
 
+use Psr\Log\LoggerInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
 use Governor\Framework\EventSourcing\EventSourcingRepository;
 use Governor\Framework\EventSourcing\AggregateFactoryInterface;
@@ -166,4 +167,11 @@ interface FixtureConfigurationInterface
      *                                 methods.
      */
     public function setReportIllegalStateChange($reportIllegalStateChange);
+    
+    /**
+     * Returns the logger associated with this fixture.
+     * 
+     * @return LoggerInterface
+     */
+    public function getLogger();
 }

@@ -26,6 +26,7 @@ namespace Governor\Framework\EventSourcing;
 
 use Governor\Framework\Common\ReflectionUtils;
 use Governor\Framework\Domain\DomainEventMessageInterface;
+use Governor\Framework\EventSourcing\EventSourcedAggregateRootInterface;
 
 /**
  * Description of GenericAggregateFactory
@@ -58,7 +59,7 @@ class GenericAggregateFactory extends AbstractAggregateFactory
         
         $this->reflClass = new \ReflectionClass($aggregateType);
 
-        if (!$this->reflClass->implementsInterface('Governor\Framework\EventSourcing\EventSourcedAggregateRootInterface')) {
+        if (!$this->reflClass->implementsInterface(EventSourcedAggregateRootInterface::class)) {
             throw new \InvalidArgumentException("The given aggregateType must be a subtype of EventSourcedAggregateRootInterface");
         }
 

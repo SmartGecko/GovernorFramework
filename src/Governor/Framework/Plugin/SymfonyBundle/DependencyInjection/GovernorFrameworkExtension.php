@@ -362,6 +362,11 @@ class GovernorFrameworkExtension extends Extension
             $repository->replaceArgument(1,
                     new Reference(sprintf("governor.event_bus.%s",
                             $parameters['event_bus'])));
+            
+            if ($parameters['type'] === 'eventsourcing' && 
+                    isset($parameters['aggregate_factory'])) {
+                $repository->replaceArgument(4, new Reference($parameters['aggregate_factory']));
+            }
 
             $container->setDefinition(sprintf('%s.repository', $name),
                     $repository);

@@ -105,6 +105,12 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->clearGivenWhenState();
     }
 
+       
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+    
     public function registerRepository(EventSourcingRepository $eventSourcingRepository)
     {
         $this->repository = new IdentifierValidatingRepository($eventSourcingRepository);

@@ -26,6 +26,7 @@ namespace Governor\Framework\EventStore\Orm;
 
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
+use Governor\Framework\Common\Logging\NullLogger;
 use Governor\Framework\Common\IdentifierValidator;
 use Governor\Framework\EventStore\EventVisitorInterface;
 use Governor\Framework\EventStore\EventStreamNotFoundException;
@@ -97,6 +98,7 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
         $this->entityManager = $entityManager;
         $this->serializer = new MessageSerializer($serializer);
         $this->entryStore = null === $entryStore ? new DefaultEventEntryStore() : $entryStore;
+        $this->logger = new NullLogger();
     }
 
     /**
