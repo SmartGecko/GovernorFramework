@@ -22,46 +22,37 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
+namespace Governor\Framework\Audit;
 
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+use Governor\Framework\CommandHandling\GenericCommandMessage;
 
 /**
- * Description of ResultCallback
+ * Description of CorrelationAuditDataProviderTest
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+class CorrelationAuditDataProviderTest extends \PHPUnit_Framework_TestCase
 {
-    
-    /**     
-     * @var mixed
-     */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
 
-    public function onFailure(\Exception $cause)
+    public function testDefaultName()
     {
-        $this->failure = $cause;
+        $command = new GenericCommandMessage(new \stdClass());
+        $provider = new CorrelationAuditDataProvider();
+        $actual = $provider->provideAuditDataFor($command);        
+
+        $this->assertCount(1, $actual);
+        $this->assertEquals($command->getIdentifier(),
+                $actual["commandIdentifier"]);
     }
 
-    public function onSuccess($result)
+    public function testCustomName()
     {
-        $this->result = $result;
-    }
+        $command = new GenericCommandMessage(new \stdClass());
+        $provider = new CorrelationAuditDataProvider('bla');
+        $actual = $provider->provideAuditDataFor($command);
 
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
-        }
-
-        return $this->result;
+        $this->assertCount(1, $actual);
+        $this->assertEquals($command->getIdentifier(), $actual["bla"]);
     }
 
 }

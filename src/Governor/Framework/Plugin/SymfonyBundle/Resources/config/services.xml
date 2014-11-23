@@ -52,12 +52,17 @@
         
         <!-- command interceptors -->
         <parameter key="governor.interceptor.validator.class">Governor\Framework\CommandHandling\Interceptors\ValidatorInterceptor</parameter>
+        <parameter key="governor.interceptor.audit.class">Governor\Framework\Audit\AuditingInterceptor</parameter>
         
     </parameters>
 
     <services>
         <service id="governor.interceptor.validator" class="%governor.interceptor.validator.class%">
             <argument type="service" id="validator"/>
+        </service>
+        
+        <service id="governor.interceptor.audit" class="%governor.interceptor.audit.class%" abstract="true">
+           
         </service>
         
         <service id="governor.order_resolver.annotation" class="%governor.order_resolver.annotation.class%"/>

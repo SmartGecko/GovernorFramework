@@ -22,46 +22,27 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
+namespace Governor\Framework\Audit;
 
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+use Governor\Framework\Domain\MetaData;
+use Governor\Framework\CommandHandling\GenericCommandMessage;
 
 /**
- * Description of ResultCallback
+ * Description of CommandMetaDataProviderTest
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+class CommandMetaDataProviderTest extends \PHPUnit_Framework_TestCase
 {
-    
-    /**     
-     * @var mixed
-     */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
 
-    public function onFailure(\Exception $cause)
+    public function testProvideAuditData()
     {
-        $this->failure = $cause;
-    }
+        $metaData = MetaData::emptyInstance();
+        $message = new GenericCommandMessage(new \stdClass(), $metaData);
+        $provider = new CommandMetaDataProvider();
 
-    public function onSuccess($result)
-    {
-        $this->result = $result;
-    }
-
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
-        }
-
-        return $this->result;
+        $actual = $provider->provideAuditDataFor($message);
+        $this->assertSame($metaData->all(), $actual);
     }
 
 }

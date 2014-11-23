@@ -22,46 +22,25 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
+namespace Governor\Framework\Audit;
 
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+use Governor\Framework\CommandHandling\CommandMessageInterface;
 
 /**
- * Description of ResultCallback
+ * Interface describing the instance that provides the relevant information for auditing purposes. The data provided by
+ * this class is attached to all events processed by the {@link AuditingInterceptor}.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+interface AuditDataProviderInterface
 {
-    
-    /**     
-     * @var mixed
+
+    /**
+     * Return the relevant auditing information for the given command. This method is called exactly once for each time
+     * the command is dispatched.
+     *
+     * @param CommandMessageInterface $command The command being dispatched
+     * @return array a map containing key-value pairs of relevant information to include in audit logs.
      */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
-
-    public function onFailure(\Exception $cause)
-    {
-        $this->failure = $cause;
-    }
-
-    public function onSuccess($result)
-    {
-        $this->result = $result;
-    }
-
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
-        }
-
-        return $this->result;
-    }
-
+    public function provideAuditDataFor(CommandMessageInterface $command);
 }

@@ -223,7 +223,7 @@ class Configuration implements ConfigurationInterface
                                 ->scalarNode('vhost')->defaultValue('/')->end()
                             ->end()
                         ->end()
-                        ->scalarNode('routing_key_resolver')->isRequired()->end()
+                        ->scalarNode('routing_key_resolver')->end()
                     ->end()
                 ->end()
             ->end();

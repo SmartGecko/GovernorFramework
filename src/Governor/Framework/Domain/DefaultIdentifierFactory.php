@@ -22,46 +22,24 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
+namespace Governor\Framework\Domain;
 
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+use Rhumsaa\Uuid\Uuid;
 
 /**
- * Description of ResultCallback
+ * Description of DefaultIdentityFactory
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+class DefaultIdentifierFactory extends IdentifierFactory
 {
-    
+
     /**     
-     * @var mixed
+     * {@inheritDoc}
      */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
-
-    public function onFailure(\Exception $cause)
+    public function generateIdentifier()
     {
-        $this->failure = $cause;
-    }
-
-    public function onSuccess($result)
-    {
-        $this->result = $result;
-    }
-
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
-        }
-
-        return $this->result;
+        return Uuid::uuid1()->toString();
     }
 
 }

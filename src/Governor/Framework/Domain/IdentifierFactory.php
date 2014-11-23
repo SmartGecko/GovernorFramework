@@ -22,46 +22,26 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
-
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+namespace Governor\Framework\Domain;
 
 /**
- * Description of ResultCallback
+ * Description of IdentifierFactory
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+abstract class IdentifierFactory
 {
-    
+
     /**     
-     * @var mixed
+     * @return IdentifierFactory
      */
-    private $result;
-    
-    /**     
-     * @var \Exception
+    public static function getInstance()
+    {
+        return new DefaultIdentifierFactory();
+    }
+
+    /**
+     * @return string
      */
-    private $failure;
-
-    public function onFailure(\Exception $cause)
-    {
-        $this->failure = $cause;
-    }
-
-    public function onSuccess($result)
-    {
-        $this->result = $result;
-    }
-
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
-        }
-
-        return $this->result;
-    }
-
+    public abstract function generateIdentifier();
 }

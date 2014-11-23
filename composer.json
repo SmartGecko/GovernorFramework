@@ -26,6 +26,7 @@
         "symfony/finder": ">=2.3",
         "symfony/validator": ">=2.3",
         "moontoast/math": "*",
-        "phake/phake": "1.*"
+        "phake/phake": "1.*",
+        "phpunit/phpunit": "4.2.*"
     }
 }

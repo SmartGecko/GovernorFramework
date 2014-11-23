@@ -103,13 +103,17 @@ class GovernorFrameworkExtension extends Extension
 
             $definition = new Definition($container->getParameter('governor.event_bus_terminal.amqp.class'));
             $definition->addArgument(new Reference('governor.serializer'));
-            $definition->addArgument(new Reference($terminal['routing_key_resolver']));
             $definition->addMethodCall('setConnection',
                     array(new Reference(sprintf("governor.amqp_terminal.connection.%s",
                                 $name))));
 
             $definition->addMethodCall('setLogger',
                     array(new Reference('logger')));
+
+            if (isset($terminal['routing_key_resolver'])) {
+                $definition->addMethodCall('setRoutingKeyResolver',
+                        array(new Reference('routing_key_resolver')));
+            }
 
             $container->setDefinition(sprintf("governor.amqp_terminal.%s", $name),
                     $definition);
@@ -121,7 +125,7 @@ class GovernorFrameworkExtension extends Extension
         foreach ($config['command_buses'] as $name => $bus) {
             $handlerInterceptors = array();
             $dispatchInterceptors = array();
-            
+
             $definition = new Definition($bus['class']);
             $definition->addMethodCall('setLogger',
                     array(new Reference('logger')));
@@ -129,14 +133,14 @@ class GovernorFrameworkExtension extends Extension
             foreach ($bus['handler_interceptors'] as $interceptor) {
                 $handlerInterceptors[] = new Reference($interceptor);
             }
-            
+
             foreach ($bus['dispatch_interceptors'] as $interceptor) {
                 $dispatchInterceptors[] = new Reference($interceptor);
             }
 
             $definition->addMethodCall('setHandlerInterceptors',
                     array($handlerInterceptors));
-            
+
             $definition->addMethodCall('setDispatchInterceptors',
                     array($dispatchInterceptors));
 
@@ -362,10 +366,11 @@ class GovernorFrameworkExtension extends Extension
             $repository->replaceArgument(1,
                     new Reference(sprintf("governor.event_bus.%s",
                             $parameters['event_bus'])));
-            
-            if ($parameters['type'] === 'eventsourcing' && 
+
+            if ($parameters['type'] === 'eventsourcing' &&
                     isset($parameters['aggregate_factory'])) {
-                $repository->replaceArgument(4, new Reference($parameters['aggregate_factory']));
+                $repository->replaceArgument(4,
+                        new Reference($parameters['aggregate_factory']));
             }
 
             $container->setDefinition(sprintf('%s.repository', $name),

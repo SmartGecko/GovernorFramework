@@ -22,46 +22,45 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
+namespace Governor\Framework\Correlation;
 
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+use Governor\Framework\Domain\MessageInterface;
 
 /**
- * Description of ResultCallback
+ * Description of SimpleCorrelationDataProvider
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+class SimpleCorrelationDataProvider implements CorrelationDataProviderInterface
 {
-    
-    /**     
-     * @var mixed
-     */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
 
-    public function onFailure(\Exception $cause)
+    /**     
+     * @var array
+     */
+    private $headerNames;
+
+    function __construct(array $headerNames = array())
     {
-        $this->failure = $cause;
+        $this->headerNames = $headerNames;
     }
 
-    public function onSuccess($result)
+    public function correlationDataFor(MessageInterface $message)
     {
-        $this->result = $result;
-    }
-
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
+        if (0 === count($this->headerNames)) {
+            return array();
         }
 
-        return $this->result;
+        $data = array();
+
+        $metaData = $message->getMetaData();
+
+        foreach ($this->headerNames as $headerName) {
+            if ($metaData->has($headerName)) {
+                $data[$headerName] = $metaData->get($headerName);
+            }
+        }
+                
+        return $data;
     }
 
 }

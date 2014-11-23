@@ -25,6 +25,7 @@
 namespace Governor\Framework\CommandHandling\Gateway;
 
 use Governor\Framework\Domain\MetaData;
+use Governor\Framework\Correlation\CorrelationDataHolder;
 use Governor\Framework\CommandHandling\CommandCallbackInterface;
 use Governor\Framework\CommandHandling\CommandBusInterface;
 use Governor\Framework\CommandHandling\GenericCommandMessage;
@@ -39,10 +40,10 @@ use Governor\Framework\CommandHandling\Callbacks\ResultCallback;
 abstract class AbstractCommandGateway implements CommandGatewayInterface
 {
 
-    /**     
+    /**
      * @var CommandBusInterface
      */
-    private $commandBus;
+    protected $commandBus;
 
     public function __construct(CommandBusInterface $commandBus)
     {
@@ -52,11 +53,9 @@ abstract class AbstractCommandGateway implements CommandGatewayInterface
     /**
      * {@inheritDoc}
      */
-    public function send($command, CommandCallbackInterface $callback = null,
-            MetaData $metaData = null)
+    public function send($command, CommandCallbackInterface $callback = null)
     {
-        $metaData = isset($metaData) ? $metaData : MetaData::emptyInstance();
-        $message = new GenericCommandMessage($command, $metaData);
+        $message = $this->createCommandMessage($command);    
 
         $this->commandBus->dispatch($message, $callback);
     }
@@ -64,10 +63,9 @@ abstract class AbstractCommandGateway implements CommandGatewayInterface
     /**
      * {@inheritDoc}
      */
-    public function sendAndWait($command, MetaData $metaData = null)
-    {
-        $metaData = isset($metaData) ? $metaData : MetaData::emptyInstance();
-        $message = new GenericCommandMessage($command, $metaData);
+    public function sendAndWait($command)
+    {        
+        $message = $this->createCommandMessage($command);                                
         $callback = new ResultCallback();
 
         $this->commandBus->dispatch($message, $callback);
@@ -75,4 +73,12 @@ abstract class AbstractCommandGateway implements CommandGatewayInterface
         return $callback->getResult();
     }
 
+    protected function createCommandMessage($command)
+    {
+        $message = GenericCommandMessage::asCommandMessage($command);
+
+        return $message->withMetaData(CorrelationDataHolder::getCorrelationData())
+                        ->andMetaData($message->getMetaData()->all());
+    }
+   
 }

@@ -26,6 +26,10 @@ namespace Governor\Framework\Saga;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
+use Governor\Framework\Correlation\CorrelationDataHolder;
+use Governor\Framework\Correlation\CorrelationDataProviderInterface;
+use Governor\Framework\Correlation\SimpleCorrelationDataProvider;
+use Governor\Framework\Correlation\MultiCorrelationDataProvider;
 use Governor\Framework\Domain\EventMessageInterface;
 
 /**
@@ -37,17 +41,18 @@ use Governor\Framework\Domain\EventMessageInterface;
 abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareInterface
 {
 
-    /**     
+    /**
      * @var SagaRepositoryInterface
      */
     private $sagaRepository;
-    /**     
+
+    /**
      * @var SagaFactoryInterface
      */
     private $sagaFactory;
     private $sagaTypes = array();
-    
-    /**     
+
+    /**
      * @var boolean
      */
     private $suppressExceptions = true;
@@ -55,7 +60,12 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
     /**
      * @var LoggerInterface 
      */
-    private $logger;    
+    private $logger;
+
+    /**
+     * @var CorrelationDataProviderInterface
+     */
+    private $correlationDataProvider;
 
     public function __construct(SagaRepositoryInterface $sagaRepository,
             SagaFactoryInterface $sagaFactory, array $sagaTypes = array())
@@ -63,6 +73,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $this->sagaRepository = $sagaRepository;
         $this->sagaFactory = $sagaFactory;
         $this->sagaTypes = $sagaTypes;
+        $this->correlationDataProvider = new SimpleCorrelationDataProvider();
     }
 
     public function handle(EventMessageInterface $event)
@@ -99,14 +110,14 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
 
     private function startNewSaga(EventMessageInterface $event, $sagaType,
             AssociationValue $associationValue)
-    {        
+    {
         $newSaga = $this->sagaFactory->createSaga($sagaType);
         $newSaga->associateWith($associationValue);
-        $this->preProcessSaga($newSaga);     
+        $this->preProcessSaga($newSaga);
 
         try {
             $this->doInvokeSaga($event, $newSaga);
-        } finally {            
+        } finally {
             $this->sagaRepository->add($newSaga);
         }
     }
@@ -149,20 +160,20 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         try {
             $this->logger->info("Saga {saga} is handling event {event}",
                     array(
-                        'saga' => $sagaId, 
-                        'event' => $event->getPayloadType()
+                'saga' => $sagaId,
+                'event' => $event->getPayloadType()
                     )
-                );
+            );
             $saga->handle($event);
         } catch (\Exception $ex) {
             $exception = $ex;
         } finally {
             $this->logger->info("Saga {saga} is commiting event {event}",
                     array(
-                        'saga' => $sagaId, 
-                        'event' => $event->getPayloadType()
+                'saga' => $sagaId,
+                'event' => $event->getPayloadType()
                     )
-                );
+            );
             $this->commit($saga);
         }
 
@@ -177,6 +188,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
             SagaInterface $saga)
     {
         try {
+            CorrelationDataHolder::setCorrelationData($this->correlationDataProvider->correlationDataFor($event));
             $saga->handle($event);
         } catch (\RuntimeException $ex) {
             $this->handleInvokationException($ex, $event, $saga);
@@ -201,7 +213,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      * @param SagaInterface $saga the Saga to commit.
      */
     protected function commit(SagaInterface $saga)
-    {        
+    {
         $this->sagaRepository->commit($saga);
     }
 
@@ -258,6 +270,29 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
     public function getManagedSagaTypes()
     {
         return $this->sagaTypes;
+    }
+
+    /**
+     * Sets the correlation data provider for this SagaManager. It will provide the data to attach to messages sent by
+     * Sagas managed by this manager.
+     *
+     * @param CorrelationDataProviderInterface $correlationDataProvider    the correlation data provider for this SagaManager
+     */
+    public function setCorrelationDataProvider(CorrelationDataProviderInterface $correlationDataProvider)
+    {
+        $this->correlationDataProvider = $correlationDataProvider;
+    }
+
+    /**
+     * Sets the given <code>correlationDataProviders</code>. Each will provide data to attach to messages sent by Sagas
+     * managed by this manager. When multiple providers provide different values for the same key, the latter provider
+     * will overwrite any values set earlier.
+     *
+     * @param array $correlationDataProviders the correlation data providers for this SagaManager
+     */
+    public function setCorrelationDataProviders(array $correlationDataProviders)
+    {
+        $this->correlationDataProvider = new MultiCorrelationDataProvider($correlationDataProviders);
     }
 
 }

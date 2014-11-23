@@ -22,46 +22,41 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
+namespace Governor\Framework\Correlation;
 
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+use Governor\Framework\Domain\MessageInterface;
 
 /**
- * Description of ResultCallback
+ * Description of MultiCorrelationDataProvider
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+class MultiCorrelationDataProvider implements CorrelationDataProviderInterface
 {
-    
-    /**     
-     * @var mixed
-     */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
 
-    public function onFailure(\Exception $cause)
+    /**
+     * @var CorrelationDataProviderInterface[] 
+     */
+    private $delegates;
+
+    function __construct(array $delegates)
     {
-        $this->failure = $cause;
+        $this->delegates = $delegates;
     }
 
-    public function onSuccess($result)
+    public function correlationDataFor(MessageInterface $message)
     {
-        $this->result = $result;
-    }
+        $correlationData = array();
 
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
+        foreach ($this->delegates as $delegate) {
+            $extraData = $delegate->correlationDataFor($message);
+
+            if (!empty($extraData)) {
+                $correlationData = array_merge($correlationData, $extraData);
+            }
         }
 
-        return $this->result;
+        return $correlationData;
     }
 
 }

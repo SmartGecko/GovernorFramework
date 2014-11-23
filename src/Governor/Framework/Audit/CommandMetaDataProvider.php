@@ -22,46 +22,21 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
+namespace Governor\Framework\Audit;
 
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+use Governor\Framework\CommandHandling\CommandMessageInterface;
 
 /**
- * Description of ResultCallback
+ * Description of CommandMetaDataProvider
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+class CommandMetaDataProvider implements AuditDataProviderInterface
 {
-    
-    /**     
-     * @var mixed
-     */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
 
-    public function onFailure(\Exception $cause)
+    public function provideAuditDataFor(CommandMessageInterface $command)
     {
-        $this->failure = $cause;
-    }
-
-    public function onSuccess($result)
-    {
-        $this->result = $result;
-    }
-
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
-        }
-
-        return $this->result;
+        return $command->getMetaData()->all();
     }
 
 }

@@ -22,46 +22,37 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
+namespace Governor\Framework\Correlation;
 
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
-
+use Governor\Framework\Domain\MetaData;
+use Governor\Framework\Domain\GenericMessage;
 /**
- * Description of ResultCallback
+ * Description of SimpleCorrelationDataProviderTest
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+class SimpleCorrelationDataProviderTest extends \PHPUnit_Framework_TestCase
 {
     
-    /**     
-     * @var mixed
-     */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
-
-    public function onFailure(\Exception $cause)
+    public function testResolveCorrelationData() 
     {
-        $this->failure = $cause;
+        $metaData = array(
+            'key1' => 'value1',
+            'key2' => 'value2',
+            'key3' => 'value3'
+        );
+        
+        $payload = new \stdClass();        
+        $message = new GenericMessage($payload, new MetaData($metaData));
+
+        $provider1 = new SimpleCorrelationDataProvider(array("key1"));
+                
+        $this->assertEquals(array("key1" => "value1"), $provider1->correlationDataFor($message));
+
+        $provider2 = new SimpleCorrelationDataProvider(array("key1", "key2", "noExist", null));
+        $actual2 = $provider2->correlationDataFor($message);
+                
+        $this->assertEquals("value1", $actual2["key1"]);
+        $this->assertEquals("value2", $actual2["key2"]);
     }
-
-    public function onSuccess($result)
-    {
-        $this->result = $result;
-    }
-
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
-        }
-
-        return $this->result;
-    }
-
 }

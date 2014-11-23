@@ -22,46 +22,23 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
-
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+namespace Governor\Framework\Audit;
 
 /**
- * Description of ResultCallback
+ * Description of NullAuditLogger
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+class NullAuditLogger implements AuditLoggerInterface
 {
-    
-    /**     
-     * @var mixed
-     */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
-
-    public function onFailure(\Exception $cause)
+    public function logFailed($command, \Exception $cause, array $events)
     {
-        $this->failure = $cause;
+        
     }
 
-    public function onSuccess($result)
+    public function logSuccessful($command, $returnValue, array $events)
     {
-        $this->result = $result;
-    }
-
-    public function getResult()
-    {
-        if (isset($this->failure)) {
-            throw $this->failure;
-        }
-
-        return $this->result;
+        
     }
 
 }

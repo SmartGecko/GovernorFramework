@@ -45,11 +45,9 @@ interface CommandGatewayInterface
      * CommandMessage is constructed from that message's payload and MetaData.
      *
      * @param mixed $command  The command to dispatch
-     * @param CommandCallbackInterface $callback The callback to notify when the command has been processed
-     * @param MetaData $metaData      Metadata to be sent with the command
+     * @param CommandCallbackInterface $callback The callback to notify when the command has been processed     
      */
-    public function send($command, CommandCallbackInterface $callback = null,
-            MetaData $metaData = null);
+    public function send($command, CommandCallbackInterface $callback = null);
 
     /**
      * Sends the given <code>command</code> and wait for it to execute. The result of the execution is returned when
@@ -63,12 +61,11 @@ interface CommandGatewayInterface
      * <p/>
      * Note that the interrupted flag is set back on the thread if it has been interrupted while waiting.
      *
-     * @param mixed $command The command to dispatch
-     * @param MetaData $metaData      Metadata to be sent with the command
+     * @param mixed $command The command to dispatch  
      * @return the result of command execution.
      * 
      * @throws org.axonframework.commandhandling.CommandExecutionException
      *          when an exception occurred while processing the command
      */
-    public function sendAndWait($command, MetaData $metaData = null);
+    public function sendAndWait($command);
 }

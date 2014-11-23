@@ -22,46 +22,54 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling\Callbacks;
-
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
+namespace Governor\Framework\Correlation;
 
 /**
- * Description of ResultCallback
+ * Description of CorrelationDataHolder
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author david
  */
-class ResultCallback implements CommandCallbackInterface
+final class CorrelationDataHolder
 {
     
     /**     
-     * @var mixed
+     * @var array
      */
-    private $result;
-    
-    /**     
-     * @var \Exception
-     */
-    private $failure;
+    private static $correlationData = array();
 
-    public function onFailure(\Exception $cause)
+    private function __construct()
     {
-        $this->failure = $cause;
+        
     }
 
-    public function onSuccess($result)
+    /**
+     * Returns the correlation data attached to the current thread. If no correlation data is available, this method
+     * returns an empty Map.
+     *
+     * @return the correlation data attached to the current process
+     */
+    public static function getCorrelationData()
     {
-        $this->result = $result;
+        return self::$correlationData;
     }
 
-    public function getResult()
+    /**
+     * Attaches the given <code>data</code> as correlation data to the current process. Any data already attached is
+     * replaced with given <code>data</code>.
+     *
+     * @param array $data the correlation data to attach to the current thread
+     */
+    public static function setCorrelationData(array $data)
     {
-        if (isset($this->failure)) {
-            throw $this->failure;
-        }
+        self::$correlationData = $data;
+    }
 
-        return $this->result;
+    /**
+     * Clears the correlation data from the current process.
+     */
+    public static function clear()
+    {
+        self::$correlationData = array();
     }
 
 }

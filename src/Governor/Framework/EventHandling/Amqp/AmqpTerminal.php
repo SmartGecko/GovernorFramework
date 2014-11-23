@@ -102,12 +102,10 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     private $clusters = array();
 
     public function __construct(SerializerInterface $serializer,
-            RoutingKeyResolverInterface $routingKeyResolver = null,
             AmqpMessageConverterInterface $messageConverter = null)
     {
         $this->serializer = $serializer;
-        $this->routingKeyResolver = null === $routingKeyResolver ? new NamespaceRoutingKeyResolver()
-                    : $routingKeyResolver;
+        $this->routingKeyResolver = new NamespaceRoutingKeyResolver();
         $this->messageConverter = null === $messageConverter ? new DefaultAmqpMessageConverter($this->serializer,
                 $this->routingKeyResolver, $this->isDurable) : $messageConverter;
     }
@@ -339,6 +337,16 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
+    }
+
+    /**
+     * Sets the RoutingKeyResolver that provides the Routing Key for each message to dispatch. 
+     *
+     * @param RoutingKeyResolverInterface $routingKeyResolver the RoutingKeyResolver to use
+     */
+    public function setRoutingKeyResolver(RoutingKeyResolverInterface $routingKeyResolver)
+    {
+        $this->routingKeyResolver = $routingKeyResolver;
     }
 
 }
