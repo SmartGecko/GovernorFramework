@@ -25,6 +25,7 @@
 namespace Governor\Framework\Repository;
 
 use Governor\Framework\Domain\AggregateRootInterface;
+use Governor\Framework\Domain\ResourceInjectorInterface;
 use Governor\Framework\EventHandling\EventBusInterface;
 use Doctrine\ORM\EntityManager;
 
@@ -45,6 +46,11 @@ class GenericOrmRepository extends LockingRepository
      * @var boolean
      */
     private $forceFlushOnSave = true;
+    
+    /**     
+     * @var ResourceInjectorInterface
+     */
+    private $resourceInjector;
 
     public function __construct($className, EventBusInterface $eventBus,
         LockManagerInterface $lockManager, EntityManager $entityManager)
@@ -87,18 +93,39 @@ class GenericOrmRepository extends LockingRepository
             throw new ConflictingAggregateVersionException($id,
             $exceptedVersion, $aggregate->getVersion());
         }
+        
+        if ($this->resourceInjector) {
+            $this->resourceInjector->injectResources($aggregate);
+        }
 
         return $aggregate;
     }
 
+    /**
+     * 
+     * @return boolean
+     */
     public function isForceFlushOnSave()
     {
         return $this->forceFlushOnSave;
     }
 
+    /**
+     * 
+     * @param boolean $forceFlushOnSave
+     */
     public function setForceFlushOnSave($forceFlushOnSave)
     {
         $this->forceFlushOnSave = $forceFlushOnSave;
     }
+
+    /**     
+     * @param \Governor\Framework\Domain\ResourceInjectorInterface $resourceInjector
+     */
+    public function setResourceInjector(ResourceInjectorInterface $resourceInjector)
+    {
+        $this->resourceInjector = $resourceInjector;
+    }
+
 
 }

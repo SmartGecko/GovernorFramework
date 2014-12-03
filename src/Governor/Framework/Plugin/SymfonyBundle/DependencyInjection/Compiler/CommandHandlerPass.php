@@ -8,6 +8,7 @@
 
 namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler;
 
+use Governor\Framework\Annotations\CommandHandler;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -35,8 +36,7 @@ class CommandHandlerPass extends AbstractHandlerPass
             $reflClass = new \ReflectionClass($class);
 
             foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                $annot = $reader->getMethodAnnotation($method,
-                        'Governor\Framework\Annotations\CommandHandler');
+                $annot = $reader->getMethodAnnotation($method, CommandHandler::class);
 
                 // not a handler
                 if (null === $annot) {

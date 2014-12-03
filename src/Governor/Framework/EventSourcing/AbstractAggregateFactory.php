@@ -38,7 +38,7 @@ abstract class AbstractAggregateFactory implements AggregateFactoryInterface
 
     public function createAggregate($aggregateIdentifier,
         DomainEventMessageInterface $firstEvent)
-    {
+    {        
         if (is_subclass_of($firstEvent->getPayloadType(), 
                 EventSourcedAggregateRootInterface::class)) {
             $aggregate = $firstEvent->getPayload();

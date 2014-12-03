@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection;
 
+use Governor\Framework\Annotations\CommandHandler;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -226,7 +227,7 @@ class GovernorFrameworkExtension extends Extension
             case 'orm':
                 $definition->addArgument(new Reference(sprintf('doctrine.orm.%s',
                                 $config['saga_repository']['parameters']['entity_manager'])));
-                $definition->addArgument(new Reference('governor.resource_injector'));
+                $definition->addArgument(new Reference('governor.saga_resource_injector'));
                 $definition->addArgument(new Reference('governor.serializer'));
                 break;
         }
@@ -317,8 +318,7 @@ class GovernorFrameworkExtension extends Extension
             $reflectionClass = new \ReflectionClass($parameters['aggregate_root']);
 
             foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                $annot = $reader->getMethodAnnotation($method,
-                        'Governor\Framework\Annotations\CommandHandler');
+                $annot = $reader->getMethodAnnotation($method, CommandHandler::class);                        
 
                 // not a handler
                 if (null === $annot) {
@@ -347,6 +347,9 @@ class GovernorFrameworkExtension extends Extension
                         ->addArgument($parameters['aggregate_root'])
                         ->addArgument($repository)
                         ->addArgument($resolver)
+                        ->addMethodCall('setResourceInjector', array(
+                            new Reference('governor.aggregate_resource_injector'))
+                        )
                         ->setPublic(true)
                         ->setLazy(true);
 

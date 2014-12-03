@@ -25,6 +25,7 @@
 namespace Governor\Framework\CommandHandling\Handlers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Governor\Framework\Domain\ResourceInjectorInterface;
 use Governor\Framework\CommandHandling\CommandBusInterface;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 use Governor\Framework\CommandHandling\CommandTargetResolverInterface;
@@ -35,29 +36,45 @@ use Governor\Framework\Repository\RepositoryInterface;
 /**
  * Description of AggregateCommandHandler
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
 {
 
+    /**
+     * @var RepositoryInterface 
+     */
     private $repository;
+
+    /**
+     * @var string 
+     */
     private $aggregateType;
+
+    /**
+     * @var CommandTargetResolverInterface 
+     */
     private $targetResolver;
+    
+    /**     
+     * @var ResourceInjectorInterface
+     */
+    private $resourceInjector;
 
     public function __construct($commandName, $methodName, $aggregateType,
-        RepositoryInterface $repository,
-        CommandTargetResolverInterface $targetResolver = null)
+            RepositoryInterface $repository,
+            CommandTargetResolverInterface $targetResolver = null)
     {
         parent::__construct($commandName, $methodName);
         $this->repository = $repository;
         $this->aggregateType = $aggregateType;
-        $this->targetResolver = null === $targetResolver 
-                ? new AnnotationCommandTargetResolver()
-                : $targetResolver;                
+        $this->targetResolver = null === $targetResolver ? new AnnotationCommandTargetResolver()
+                    : $targetResolver;
     }
 
     public function handle(CommandMessageInterface $commandMessage,
-        UnitOfWorkInterface $unitOfWork)
+            UnitOfWorkInterface $unitOfWork)
     {
         $this->verifyCommandMessage($commandMessage);
 
@@ -71,31 +88,39 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
     }
 
     private function handleConstructor(CommandMessageInterface $commandMessage,
-        UnitOfWorkInterface $unitOfWork)
+            UnitOfWorkInterface $unitOfWork)
     {
-        $reflectionClass = new \ReflectionClass($this->aggregateType);
-        $object = $reflectionClass->newInstanceArgs(array($commandMessage->getPayload()));
+        $reflectionClass = new \ReflectionClass($this->aggregateType);        
+        $instance = $reflectionClass->newInstanceWithoutConstructor();
+        
+        if ($this->resourceInjector) {
+            $this->resourceInjector->injectResources($instance);
+        }
+        
+        $constructor = $reflectionClass->getConstructor();
+        call_user_func_array(array($instance, $constructor->getName()), array($commandMessage->getPayload()));        
 
-        $this->repository->add($object);
+        $this->repository->add($instance);
     }
 
     private function handleMethod(CommandMessageInterface $commandMessage,
-        UnitOfWorkInterface $unitOfWork)
+            UnitOfWorkInterface $unitOfWork)
     {
         $versionedId = $this->targetResolver->resolveTarget($commandMessage);
         $aggregate = $this->repository->load($versionedId->getIdentifier(),
-            $versionedId->getVersion());
-        
+                $versionedId->getVersion());
+
         $reflectionMethod = new \ReflectionMethod($aggregate, $this->methodName);
-        return $reflectionMethod->invokeArgs($aggregate, array($commandMessage->getPayload()));
+        return $reflectionMethod->invokeArgs($aggregate,
+                        array($commandMessage->getPayload()));
     }
 
-    public static function subscribe($className, RepositoryInterface $repository, 
-            CommandBusInterface $commandBus)
+    public static function subscribe($className,
+            RepositoryInterface $repository, CommandBusInterface $commandBus)
     {
         $reflClass = new \ReflectionClass($className);
         $reader = new AnnotationReader();
-        
+
         // !!! TODO one reflection scanner
         foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
             $annot = $reader->getMethodAnnotation($method,
@@ -105,7 +130,7 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
             if (null === $annot) {
                 continue;
             }
- 
+
             $commandParam = current($method->getParameters());
 
             // command type must be typehinted
@@ -115,11 +140,20 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
 
             $commandClassName = $commandParam->getClass()->name;
             $methodName = $method->name;
-            
-            $handler = new AnnotatedAggregateCommandHandler($commandClassName, 
-                    $methodName, $reflClass->getName(),$repository);      
-            
-            $commandBus->subscribe($commandClassName, $handler);           
+
+            $handler = new AnnotatedAggregateCommandHandler($commandClassName,
+                    $methodName, $reflClass->getName(), $repository);
+
+            $commandBus->subscribe($commandClassName, $handler);
         }
     }
+
+    /**     
+     * @param \Governor\Framework\Domain\ResourceInjectorInterface $resourceInjector
+     */
+    public function setResourceInjector(ResourceInjectorInterface $resourceInjector)
+    {
+        $this->resourceInjector = $resourceInjector;
+    }
+
 }

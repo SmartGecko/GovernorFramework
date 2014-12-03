@@ -43,8 +43,11 @@
         <parameter key="governor.saga_factory.generic.class">Governor\Framework\Saga\GenericSagaFactory</parameter>
 
         <!-- resource injectors -->
-        <parameter key="governor.resource_injector.null.class">Governor\Framework\Saga\NullResourceInjector</parameter>
-        <parameter key="governor.resource_injector.container.class">Governor\Framework\Saga\ContainerAwareResourceInjector</parameter>
+        <parameter key="governor.saga_resource_injector.null.class">Governor\Framework\Saga\NullResourceInjector</parameter>
+        <parameter key="governor.saga_resource_injector.container.class">Governor\Framework\Saga\ContainerAwareResourceInjector</parameter>
+        
+        <parameter key="governor.aggregate_resource_injector.null.class">Governor\Framework\Domain\NullResourceInjector</parameter>
+        <parameter key="governor.aggregate_resource_injector.container.class">Governor\Framework\Domain\ContainerAwareResourceInjector</parameter>
 
         <!-- AMQP terminal -->
         <parameter key="governor.event_bus_terminal.amqp.class">Governor\Framework\EventHandling\Amqp\AmqpTerminal</parameter>
@@ -67,7 +70,13 @@
         
         <service id="governor.order_resolver.annotation" class="%governor.order_resolver.annotation.class%"/>
         
-        <service id="governor.resource_injector" class="%governor.resource_injector.container.class%">
+        <service id="governor.saga_resource_injector" class="%governor.saga_resource_injector.container.class%">
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        
+        <service id="governor.aggregate_resource_injector" class="%governor.aggregate_resource_injector.container.class%">
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
@@ -93,7 +102,7 @@
 
         <!-- saga factory -->
         <service id="governor.saga_factory" class="%governor.saga_factory.generic.class%">
-            <argument type="service" id="governor.resource_injector"/>
+            <argument type="service" id="governor.saga_resource_injector"/>
         </service>
 
         <!-- serializers -->
@@ -107,6 +116,9 @@
             <argument type="service" id="governor.event_bus.default"/>
             <argument type="service" id="governor.lock_manager"/>
             <argument type="service" id="doctrine.orm.default_entity_manager"/>
+            <call method="setResourceInjector">
+                <argument type="service" id="governor.aggregate_resource_injector" />
+            </call>
         </service>
 
         <service id="governor.repository.hybrid" class="%governor.repository.hybrid.class%" abstract="true" public="false">
@@ -115,6 +127,9 @@
             <argument type="service" id="governor.lock_manager"/>
             <argument type="service" id="doctrine.orm.default_entity_manager"/>
             <argument type="service" id="governor.event_store"/>
+            <call method="setResourceInjector">
+                <argument type="service" id="governor.aggregate_resource_injector" />
+            </call>
         </service>
 
         <service id="governor.repository.eventsourcing" class="%governor.repository.eventsourcing.class%" abstract="true" public="false">

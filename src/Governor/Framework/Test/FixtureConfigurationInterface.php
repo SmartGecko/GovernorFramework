@@ -25,6 +25,8 @@
 namespace Governor\Framework\Test;
 
 use Psr\Log\LoggerInterface;
+use Governor\Framework\EventStore\EventStoreInterface;
+use Governor\Framework\Repository\RepositoryInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
 use Governor\Framework\EventSourcing\EventSourcingRepository;
 use Governor\Framework\EventSourcing\AggregateFactoryInterface;
@@ -78,22 +80,20 @@ interface FixtureConfigurationInterface
      *
      * @param string $commandName    The name of the command to register the handler for
      * @param CommandHandlerInterface $commandHandler The handler to register
-     * @return the current FixtureConfiguration, for fluent interfacing
+     * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
      */
     public function registerCommandHandler($commandName,
             CommandHandlerInterface $commandHandler);
 
     /**
-     * Registers a resource that is eligible for injection in handler method (e.g. methods annotated with {@link
-     * org.axonframework.commandhandling.annotation.CommandHandler @CommandHandler}, {@link
-     * org.axonframework.eventsourcing.annotation.EventSourcingHandler @EventSourcingHandler} and {@link
-     * org.axonframework.eventhandling.annotation.EventHandler @EventHandler}. These resource must be
-     * registered <em>before</em> registering any command handler.
+     * Registers a resource that is eligible for injection in handler method.
+     * These resource must be registered <em>before</em> registering any command handler.
      *
+     * @param string $id The resource id.
      * @param mixed $resource The resource eligible for injection
-     * @return the current FixtureConfiguration, for fluent interfacing
+     * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
      */
-    public function registerInjectableResource($resource);
+    public function registerInjectableResource($id, $resource);
 
     /**
      * Configures the given <code>domainEvents</code> as the "given" events. These are the events returned by the event
@@ -112,7 +112,7 @@ interface FixtureConfigurationInterface
      * Indicates that no relevant activity has occurred in the past. The behavior of this method is identical to giving
      * no events in the {@link #given(java.util.List)} method.
      *
-     * @return a TestExecutor instance that can execute the test with this configuration
+     * @return TestExecutorInterface a TestExecutor instance that can execute the test with this configuration
      *
      * @since 2.1.1
      */
@@ -123,7 +123,7 @@ interface FixtureConfigurationInterface
      * executed, and the resulting stored events are captured.
      *
      * @param commands the domain events the event store should return
-     * @return a TestExecutor instance that can execute the test with this configuration
+     * @return TestExecutorInterface a TestExecutor instance that can execute the test with this configuration
      */
     public function givenCommands(array $commands);
 
@@ -147,7 +147,7 @@ interface FixtureConfigurationInterface
     /**
      * Returns the event store used by this fixture. This event store is provided for wiring purposes only.
      *
-     * @return \Governor\Framework\EventStore\EventStoreInterface the event store used by this fixture
+     * @return EventStoreInterface the event store used by this fixture
      */
     public function getEventStore();
 
@@ -155,7 +155,7 @@ interface FixtureConfigurationInterface
      * Returns the repository used by this fixture. This repository is provided for wiring purposes only. The
      * repository is configured to use the fixture's event store to load events.
      *
-     * @return the repository used by this fixture
+     * @return RepositoryInterface the repository used by this fixture
      */
     public function getRepository();
 
