@@ -299,8 +299,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                 
                 $handler = new AnnotatedAggregateCommandHandler($commandName,
                         $method->name, $this->aggregateType, $this->repository,
-                        new AnnotationCommandTargetResolver());
-                $handler->setResourceInjector($this->resourceInjector);
+                        new AnnotationCommandTargetResolver());                
                 
                 $this->commandBus->subscribe($commandName, $handler);
             }

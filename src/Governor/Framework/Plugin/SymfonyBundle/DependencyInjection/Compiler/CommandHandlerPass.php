@@ -9,7 +9,8 @@
 namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler;
 
 use Governor\Framework\Annotations\CommandHandler;
-use Doctrine\Common\Annotations\AnnotationReader;
+use Governor\Framework\CommandHandling\Handlers\AnnotatedCommandHandler;
+use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -23,8 +24,6 @@ class CommandHandlerPass extends AbstractHandlerPass
 
     public function process(ContainerBuilder $container)
     {
-        $reader = new AnnotationReader();
-
         foreach ($container->findTaggedServiceIds('governor.command_handler') as $id => $attributes) {
             $busDefinition = $container->findDefinition(sprintf("governor.command_bus.%s",
                             isset($attributes['command_bus']) ? $attributes['command_bus']
@@ -32,40 +31,23 @@ class CommandHandlerPass extends AbstractHandlerPass
 
             $definition = $container->findDefinition($id);
             $class = $definition->getClass();
+            
+            $inspector = new MethodMessageHandlerInspector(new \ReflectionClass($class),  
+                    CommandHandler::class);
 
-            $reflClass = new \ReflectionClass($class);
-
-            foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                $annot = $reader->getMethodAnnotation($method, CommandHandler::class);
-
-                // not a handler
-                if (null === $annot) {
-                    continue;
-                }
-
-                $commandParam = current($method->getParameters());
-
-                // command type must be typehinted
-                if (!$commandParam->getClass()) {
-                    continue;
-                }
-
-                $commandClassName = $commandParam->getClass()->name;
-                $methodName = $method->name;
-                $commandTarget = new Reference($id);
+            foreach ($inspector->getHandlerDefinitions() as $handlerDefinition) {
                 $handlerId = $this->getHandlerIdentifier("governor.command_handler");
-
-                $container->register($handlerId,
-                                'Governor\Framework\CommandHandling\Handlers\AnnotatedCommandHandler')
-                        ->addArgument($commandClassName)
-                        ->addArgument($methodName)
-                        ->addArgument($commandTarget)
+                
+                $container->register($handlerId, AnnotatedCommandHandler::class)                                
+                        ->addArgument($handlerDefinition->getPayloadType())
+                        ->addArgument($handlerDefinition->getMethod()->name)
+                        ->addArgument(new Reference($id))
                         ->setPublic(true)
                         ->setLazy(true);
 
                 $busDefinition->addMethodCall('subscribe',
-                        array($commandClassName, new Reference($handlerId)));
-            }
+                        array($handlerDefinition->getTarget()->name, new Reference($handlerId)));
+            }         
         }
     }
 

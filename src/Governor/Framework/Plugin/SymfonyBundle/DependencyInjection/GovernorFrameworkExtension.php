@@ -25,6 +25,7 @@
 namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection;
 
 use Governor\Framework\Annotations\CommandHandler;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -33,8 +34,8 @@ use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Symfony\Component\Finder\Finder;
+use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
+use Governor\Framework\CommandHandling\Handlers\AnnotatedAggregateCommandHandler;
 
 class GovernorFrameworkExtension extends Extension
 {
@@ -227,7 +228,7 @@ class GovernorFrameworkExtension extends Extension
             case 'orm':
                 $definition->addArgument(new Reference(sprintf('doctrine.orm.%s',
                                 $config['saga_repository']['parameters']['entity_manager'])));
-                $definition->addArgument(new Reference('governor.saga_resource_injector'));
+                $definition->addArgument(new Reference('governor.resource_injector'));
                 $definition->addArgument(new Reference('governor.serializer'));
                 break;
         }
@@ -308,54 +309,29 @@ class GovernorFrameworkExtension extends Extension
     private function loadAggregateCommandHandlers($config,
             ContainerBuilder $container)
     {
-        $reader = new AnnotationReader();
-
-
         foreach ($config['aggregate_command_handlers'] as $name => $parameters) {
             $busDefinition = $container->findDefinition(sprintf("governor.command_bus.%s",
                             $parameters['command_bus']));
+            
+            $inspector = new MethodMessageHandlerInspector(new \ReflectionClass($parameters['aggregate_root']),  
+                    CommandHandler::class);
 
-            $reflectionClass = new \ReflectionClass($parameters['aggregate_root']);
-
-            foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                $annot = $reader->getMethodAnnotation($method, CommandHandler::class);                        
-
-                // not a handler
-                if (null === $annot) {
-                    continue;
-                }
-
-                $commandParam = current($method->getParameters());
-
-                // command type must be typehinted
-                if (!$commandParam->getClass()) {
-                    continue;
-                }
-
-                $handlerClass = 'Governor\Framework\CommandHandling\Handlers\AnnotatedAggregateCommandHandler';
-                $methodName = $method->name;
-                $commandClassName = $commandParam->getClass()->name;
-                $repository = new Reference($parameters['repository']);
-                $resolver = new Reference('governor.command_target_resolver');
-
+            foreach ($inspector->getHandlerDefinitions() as $handlerDefinition) {
                 $handlerId = sprintf("governor.aggregate_command_handler.%s",
                         hash('crc32', openssl_random_pseudo_bytes(8)));
-
-                $container->register($handlerId, $handlerClass)
-                        ->addArgument($commandClassName)
-                        ->addArgument($methodName)
+                               
+                $container->register($handlerId, AnnotatedAggregateCommandHandler::class)
+                        ->addArgument($handlerDefinition->getPayloadType())
+                        ->addArgument($handlerDefinition->getMethod()->name)
                         ->addArgument($parameters['aggregate_root'])
-                        ->addArgument($repository)
-                        ->addArgument($resolver)
-                        ->addMethodCall('setResourceInjector', array(
-                            new Reference('governor.aggregate_resource_injector'))
-                        )
+                        ->addArgument(new Reference($parameters['repository']))
+                        ->addArgument(new Reference('governor.command_target_resolver'))                     
                         ->setPublic(true)
                         ->setLazy(true);
 
-                $busDefinition->addMethodCall('subscribe',
-                        array($commandParam->getClass()->name, new Reference($handlerId)));
-            }
+                 $busDefinition->addMethodCall('subscribe',
+                        array($handlerDefinition->getTarget()->name, new Reference($handlerId)));
+            }                  
         }
     }
 

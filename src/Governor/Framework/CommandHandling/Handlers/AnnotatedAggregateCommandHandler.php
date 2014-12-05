@@ -25,7 +25,6 @@
 namespace Governor\Framework\CommandHandling\Handlers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Governor\Framework\Domain\ResourceInjectorInterface;
 use Governor\Framework\CommandHandling\CommandBusInterface;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 use Governor\Framework\CommandHandling\CommandTargetResolverInterface;
@@ -57,11 +56,6 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
      */
     private $targetResolver;
     
-    /**     
-     * @var ResourceInjectorInterface
-     */
-    private $resourceInjector;
-
     public function __construct($commandName, $methodName, $aggregateType,
             RepositoryInterface $repository,
             CommandTargetResolverInterface $targetResolver = null)
@@ -146,14 +140,6 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
 
             $commandBus->subscribe($commandClassName, $handler);
         }
-    }
-
-    /**     
-     * @param \Governor\Framework\Domain\ResourceInjectorInterface $resourceInjector
-     */
-    public function setResourceInjector(ResourceInjectorInterface $resourceInjector)
-    {
-        $this->resourceInjector = $resourceInjector;
     }
 
 }
