@@ -22,13 +22,27 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Annotations;
+namespace Governor\Framework\Common;
 
 /**
- * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * Description of AbstractParameterResolverFactory
+ *
+ * @author david
  */
-final class Inject
+abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
 {
-    public $service;
+
+    protected function getResolverFor($annotations,
+            \ReflectionParameter $parameter)
+    {
+        foreach ($annotations as $annotation) {
+            if ($annotation instanceof Governor\Resolve &&
+                    $annotation->parameter = $parameter->getName()) {
+                return $annotation->resolver;
+            }
+        }
+
+        return null;
+    }
+
 }

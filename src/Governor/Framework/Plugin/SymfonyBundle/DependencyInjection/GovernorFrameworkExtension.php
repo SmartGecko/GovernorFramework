@@ -319,18 +319,18 @@ class GovernorFrameworkExtension extends Extension
             foreach ($inspector->getHandlerDefinitions() as $handlerDefinition) {
                 $handlerId = sprintf("governor.aggregate_command_handler.%s",
                         hash('crc32', openssl_random_pseudo_bytes(8)));
-                               
+                                                               
                 $container->register($handlerId, AnnotatedAggregateCommandHandler::class)
-                        ->addArgument($handlerDefinition->getPayloadType())
-                        ->addArgument($handlerDefinition->getMethod()->name)
                         ->addArgument($parameters['aggregate_root'])
-                        ->addArgument(new Reference($parameters['repository']))
-                        ->addArgument(new Reference('governor.command_target_resolver'))                     
+                        ->addArgument($handlerDefinition->getMethod()->name)
+                        ->addArgument(new Reference('governor.parameter_resolver_factory'))                          
+                        ->addArgument(new Reference($parameters['repository']))                        
+                        ->addArgument(new Reference('governor.command_target_resolver'))                          
                         ->setPublic(true)
                         ->setLazy(true);
 
                  $busDefinition->addMethodCall('subscribe',
-                        array($handlerDefinition->getTarget()->name, new Reference($handlerId)));
+                        array($handlerDefinition->getPayloadType(), new Reference($handlerId)));
             }                  
         }
     }

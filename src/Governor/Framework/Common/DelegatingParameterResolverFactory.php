@@ -22,13 +22,35 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Annotations;
+namespace Governor\Framework\Common;
 
 /**
- * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * Description of DelegatingParameterResolverFactory
+ *
+ * @author david
  */
-final class Inject
+class DelegatingParameterResolverFactory implements ParameterResolverFactoryInterface
 {
-    public $service;
+    /**     
+     * @var ParameterResolverFactoryInterface[]
+     */
+    private $delegates;
+    
+    function __construct(array $delegates)
+    {
+        $this->delegates = $delegates;
+    }
+    
+    public function createInstance(array $methodAnnotations,
+            \ReflectionParameter $parameter)
+    {
+        foreach ($this->delegates as $delegate) {
+            if (null !== $factory = $delegate->createInstance($methodAnnotations, $parameter)) {
+                return $factory;
+            }
+        }
+        
+        return null;
+    }
+
 }

@@ -22,13 +22,42 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Annotations;
+namespace Governor\Framework\Common;
+
+use Governor\Framework\Annotations as Governor;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * Description of ContainerParameterResolverFactory
+ *
+ * @author david
  */
-final class Inject
+class ContainerParameterResolverFactory extends AbstractParameterResolverFactory implements ContainerAwareInterface
 {
-    public $service;
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    public function createInstance(array $methodAnnotations,
+            \ReflectionParameter $parameter)
+    {
+        $resolver = $this->getResolverFor($methodAnnotations, $parameter);
+        
+        if ($resolver && $resolver instanceof Governor\Inject) {
+            $service = $this->container->get($resolver->service);
+            
+            return new FixedValueParameterResolver($service);
+        }
+        
+        return null;
+    }
+
+    public function setContainer(ContainerInterface $container = null)
+    {
+        $this->container = $container;
+    }
+
 }

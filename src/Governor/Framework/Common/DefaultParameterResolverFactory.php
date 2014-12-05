@@ -26,41 +26,30 @@ namespace Governor\Framework\Common;
 
 use Governor\Framework\Annotations as Governor;
 use Governor\Framework\Domain\MetaData;
+
 /**
  * Description of DefaultParameterResolverFactory
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class DefaultParameterResolverFactory implements ParameterResolverFactoryInterface
+class DefaultParameterResolverFactory extends AbstractParameterResolverFactory
 {
-    public function createInstance(array $methodAnnotations, \ReflectionParameter $parameter) 
+
+    public function createInstance(array $methodAnnotations,
+            \ReflectionParameter $parameter)
     {
         $resolver = $this->getResolverFor($methodAnnotations, $parameter);
-        
-        if ($resolver) {
-            if ($resolver instanceof Governor\MetaData) {
-                return new AnnotatedMetaDataParameterResolver($resolver, $parameter);
-            }
-            
-            if ($resolver instanceof Governor\Inject) {
-                return new ContainerParameterResolver($resolver, $parameter);
-            }
+
+        if ($resolver && $resolver instanceof Governor\MetaData) {
+            return new AnnotatedMetaDataParameterResolver($resolver, $parameter);
         }
-        
+
         if ($parameter->getClass() === MetaData::class) {
             return new MetaDataParameterResolver();
-        }
-    }
-
-    private function getResolverFor($annotations, \ReflectionParameter $parameter) 
-    {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve && 
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
         }
         
         return null;
     }
+
 }

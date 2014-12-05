@@ -55,9 +55,30 @@
         <parameter key="governor.interceptor.validator.class">Governor\Framework\CommandHandling\Interceptors\ValidatorInterceptor</parameter>
         <parameter key="governor.interceptor.audit.class">Governor\Framework\Audit\AuditingInterceptor</parameter>
         
+        <!-- parameter resolvers -->
+        <parameter key="governor.parameter_resolver_factory.class">Governor\Framework\Common\DelegatingParameterResolverFactory</parameter>
+        <parameter key="governor.parameter_resolver_factory.default.class">Governor\Framework\Common\DefaultParameterResolverFactory</parameter>
+        <parameter key="governor.parameter_resolver_factory.container.class">Governor\Framework\Common\ContainerParameterResolverFactory</parameter>        
     </parameters>
 
     <services>
+        
+        <service id="governor.parameter_resolver_factory" class="%governor.parameter_resolver_factory.class%">
+            <argument type="collection">
+                <argument type="service" id="governor.parameter_resolver_factory.default"/>
+                <argument type="service" id="governor.parameter_resolver_factory.container"/>
+            </argument>
+        </service>
+        
+        <service id="governor.parameter_resolver_factory.default" class="%governor.parameter_resolver_factory.default.class%">            
+        </service>
+                   
+        <service id="governor.parameter_resolver_factory.container" class="%governor.parameter_resolver_factory.container.class%">
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        
         <service id="governor.interceptor.validator" class="%governor.interceptor.validator.class%">
             <argument type="service" id="validator"/>
         </service>
