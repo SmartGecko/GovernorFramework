@@ -57,6 +57,8 @@ use Governor\Framework\Repository\NullLockManager;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
+use Governor\Framework\Common\DelegatingParameterResolverFactory;
+use Governor\Framework\Common\DefaultParameterResolverFactory;
 
 /**
  * Description of GivenWhenThenTestFixture
@@ -81,11 +83,11 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     private $reportIllegalStateChange = true;
     private $aggregateType;
     private $explicitCommandHandlersSet;
-    
-    /**     
-     * @var FixtureResourceInjector
+
+    /**
+     * @var FixtureParameterResolverFactory
      */
-    private $resourceInjector;
+    private $parameterResolver;
 
     /**
      * Initializes a new given-when-then style test fixture for the given <code>aggregateType</code>.
@@ -104,20 +106,20 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->eventStore = new RecordingEventStore($this->storedEvents,
                 $this->givenEvents, $this->aggregateIdentifier);
 
-        $this->resourceInjector = new FixtureResourceInjector();
+        $this->parameterResolver = new FixtureParameterResolverFactory();
+
         $this->aggregateType = $aggregateType;
         $this->clearGivenWhenState();
     }
 
-       
     public function getLogger()
     {
         return $this->logger;
     }
-    
+
     public function registerRepository(EventSourcingRepository $eventSourcingRepository)
     {
-        $this->repository = new IdentifierValidatingRepository($eventSourcingRepository, $this->resourceInjector);
+        $this->repository = new IdentifierValidatingRepository($eventSourcingRepository);
         //   $eventSourcingRepository->setEventBus($this->eventBus);
         return $this;
     }
@@ -138,7 +140,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $reader = new \Doctrine\Common\Annotations\AnnotationReader();
 
         foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-            $annot = $reader->getMethodAnnotation($method, CommandHandler::class);                    
+            $annot = $reader->getMethodAnnotation($method, CommandHandler::class);
 
             // not a handler
             if (null === $annot) {
@@ -153,10 +155,11 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
             }
 
             $commandClassName = $commandParam->getClass()->name;
+            $handler = new AnnotatedCommandHandler($commandClassName,
+                    $method->name, $this->parameterResolver,
+                    $annotatedCommandHandler);
 
-            $this->commandBus->subscribe($commandClassName,
-                    new AnnotatedCommandHandler($commandClassName,
-                    $method->name, $annotatedCommandHandler));
+            $this->commandBus->subscribe($commandClassName, $handler);
         }
 
         return $this;
@@ -179,9 +182,9 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
             "registerCommandHandler() or " .
             "registerAnnotatedCommandHandler()");
         }
-        
-        $this->resourceInjector->registerResource($id, $resource);
-        
+
+        $this->parameterResolver->registerService($id, $resource);
+
         return $this;
     }
 
@@ -281,7 +284,8 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
             $reflectionClass = new \ReflectionClass($this->aggregateType);
 
             foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                $annot = $reader->getMethodAnnotation($method, CommandHandler::class);                        
+                $annot = $reader->getMethodAnnotation($method,
+                        CommandHandler::class);
 
                 // not a handler
                 if (null === $annot) {
@@ -296,11 +300,11 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                 }
 
                 $commandName = $commandParam->getClass()->name;
-                
-                $handler = new AnnotatedAggregateCommandHandler($commandName,
-                        $method->name, $this->aggregateType, $this->repository,
-                        new AnnotationCommandTargetResolver());                
-                
+
+                $handler = new AnnotatedAggregateCommandHandler($this->aggregateType,
+                        $method->name, $this->parameterResolver,
+                        $this->repository, new AnnotationCommandTargetResolver());
+
                 $this->commandBus->subscribe($commandName, $handler);
             }
         }
@@ -413,7 +417,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         return $this->eventBus;
     }
 
-     /**
+    /**
      * Returns the {@see EventStoreInterface} used by this fixture.
      * 
      * @return EventStoreInterface
@@ -446,7 +450,7 @@ class RecordingEventBus implements EventBusInterface
     public function publish(array $events)
     {
         $this->publishedEvents = array_merge($this->publishedEvents, $events);
-        
+
         foreach ($events as $event) {
             foreach ($this->eventListeners as $eventListener) {
                 $eventListener->handle($event);
@@ -470,22 +474,19 @@ class IdentifierValidatingRepository implements RepositoryInterface
 {
 
     private $delegate;
-    private $injector;
 
-    public function __construct(RepositoryInterface $delegate, FixtureResourceInjector $injector)
+    public function __construct(RepositoryInterface $delegate)
     {
         $this->delegate = $delegate;
-        $this->injector = $injector;
     }
 
     public function load($aggregateIdentifier, $expectedVersion = null)
     {
         $aggregate = $this->delegate->load($aggregateIdentifier,
-                $expectedVersion);                
-        
-        $this->validateIdentifier($aggregateIdentifier, $aggregate);        
-        $this->injector->injectResources($aggregate);
-        
+                $expectedVersion);
+
+        $this->validateIdentifier($aggregateIdentifier, $aggregate);
+
         return $aggregate;
     }
 

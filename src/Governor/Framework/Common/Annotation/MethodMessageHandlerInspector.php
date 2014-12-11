@@ -30,76 +30,75 @@ use Governor\Framework\Common\ReflectionUtils;
 /**
  * Description of MethodMessageHandlerInspector
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class MethodMessageHandlerInspector 
+class MethodMessageHandlerInspector
 {
-    
-    /**    
+
+    /**
      * @var \ReflectionClass
      */
     private $targetClass;
-    
-    /**         
+
+    /**
      * @var string 
      */
     private $annotation;
-    
+
     /**
      * @var array
      */
     private $handlers;
-        
 
-    
-    function __construct(\ReflectionClass $targetClass, $annotation) 
+    function __construct(\ReflectionClass $targetClass, $annotation)
     {
         $this->handlers = array();
         $this->targetClass = $targetClass;
-        $this->annotation = $annotation;        
-        
+        $this->annotation = $annotation;
+
         $this->inspect();
     }
 
-    
     private function inspect()
     {
         $reader = new AnnotationReader();
-        
+
         foreach (ReflectionUtils::getMethods($this->targetClass) as $method) {
-            $annotation = $reader->getMethodAnnotation($method, $this->annotation);
-            
+            $annotation = $reader->getMethodAnnotation($method,
+                    $this->annotation);
+
             if (!$annotation) {
                 continue;
             }
-            
+
             $payloadType = $this->extractPayloadType($method);
-            
+            $methodAnnotations = $reader->getMethodAnnotations($method);
+
             if ($payloadType) {
-                $this->handlers[] = new AnnotatedHandlerDefinition($this->targetClass, $method, $payloadType);
+                $this->handlers[] = new AnnotatedHandlerDefinition($this->targetClass,
+                        $method, $methodAnnotations, $payloadType);
             }
         }
     }
-    
+
     private function extractPayloadType(\ReflectionMethod $method)
     {
         $param = current($method->getParameters());
-        
+
         if ($param->getClass()) {
             return $param->getClass()->name;
         }
-        
+
         return null;
     }
-    
-    /**     
+
+    /**
      * @return HandlerDefinitionInterface[]
      */
-    function getHandlerDefinitions() 
+    function getHandlerDefinitions()
     {
         return $this->handlers;
     }
 
-
-    
 }

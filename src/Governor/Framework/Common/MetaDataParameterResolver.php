@@ -28,7 +28,8 @@ use Governor\Framework\Domain\MessageInterface;
 /**
  * Description of MetaDataParameterResolver
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class MetaDataParameterResolver implements ParameterResolverInterface
 {

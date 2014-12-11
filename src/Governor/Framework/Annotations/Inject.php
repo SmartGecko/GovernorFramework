@@ -26,7 +26,7 @@ namespace Governor\Framework\Annotations;
 
 /**
  * @Annotation
- * @Target("METHOD")
+ * @Target({"METHOD", "ANNOTATION"})
  */
 final class Inject
 {

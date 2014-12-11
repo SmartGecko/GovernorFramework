@@ -11,7 +11,8 @@ namespace Governor\Framework\Common\Annotation;
 /**
  * Description of AbstractAnnotatedHandlerDefinition
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class AnnotatedHandlerDefinition implements HandlerDefinitionInterface
 {   
@@ -31,17 +32,28 @@ class AnnotatedHandlerDefinition implements HandlerDefinitionInterface
      */
     private $payloadType;
     
+    /**     
+     * @var array
+     */
+    private $methodAnnotations;
+    
     function __construct(\ReflectionClass $target, \ReflectionMethod $method, 
-            $payloadType) 
+            array $methodAnnotations, $payloadType) 
     {
         $this->target = $target;
         $this->method = $method;
+        $this->methodAnnotations = $methodAnnotations;
         $this->payloadType = $payloadType;
     }
 
     public function getMethod() 
     {
         return $this->method;
+    }
+    
+    public function getMethodAnnotations()
+    {
+        return $this->methodAnnotations;
     }
 
     public function getPayloadType() 
