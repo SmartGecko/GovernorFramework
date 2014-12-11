@@ -31,23 +31,24 @@ class CommandHandlerPass extends AbstractHandlerPass
 
             $definition = $container->findDefinition($id);
             $class = $definition->getClass();
-            
-            $inspector = new MethodMessageHandlerInspector(new \ReflectionClass($class),  
+
+            $inspector = new MethodMessageHandlerInspector(new \ReflectionClass($class),
                     CommandHandler::class);
 
             foreach ($inspector->getHandlerDefinitions() as $handlerDefinition) {
                 $handlerId = $this->getHandlerIdentifier("governor.command_handler");
-                
-                $container->register($handlerId, AnnotatedCommandHandler::class)                                
-                        ->addArgument($handlerDefinition->getPayloadType())
+
+                $container->register($handlerId, AnnotatedCommandHandler::class)
+                        ->addArgument($class)
                         ->addArgument($handlerDefinition->getMethod()->name)
+                        ->addArgument(new Reference('governor.parameter_resolver_factory'))
                         ->addArgument(new Reference($id))
                         ->setPublic(true)
                         ->setLazy(true);
 
                 $busDefinition->addMethodCall('subscribe',
-                        array($handlerDefinition->getTarget()->name, new Reference($handlerId)));
-            }         
+                        array($handlerDefinition->getPayloadType(), new Reference($handlerId)));
+            }
         }
     }
 

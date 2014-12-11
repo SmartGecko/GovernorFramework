@@ -24,8 +24,11 @@
 
 namespace Governor\Framework\CommandHandling\Handlers;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Governor\Framework\Common\ParameterResolverFactoryInterface;
+use Governor\Framework\Common\PayloadParameterResolver;
+use Governor\Framework\Domain\MessageInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
-use Governor\Framework\CommandHandling\CommandMessageInterface;
 
 /**
  * Description of AbstractAnnotatedCommandHandler
@@ -35,21 +38,65 @@ use Governor\Framework\CommandHandling\CommandMessageInterface;
 abstract class AbstractAnnotatedCommandHandler implements CommandHandlerInterface
 {
 
-    protected $commandName;
-    protected $methodName;
+    /**
+     * @var \ReflectionMethod 
+     */
+    private $method;
 
-    function __construct($commandName, $methodName)
-    {
-        $this->commandName = $commandName;
-        $this->methodName = $methodName;
+    /**
+     * @var array
+     */
+    private $annotations;
+
+    /**
+     * @var ParameterResolverFactoryInterface
+     */
+    private $parameterResolver;
+
+    function __construct($className, $methodName,
+            ParameterResolverFactoryInterface $parameterResolver)
+    {        
+        $this->method = new \ReflectionMethod($className, $methodName);
+
+        $reader = new AnnotationReader();
+        
+        $this->annotations = $reader->getMethodAnnotations($this->method);
+        $this->parameterResolver = $parameterResolver;
     }
 
-    protected function verifyCommandMessage(CommandMessageInterface $message)
+    public function getMethod()
     {
-        if ($message->getCommandName() !== $this->commandName) {
-            throw new \BadMethodCallException(sprintf("Invalid command in handler %s, expected %s but got %s",
-                get_class($this), $this->commandName, $message->getCommandName()));
+        return $this->method;
+    }
+
+    public function getAnnotations()
+    {
+        return $this->annotations;
+    }
+
+    public function getParameterResolver()
+    {
+        return $this->parameterResolver;
+    }
+
+    protected function resolveArguments(MessageInterface $message)
+    {
+        $arguments = array();
+        $parameters = $this->method->getParameters();
+                
+        for ($cc = 0; $cc < count($parameters); $cc++) {            
+            if ($cc === 0) {
+                $resolver = new PayloadParameterResolver($message->getPayloadType());
+                $arguments[] = $resolver->resolveParameterValue($message);
+            } else {                
+                $resolver = $this->parameterResolver->createInstance($this->annotations,
+                        $parameters[$cc]);
+                                                
+                $arguments[] = $resolver->resolveParameterValue($message);                
+            }
         }
+
+        return $arguments;
     }
 
 }

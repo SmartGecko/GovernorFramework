@@ -14,7 +14,8 @@ use Governor\Framework\Domain\MetaData;
 /**
  * Description of MessageSerializer
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class MessageSerializer implements SerializerInterface
 {

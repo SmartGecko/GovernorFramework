@@ -13,7 +13,8 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 /**
  * Description of AbstractHandlerPass
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 abstract class AbstractHandlerPass implements CompilerPassInterface
 {

@@ -20,8 +20,8 @@ class ParameterResolving {
     
     /**
      * @Governor\CommandHandler
-     * @Governor\Resolve(parameter="service", @Governor\Inject("service.name"))
-     * @Governor\Resolve(parameter="userIdentifier", @Governor\MetaData)
+     * @Governor\Resolve(parameter="service", resolver = @Governor\Inject("service.name"))
+     * @Governor\Resolve(parameter="userIdentifier", resolver = @Governor\MetaData)
      * @param Command $command
      */
     public function doSomething(Command $command, Service $service, MetaData $metadata, $userIdentifier)

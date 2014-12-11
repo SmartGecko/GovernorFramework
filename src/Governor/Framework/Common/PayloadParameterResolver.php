@@ -12,7 +12,8 @@ use Governor\Framework\Domain\MessageInterface;
 /**
  * Description of PayloadParameterResolver
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
 class PayloadParameterResolver implements ParameterResolverInterface
 {
