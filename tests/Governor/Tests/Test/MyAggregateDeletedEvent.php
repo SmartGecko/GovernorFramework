@@ -22,29 +22,26 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
-
-use Governor\Framework\Annotations as Governor;
+namespace Governor\Tests\Test;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of MyAggregateDeletedEvent
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class MyAggregateDeletedEvent
 {
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
-    {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+    private $withIllegalStateChange;
 
-        return null;
+    public function __construct($withIllegalStateChange)
+    {
+        $this->withIllegalStateChange = $withIllegalStateChange;
+    }
+
+    public function isWithIllegalStateChange()
+    {
+        return $this->withIllegalStateChange;
     }
 
 }

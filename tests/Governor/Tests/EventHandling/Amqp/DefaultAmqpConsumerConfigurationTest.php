@@ -22,29 +22,31 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\EventHandling\Amqp;
 
-use Governor\Framework\Annotations as Governor;
-
+use Governor\Framework\EventHandling\Amqp\DefaultAmqpConsumerConfiguration;
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of DefaultAmqpConsumerConfigurationTest
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class DefaultAmqpConsumerConfigurationTest extends \PHPUnit_Framework_TestCase
 {
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
+    public function testUsesDefaultSettings()
     {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+        $testSubject = new DefaultAmqpConsumerConfiguration("QueueName");
 
-        return null;
+        $this->assertEquals("QueueName", $testSubject->getQueueName());
+        $this->assertEquals(true, $testSubject->getExclusive());
+        $this->assertNull($testSubject->getPrefetchCount());
+    }
+
+    public function testNullQueueAllowed()
+    {
+        $testSubject = new DefaultAmqpConsumerConfiguration(null);
+        $this->assertNull($testSubject->getQueueName());
     }
 
 }

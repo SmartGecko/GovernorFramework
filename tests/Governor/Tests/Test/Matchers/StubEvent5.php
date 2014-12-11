@@ -22,29 +22,14 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
-
-use Governor\Framework\Annotations as Governor;
+namespace Governor\Tests\Test\Matchers;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of StubEvent3
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class StubEvent5 extends StubEvent
 {
-
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
-    {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
-
-        return null;
-    }
-
+    //put your code here
 }

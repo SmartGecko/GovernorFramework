@@ -22,29 +22,32 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\Saga\Repository;
 
-use Governor\Framework\Annotations as Governor;
+use JMS\Serializer\Annotation\Type;
+use Governor\Framework\Saga\Annotation\AbstractAnnotatedSaga;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of StubSaga
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class StubSaga extends AbstractAnnotatedSaga
 {
+    /**
+     * @Type("integer")
+     * @var integer 
+     */
+    public $counter = 0;
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
+    public function __construct($identifier)
     {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+        parent::__construct($identifier);
+    }
 
-        return null;
+    public function end()
+    {
+        parent::end();
     }
 
 }

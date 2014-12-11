@@ -22,29 +22,38 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\Audit;
 
-use Governor\Framework\Annotations as Governor;
+use Governor\Framework\CommandHandling\GenericCommandMessage;
+use Governor\Framework\Audit\CorrelationAuditDataProvider;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of CorrelationAuditDataProviderTest
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class CorrelationAuditDataProviderTest extends \PHPUnit_Framework_TestCase
 {
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
+    public function testDefaultName()
     {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+        $command = new GenericCommandMessage(new \stdClass());
+        $provider = new CorrelationAuditDataProvider();
+        $actual = $provider->provideAuditDataFor($command);        
 
-        return null;
+        $this->assertCount(1, $actual);
+        $this->assertEquals($command->getIdentifier(),
+                $actual["commandIdentifier"]);
+    }
+
+    public function testCustomName()
+    {
+        $command = new GenericCommandMessage(new \stdClass());
+        $provider = new CorrelationAuditDataProvider('bla');
+        $actual = $provider->provideAuditDataFor($command);
+
+        $this->assertCount(1, $actual);
+        $this->assertEquals($command->getIdentifier(), $actual["bla"]);
     }
 
 }

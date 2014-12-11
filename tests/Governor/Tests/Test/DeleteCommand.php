@@ -22,29 +22,38 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\Test;
 
-use Governor\Framework\Annotations as Governor;
+use Governor\Framework\Annotations\TargetAggregateIdentifier;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of DeleteCommand
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class DeleteCommand
 {
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
-    {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+    /**
+     * @TargetAggregateIdentifier
+     */
+    private $aggregateIdentifier;
+    private $asIllegalChange;
 
-        return null;
+    public function __construct($aggregateIdentifier, $asIllegalChange)
+    {
+        $this->aggregateIdentifier = $aggregateIdentifier;
+        $this->asIllegalChange = $asIllegalChange;
+    }
+
+    public function getAggregateIdentifier()
+    {
+        return $this->aggregateIdentifier;
+    }
+
+    public function isAsIllegalChange()
+    {
+        return $this->asIllegalChange;
     }
 
 }

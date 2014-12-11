@@ -22,29 +22,22 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\Test\Matchers;
 
-use Governor\Framework\Annotations as Governor;
+use Governor\Framework\Test\Matchers\Matchers;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of NullOrVoidMatcherTest
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class NullOrVoidMatcherTest extends \PHPUnit_Framework_TestCase
 {
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
+    public function testMatcherMatchesVoidAndNull()
     {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
-
-        return null;
+        $this->assertTrue(Matchers::nothing()->matches(null));
+        $this->assertFalse(Matchers::nothing()->matches(new \stdClass()));
     }
 
 }

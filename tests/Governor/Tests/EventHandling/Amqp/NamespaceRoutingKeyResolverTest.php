@@ -22,29 +22,34 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\EventHandling\Amqp;
 
-use Governor\Framework\Annotations as Governor;
+use Governor\Framework\Domain\GenericEventMessage;
+use Governor\Framework\EventHandling\Amqp\NamespaceRoutingKeyResolver;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of NamespaceRoutingKeyResolverTest
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class NamespaceRoutingKeyResolverTest extends \PHPUnit_Framework_TestCase
 {
-
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
+    /**     
+     * @var NamespaceRoutingKeyResolver
+     */
+    private $testSubject;
+    
+    public function testResolver()
     {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
-
-        return null;
+        $this->testSubject = new NamespaceRoutingKeyResolver();
+        $key = $this->testSubject->resolveRoutingKey(new GenericEventMessage(new NamespacesPayload()));
+        
+        $this->assertEquals('Governor.Tests.EventHandling.Amqp.NamespacesPayload', $key);
     }
+}
 
+class NamespacesPayload
+{
+    
 }

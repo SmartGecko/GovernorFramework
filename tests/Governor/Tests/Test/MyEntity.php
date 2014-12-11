@@ -22,29 +22,32 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\Test;
 
-use Governor\Framework\Annotations as Governor;
+use Governor\Framework\Annotations\EventHandler;
+use Governor\Framework\EventSourcing\Annotation\AbstractAnnotatedEntity;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of MyEntity
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class MyEntity extends AbstractAnnotatedEntity
 {
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
-    {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+    private $lastNumber;
 
-        return null;
+    /**
+     * @EventHandler
+     */
+    public function handleMyEvent(MyEvent $event)
+    {
+        $this->lastNumber = $event->getSomeValue();
+    }
+
+    public function getLastNumber()
+    {
+        return $this->lastNumber;
     }
 
 }

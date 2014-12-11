@@ -22,29 +22,26 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
-
-use Governor\Framework\Annotations as Governor;
+namespace Governor\Tests\Test;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of CreateAggregateCommand
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class CreateAggregateCommand
 {
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
-    {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+    private $aggregateIdentifier;
 
-        return null;
+    public function __construct($aggregateIdentifier = null)
+    {
+        $this->aggregateIdentifier = $aggregateIdentifier;
+    }
+
+    public function getAggregateIdentifier()
+    {
+        return $this->aggregateIdentifier;
     }
 
 }

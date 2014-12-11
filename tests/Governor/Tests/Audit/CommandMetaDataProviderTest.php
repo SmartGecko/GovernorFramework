@@ -22,29 +22,28 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\Audit;
 
-use Governor\Framework\Annotations as Governor;
+use Governor\Framework\Domain\MetaData;
+use Governor\Framework\CommandHandling\GenericCommandMessage;
+use Governor\Framework\Audit\CommandMetaDataProvider;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of CommandMetaDataProviderTest
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class CommandMetaDataProviderTest extends \PHPUnit_Framework_TestCase
 {
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
+    public function testProvideAuditData()
     {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+        $metaData = MetaData::emptyInstance();
+        $message = new GenericCommandMessage(new \stdClass(), $metaData);
+        $provider = new CommandMetaDataProvider();
 
-        return null;
+        $actual = $provider->provideAuditDataFor($message);
+        $this->assertSame($metaData->all(), $actual);
     }
 
 }

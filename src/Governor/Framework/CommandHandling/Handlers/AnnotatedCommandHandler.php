@@ -10,7 +10,6 @@ namespace Governor\Framework\CommandHandling\Handlers;
 
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
-use Governor\Framework\Common\Annotation\MethodMessageHandler;
 use Governor\Framework\Common\ParameterResolverFactoryInterface;
 
 /**
@@ -26,10 +25,10 @@ class AnnotatedCommandHandler extends AbstractAnnotatedCommandHandler
      */
     private $target;
 
-    public function __construct(\ReflectionMethod $method, array $annotations,
+    public function __construct($className, $methodName,
             ParameterResolverFactoryInterface $parameterResolver, $target)
     {
-        parent::__construct($method, $annotations, $parameterResolver);
+        parent::__construct(get_class($target), $methodName, $parameterResolver);
         $this->target = $target;
     }
 

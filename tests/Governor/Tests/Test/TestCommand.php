@@ -22,29 +22,31 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\Test;
 
-use Governor\Framework\Annotations as Governor;
+use Governor\Framework\Annotations\TargetAggregateIdentifier;
 
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of TestCommand
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class TestCommand
 {
 
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
-    {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+    /**
+     * @TargetAggregateIdentifier
+     */
+    private $aggregateIdentifier;
 
-        return null;
+    public function __construct($aggregateIdentifier)
+    {
+        $this->aggregateIdentifier = $aggregateIdentifier;
+    }
+
+    public function getAggregateIdentifier()
+    {
+        return $this->aggregateIdentifier;
     }
 
 }

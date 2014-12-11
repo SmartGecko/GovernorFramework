@@ -22,29 +22,38 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Tests\Correlation;
 
-use Governor\Framework\Annotations as Governor;
-
+use Governor\Framework\Domain\MetaData;
+use Governor\Framework\Domain\GenericMessage;
+use Governor\Framework\Correlation\SimpleCorrelationDataProvider;
 /**
- * Description of AbstractParameterResolverFactory
+ * Description of SimpleCorrelationDataProviderTest
  *
  * @author david
  */
-abstract class AbstractParameterResolverFactory implements ParameterResolverFactoryInterface
+class SimpleCorrelationDataProviderTest extends \PHPUnit_Framework_TestCase
 {
-
-    protected function getResolverFor($annotations,
-            \ReflectionParameter $parameter)
+    
+    public function testResolveCorrelationData() 
     {
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
-                return $annotation->resolver;
-            }
-        }
+        $metaData = array(
+            'key1' => 'value1',
+            'key2' => 'value2',
+            'key3' => 'value3'
+        );
+        
+        $payload = new \stdClass();        
+        $message = new GenericMessage($payload, new MetaData($metaData));
 
-        return null;
+        $provider1 = new SimpleCorrelationDataProvider(array("key1"));
+                
+        $this->assertEquals(array("key1" => "value1"), $provider1->correlationDataFor($message));
+
+        $provider2 = new SimpleCorrelationDataProvider(array("key1", "key2", "noExist", null));
+        $actual2 = $provider2->correlationDataFor($message);
+                
+        $this->assertEquals("value1", $actual2["key1"]);
+        $this->assertEquals("value2", $actual2["key2"]);
     }
-
 }

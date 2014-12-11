@@ -3,7 +3,7 @@
     "description": "PHP Command-Query-Responsibility-Segregation framework.",
     "license": "MIT",
     "autoload": {
-        "psr-0": {"Governor": "src/"}
+        "psr-0": {"Governor\\": "src/"}
     },
     "require": {
         "rhumsaa/uuid": "@stable",
@@ -19,7 +19,6 @@
     },
     "require-dev": {
         "doctrine/orm": ">=2.4",
-        "doctrine/mongodb-odm": "1.0.*@dev",
         "jms/aop-bundle": "1.1.*@dev",
         "symfony/framework-bundle": ">=2.4",
         "symfony/console": ">=2.3",
