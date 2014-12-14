@@ -25,22 +25,22 @@
 namespace Governor\Framework\Test;
 
 /**
- * Interface describing the operations available on a test fixture in the execution stage. In this stage, there is only
- * on operation: {@link #when(Object)}, which dispatches a command on this fixture's Command Bus.
+ * Interface describing the operations available on a test fixture in the execution stage.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface TestExecutorInterface
 {
 
     /**
      * Dispatches the given command and meta data to the appropriate command handler and records all
-     * activity in the fixture for result validation. If the given <code>command</code> is a {@link
-     * org.axonframework.commandhandling.CommandMessage} instance, it will be dispatched as-is, with given
-     * additional <code>metaData</code>. Any other object will cause the given <code>command</code> to be wrapped in a
-     * {@code CommandMessage} as its payload.
+     * activity in the fixture for result validation. If the given <code>command</code> is a CommandMessageInterface instance, it will be dispatched as-is, with given
+     * additional <code>metaData</code>. Any other object will cause the given <code>command</code> to be wrapped in a CommandMessageInterface as its payload.
      *
-     * @param command  The command to execute
-     * @param metaData The meta data to attach to the
-     * @return a ResultValidator that can be used to validate the resulting actions of the command execution
+     * @param mixed $command  The command to execute
+     * @param array $metaData The meta data to attach to the
+     * @return ResultValidatorInterface a ResultValidator that can be used to validate the resulting actions of the command execution
      */
     public function when($command, array $metaData = array());
 }

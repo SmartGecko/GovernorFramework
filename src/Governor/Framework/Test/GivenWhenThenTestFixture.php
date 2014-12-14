@@ -92,7 +92,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     /**
      * Initializes a new given-when-then style test fixture for the given <code>aggregateType</code>.
      *
-     * @param aggregateType The aggregate to initialize the test fixture for
+     * @param string $aggregateType The aggregate to initialize the test fixture for
      */
     public function __construct($aggregateType)
     {
