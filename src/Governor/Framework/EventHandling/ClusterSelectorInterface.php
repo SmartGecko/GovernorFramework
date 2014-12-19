@@ -38,8 +38,8 @@ interface ClusterSelectorInterface
      * <p/>
      * When {@code null} is returned, this may cause the Event Listener not to be subscribed to any cluster at all.
      *
-     * @param eventListener the event listener to select a cluster for
-     * @return The Cluster assigned to the listener
+     * @param EventListenerInterface $eventListener the event listener to select a cluster for
+     * @return ClusterInterface The Cluster assigned to the listener
      */
     public function selectCluster(EventListenerInterface $eventListener);
 }

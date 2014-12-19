@@ -67,9 +67,9 @@ class AuditingUnitOfWorkListener extends UnitOfWorkListenerAdapter
      * the Unit Of Work is committed to provide the auditing information. The <code>auditLogger</code> is invoked after
      * the Unit Of Work is successfully committed.
      *
-     * @param command           The command being audited
-     * @param auditDataProvider The instance providing the information to attach to the events
-     * @param auditLogger       The logger writing the audit
+     * @param CommandMessageInterface $command           The command being audited
+     * @param AuditDataProviderInterface $auditDataProvider The instance providing the information to attach to the events
+     * @param AuditLoggerInterface $auditLogger       The logger writing the audit
      */
     public function __construct(CommandMessageInterface $command,
             AuditDataProviderInterface $auditDataProvider,

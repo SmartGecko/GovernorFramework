@@ -73,7 +73,8 @@ class FilesystemSnapshotEventWriter
      * Writes the given snapshotEvent to the {@link #snapshotEventFile}.
      * Prepends a long value to the event in the file indicating the bytes to skip when reading the {@link #eventFile}.
      *
-     * @param snapshotEvent The snapshot to write to the {@link #snapshotEventFile}
+     * @param DomainEventMessageInterface $snapshotEvent The snapshot to write to the {@link #snapshotEventFile}
+     * @throws EventStoreException
      */
     public function writeSnapshotEvent(DomainEventMessageInterface $snapshotEvent)
     {
@@ -94,10 +95,10 @@ class FilesystemSnapshotEventWriter
     /**
      * Calculate the bytes to skip when reading the event file.
      *
-     * @param snapshotEvent the snapshot event
-     * @return the bytes to skip when reading the event file
+     * @param DomainEventMessageInterface $snapshotEvent the snapshot event
+     * @return integer the bytes to skip when reading the event file
      *
-     * @throws IOException when the {@link #eventFile} was closed unexpectedly
+     * @throws \Exception
      */
     private function calculateOffset(DomainEventMessageInterface $snapshotEvent)
     {

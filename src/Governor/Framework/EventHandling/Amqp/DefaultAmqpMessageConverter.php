@@ -36,18 +36,26 @@ use Governor\Framework\Serializer\SerializerInterface;
  */
 class DefaultAmqpMessageConverter implements AmqpMessageConverterInterface
 {
-
+    /**
+     * @var SerializerInterface
+     */
     private $serializer;
+    /**
+     * @var RoutingKeyResolverInterface
+     */
     private $routingKeyResolver;
+    /**
+     * @var bool
+     */
     private $durable;
 
     /**
      * Initializes the AMQPMessageConverter with the given <code>serializer</code>, <code>routingKeyResolver</code> and
      * requesting durable dispatching when <code>durable</code> is <code>true</code>.
      *
-     * @param serializer         The serializer to serialize the Event Message's payload and Meta Data with
-     * @param routingKeyResolver The strategy to use to resolve routing keys for Event Messages
-     * @param durable            Whether to request durable message dispatching
+     * @param SerializerInterface $serializer         The serializer to serialize the Event Message's payload and Meta Data with
+     * @param RoutingKeyResolverInterface $routingKeyResolver The strategy to use to resolve routing keys for Event Messages
+     * @param boolean $durable            Whether to request durable message dispatching
      */
     public function __construct(SerializerInterface $serializer,
             RoutingKeyResolverInterface $routingKeyResolver = null,
@@ -60,6 +68,10 @@ class DefaultAmqpMessageConverter implements AmqpMessageConverterInterface
         $this->durable = $durable;
     }
 
+    /**
+     * @param EventMessageInterface $eventMessage
+     * @return AmqpMessage
+     */
     public function createAmqpMessage(EventMessageInterface $eventMessage)
     {
         $writer = new EventMessageWriter($this->serializer);

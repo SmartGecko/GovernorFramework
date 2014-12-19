@@ -37,7 +37,7 @@ class ReflectionUtils
      * Returns a list of all properties declared in either the $class or any of its parents.
      * 
      * @param \ReflectionClass $class
-     * @return ReflectionProperty[]
+     * @return \ReflectionProperty[]
      */
     public static function getProperties(\ReflectionClass $class)
     {
@@ -56,7 +56,7 @@ class ReflectionUtils
      * Returns a list of public methods declared in either the $class or any of its parents.
      * 
      * @param \ReflectionClass $class
-     * @return ReflectionMethod[]
+     * @return \ReflectionMethod[]
      */
     public static function getMethods(\ReflectionClass $class)
     {
@@ -68,16 +68,17 @@ class ReflectionUtils
      * Returns a reflection class for the object. If the object is an Orm Proxy it returns the parent class.
      * 
      * @param string|mixed $object
+     * @return \ReflectionClass
      */
     public static function getClass ($object)
     {
-        $reflClass = new \ReflectionClass($object);
+        $reflectionClass = new \ReflectionClass($object);
         
-        if ($reflClass->implementsInterface('Doctrine\ORM\Proxy\Proxy')) {
-            return $reflClass->getParentClass();            
+        if ($reflectionClass->implementsInterface('Doctrine\ORM\Proxy\Proxy')) {
+            return $reflectionClass->getParentClass();
         }
         
-        return $reflClass;
+        return $reflectionClass;
     }
 
 }

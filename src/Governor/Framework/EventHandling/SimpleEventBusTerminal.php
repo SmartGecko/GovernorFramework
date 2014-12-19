@@ -32,6 +32,9 @@ namespace Governor\Framework\EventHandling;
 class SimpleEventBusTerminal implements EventBusTerminalInterface
 {
 
+    /**
+     * @var ClusterInterface[]
+     */
     private $clusters = array();
 
     public function publish(array $events)

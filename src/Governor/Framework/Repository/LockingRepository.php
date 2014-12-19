@@ -85,14 +85,14 @@ abstract class LockingRepository extends AbstractRepository
     /**
      * Perform the actual saving of the aggregate. All necessary locks have been verified.
      *
-     * @param aggregate the aggregate to store
+     * @param AggregateRootInterface $aggregate the aggregate to store
      */
     protected abstract function doSaveWithLock(AggregateRootInterface $aggregate);
 
     /**
      * Perform the actual deleting of the aggregate. All necessary locks have been verifierd.
      *
-     * @param aggregate the aggregate to delete
+     * @param AggregateRootInterface $aggregate the aggregate to delete
      */
     protected abstract function doDeleteWithLock(AggregateRootInterface $aggregate);
 }

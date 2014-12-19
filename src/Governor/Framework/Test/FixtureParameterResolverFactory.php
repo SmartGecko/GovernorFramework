@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\Test;
 
+use Governor\Framework\Common\ParameterResolverFactoryInterface;
 use Governor\Framework\Common\AbstractParameterResolverFactory;
 use Governor\Framework\Common\DefaultParameterResolverFactory;
 

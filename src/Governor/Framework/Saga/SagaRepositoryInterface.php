@@ -12,6 +12,9 @@ namespace Governor\Framework\Saga;
  * Interface towards the storage mechanism of Saga instances. Saga Repositories can find sagas either through the
  * values
  * they have been associated with (see {@link AssociationValue}) or via their unique identifier.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface SagaRepositoryInterface
 {

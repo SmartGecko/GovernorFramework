@@ -40,9 +40,10 @@ class Reporter
     /**
      * Report a failed assertion due to a difference in the stored versus the published events.
      *
-     * @param storedEvents    The events that were stored
-     * @param publishedEvents The events that were published
-     * @param probableCause   An exception that might be the cause of the failure
+     * @param array $storedEvents    The events that were stored
+     * @param array $publishedEvents The events that were published
+     * @param \Exception $probableCause   An exception that might be the cause of the failure
+     * @throws GovernorAssertionError
      */
     public function reportDifferenceInStoredVsPublished(array $storedEvents,
             array $publishedEvents, \Exception $probableCause = null)
@@ -59,9 +60,10 @@ class Reporter
      * Report an error in the ordering or count of events. This is typically a difference that can be shown to the user
      * by enumerating the expected and actual events
      *
-     * @param actualEvents   The events that were found
-     * @param expectedEvents The events that were expected
-     * @param probableCause  An optional exception that might be the reason for wrong events
+     * @param array $actualEvents   The events that were found
+     * @param array $expectedEvents The events that were expected
+     * @param \Exception $probableCause  An optional exception that might be the reason for wrong events
+     * @throws GovernorAssertionError
      */
     public function reportWrongEvent(array $actualEvents, array $expectedEvents,
             \Exception $probableCause = null)
@@ -112,8 +114,9 @@ class Reporter
      * Reports an error due to an unexpected exception. This means a return value was expected, but an exception was
      * thrown by the command handler
      *
-     * @param actualException The actual exception
-     * @param expectation     A text describing what was expected
+     * @param \Exception  $actualException The actual exception
+     * @param Description $expectation     A text describing what was expected
+     * @throws GovernorAssertionError
      */
     public function reportUnexpectedException(\Exception $actualException,
             Description $expectation)
@@ -130,8 +133,9 @@ class Reporter
     /**
      * Reports an error due to a wrong return value.
      *
-     * @param actualReturnValue The actual return value
-     * @param expectation       A description of the expected value
+     * @param mixed $actualReturnValue The actual return value
+     * @param Description $expectation       A description of the expected value
+     * @throws GovernorAssertionError
      */
     public function reportWrongResult($actualReturnValue,
             Description $expectation)
@@ -148,8 +152,9 @@ class Reporter
     /**
      * Report an error due to an unexpected return value, while an exception was expected.
      *
-     * @param actualReturnValue The actual return value
+     * @param mixed $actualReturnValue The actual return value
      * @param Description $description       A description describing the expected value
+     * @throws GovernorAssertionError
      */
     public function reportUnexpectedReturnValue($actualReturnValue,
             Description $description)
@@ -168,11 +173,12 @@ class Reporter
      *
      * @param \Exception $actualException The actual exception
      * @param Description $description     A description describing the expected value
+     * @throws GovernorAssertionError
      */
     public function reportWrongException(\Exception $actualException,
             Description $description)
     {
-        $str .= "The command handler threw an exception, but not of the expected type";
+        $str = "The command handler threw an exception, but not of the expected type";
         $str .= PHP_EOL . PHP_EOL;
         $str .= "Expected <" . $description . "> but got <exception of type [";
         $str .= get_class($actualException) . "]>. Stacktrace follows: ";
@@ -184,10 +190,11 @@ class Reporter
     /**
      * Report an error due to a difference in on of the fields of an event.
      *
-     * @param eventType The (runtime) type of event the difference was found in
-     * @param field     The field that contains the difference
-     * @param actual    The actual value of the field
-     * @param expected  The expected value of the field
+     * @param string $eventType The (runtime) type of event the difference was found in
+     * @param string $field     The field that contains the difference
+     * @param mixed $actual    The actual value of the field
+     * @param mixed $expected  The expected value of the field
+     * @throws GovernorAssertionError
      */
     public function reportDifferentEventContents($eventType, $field, $actual,
             $expected)

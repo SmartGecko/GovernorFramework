@@ -27,7 +27,8 @@ namespace Governor\Framework\Correlation;
 /**
  * Description of CorrelationDataHolder
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 final class CorrelationDataHolder
 {
@@ -46,7 +47,7 @@ final class CorrelationDataHolder
      * Returns the correlation data attached to the current thread. If no correlation data is available, this method
      * returns an empty Map.
      *
-     * @return the correlation data attached to the current process
+     * @return array the correlation data attached to the current process
      */
     public static function getCorrelationData()
     {

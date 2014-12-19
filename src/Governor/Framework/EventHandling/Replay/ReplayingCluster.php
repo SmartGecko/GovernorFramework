@@ -64,7 +64,7 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
     private $incomingMessageHandler;
 
     /**
-     * @var SplObjectStorage
+     * @var \SplObjectStorage
      */
     private $replayAwareListeners; //new CopyOnWriteArraySet<ReplayAware>();
     private $status = self::STATUS_LIVE;

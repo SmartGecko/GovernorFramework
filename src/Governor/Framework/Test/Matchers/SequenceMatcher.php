@@ -45,7 +45,7 @@ class SequenceMatcher extends ListMatcher
      * Construct a matcher that will return true if all the given <code>matchers</code> match against an item
      * positioned after the item that the previous matcher matched against.
      *
-     * @param matchers The matchers that must match against at least one item in the list.
+     * @param array $matchers The matchers that must match against at least one item in the list.
      */
     public function __construct(array $matchers)
     {

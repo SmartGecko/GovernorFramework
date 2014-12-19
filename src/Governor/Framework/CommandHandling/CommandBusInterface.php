@@ -24,7 +24,6 @@
 
 namespace Governor\Framework\CommandHandling;
 
-use Governor\Framework\CommandHandling\CommandMessageInterface;
 
 /**
  * Accept and process commands by passing them along to a matching command handler.
@@ -56,7 +55,7 @@ interface CommandBusInterface
      *
      * @param string $commandName The name of the command the handler is subscribed to
      * @param CommandHandlerInterface $handler     The handler service to unsubscribe from the CommandBus     
-     * @return <code>true</code> of this handler is successfully unsubscribed, <code>false</code> of the given
+     * @return boolean <code>true</code> of this handler is successfully unsubscribed, <code>false</code> of the given
      *         <code>handler</code> was not the current handler for given <code>commandType</code>.
      */
     public function unsubscribe($commandName, CommandHandlerInterface $handler);

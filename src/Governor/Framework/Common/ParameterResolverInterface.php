@@ -48,7 +48,7 @@ interface ParameterResolverInterface
      * Indicates whether this resolver is capable of providing a value for the given <code>message</code>.
      *
      * @param MessageInterface $message The message to evaluate
-     * @return booleam <code>true</code> if this resolver can provide a value for the message, otherwise <code>false</code>
+     * @return boolean <code>true</code> if this resolver can provide a value for the message, otherwise <code>false</code>
      */
     public function matches(MessageInterface $message);
 }

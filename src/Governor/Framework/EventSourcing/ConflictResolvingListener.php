@@ -19,8 +19,17 @@ use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 class ConflictResolvingListener extends UnitOfWorkListenerAdapter
 {
 
+    /**
+     * @var string
+     */
     private $aggregate;
+    /**
+     * @var array
+     */
     private $unseenEvents;
+    /**
+     * @var ConflictResolverInterface
+     */
     private $conflictResolver;
 
     public function __construct($aggregate, array $unseenEvents,

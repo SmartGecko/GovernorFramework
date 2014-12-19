@@ -52,7 +52,7 @@ interface ResultValidatorInterface
      * <p/>
      * Note that the event identifier is ignored in the comparison.
      *
-     * @param expectedEvents The expected events, in the exact order they are expected to be dispatched and stored.
+     * @param array $expectedEvents The expected events, in the exact order they are expected to be dispatched and stored.
      * @return ResultValidatorInterface the current ResultValidator, for fluent interfacing
      */
     public function expectEvents(array $expectedEvents);
@@ -64,8 +64,8 @@ interface ResultValidatorInterface
      * <p/>
      * Note: if no events were published or stored, the matcher receives an empty List.
      *
-     * @param matcher The matcher to match with the actually published events
-     * @return the current ResultValidator, for fluent interfacing
+     * @param Matcher $matcher The matcher to match with the actually published events
+     * @return ResultValidatorInterface the current ResultValidator, for fluent interfacing
      */
     public function expectEventsMatching(Matcher $matcher);
 
@@ -79,8 +79,8 @@ interface ResultValidatorInterface
      * Note that the event identifier is ignored in the comparison. For Application and System events, however, the
      * <code>source</code> of the events must be equal, too.
      *
-     * @param expectedEvents The expected events, in the exact order they are expected to be dispatched.
-     * @return the current ResultValidator, for fluent interfacing
+     * @param array $expectedEvents The expected events, in the exact order they are expected to be dispatched.
+     * @return ResultValidatorInterface the current ResultValidator, for fluent interfacing
      */
     public function expectPublishedEvents(array $expectedEvents);
 
@@ -91,8 +91,8 @@ interface ResultValidatorInterface
      * <p/>
      * Note: if no events were published, the matcher receives an empty List.
      *
-     * @param matcher The matcher which validates the actual list of published events.
-     * @return the current ResultValidator, for fluent interfacing
+     * @param Matcher $matcher The matcher which validates the actual list of published events.
+     * @return ResultValidatorInterface the current ResultValidator, for fluent interfacing
      */
     public function expectPublishedEventsMatching(Matcher $matcher);
 
@@ -106,8 +106,8 @@ interface ResultValidatorInterface
      * Note that the event identifier is ignored in the comparison. For Application and System events, however, the
      * <code>source</code> of the events must be equal, too.
      *
-     * @param expectedEvents The expected events, in the exact order they are expected to be stored.
-     * @return the current ResultValidator, for fluent interfacing
+     * @param array $expectedEvents The expected events, in the exact order they are expected to be stored.
+     * @return ResultValidatorInterface the current ResultValidator, for fluent interfacing
      */
     public function expectStoredEvents(array $expectedEvents);
 
@@ -117,16 +117,16 @@ interface ResultValidatorInterface
      * <p/>
      * Note: if no events were stored, the matcher receives an empty List.
      *
-     * @param matcher The matcher which validates the actual list of stored events.
-     * @return the current ResultValidator, for fluent interfacing
+     * @param Matcher $matcher The matcher which validates the actual list of stored events.
+     * @return ResultValidatorInterface the current ResultValidator, for fluent interfacing
      */
     public function expectStoredEventsMatching(Matcher $matcher);
 
     /**
      * Expect the command handler to return a value that matches the given <code>matcher</code> after execution.
      *
-     * @param matcher The matcher to verify the actual return value against
-     * @return the current ResultValidator, for fluent interfacing
+     * @param Matcher $matcher The matcher to verify the actual return value against
+     * @return ResultValidatorInterface the current ResultValidator, for fluent interfacing
      */
     public function expectReturnValue(Matcher $matcher);
 
@@ -134,8 +134,8 @@ interface ResultValidatorInterface
      * Expect the given <code>expectedException</code> to occur during command handler execution. The actual exception
      * should be exactly of that type, subclasses are not accepted.
      *
-     * @param expectedException The type of exception expected from the command handler execution
-     * @return the current ResultValidator, for fluent interfacing
+     * @param Matcher $matcher The type of exception expected from the command handler execution
+     * @return ResultValidatorInterface the current ResultValidator, for fluent interfacing
      */
     public function expectException(Matcher $matcher);
 
@@ -143,7 +143,7 @@ interface ResultValidatorInterface
      * Explicitly expect a <code>void</code> return type on the given command handler. <code>void</code> is the
      * recommended return value for all command handlers as they allow for a more scalable architecture.
      *
-     * @return the current ResultValidator, for fluent interfacing
+     * @return ResultValidatorInterface the current ResultValidator, for fluent interfacing
      */
     public function expectVoidReturnType();
 }

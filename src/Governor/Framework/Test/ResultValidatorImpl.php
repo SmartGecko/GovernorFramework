@@ -149,7 +149,7 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
                     $expectedEvents, $this->actualException);
         }
 
-        foreach ($this->expectedEvents as $expectedEvent) {
+        foreach ($expectedEvents as $expectedEvent) {
             $actualEvent = current($this->storedEvents);
             if (!$this->verifyEventEquality($expectedEvent,
                             $actualEvent->getPayload())) {
@@ -162,7 +162,7 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
         return $this;
     }
 
-    public function expectStoredEventsMatching(\Hamcrest\Matcher $matcher)
+    public function expectStoredEventsMatching(Matcher $matcher)
     {
         if (!$matcher->matches($this->storedEvents)) {
             $this->reporter->reportWrongEvent($this->storedEvents,

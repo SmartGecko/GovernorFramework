@@ -24,7 +24,6 @@
 
 namespace Governor\Framework\CommandHandling\Handlers;
 
-use Governor\Framework\Common\Annotation\MethodMessageHandler;
 use Governor\Framework\Annotations\CommandHandler;
 use Governor\Framework\Common\ParameterResolverFactoryInterface;
 use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;

@@ -11,7 +11,8 @@ namespace Governor\Framework\Domain;
 /**
  * Description of MessageInterface
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface MessageInterface
 {
@@ -51,17 +52,17 @@ interface MessageInterface
      * must take special care in returning the same type of Message (e.g. EventMessage, DomainEventMessage) to prevent
      * errors further downstream.
      *
-     * @param metaData The new MetaData for the Message
-     * @return a copy of this message with the given MetaData
+     * @param array $metaData The new MetaData for the Message
+     * @return MessageInterface a copy of this message with the given MetaData
      */
-    public function withMetaData(array $metadata = array());
+    public function withMetaData(array $metaData = array());
 
     /**
      * Returns a copy of this Message with it MetaData merged with the given <code>metaData</code>. The payload
      * remains unchanged.
      *
-     * @param metaData The MetaData to merge with
-     * @return a copy of this message with the given MetaData
+     * @param array $metaData The MetaData to merge with
+     * @return MessageInterface a copy of this message with the given MetaData
      */
-    public function andMetaData(array $metadata = array());
+    public function andMetaData(array $metaData = array());
 }

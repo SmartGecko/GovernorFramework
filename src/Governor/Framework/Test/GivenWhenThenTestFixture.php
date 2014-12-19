@@ -47,7 +47,6 @@ use Governor\Framework\CommandHandling\GenericCommandMessage;
 use Governor\Framework\CommandHandling\CommandCallbackInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterceptorInterface;
-use Governor\Framework\EventHandling\EventListenerInterface;
 use Governor\Framework\EventSourcing\EventSourcingRepository;
 use Governor\Framework\EventStore\EventStoreInterface;
 use Governor\Framework\EventStore\EventStoreException;
@@ -56,9 +55,7 @@ use Governor\Framework\Domain\SimpleDomainEventStream;
 use Governor\Framework\Repository\NullLockManager;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
-use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
-use Governor\Framework\Common\DelegatingParameterResolverFactory;
-use Governor\Framework\Common\DefaultParameterResolverFactory;
+
 
 /**
  * Description of GivenWhenThenTestFixture
@@ -69,18 +66,33 @@ use Governor\Framework\Common\DefaultParameterResolverFactory;
 class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExecutorInterface
 {
 
+    /**
+     * @var Logger
+     */
     private $logger;
+    /**
+     * @var IdentifierValidatingRepository
+     */
     private $repository;
     private $commandBus;
+    /**
+     * @var RecordingEventBus
+     */
     private $eventBus;
     private $aggregateIdentifier;
     private $eventStore;
     private $givenEvents = array();
     private $storedEvents = array(); //Deque<DomainEventMessage> storedEvents;
     private $publishedEvents = array(); //List<EventMessage> publishedEvents;
+    /**
+     * @var int
+     */
     private $sequenceNumber = 0;
     private $workingAggregate;
     private $reportIllegalStateChange = true;
+    /**
+     * @var string
+     */
     private $aggregateType;
     private $explicitCommandHandlersSet;
 
@@ -431,41 +443,6 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     {
         $this->ensureRepositoryConfiguration();
         return $this->repository;
-    }
-
-}
-
-class RecordingEventBus implements EventBusInterface
-{
-
-    private $publishedEvents;
-    private $eventListeners;
-
-    public function __construct(array &$publishedEvents)
-    {
-        $this->publishedEvents = &$publishedEvents;
-        $this->eventListeners = array();
-    }
-
-    public function publish(array $events)
-    {
-        $this->publishedEvents = array_merge($this->publishedEvents, $events);
-
-        foreach ($events as $event) {
-            foreach ($this->eventListeners as $eventListener) {
-                $eventListener->handle($event);
-            }
-        }
-    }
-
-    public function subscribe(EventListenerInterface $eventListener)
-    {
-        $this->eventListeners[] = $eventListener;
-    }
-
-    public function unsubscribe(EventListenerInterface $eventListener)
-    {
-        
     }
 
 }

@@ -24,7 +24,7 @@ interface SagaInterface {
     /**
      * Returns the unique identifier of this saga.
      *
-     * @return the unique identifier of this saga
+     * @return string the unique identifier of this saga
      */
     public function getSagaIdentifier();
 

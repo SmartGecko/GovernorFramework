@@ -28,13 +28,14 @@ class GenericSagaFactory implements SagaFactoryInterface
 
     public function createSaga($sagaType)
     {        
-        $reflClass = new \ReflectionClass($sagaType);
+        $reflectionClass = new \ReflectionClass($sagaType);
 
         if (!$this->supports($sagaType)) {
             throw new \InvalidArgumentException("The given sagaType must be a subtype of SagaInterface");
         }
-                
-        $instance = $reflClass->newInstanceArgs();
+
+        /** @var SagaInterface $instance */
+        $instance = $reflectionClass->newInstanceArgs();
         $this->resourceInjector->injectResources($instance);
 
         return $instance;
@@ -42,8 +43,8 @@ class GenericSagaFactory implements SagaFactoryInterface
 
     public function supports($sagaType)
     {
-        $reflClass = new \ReflectionClass($sagaType);
-        if ($reflClass->implementsInterface('Governor\Framework\Saga\SagaInterface')) {
+        $reflectionClass = new \ReflectionClass($sagaType);
+        if ($reflectionClass->implementsInterface(SagaInterface::class)) {
             return true;
         }
 

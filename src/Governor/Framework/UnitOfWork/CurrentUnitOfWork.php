@@ -69,7 +69,7 @@ abstract class CurrentUnitOfWork
      * Binds the given <code>unitOfWork</code> to the current thread. If other UnitOfWork instances were bound, they
      * will be marked as inactive until the given UnitOfWork is cleared.
      *
-     * @param unitOfWork The UnitOfWork to bind to the current thread.
+     * @param UnitOfWorkInterface $unitOfWork The UnitOfWork to bind to the current thread.
      */
     public static function set(UnitOfWorkInterface $unitOfWork)
     {                

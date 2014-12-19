@@ -178,7 +178,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         }
 
         if (null !== $exception) {
-            $this->handleInvokationException($ex, $event, $saga);
+            $this->handleInvokationException($exception, $event, $saga);
         }
 
         return $saga;

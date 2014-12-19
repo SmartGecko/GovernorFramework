@@ -25,6 +25,7 @@
 namespace Governor\Framework\Saga\Annotation;
 
 use Doctrine\Common\Comparable;
+use Governor\Framework\Annotations\StartSaga;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\Saga\AssociationValue;
 use Governor\Framework\Domain\EventMessageInterface;
@@ -56,7 +57,7 @@ class SagaMethodMessageHandler implements Comparable
 
     /**
      *
-     * @var  Governor\Framework\Common\Property\PropertyInterface
+     * @var  \Governor\Framework\Common\Property\PropertyInterface
      */
     private $associationProperty;
 
@@ -86,8 +87,7 @@ class SagaMethodMessageHandler implements Comparable
 
         $associationKey = (empty($handlerAnnotation->keyName)) ? $handlerAnnotation->associationProperty
                     : $handlerAnnotation->keyName;
-        $startAnnotation = $reader->getMethodAnnotation($handlerMethod,
-                \Governor\Framework\Annotations\StartSaga::class);
+        $startAnnotation = $reader->getMethodAnnotation($handlerMethod, StartSaga::class);
 
         if (null === $startAnnotation) {
             $sagaCreationPolicy = SagaCreationPolicy::NONE;
