@@ -22,7 +22,7 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Tests\Saga\Repository\Memory;
+namespace Governor\Framework\Saga\Repository\Memory;
 
 use Governor\Framework\Saga\SagaInterface;
 use Governor\Framework\Saga\SagaRepositoryInterface;

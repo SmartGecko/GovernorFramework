@@ -27,7 +27,7 @@ namespace Governor\Framework\Test\Saga;
 
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\Test\Utils\RecordingCommandBus;
-use Governor\Tests\Saga\Repository\Memory\InMemorySagaRepository;
+use Governor\Framework\Saga\Repository\Memory\InMemorySagaRepository;
 use Hamcrest\Matcher;
 use Governor\Framework\Test\Matchers\Matchers;
 

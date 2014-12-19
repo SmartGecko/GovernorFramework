@@ -24,8 +24,12 @@
 
 namespace Governor\Tests\Test;
 
+use Governor\Framework\Domain\GenericDomainEventMessage;
+use Governor\Framework\Domain\SimpleDomainEventStream;
 use Governor\Framework\EventSourcing\AggregateFactoryInterface;
+use Governor\Framework\Test\FixtureConfigurationInterface;
 use Governor\Framework\Test\Fixtures;
+use Rhumsaa\Uuid\Uuid;
 
 /**
  * Description of FixtureTestGeneric
@@ -35,13 +39,15 @@ use Governor\Framework\Test\Fixtures;
 class FixtureTestGeneric extends \PHPUnit_Framework_TestCase
 {
 
+    /**
+     * @var FixtureConfigurationInterface
+     */
     private $fixture;
     private $mockAggregateFactory;
 
     public function setUp()
     {
         $this->fixture = Fixtures::newGivenWhenThenFixture(StandardAggregate::class);
-        $this->fixture->setReportIllegalStateChange(false);
         $this->mockAggregateFactory = \Phake::mock(AggregateFactoryInterface::class);
 
         \Phake::when($this->mockAggregateFactory)->getAggregateType(\Phake::anyParameters())->thenReturn(
@@ -68,7 +74,7 @@ class FixtureTestGeneric extends \PHPUnit_Framework_TestCase
         $this->fixture->given(array(new MyEvent("id1", 1)))
             ->when(new TestCommand("id1"));
 
-        \Phake::verify($this->mockAggregateFactory)->createAggregate(
+        \Phake::verify($this->mockAggregateFactory, \Phake::atLeast(1))->createAggregate(
             \Phake::equalTo("id1"),
             \Phake::anyParameters()
         );
@@ -90,30 +96,42 @@ class FixtureTestGeneric extends \PHPUnit_Framework_TestCase
         $this->fixture->getRepository();
     }
 
-    /*
-      @Test(expected = FixtureExecutionException.class)
-      public void testInjectResources_CommandHandlerAlreadyRegistered() {
-      fixture.registerAggregateFactory(mockAggregateFactory);
-      fixture.registerAnnotatedCommandHandler(new MyCommandHandler(fixture.getRepository(), fixture.getEventBus()));
-      fixture.registerInjectableResource("I am injectable");
-      }
 
-      @Test
-      public void testAggregateIdentifier_IdentifierAutomaticallyDeducted() {
-      fixture.registerAggregateFactory(mockAggregateFactory);
-      fixture.registerAnnotatedCommandHandler(new MyCommandHandler(fixture.getRepository(), fixture.getEventBus()));
-      fixture.given(new MyEvent("AggregateId", 1), new MyEvent("AggregateId", 2))
-      .when(new TestCommand("AggregateId"))
-      .expectEvents(new MyEvent("AggregateId", 3));
+    /**
+     * @expectedException \Governor\Framework\Test\FixtureExecutionException
+     */
+    public function testInjectResources_CommandHandlerAlreadyRegistered()
+    {
+        $this->fixture->registerAggregateFactory($this->mockAggregateFactory);
+        $this->fixture->registerAnnotatedCommandHandler(
+            new MyCommandHandler($this->fixture->getRepository(), $this->fixture->getEventBus())
+        );
 
-      DomainEventStream events = fixture.getEventStore().readEvents("StandardAggregate", "AggregateId");
-      for (int t=0;t<3;t++) {
-      assertTrue(events.hasNext());
-      DomainEventMessage next = events.next();
-      assertEquals("AggregateId", next.getAggregateIdentifier());
-      assertEquals(t, next.getSequenceNumber());
-      }
-      } */
+        $this->fixture->registerInjectableResource('id', new \stdClass());
+    }
+
+
+    public function testAggregateIdentifier_IdentifierAutomaticallyDeducted()
+    {
+        $this->fixture->registerAggregateFactory($this->mockAggregateFactory);
+        $this->fixture->registerAnnotatedCommandHandler(
+            new MyCommandHandler($this->fixture->getRepository(), $this->fixture->getEventBus())
+        );
+        $this->fixture->given(array(new MyEvent("AggregateId", 1), new MyEvent("AggregateId", 2)))
+            ->when(new TestCommand("AggregateId"))
+            ->expectEvents(array(new MyEvent("AggregateId", 3)));
+
+
+        $events = $this->fixture->getEventStore()->readEvents("StandardAggregate", "AggregateId");
+
+        for ($t = 0; $t < 3; $t++) {
+            $this->assertTrue($events->hasNext());
+            $next = $events->next();
+
+            $this->assertEquals("AggregateId", $next->getAggregateIdentifier());
+            $this->assertEquals($t, $next->getScn());
+        }
+    }
 
     public function testReadAggregate_WrongIdentifier()
     {
@@ -129,36 +147,58 @@ class FixtureTestGeneric extends \PHPUnit_Framework_TestCase
             $exec->when(new TestCommand("OtherIdentifier"));
             $this->fail("Expected an AssertionError");
         } catch (\Exception $ex) {
-            $this->assertTrue(
-                "Wrong message. Was: " . $ex->getMessage(),
-                $ex->getMessage()
-            ); // . contains("OtherIdentifier"));
-            $this->assertTrue(
-                "Wrong message. Was: " . $ex->getMessage(),
-                $ex->getMessage()
-            ); // . contains("AggregateId"));
+            echo $ex->getMessage();
+
+            /*  $this->assertTrue(
+                  "Wrong message. Was: " . $ex->getMessage(),
+                  $ex->getMessage()
+              ); // . contains("OtherIdentifier"));
+              $this->assertTrue(
+                  "Wrong message. Was: " . $ex->getMessage(),
+                  $ex->getMessage()
+              ); // . contains("AggregateId"));*/
         }
     }
 
-    /*
-      @Test(expected = EventStoreException.class)
-      public void testFixtureGeneratesExceptionOnWrongEvents_DifferentAggregateIdentifiers() {
-      fixture.getEventStore().appendEvents("whatever", new SimpleDomainEventStream(
-      new GenericDomainEventMessage<StubDomainEvent>(UUID.randomUUID(), 0, new StubDomainEvent()),
-      new GenericDomainEventMessage<StubDomainEvent>(UUID.randomUUID(), 0, new StubDomainEvent())));
-      }
 
-      @Test(expected = EventStoreException.class)
-      public void testFixtureGeneratesExceptionOnWrongEvents_WrongSequence() {
-      UUID identifier = UUID.randomUUID();
-      fixture.getEventStore().appendEvents("whatever", new SimpleDomainEventStream(
-      new GenericDomainEventMessage<StubDomainEvent>(identifier, 0, new StubDomainEvent()),
-      new GenericDomainEventMessage<StubDomainEvent>(identifier, 2, new StubDomainEvent())));
-      }
+    /**
+     * @expectedException \Governor\Framework\EventStore\EventStoreException
+     */
+    public function testFixtureGeneratesExceptionOnWrongEvents_DifferentAggregateIdentifiers()
+    {
+        $this->fixture->getEventStore()->appendEvents(
+            "whatever",
+            new SimpleDomainEventStream(
+                array(
+                    new GenericDomainEventMessage(Uuid::uuid1()->toString(), 0, new StubDomainEvent()),
+                    new GenericDomainEventMessage(Uuid::uuid1()->toString(), 0, new StubDomainEvent())
+                )
+            )
+        );
+    }
 
-      private class StubDomainEvent {
 
-      public StubDomainEvent() {
-      }
-      } */
+    /**
+     * @expectedException \Governor\Framework\EventStore\EventStoreException
+     */
+    public function testFixtureGeneratesExceptionOnWrongEvents_WrongSequence()
+    {
+        $identifier = Uuid::uuid1()->toString();
+
+        $this->fixture->getEventStore()->appendEvents(
+            "whatever",
+            new SimpleDomainEventStream(
+                array(
+                    new GenericDomainEventMessage($identifier, 0, new StubDomainEvent()),
+                    new GenericDomainEventMessage($identifier, 2, new StubDomainEvent())
+                )
+            )
+        );
+    }
+
+}
+
+class StubDomainEvent
+{
+
 }

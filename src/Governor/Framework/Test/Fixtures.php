@@ -25,7 +25,7 @@
 namespace Governor\Framework\Test;
 
 /**
- * Utility class providing access to fixture instances in the Axon Test module.
+ * Utility class providing access to fixture instances in the Governor Test module.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
@@ -34,8 +34,7 @@ abstract class Fixtures
 {
 
     /**
-     * Returns a new given-when-then style test fixture in configuration mode. See {@link
-     * org.axonframework.test.FixtureConfiguration} for more detailed usage information.
+     * Returns a new given-when-then style test fixture in configuration mode.
      *
      * @param string $aggregateType The aggregate under test     
      * @return FixtureConfigurationInterface a new given-when-then style test fixture in configuration mode

@@ -22,7 +22,7 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Test;
+namespace Governor\Framework\Test\Utils;
 
 
 use Governor\Framework\EventHandling\EventBusInterface;

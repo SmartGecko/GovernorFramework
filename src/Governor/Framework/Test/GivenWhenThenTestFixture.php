@@ -24,44 +24,49 @@
 
 namespace Governor\Framework\Test;
 
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Psr\Log\LoggerInterface;
 use Governor\Framework\Annotations\CommandHandler;
-use Governor\Framework\Common\IdentifierValidator;
+use Governor\Framework\CommandHandling\CommandBusInterface;
+use Governor\Framework\CommandHandling\CommandCallbackInterface;
+use Governor\Framework\CommandHandling\CommandHandlerInterceptorInterface;
+use Governor\Framework\CommandHandling\CommandHandlerInterface;
+use Governor\Framework\CommandHandling\CommandMessageInterface;
+use Governor\Framework\CommandHandling\GenericCommandMessage;
 use Governor\Framework\CommandHandling\Handlers\AnnotatedAggregateCommandHandler;
 use Governor\Framework\CommandHandling\Handlers\AnnotatedCommandHandler;
-use Governor\Framework\CommandHandling\AnnotationCommandTargetResolver;
-use Governor\Framework\EventSourcing\AggregateFactoryInterface;
+use Governor\Framework\CommandHandling\InterceptorChainInterface;
+use Governor\Framework\CommandHandling\SimpleCommandBus;
+use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
+use Governor\Framework\Common\IdentifierValidator;
 use Governor\Framework\Domain\AggregateRootInterface;
+use Governor\Framework\Domain\DomainEventMessageInterface;
+use Governor\Framework\Domain\DomainEventStreamInterface;
+use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\MessageInterface;
-use Governor\Framework\Repository\RepositoryInterface;
-use Governor\Framework\Repository\AggregateNotFoundException;
-use Governor\Framework\EventHandling\EventBusInterface;
-use Governor\Framework\CommandHandling\SimpleCommandBus;
-use Governor\Framework\CommandHandling\CommandBusInterface;
-use Governor\Framework\CommandHandling\CommandMessageInterface;
-use Governor\Framework\CommandHandling\InterceptorChainInterface;
-use Governor\Framework\CommandHandling\GenericCommandMessage;
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
-use Governor\Framework\CommandHandling\CommandHandlerInterface;
-use Governor\Framework\CommandHandling\CommandHandlerInterceptorInterface;
-use Governor\Framework\EventSourcing\EventSourcingRepository;
-use Governor\Framework\EventStore\EventStoreInterface;
-use Governor\Framework\EventStore\EventStoreException;
-use Governor\Framework\Domain\DomainEventStreamInterface;
 use Governor\Framework\Domain\SimpleDomainEventStream;
+use Governor\Framework\EventHandling\EventBusInterface;
+use Governor\Framework\EventSourcing\AggregateFactoryInterface;
+use Governor\Framework\EventSourcing\EventSourcingRepository;
+use Governor\Framework\EventSourcing\GenericAggregateFactory;
+use Governor\Framework\EventStore\EventStoreException;
+use Governor\Framework\EventStore\EventStoreInterface;
+use Governor\Framework\Repository\AggregateNotFoundException;
 use Governor\Framework\Repository\NullLockManager;
-use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
+use Governor\Framework\Repository\RepositoryInterface;
+use Governor\Framework\Test\Utils\RecordingEventBus;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
+use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
+use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 
 /**
  * Description of GivenWhenThenTestFixture
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExecutorInterface
 {
@@ -74,26 +79,62 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
      * @var IdentifierValidatingRepository
      */
     private $repository;
+
+    /**
+     * @var SimpleCommandBus
+     */
     private $commandBus;
     /**
      * @var RecordingEventBus
      */
     private $eventBus;
+
+    /**
+     * @var string
+     */
     private $aggregateIdentifier;
+
+    /**
+     * @var RecordingEventStore
+     */
     private $eventStore;
+
+    /**
+     * @var DomainEventMessageInterface[]
+     */
     private $givenEvents = array();
+
+    /**
+     * @var DomainEventMessageInterface[]
+     */
     private $storedEvents = array(); //Deque<DomainEventMessage> storedEvents;
+
+    /**
+     * @var EventMessageInterface[]
+     */
     private $publishedEvents = array(); //List<EventMessage> publishedEvents;
     /**
      * @var int
      */
     private $sequenceNumber = 0;
+
+    /**
+     * @var AggregateRootInterface
+     */
     private $workingAggregate;
+
+    /**
+     * @var bool
+     */
     private $reportIllegalStateChange = true;
     /**
      * @var string
      */
     private $aggregateType;
+
+    /**
+     * @var boolean
+     */
     private $explicitCommandHandlersSet;
 
     /**
@@ -109,14 +150,20 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     public function __construct($aggregateType)
     {
         $this->logger = new Logger('fixture');
-        $this->logger->pushHandler(new StreamHandler('php://stdout',
-                Logger::DEBUG));
+        $this->logger->pushHandler(
+            new StreamHandler(
+                'php://stdout',
+                Logger::DEBUG
+            )
+        );
 
         $this->eventBus = new RecordingEventBus($this->publishedEvents);
         $this->commandBus = new SimpleCommandBus();
         $this->commandBus->setLogger($this->logger);
-        $this->eventStore = new RecordingEventStore($this->storedEvents,
-                $this->givenEvents, $this->aggregateIdentifier);
+        $this->eventStore = new RecordingEventStore(
+            $this->storedEvents,
+            $this->givenEvents, $this->aggregateIdentifier
+        );
 
         $this->parameterResolver = new FixtureParameterResolverFactory();
 
@@ -132,15 +179,19 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     public function registerRepository(EventSourcingRepository $eventSourcingRepository)
     {
         $this->repository = new IdentifierValidatingRepository($eventSourcingRepository);
-        //   $eventSourcingRepository->setEventBus($this->eventBus);
+
         return $this;
     }
 
     public function registerAggregateFactory(AggregateFactoryInterface $aggregateFactory)
     {
-        return $this->registerRepository(new EventSourcingRepository($aggregateFactory->getAggregateType(),
-                        $this->eventBus, new NullLockManager(),
-                        $this->eventStore, $aggregateFactory));
+        return $this->registerRepository(
+            new EventSourcingRepository(
+                $aggregateFactory->getAggregateType(),
+                $this->eventBus, new NullLockManager(),
+                $this->eventStore, $aggregateFactory
+            )
+        );
     }
 
     public function registerAnnotatedCommandHandler($annotatedCommandHandler)
@@ -148,51 +199,43 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->registerAggregateCommandHandlers();
         $this->explicitCommandHandlersSet = true;
 
-        $reflClass = new \ReflectionClass($annotatedCommandHandler);
-        $reader = new \Doctrine\Common\Annotations\AnnotationReader();
+        $reflectionClass = new \ReflectionClass($annotatedCommandHandler);
+        $inspector = new MethodMessageHandlerInspector($reflectionClass, CommandHandler::class);
 
-        foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-            $annot = $reader->getMethodAnnotation($method, CommandHandler::class);
+        foreach ($inspector->getHandlerDefinitions() as $handlerDefinition) {
+            $handler = new AnnotatedCommandHandler(
+                $reflectionClass->name,
+                $handlerDefinition->getMethod()->name,
+                $this->parameterResolver,
+                $annotatedCommandHandler
+            );
 
-            // not a handler
-            if (null === $annot) {
-                continue;
-            }
-
-            $commandParam = current($method->getParameters());
-
-            // command type must be typehinted
-            if (!$commandParam->getClass()) {
-                continue;
-            }
-
-            $commandClassName = $commandParam->getClass()->name;
-            $handler = new AnnotatedCommandHandler($commandClassName,
-                    $method->name, $this->parameterResolver,
-                    $annotatedCommandHandler);
-
-            $this->commandBus->subscribe($commandClassName, $handler);
+            $this->commandBus->subscribe($handlerDefinition->getPayloadType(), $handler);
         }
 
         return $this;
     }
 
-    public function registerCommandHandler($commandName,
-            CommandHandlerInterface $commandHandler)
-    {
+    public function registerCommandHandler(
+        $commandName,
+        CommandHandlerInterface $commandHandler
+    ) {
         $this->registerAggregateCommandHandlers();
         $this->explicitCommandHandlersSet = true;
         $this->commandBus->subscribe($commandName, $commandHandler);
+
         return $this;
     }
 
     public function registerInjectableResource($id, $resource)
     {
         if ($this->explicitCommandHandlersSet) {
-            throw new FixtureExecutionException("Cannot inject resources after command handler has been created. " .
-            "Configure all resource before calling " .
-            "registerCommandHandler() or " .
-            "registerAnnotatedCommandHandler()");
+            throw new FixtureExecutionException(
+                "Cannot inject resources after command handler has been created. " .
+                "Configure all resource before calling " .
+                "registerCommandHandler() or " .
+                "registerAnnotatedCommandHandler()"
+            );
         }
 
         $this->parameterResolver->registerService($id, $resource);
@@ -217,12 +260,15 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                     $payload = $event->getPayload();
                     $metaData = $event->getMetaData();
                 }
-                $this->givenEvents[] = new GenericDomainEventMessage($this->aggregateIdentifier,
-                        $this->sequenceNumber++, $payload, $metaData);
+                $this->givenEvents[] = new GenericDomainEventMessage(
+                    $this->aggregateIdentifier,
+                    $this->sequenceNumber++, $payload, $metaData
+                );
             }
         } catch (\RuntimeException $ex) {
 //FixtureResourceParameterResolverFactory.clear();
         }
+
         return $this;
     }
 
@@ -233,8 +279,10 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         try {
             foreach ($commands as $command) {
                 $callback = new ExecutionExceptionAwareCallback();
-                $this->commandBus->dispatch(GenericCommandMessage::asCommandMessage($command),
-                        $callback);
+                $this->commandBus->dispatch(
+                    GenericCommandMessage::asCommandMessage($command),
+                    $callback
+                );
                 $callback->assertSuccessful();
 
                 foreach ($this->storedEvents as $event) {
@@ -248,6 +296,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
             //FixtureResourceParameterResolverFactory.clear();
             throw $ex;
         }
+
         return $this;
     }
 
@@ -255,12 +304,18 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     {
         try {
             $this->finalizeConfiguration();
-            $resultValidator = new ResultValidatorImpl($this->storedEvents,
-                    $this->publishedEvents);
-            $this->commandBus->setHandlerInterceptors(array(new AggregateRegisteringInterceptor()));
+            $resultValidator = new ResultValidatorImpl(
+                $this->storedEvents,
+                $this->publishedEvents
+            );
+            $this->commandBus->setHandlerInterceptors(
+                array(new AggregateRegisteringInterceptor($this->workingAggregate))
+            );
 
-            $this->commandBus->dispatch(GenericCommandMessage::asCommandMessage($command)->andMetaData($metaData),
-                    $resultValidator);
+            $this->commandBus->dispatch(
+                GenericCommandMessage::asCommandMessage($command)->andMetaData($metaData),
+                $resultValidator
+            );
 
             $this->detectIllegalStateChanges();
             $resultValidator->assertValidRecording();
@@ -274,9 +329,15 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     private function ensureRepositoryConfiguration()
     {
         if (null === $this->repository) {
-            $this->registerRepository(new EventSourcingRepository($this->aggregateType,
-                    $this->eventBus, new NullLockManager(), $this->eventStore,
-                    new \Governor\Framework\EventSourcing\GenericAggregateFactory($this->aggregateType)));
+            $this->registerRepository(
+                new EventSourcingRepository(
+                    $this->aggregateType,
+                    $this->eventBus,
+                    new NullLockManager(),
+                    $this->eventStore,
+                    new GenericAggregateFactory($this->aggregateType)
+                )
+            );
         }
     }
 
@@ -286,66 +347,51 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->explicitCommandHandlersSet = true;
     }
 
-    // !!! TODO one reflection scanner 
     private function registerAggregateCommandHandlers()
     {
         $this->ensureRepositoryConfiguration();
 
         if (!$this->explicitCommandHandlersSet) {
-            $reader = new \Doctrine\Common\Annotations\AnnotationReader();
-            $reflectionClass = new \ReflectionClass($this->aggregateType);
-
-            foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                $annot = $reader->getMethodAnnotation($method,
-                        CommandHandler::class);
-
-                // not a handler
-                if (null === $annot) {
-                    continue;
-                }
-
-                $commandParam = current($method->getParameters());
-
-                // command type must be typehinted
-                if (!$commandParam->getClass()) {
-                    continue;
-                }
-
-                $commandName = $commandParam->getClass()->name;
-
-                $handler = new AnnotatedAggregateCommandHandler($this->aggregateType,
-                        $method->name, $this->parameterResolver,
-                        $this->repository, new AnnotationCommandTargetResolver());
-
-                $this->commandBus->subscribe($commandName, $handler);
-            }
+            AnnotatedAggregateCommandHandler::subscribe(
+                $this->aggregateType,
+                $this->repository,
+                $this->commandBus,
+                $this->parameterResolver
+            );
         }
     }
 
     private function detectIllegalStateChanges()
     {
         if (null !== $this->aggregateIdentifier && null !== $this->workingAggregate
-                && $this->reportIllegalStateChange) {
+            && $this->reportIllegalStateChange
+        ) {
             $uow = DefaultUnitOfWork::startAndGet();
             try {
                 $aggregate2 = $this->repository->load($this->aggregateIdentifier);
                 if ($this->workingAggregate->isDeleted()) {
-                    throw new GovernorAssertionError("The working aggregate was considered deleted, " .
-                    "but the Repository still contains a non-deleted copy of " .
-                    "the aggregate. Make sure the aggregate explicitly marks " .
-                    "itself as deleted in an EventHandler.");
+                    throw new GovernorAssertionError(
+                        "The working aggregate was considered deleted, " .
+                        "but the Repository still contains a non-deleted copy of " .
+                        "the aggregate. Make sure the aggregate explicitly marks " .
+                        "itself as deleted in an EventHandler."
+                    );
                 }
                 $this->assertValidWorkingAggregateState($aggregate2);
             } catch (AggregateNotFoundException $notFound) {
                 if (!$this->workingAggregate->isDeleted()) {
-                    throw new GovernorAssertionError("The working aggregate was not considered deleted, " .
-                    "but the Repository cannot recover the state of the " .
-                    "aggregate, as it is considered deleted there.");
+                    throw new GovernorAssertionError(
+                        "The working aggregate was not considered deleted, " .
+                        "but the Repository cannot recover the state of the " .
+                        "aggregate, as it is considered deleted there."
+                    );
                 }
             } catch (\Exception $ex) {
-                $this->logger->warn("An Exception occurred while detecting illegal state changes in {class}.",
-                        array('class' => get_class($this->workingAggregate)),
-                        $ex);
+                $this->logger->warn(
+                    "An Exception occurred while detecting illegal state changes in {class}.",
+                    array('class' => get_class($this->workingAggregate)),
+                    $ex
+                );
             } finally {
                 // rollback to prevent changes bing pushed to event store
                 $uow->rollback();
@@ -353,48 +399,50 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         }
     }
 
-    /*
-      private void assertValidWorkingAggregateState(EventSourcedAggregateRoot eventSourcedAggregate) {
-      HashSet<ComparationEntry> comparedEntries = new HashSet<ComparationEntry>();
-      if (!workingAggregate.getClass().equals(eventSourcedAggregate.getClass())) {
-      throw new AxonAssertionError(String.format("The aggregate loaded based on the generated events seems to "
-      + "be of another type than the original.\n"
-      + "Working type: <%s>\nEvent Sourced type: <%s>",
-      workingAggregate.getClass().getName(),
-      eventSourcedAggregate.getClass().getName()));
-      }
-      ensureValuesEqual(workingAggregate,
-      eventSourcedAggregate,
-      eventSourcedAggregate.getClass().getName(),
-      comparedEntries);
-      }
 
-      private void ensureValuesEqual(Object workingValue, Object eventSourcedValue, String propertyPath,
-      Set<ComparationEntry> comparedEntries) {
-      if (explicitlyUnequal(workingValue, eventSourcedValue)) {
-      throw new AxonAssertionError(format("Illegal state change detected! "
-      + "Property \"%s\" has different value when sourcing events.\n"
-      + "Working aggregate value:     <%s>\n"
-      + "Value after applying events: <%s>",
-      propertyPath, workingValue, eventSourcedValue));
-      } else if (workingValue != null && comparedEntries.add(new ComparationEntry(workingValue, eventSourcedValue))
-      && !hasEqualsMethod(workingValue.getClass())) {
-      for (Field field : fieldsOf(workingValue.getClass())) {
-      if (!Modifier.isStatic(field.getModifiers()) && !Modifier.isTransient(field.getModifiers())) {
-      ensureAccessible(field);
-      String newPropertyPath = propertyPath + "." + field.getName();
-      try {
-      Object workingFieldValue = field.get(workingValue);
-      Object eventSourcedFieldValue = field.get(eventSourcedValue);
-      ensureValuesEqual(workingFieldValue, eventSourcedFieldValue, newPropertyPath, comparedEntries);
-      } catch (IllegalAccessException e) {
-      logger.warn("Could not access field \"{}\". Unable to detect inappropriate state changes.",
-      newPropertyPath);
-      }
-      }
-      }
-      }
-      } */
+    private function assertValidWorkingAggregateState(EventSourcedAggregateRoot $eventSourcedAggregate)
+    {
+        /*HashSet<ComparationEntry> comparedEntries = new HashSet<ComparationEntry>();
+        if (!workingAggregate.getClass().equals(eventSourcedAggregate.getClass())) {
+        throw new AxonAssertionError(String.format("The aggregate loaded based on the generated events seems to "
+        + "be of another type than the original.\n"
+        + "Working type: <%s>\nEvent Sourced type: <%s>",
+        workingAggregate.getClass().getName(),
+        eventSourcedAggregate.getClass().getName()));
+        }
+        ensureValuesEqual(workingAggregate,
+        eventSourcedAggregate,
+        eventSourcedAggregate.getClass().getName(),
+        comparedEntries);*/
+    }
+
+    /*
+          private void ensureValuesEqual(Object workingValue, Object eventSourcedValue, String propertyPath,
+          Set<ComparationEntry> comparedEntries) {
+          if (explicitlyUnequal(workingValue, eventSourcedValue)) {
+          throw new AxonAssertionError(format("Illegal state change detected! "
+          + "Property \"%s\" has different value when sourcing events.\n"
+          + "Working aggregate value:     <%s>\n"
+          + "Value after applying events: <%s>",
+          propertyPath, workingValue, eventSourcedValue));
+          } else if (workingValue != null && comparedEntries.add(new ComparationEntry(workingValue, eventSourcedValue))
+          && !hasEqualsMethod(workingValue.getClass())) {
+          for (Field field : fieldsOf(workingValue.getClass())) {
+          if (!Modifier.isStatic(field.getModifiers()) && !Modifier.isTransient(field.getModifiers())) {
+          ensureAccessible(field);
+          String newPropertyPath = propertyPath + "." + field.getName();
+          try {
+          Object workingFieldValue = field.get(workingValue);
+          Object eventSourcedFieldValue = field.get(eventSourcedValue);
+          ensureValuesEqual(workingFieldValue, eventSourcedFieldValue, newPropertyPath, comparedEntries);
+          } catch (IllegalAccessException e) {
+          logger.warn("Could not access field \"{}\". Unable to detect inappropriate state changes.",
+          newPropertyPath);
+          }
+          }
+          }
+          }
+          } */
 
     private function clearGivenWhenState()
     {
@@ -411,7 +459,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
 
     /**
      * Returns the {@see CommandBusInterface} used by this fixture.
-     * 
+     *
      * @return CommandBusInterface
      */
     public function getCommandBus()
@@ -421,7 +469,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
 
     /**
      * Returns the {@see EventBusInterface} used by this fixture.
-     * 
+     *
      * @return EventBusInterface
      */
     public function getEventBus()
@@ -431,7 +479,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
 
     /**
      * Returns the {@see EventStoreInterface} used by this fixture.
-     * 
+     *
      * @return EventStoreInterface
      */
     public function getEventStore()
@@ -442,6 +490,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     public function getRepository()
     {
         $this->ensureRepositoryConfiguration();
+
         return $this->repository;
     }
 
@@ -459,23 +508,30 @@ class IdentifierValidatingRepository implements RepositoryInterface
 
     public function load($aggregateIdentifier, $expectedVersion = null)
     {
-        $aggregate = $this->delegate->load($aggregateIdentifier,
-                $expectedVersion);
+        $aggregate = $this->delegate->load(
+            $aggregateIdentifier,
+            $expectedVersion
+        );
 
         $this->validateIdentifier($aggregateIdentifier, $aggregate);
 
         return $aggregate;
     }
 
-    private function validateIdentifier($aggregateIdentifier,
-            AggregateRootInterface $aggregate)
-    {
+    private function validateIdentifier(
+        $aggregateIdentifier,
+        AggregateRootInterface $aggregate
+    ) {
         if (null !== $aggregateIdentifier && !$aggregateIdentifier === $aggregate->getIdentifier()) {
-            throw new \RuntimeException(sprintf(
+            throw new \RuntimeException(
+                sprintf(
                     "The aggregate used in this fixture was initialized with an identifier different than " .
                     "the one used to load it. Loaded [%s], but actual identifier is [%s].\n" .
                     "Make sure the identifier passed in the Command matches that of the given Events.",
-                    $aggregateIdentifier, $aggregate->getIdentifier()));
+                    $aggregateIdentifier,
+                    $aggregate->getIdentifier()
+                )
+            );
         }
     }
 
@@ -498,7 +554,7 @@ class ExecutionExceptionAwareCallback implements CommandCallbackInterface
 
     public function onSuccess($result)
     {
-        
+
     }
 
     public function onFailure(\Exception $cause)
@@ -524,9 +580,11 @@ class RecordingEventStore implements EventStoreInterface
     private $givenEvents;
     private $aggregateIdentifier;
 
-    public function __construct(array &$storedEvents, array &$givenEvents,
-            &$aggregateIdentifier)
-    {
+    public function __construct(
+        array &$storedEvents,
+        array &$givenEvents,
+        &$aggregateIdentifier
+    ) {
         $this->storedEvents = &$storedEvents;
         $this->givenEvents = &$givenEvents;
         $this->aggregateIdentifier = &$aggregateIdentifier;
@@ -542,12 +600,21 @@ class RecordingEventStore implements EventStoreInterface
                 $lastEvent = end($this->storedEvents);
 
                 if ($lastEvent->getAggregateIdentifier() !== $next->getAggregateIdentifier()) {
-                    throw new EventStoreException("Writing events for an unexpected aggregate. This could " .
-                    "indicate that a wrong aggregate is being triggered.");
-                } else if ($lastEvent->getScn() !== $next->getScn() - 1) {
-                    throw new EventStoreException(sprintf("Unexpected sequence number on stored event. " .
-                            "Expected %s, but got %s.",
-                            $lastEvent->getScn() + 1, $next->getScn()));
+                    throw new EventStoreException(
+                        "Writing events for an unexpected aggregate. This could " .
+                        "indicate that a wrong aggregate is being triggered."
+                    );
+                } else {
+                    if ($lastEvent->getScn() !== $next->getScn() - 1) {
+                        throw new EventStoreException(
+                            sprintf(
+                                "Unexpected sequence number on stored event. " .
+                                "Expected %s, but got %s.",
+                                $lastEvent->getScn() + 1,
+                                $next->getScn()
+                            )
+                        );
+                    }
                 }
             }
 
@@ -567,20 +634,26 @@ class RecordingEventStore implements EventStoreInterface
         }
 
         if (null !== $this->aggregateIdentifier && $this->aggregateIdentifier !== $identifier) {
-            throw new EventStoreException("You probably want to use aggregateIdentifier() on your fixture " .
-            "to get the aggregate identifier to use");
-        } else if (null === $this->aggregateIdentifier) {
-            $this->aggregateIdentifier = $identifier;
-            $this->injectAggregateIdentifier();
+            throw new EventStoreException(
+                "You probably want to use aggregateIdentifier() on your fixture " .
+                "to get the aggregate identifier to use"
+            );
+        } else {
+            if (null === $this->aggregateIdentifier) {
+                $this->aggregateIdentifier = $identifier;
+                $this->injectAggregateIdentifier();
+            }
         }
 
         $allEvents = $this->givenEvents;
         $allEvents = array_merge($allEvents, $this->storedEvents);
 
         if (empty($allEvents)) {
-            throw new AggregateNotFoundException($identifier,
-            "No 'given' events were configured for this aggregate, " .
-            "nor have any events been stored.");
+            throw new AggregateNotFoundException(
+                $identifier,
+                "No 'given' events were configured for this aggregate, " .
+                "nor have any events been stored."
+            );
         }
 
         return new SimpleDomainEventStream($allEvents);
@@ -592,11 +665,15 @@ class RecordingEventStore implements EventStoreInterface
         $this->givenEvents = array();
 
         foreach ($oldEvents as $oldEvent) {
-            if (null !== $oldEvent->getAggregateIdentifier()) {
-                $this->givenEvents[] = new GenericDomainEventMessage($oldEvent->getIdentifier(),
-                        $oldEvent->getTimestamp(), $this->aggregateIdentifier,
-                        $oldEvent->getScn(), $oldEvent->getPayload(),
-                        $oldEvent->getMetaData());
+            if (null === $oldEvent->getAggregateIdentifier()) {
+                $this->givenEvents[] = new GenericDomainEventMessage(
+                    $this->aggregateIdentifier,
+                    $oldEvent->getScn(),
+                    $oldEvent->getPayload(),
+                    $oldEvent->getMetaData(),
+                    $oldEvent->getIdentifier(),
+                    $oldEvent->getTimestamp()
+                );
             } else {
                 $this->givenEvents[] = $oldEvent;
             }
@@ -605,31 +682,51 @@ class RecordingEventStore implements EventStoreInterface
 
     public function setLogger(LoggerInterface $logger)
     {
-        
+
     }
 
 }
 
 class AggregateRegisteringInterceptor implements CommandHandlerInterceptorInterface
 {
+    private $workingAggregate;
 
-    public function handle(CommandMessageInterface $commandMessage,
-            UnitOfWorkInterface $unitOfWork,
-            InterceptorChainInterface $interceptorChain)
+    function __construct(&$workingAggregate)
     {
+        $this->workingAggregate = &$workingAggregate;
+    }
 
-        /* $unitOfWork->registerListener(new UnitOfWorkListenerAdapter() {
-          @Override
-          public void onPrepareCommit(UnitOfWork unitOfWork, Set<AggregateRoot> aggregateRoots,
-          List<EventMessage> events) {
-          Iterator<AggregateRoot> iterator = aggregateRoots.iterator();
-          if (iterator.hasNext()) {
-          workingAggregate = iterator.next();
-          }
-          }
-          });
-         */
+    public function handle(
+        CommandMessageInterface $commandMessage,
+        UnitOfWorkInterface $unitOfWork,
+        InterceptorChainInterface $interceptorChain
+    ) {
+
+        $unitOfWork->registerListener(new AggregateListenerAdapter($this->workingAggregate));
+
         return $interceptorChain->proceed();
+    }
+
+}
+
+class AggregateListenerAdapter extends UnitOfWorkListenerAdapter
+{
+    private $workingAggregate;
+
+    function __construct(&$workingAggregate)
+    {
+        $this->workingAggregate = &$workingAggregate;
+    }
+
+
+    public function onPrepareCommit(
+        UnitOfWorkInterface $unitOfWork,
+        array $aggregateRoots,
+        array $events
+    ) {
+        foreach ($aggregateRoots as $aggregateRoot) {
+            $this->workingAggregate = $aggregateRoot;
+        }
     }
 
 }

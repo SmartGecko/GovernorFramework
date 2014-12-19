@@ -24,11 +24,12 @@
 
 namespace Governor\Tests\Saga\Annotation;
 
+use Psr\Log\LoggerInterface;
 use Governor\Framework\Domain\MetaData;
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\Saga\AssociationValue;
 use Governor\Framework\Saga\GenericSagaFactory;
-use Governor\Tests\Saga\Repository\InMemorySagaRepository;
+use Governor\Framework\Saga\Repository\Memory\InMemorySagaRepository;
 use Governor\Framework\EventHandling\SimpleEventBus;
 use Governor\Framework\Annotations\SagaEventHandler;
 use Governor\Framework\Annotations\StartSaga;
@@ -37,9 +38,10 @@ use Governor\Framework\Saga\Annotation\AbstractAnnotatedSaga;
 use Governor\Framework\Saga\Annotation\AnnotatedSagaManager;
 
 /**
- * Description of AnnotatedSagaManagerTest
+ * AnnotatedSagaManager unit tests.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class AnnotatedSagaManagerTest extends \PHPUnit_Framework_TestCase
 {
@@ -51,12 +53,12 @@ class AnnotatedSagaManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->sagaRepository = \Phake::partialMock(InMemorySagaRepository::class);
         $eventBus = new SimpleEventBus();
-        $eventBus->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
+        $eventBus->setLogger($this->getMock(LoggerInterface::class));
 
         $this->manager = new AnnotatedSagaManager($this->sagaRepository,
                 new GenericSagaFactory(), array(MyTestSaga::class));
 
-        $this->manager->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
+        $this->manager->setLogger($this->getMock(LoggerInterface::class));
     }
 
     private function repositoryContents($lookupValue, $sagaType)
