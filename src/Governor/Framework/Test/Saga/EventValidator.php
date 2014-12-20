@@ -29,7 +29,7 @@ class EventValidator implements EventListenerInterface
      *
      * @param EventBusInterface $eventBus the event bus to monitor
      */
-    public function __construct(EventBusInterface $eventBus)
+    public function __construct(EventBusInterface $eventBus = null)
     {
         $this->eventBus = $eventBus;
     }
@@ -65,7 +65,7 @@ class EventValidator implements EventListenerInterface
      * @param array $expected the events that must have been published.
      * @throws GovernorAssertionError
      */
-    public function assertPublishedEvents(array $expected)
+    public function assertPublishedEvents(array $expected = array())
     {
         if (count($this->publishedEvents) !== count($expected)) {
             throw new GovernorAssertionError(

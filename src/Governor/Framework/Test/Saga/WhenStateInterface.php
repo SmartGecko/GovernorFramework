@@ -45,7 +45,7 @@ interface WhenStateInterface
      * reset them yourself if they are manipulated by the Saga in the "given" stage of the test.
      *
      * @param mixed $aggregateIdentifier The identifier of the aggregate the events should appear to come from
-     * @return WhenAggregateEventPublisher an object that allows registration of the actual events to send
+     * @return WhenAggregateEventPublisherInterface an object that allows registration of the actual events to send
      */
     public function whenAggregate($aggregateIdentifier);
 

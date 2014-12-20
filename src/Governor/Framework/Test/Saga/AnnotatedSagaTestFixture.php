@@ -24,18 +24,13 @@
 
 namespace Governor\Framework\Test\Saga;
 
-use Governor\Framework\CommandHandling\CommandBusInterface;
-use Governor\Framework\CommandHandling\CommandHandlerInterface;
-use Governor\Framework\EventHandling\EventBusInterface;
-use Governor\Framework\EventSourcing\AggregateFactoryInterface;
-use Governor\Framework\EventSourcing\EventSourcingRepository;
-use Governor\Framework\EventStore\EventStoreInterface;
-use Governor\Framework\Repository\RepositoryInterface;
+use Governor\Framework\CommandHandling\Gateway\CommandGatewayInterface;
+use Governor\Framework\Domain\GenericEventMessage;
+use Governor\Framework\EventHandling\SimpleEventBus;
 use Governor\Framework\Saga\Annotation\AnnotatedSagaManager;
-use Governor\Framework\Test\FixtureConfigurationInterface;
-use Governor\Framework\Test\TestExecutorInterface;
+use Governor\Framework\Saga\GenericSagaFactory;
+use Governor\Framework\Saga\Repository\Memory\InMemorySagaRepository;
 use Governor\Framework\Test\Utils\RecordingCommandBus;
-use Psr\Log\LoggerInterface;
 
 /**
  * Description of GivenWhenThenTestFixture
@@ -50,20 +45,49 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
     /**
      * @var AnnotatedSagaManager
      */
-    private $sagaManager;
+    public $sagaManager;
     /**
      * @var array
      */
     private $registeredResources = array();
 
     private $aggregatePublishers = array(); //new HashMap<Object, AggregateEventPublisherImpl>();
-    //private FixtureExecutionResultImpl fixtureExecutionResult;
+
+    /**
+     * @var FixtureExecutionResultInterface
+     */
+    public $fixtureExecutionResult;
     /**
      * @var RecordingCommandBus
      */
     private $commandBus;
 
+    public function __construct($sagaType)
+    {
+        //eventScheduler = new StubEventScheduler();
+        $eventScheduler = null;
+        $genericSagaFactory = new GenericSagaFactory();
+        //genericSagaFactory.setResourceInjector(new AutowiredResourceInjector(registeredResources));
+        $eventBus = new SimpleEventBus();
+        $sagaRepository = new InMemorySagaRepository();
+        $this->sagaManager = new AnnotatedSagaManager($sagaRepository, $genericSagaFactory, array($sagaType));
+        $this->sagaManager->setSuppressExceptions(false);
 
+        //registeredResources.add(eventBus);
+        $this->commandBus = new RecordingCommandBus();
+        //registeredResources.add(commandBus);
+        //registeredResources.add(eventScheduler);
+        //registeredResources.add(new DefaultCommandGateway(commandBus));
+        $this->fixtureExecutionResult = new FixtureExecutionResultImpl(
+            $sagaRepository, $eventScheduler, $eventBus, $this->commandBus,
+            $sagaType
+        );
+
+        /*FixtureResourceParameterResolverFactory.clear();
+        for (Object resource : registeredResources) {
+        FixtureResourceParameterResolverFactory.registerResource(resource);
+        }*/
+    }
 
     /**
      * Use this method to indicate that an aggregate with given identifier published certain events.
@@ -76,7 +100,7 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      */
     public function andThenAggregate($aggregateIdentifier)
     {
-        // TODO: Implement andThenAggregate() method.
+        return $this->givenAggregate($aggregateIdentifier);
     }
 
     /**
@@ -84,7 +108,7 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      * importance.
      *
      * @param \DateInterval $elapsedTime The amount of time that will elapse
-     * @return ContinuedGivenState an object that allows registration of the actual events to send
+     * @return ContinuedGivenStateInterface an object that allows registration of the actual events to send
      */
     public function andThenTimeElapses(\DateInterval $elapsedTime)
     {
@@ -96,7 +120,7 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      * importance.
      *
      * @param \DateTime $newDateTime The time to advance the clock to
-     * @return ContinuedGivenState an object that allows registration of the actual events to send
+     * @return ContinuedGivenStateInterface an object that allows registration of the actual events to send
      */
     public function andThenTimeAdvancesTo(\DateTime $newDateTime)
     {
@@ -108,185 +132,100 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      * sagas.
      *
      * @param mixed $event The event to publish
-     * @return ContinuedGivenState an object that allows chaining of more given state
+     * @return ContinuedGivenStateInterface an object that allows chaining of more given state
      */
     public function  andThenAPublished($event)
     {
-        // TODO: Implement andThenAPublished() method.
+        $this->sagaManager->handle(GenericEventMessage::asEventMessage($event));
+
+        return $this;
     }
 
     /**
-     * Registers an arbitrary event sourcing <code>repository</code> with the fixture. The repository must be wired
-     * with the Event Store of this test fixture.
+     * Registers the given <code>resource</code>. When a Saga is created, all resources are injected on that instance
+     * before any Events are passed onto it.
      * <p/>
-     * Should not be used in combination with registerAggregateFactory(), as that will overwrite any repository previously registered.
-     *
-     * @param EventSourcingRepository $repository The repository to use in the test case
-     * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
-     */
-    public function registerRepository(EventSourcingRepository $repository)
-    {
-        // TODO: Implement registerRepository() method.
-    }
-
-    /**
-     * Registers the given <code>aggregateFactory</code> with the fixture. The repository used by the fixture will use
-     * the given factory to create new aggregate instances. Defaults to an Aggregate Factory that uses the no-arg
-     * constructor to create new instances.
+     * Note that a CommandBus, EventBus and EventScheduler are already registered as resources, and need not be
+     * registered again.
      * <p/>
-     * Should not be used in combination with registerRepository(), as that will overwrite any aggregate factory previously registered.
+     * Also note that you might need to reset the resources manually if you want to isolate behavior during the "when"
+     * stage of the test.
      *
-     * @param AggregateFactoryInterface $aggregateFactory The Aggregate Factory to create empty aggregates with
-     * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
+     * @param mixed $resource the resource to register.
      */
-    public function registerAggregateFactory(AggregateFactoryInterface $aggregateFactory)
+    public function registerResource($resource)
     {
-        // TODO: Implement registerAggregateFactory() method.
+        // TODO: Implement registerResource() method.
     }
 
     /**
-     * Registers an <code>annotatedCommandHandler</code> with this fixture. This will register this command handler
-     * with the command bus used in this fixture.
-     *
-     * @param mixed $annotatedCommandHandler The command handler to register for this test
-     * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
-     */
-    public function registerAnnotatedCommandHandler($annotatedCommandHandler)
-    {
-        // TODO: Implement registerAnnotatedCommandHandler() method.
-    }
-
-    /**
-     * Registers a <code>commandHandler</code> to handle commands of the given <code>commandType</code> with the
-     * command bus used by this fixture.
-     *
-     * @param string $commandName The name of the command to register the handler for
-     * @param CommandHandlerInterface $commandHandler The handler to register
-     * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
-     */
-    public function registerCommandHandler(
-        $commandName,
-        CommandHandlerInterface $commandHandler
-    ) {
-        // TODO: Implement registerCommandHandler() method.
-    }
-
-    /**
-     * Registers a resource that is eligible for injection in handler method.
-     * These resource must be registered <em>before</em> registering any command handler.
-     *
-     * @param string $id The resource id.
-     * @param mixed $resource The resource eligible for injection
-     * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
-     */
-    public function registerInjectableResource($id, $resource)
-    {
-        // TODO: Implement registerInjectableResource() method.
-    }
-
-    /**
-     * Configures the given <code>domainEvents</code> as the "given" events. These are the events returned by the event
-     * store when an aggregate is loaded.
+     * Creates a Command Gateway for the given <code>gatewayInterface</code> and registers that as a resource. The
+     * gateway will dispatch commands on the Command Bus contained in this Fixture, so that you can validate commands
+     * using {@link FixtureExecutionResult#expectDispatchedCommandsEqualTo(Object...)} and {@link
+     * FixtureExecutionResult#expectDispatchedCommandsMatching(org.hamcrest.Matcher)}.
      * <p/>
-     * If an item in the given <code>domainEvents</code> implements {@link org.axonframework.domain.Message}, the
-     * payload and meta data from that message are copied into a newly created Domain Event Message. Otherwise, a
-     * Domain Event Message with the item as payload and empty meta data is created.
+     * Note that you need to use {@link #setCallbackBehavior(org.axonframework.test.utils.CallbackBehavior)} to defined
+     * the behavior of commands when expecting return values. Alternatively, you can use {@link
+     * #registerCommandGateway(Class, Object)} to define behavior using a stub implementation.
      *
-     * @param array $domainEvents the domain events the event store should return
-     * @return TestExecutorInterface TestExecutor instance that can execute the test with this configuration
+     * @param CommandGatewayInterface $gatewayInterface The interface describing the gateway
+     * @return CommandGatewayInterface the gateway implementation being registered as a resource.
      */
-    public function given(array $domainEvents)
+    public function registerCommandGateway(CommandGatewayInterface $gatewayInterface)
     {
-        // TODO: Implement given() method.
+        // TODO: Implement registerCommandGateway() method.
     }
 
     /**
-     * Indicates that no relevant activity has occurred in the past. The behavior of this method is identical to giving
-     * no events in the {@link #given(java.util.List)} method.
+     * Use this method to indicate that an aggregate with given identifier published certain events.
+     * <p/>
+     * Can be chained to build natural sentences:<br/>
+     * <code>andThenAggregate(someIdentifier).published(someEvents)</code>
      *
-     * @return TestExecutorInterface a TestExecutor instance that can execute the test with this configuration
+     * @param string $aggregateIdentifier The identifier of the aggregate the events should appear to come from
+     * @return GivenAggregateEventPublisherInterface an object that allows registration of the actual events to send
+     */
+    public function givenAggregate($aggregateIdentifier)
+    {
+        return $this->getPublisherFor($aggregateIdentifier);
+    }
+
+    /**
+     * Indicates that the given <code>applicationEvent</code> has been published in the past. This event is sent to the
+     * associated sagas.
+     *
+     * @param mixed $event The event to publish
+     * @return ContinuedGivenStateInterface an object that allows chaining of more given state
+     */
+    public function givenAPublished($event)
+    {
+        $this->sagaManager->handle(GenericEventMessage::asEventMessage($event));
+        return $this;
+    }
+
+    /**
+     * Indicates that no relevant activity has occurred in the past.
+     *
+     * @return WhenStateInterface an object that allows the definition of the activity to measure Saga behavior
      */
     public function givenNoPriorActivity()
     {
-        // TODO: Implement givenNoPriorActivity() method.
+        return $this;
     }
 
     /**
-     * Configures the given <code>commands</code> as the command that will provide the "given" events. The commands are
-     * executed, and the resulting stored events are captured.
+     * Returns the time as "known" by the fixture. This is the time at which the fixture was created, plus the amount
+     * of
+     * time the fixture was told to simulate a "wait".
+     * <p/>
+     * This time can be used to predict calculations that the saga may have made based on timestamps from the events it
+     * received.
      *
-     * @param array $commands the domain events the event store should return
-     * @return TestExecutorInterface a TestExecutor instance that can execute the test with this configuration
+     * @return \DateTime the simulated "current time" of the fixture.
      */
-    public function givenCommands(array $commands)
+    public function currentTime()
     {
-        // TODO: Implement givenCommands() method.
-    }
-
-    /**
-     * Returns the command bus used by this fixture. The command bus is provided for wiring purposes only, for example
-     * to support composite commands (a single command that causes the execution of one or more others).
-     *
-     * @return CommandBusInterface the command bus used by this fixture
-     */
-    public function getCommandBus()
-    {
-        // TODO: Implement getCommandBus() method.
-    }
-
-    /**
-     * Returns the event bus used by this fixture. The event bus is provided for wiring purposes only, for example to
-     * allow command handlers to publish events other than Domain Events. Events published on the returned event bus
-     * are recorded an evaluated in the {@link ResultValidator} operations.
-     *
-     * @return EventBusInterface the event bus used by this fixture
-     */
-    public function getEventBus()
-    {
-        // TODO: Implement getEventBus() method.
-    }
-
-    /**
-     * Returns the event store used by this fixture. This event store is provided for wiring purposes only.
-     *
-     * @return EventStoreInterface the event store used by this fixture
-     */
-    public function getEventStore()
-    {
-        // TODO: Implement getEventStore() method.
-    }
-
-    /**
-     * Returns the repository used by this fixture. This repository is provided for wiring purposes only. The
-     * repository is configured to use the fixture's event store to load events.
-     *
-     * @return RepositoryInterface the repository used by this fixture
-     */
-    public function getRepository()
-    {
-        // TODO: Implement getRepository() method.
-    }
-
-    /**
-     * Sets whether or not the fixture should detect and report state changes that occur outside of Event Handler
-     * methods.
-     *
-     * @param boolean $reportIllegalStateChange whether or not to detect and report state changes outside of Event Handler
-     *                                 methods.
-     */
-    public function setReportIllegalStateChange($reportIllegalStateChange)
-    {
-        // TODO: Implement setReportIllegalStateChange() method.
-    }
-
-    /**
-     * Returns the logger associated with this fixture.
-     *
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        // TODO: Implement getLogger() method.
+        // TODO: Implement currentTime() method.
     }
 
     /**
@@ -305,7 +244,9 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      */
     public function whenAggregate($aggregateIdentifier)
     {
-        // TODO: Implement whenAggregate() method.
+        $this->fixtureExecutionResult->startRecording();
+
+        return $this->getPublisherFor($aggregateIdentifier);
     }
 
     /**
@@ -319,7 +260,16 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      */
     public function whenPublishingA($event)
     {
-        // TODO: Implement whenPublishingA() method.
+        try {
+            $this->fixtureExecutionResult->startRecording();
+
+            $this->sagaManager->handle(GenericEventMessage::asEventMessage($event));
+        } finally {
+
+            //FixtureResourceParameterResolverFactory.clear();
+        }
+
+        return $this->fixtureExecutionResult;
     }
 
     /**
@@ -352,6 +302,18 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
     public function whenTimeAdvancesTo(\DateTime $newDateTime)
     {
         // TODO: Implement whenTimeAdvancesTo() method.
+    }
+
+    private function getPublisherFor($aggregateIdentifier)
+    {
+        if (!array_key_exists($aggregateIdentifier, $this->aggregatePublishers)) {
+            $this->aggregatePublishers[$aggregateIdentifier] = new AggregateEventPublisherImpl(
+                $this,
+                $aggregateIdentifier
+            );
+        }
+
+        return $this->aggregatePublishers[$aggregateIdentifier];
     }
 
 }

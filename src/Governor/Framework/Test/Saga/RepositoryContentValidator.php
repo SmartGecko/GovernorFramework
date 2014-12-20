@@ -26,7 +26,7 @@ namespace Governor\Framework\Test\Saga;
 
 use Governor\Framework\Saga\AssociationValue;
 use Governor\Framework\Test\GovernorAssertionError;
-use Governor\Tests\Saga\Repository\Memory\InMemorySagaRepository;
+use Governor\Framework\Saga\Repository\Memory\InMemorySagaRepository;
 
 class RepositoryContentValidator
 {

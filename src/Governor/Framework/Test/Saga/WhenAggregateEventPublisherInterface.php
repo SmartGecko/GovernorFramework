@@ -24,33 +24,23 @@
 
 namespace Governor\Framework\Test\Saga;
 
-use Hamcrest\Description;
+/**
+ * Interface to an object that publishes events on behalf of an aggregate. The sequence number on the events must be
+ * exactly sequential per aggregate.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
+ */
 
-abstract class DescriptionUtils
+interface WhenAggregateEventPublisherInterface
 {
     /**
-     * Describe the contents of the given <code>list</code> in the given <code>description</code>.
+     * Register the given <code>event</code> to be published on behalf of an aggregate. Activity caused by this event
+     * on
+     * the CommandBus and EventBus is monitored and can be checked in the FixtureExecutionResult.
      *
-     * @param array $list The list to describe
-     * @param Description $description The description to describe to
+     * @param mixed $event The event published by the aggregate
+     * @return FixtureExecutionResultInterface a reference to the test results for the validation  phase
      */
-    public static function describe(array $list, Description $description)
-    {
-        $counter = 0;
-
-        $description->appendText("List with ");
-        foreach ($list as $item) {
-            $description->appendText("<")
-                ->appendText(null !== $item ? get_class($item) : "null")
-                ->appendText(">");
-            if ($counter === count($list) - 2) {
-                $description->appendText(" and ");
-            } else {
-                if ($counter < count($list) - 2) {
-                    $description->appendText(", ");
-                }
-            }
-            $counter++;
-        }
-    }
+    public function publishes($event);
 }

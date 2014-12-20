@@ -22,35 +22,20 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Test\Saga;
+namespace Governor\Tests\Test\Saga;
 
-use Hamcrest\Description;
 
-abstract class DescriptionUtils
+class TriggerExistingSagaEvent
 {
-    /**
-     * Describe the contents of the given <code>list</code> in the given <code>description</code>.
-     *
-     * @param array $list The list to describe
-     * @param Description $description The description to describe to
-     */
-    public static function describe(array $list, Description $description)
-    {
-        $counter = 0;
+    private $identifier;
 
-        $description->appendText("List with ");
-        foreach ($list as $item) {
-            $description->appendText("<")
-                ->appendText(null !== $item ? get_class($item) : "null")
-                ->appendText(">");
-            if ($counter === count($list) - 2) {
-                $description->appendText(" and ");
-            } else {
-                if ($counter < count($list) - 2) {
-                    $description->appendText(", ");
-                }
-            }
-            $counter++;
-        }
+    public function  __construct($identifier)
+    {
+        $this->identifier = $identifier;
+    }
+
+    public function getIdentifier()
+    {
+        return $this->identifier;
     }
 }

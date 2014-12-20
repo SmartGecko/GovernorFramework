@@ -53,7 +53,8 @@ class FixtureExecutionResultImpl implements FixtureExecutionResultInterface
 
     public function __construct(
         InMemorySagaRepository $sagaRepository,
-        StubEventScheduler $eventScheduler,
+        //StubEventScheduler $eventScheduler,
+        $eventScheduler = null,
         EventBusInterface $eventBus,
         RecordingCommandBus $commandBus,
         $sagaType
@@ -61,7 +62,7 @@ class FixtureExecutionResultImpl implements FixtureExecutionResultInterface
         $this->commandValidator = new CommandValidator($commandBus);
         $this->repositoryContentValidator = new RepositoryContentValidator($sagaRepository, $sagaType);
         $this->eventValidator = new EventValidator($eventBus);
-        $this->eventSchedulerValidator = new EventSchedulerValidator($eventScheduler);
+        //$this->eventSchedulerValidator = new EventSchedulerValidator($eventScheduler);
     }
 
     /**
