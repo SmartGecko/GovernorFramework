@@ -51,7 +51,7 @@ abstract class AbstractAnnotatedAggregateRoot extends AbstractEventSourcedAggreg
     protected function handle(DomainEventMessageInterface $event)
     {
         $this->ensureInspectorStarted();
-        $this->inspector->findAndinvokeEventHandlers($event);
+        $this->inspector->findAndInvokeEventHandlers($event);
     }
 
     public function getIdentifier()

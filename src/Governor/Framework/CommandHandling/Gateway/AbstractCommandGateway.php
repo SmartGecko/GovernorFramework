@@ -24,18 +24,17 @@
 
 namespace Governor\Framework\CommandHandling\Gateway;
 
-use Governor\Framework\Domain\MetaData;
-use Governor\Framework\Correlation\CorrelationDataHolder;
-use Governor\Framework\CommandHandling\CommandCallbackInterface;
-use Governor\Framework\CommandHandling\CommandBusInterface;
-use Governor\Framework\CommandHandling\GenericCommandMessage;
 use Governor\Framework\CommandHandling\Callbacks\ResultCallback;
+use Governor\Framework\CommandHandling\CommandBusInterface;
+use Governor\Framework\CommandHandling\CommandCallbackInterface;
+use Governor\Framework\CommandHandling\GenericCommandMessage;
+use Governor\Framework\Correlation\CorrelationDataHolder;
 
 /**
  * Description of AbstractCommandGateway
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AbstractCommandGateway implements CommandGatewayInterface
 {
@@ -45,6 +44,9 @@ abstract class AbstractCommandGateway implements CommandGatewayInterface
      */
     protected $commandBus;
 
+    /**
+     * @param CommandBusInterface $commandBus
+     */
     public function __construct(CommandBusInterface $commandBus)
     {
         $this->commandBus = $commandBus;
@@ -55,7 +57,7 @@ abstract class AbstractCommandGateway implements CommandGatewayInterface
      */
     public function send($command, CommandCallbackInterface $callback = null)
     {
-        $message = $this->createCommandMessage($command);    
+        $message = $this->createCommandMessage($command);
 
         $this->commandBus->dispatch($message, $callback);
     }
@@ -64,8 +66,8 @@ abstract class AbstractCommandGateway implements CommandGatewayInterface
      * {@inheritDoc}
      */
     public function sendAndWait($command)
-    {        
-        $message = $this->createCommandMessage($command);                                
+    {
+        $message = $this->createCommandMessage($command);
         $callback = new ResultCallback();
 
         $this->commandBus->dispatch($message, $callback);
@@ -73,12 +75,17 @@ abstract class AbstractCommandGateway implements CommandGatewayInterface
         return $callback->getResult();
     }
 
+
+    /**
+     * @param $command
+     * @return GenericCommandMessage
+     */
     protected function createCommandMessage($command)
     {
         $message = GenericCommandMessage::asCommandMessage($command);
 
         return $message->withMetaData(CorrelationDataHolder::getCorrelationData())
-                        ->andMetaData($message->getMetaData()->all());
+            ->andMetaData($message->getMetaData()->all());
     }
-   
+
 }

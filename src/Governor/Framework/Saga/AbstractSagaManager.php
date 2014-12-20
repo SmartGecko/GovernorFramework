@@ -24,6 +24,8 @@
 
 namespace Governor\Framework\Saga;
 
+use Doctrine\Tests\Common\Annotations\Null;
+use Governor\Framework\Common\Logging\NullLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Governor\Framework\Correlation\CorrelationDataHolder;
@@ -74,6 +76,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $this->sagaFactory = $sagaFactory;
         $this->sagaTypes = $sagaTypes;
         $this->correlationDataProvider = new SimpleCorrelationDataProvider();
+        $this->logger = new NullLogger();
     }
 
     public function handle(EventMessageInterface $event)
@@ -262,6 +265,11 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $this->suppressExceptions = $suppressExceptions;
     }
 
+
+    /**
+     * @param LoggerInterface $logger
+     * @return null
+     */
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;

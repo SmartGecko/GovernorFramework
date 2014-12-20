@@ -36,7 +36,7 @@ use Rhumsaa\Uuid\Uuid;
  *
  * @author david
  */
-class FixtureTestGeneric extends \PHPUnit_Framework_TestCase
+class GenericFixtureTest extends \PHPUnit_Framework_TestCase
 {
 
     /**

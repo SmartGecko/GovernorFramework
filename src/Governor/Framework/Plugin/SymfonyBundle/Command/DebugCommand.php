@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 
+// !!! TODO consider removing this
 class DebugCommand extends ContainerAwareCommand
 {
     protected function configure()

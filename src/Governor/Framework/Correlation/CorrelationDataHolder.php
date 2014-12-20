@@ -38,7 +38,7 @@ final class CorrelationDataHolder
      */
     private static $correlationData = array();
 
-    private function __construct()
+    protected function __construct()
     {
         
     }
@@ -60,7 +60,7 @@ final class CorrelationDataHolder
      *
      * @param array $data the correlation data to attach to the current thread
      */
-    public static function setCorrelationData(array $data)
+    public static function setCorrelationData(array $data = array())
     {
         self::$correlationData = $data;
     }

@@ -24,19 +24,19 @@
 
 namespace Governor\Framework\EventSourcing\Annotation;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\Annotations\AggregateIdentifier;
 use Governor\Framework\Annotations\EventHandler;
 use Governor\Framework\Annotations\EventSourcedMember;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\Common\ReflectionUtils;
+use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\EventSourcing\IncompatibleAggregateException;
 
 /**
  * Description of AnnotationAggregateInspector
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class AnnotationAggregateInspector
 {
@@ -56,6 +56,9 @@ class AnnotationAggregateInspector
      */
     private $reader;
 
+    /**
+     * @param $targetObject
+     */
     public function __construct($targetObject)
     {
         $this->targetObject = $targetObject;
@@ -63,45 +66,64 @@ class AnnotationAggregateInspector
         $this->reflectionClass = ReflectionUtils::getClass($this->targetObject);
     }
 
+    /**
+     * @return string
+     * @throws IncompatibleAggregateException
+     */
     public function getIdentifier()
     {
         foreach (ReflectionUtils::getProperties($this->reflectionClass) as $property) {
-            $annot = $this->reader->getPropertyAnnotation($property,
-                    AggregateIdentifier::class);
+            $annotation = $this->reader->getPropertyAnnotation(
+                $property,
+                AggregateIdentifier::class
+            );
 
-            if (null !== $annot) {
+            if (null !== $annotation) {
                 $property->setAccessible(true);
+
                 return $property->getValue($this->targetObject);
             }
         }
 
-        throw new IncompatibleAggregateException(sprintf("The aggregate class [%s] does not specify an Identifier. " .
+        throw new IncompatibleAggregateException(
+            sprintf(
+                "The aggregate class [%s] does not specify an Identifier. " .
                 "Ensure that the field containing the aggregate " .
                 "identifier is annotated with @AggregateIdentifier.",
-                $this->reflectionClass->getName()));
+                $this->reflectionClass->getName()
+            )
+        );
     }
 
+
+    /**
+     * @return array
+     */
     public function getChildEntities()
     {
         $entities = array();
 
         foreach (ReflectionUtils::getProperties($this->reflectionClass) as $property) {
-            $annot = $this->reader->getPropertyAnnotation($property,
-                    EventSourcedMember::class);
+            $annotation = $this->reader->getPropertyAnnotation(
+                $property,
+                EventSourcedMember::class
+            );
 
-            if (null !== $annot) {
+            if (null !== $annotation) {
                 $property->setAccessible(true);
                 $child = $property->getValue($this->targetObject);
 
 
                 if (is_array($child)) {
                     $entities = array_merge($entities, $child);
-                } else if ($child instanceof \IteratorAggregate) {
-                    foreach ($child as $element) {
-                        $entities[] = $element;
-                    }
                 } else {
-                    $entities[] = $child;
+                    if ($child instanceof \IteratorAggregate) {
+                        foreach ($child as $element) {
+                            $entities[] = $element;
+                        }
+                    } else {
+                        $entities[] = $child;
+                    }
                 }
             }
         }
@@ -109,19 +131,28 @@ class AnnotationAggregateInspector
         return $entities;
     }
 
-    public function findAndinvokeEventHandlers(DomainEventMessageInterface $event)
+    /**
+     * @param DomainEventMessageInterface $event
+     */
+    public function findAndInvokeEventHandlers(DomainEventMessageInterface $event)
     {
+        // !!! TODO revisit
         foreach (ReflectionUtils::getMethods($this->reflectionClass) as $method) {
-            $annot = $this->reader->getMethodAnnotation($method,
-                    EventHandler::class);
+            $annotation = $this->reader->getMethodAnnotation(
+                $method,
+                EventHandler::class
+            );
 
-            if (null !== $annot) {
+            if (null !== $annotation) {
                 $parameter = current($method->getParameters());
 
                 if (null !== $parameter->getClass() && $parameter->getClass()->name
-                        === $event->getPayloadType()) {
-                    $method->invokeArgs($this->targetObject,
-                            array($event->getPayload()));
+                    === $event->getPayloadType()
+                ) {
+                    $method->invokeArgs(
+                        $this->targetObject,
+                        array($event->getPayload())
+                    );
                 }
             }
         }
