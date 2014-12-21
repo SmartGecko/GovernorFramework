@@ -74,7 +74,7 @@ class SimpleSerializedDomainEventData implements SerializedDomainEventDataInterf
      * Note that the given <code>timestamp</code> must be in a format supported by {@link} DateTime#DateTime(Object)}.
      *
      * @param string $eventIdentifier     The identifier of the event
-     * @param string$ aggregateIdentifier The identifier of the aggregate
+     * @param string $aggregateIdentifier The identifier of the aggregate
      * @param integer $scn      The sequence number of the event
      * @param \DateTime $timestamp           The timestamp of the event (format must be supported by {@link
      *                            DateTime#DateTime(Object)})

@@ -34,17 +34,22 @@ interface SerializerInterface
 {
 
     /**
+     * @param mixed $object Object to serialize.
+     *
      * @return SerializedObjectInterface
      */
     public function serialize($object);
 
     /**
-     * @param SerializedObjectInterface $data     
+     * @param SerializedObjectInterface $data
+     *
      * @return mixed
      */
     public function deserialize(SerializedObjectInterface $data);
 
     /**
+     * @param mixed $object
+     *
      * @return SerializedObjectInterface
      */
     public function typeForClass($object);

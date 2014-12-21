@@ -258,22 +258,6 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
         $this->exchangeName = $exchangeName;
     }
 
-    /**
-     * Sets the ListenerContainerLifecycleManager that creates and manages the lifecycle of Listener Containers for the
-     * clusters that are connected to this terminal.
-     * <p/>
-     * Defaults to an autowired ListenerContainerLifecycleManager
-     *
-     * @param listenerContainerLifecycleManager
-     *         the listenerContainerLifecycleManager to set
-     */
-    //   public void setListenerContainerLifecycleManager(
-    //          ListenerContainerLifecycleManager listenerContainerLifecycleManager) {
-    //      this.listenerContainerLifecycleManager = listenerContainerLifecycleManager;
-    //  }
-
-
-
     public function onClusterCreated(ClusterInterface $cluster)
     {
         $clusterMetaData = $cluster->getMetaData();

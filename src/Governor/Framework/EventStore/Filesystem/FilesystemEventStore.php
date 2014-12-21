@@ -41,7 +41,8 @@ class FilesystemEventStore implements EventStoreInterface, SnapshotEventStoreInt
     private $logger;
 
     /**
-     * 
+     *
+     * @param EventFileResolverInterface $fileResolver
      * @param SerializerInterface $serializer
      */
     function __construct(EventFileResolverInterface $fileResolver,
