@@ -52,12 +52,12 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
     }
 
     public function expectEvents(array $expectedEvents)
-    {      
+    {
         if (count($this->publishedEvents) !== count($this->storedEvents)) {
             $this->reporter->reportDifferenceInStoredVsPublished($this->storedEvents,
-                    $this->publishedEvents, $this->actualException);
+                $this->publishedEvents, $this->actualException);
         }
-        
+
         return $this->expectPublishedEvents($expectedEvents);
     }
 
@@ -65,7 +65,7 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
     {
         if (count($this->publishedEvents) !== count($this->storedEvents)) {
             $this->reporter->reportDifferenceInStoredVsPublished($this->storedEvents,
-                    $this->publishedEvents, $this->actualException);
+                $this->publishedEvents, $this->actualException);
         }
 
         return $this->expectPublishedEventsMatching($matcher);
@@ -78,11 +78,11 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
 
         if (null === $this->actualException) {
             $this->reporter->reportUnexpectedReturnValue($this->actualReturnValue,
-                    $description);
+                $description);
         }
         if (!$matcher->matches($this->actualException)) {
             $this->reporter->reportWrongException($this->actualException,
-                    $description);
+                $description);
         }
         return $this;
     }
@@ -91,15 +91,15 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
     {
         if (count($expectedEvents) !== count($this->publishedEvents)) {
             $this->reporter->reportWrongEvent($this->publishedEvents,
-                    $expectedEvents, $this->actualException);
+                $expectedEvents, $this->actualException);
         }
 
         foreach ($expectedEvents as $expectedEvent) {
             $actualEvent = current($this->publishedEvents);
             if (!$this->verifyEventEquality($expectedEvent,
-                            $actualEvent->getPayload())) {
+                $actualEvent->getPayload())) {
                 $this->reporter->reportWrongEvent($this->publishedEvents,
-                        $expectedEvents, $this->actualException);
+                    $expectedEvents, $this->actualException);
             }
 
             next($this->publishedEvents);
@@ -110,8 +110,8 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
     public function expectPublishedEventsMatching(Matcher $matcher)
     {
         if (!$matcher->matches($this->publishedEvents)) {
-            $this->reporter->reportWrongEvent($this->publishedEvents,
-                    $this->descriptionOf($matcher), $this->actualException);
+            $this->reporter->reportWrongEventDescription($this->publishedEvents,
+                $this->descriptionOf($matcher), $this->actualException);
         }
         return $this;
     }
@@ -134,10 +134,10 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
 
         if (null !== $this->actualException) {
             $this->reporter->reportUnexpectedException($this->actualException,
-                    $description);
+                $description);
         } else if (!$matcher->matches($this->actualReturnValue)) {
             $this->reporter->reportWrongResult($this->actualReturnValue,
-                    $description);
+                $description);
         }
         return $this;
     }
@@ -146,15 +146,15 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
     {
         if (count($expectedEvents) !== count($this->storedEvents)) {
             $this->reporter->reportWrongEvent($this->storedEvents,
-                    $expectedEvents, $this->actualException);
+                $expectedEvents, $this->actualException);
         }
 
         foreach ($expectedEvents as $expectedEvent) {
             $actualEvent = current($this->storedEvents);
             if (!$this->verifyEventEquality($expectedEvent,
-                            $actualEvent->getPayload())) {
+                $actualEvent->getPayload())) {
                 $this->reporter->reportWrongEvent($this->storedEvents,
-                        $expectedEvents, $this->actualException);
+                    $expectedEvents, $this->actualException);
             }
 
             next($this->storedEvents);
@@ -165,8 +165,8 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
     public function expectStoredEventsMatching(Matcher $matcher)
     {
         if (!$matcher->matches($this->storedEvents)) {
-            $this->reporter->reportWrongEvent($this->storedEvents,
-                    $this->descriptionOf($matcher), $this->actualException);
+            $this->reporter->reportWrongEventDescription($this->storedEvents,
+                $this->descriptionOf($matcher), $this->actualException);
         }
         return $this;
     }
@@ -183,14 +183,14 @@ class ResultValidatorImpl implements ResultValidatorInterface, CommandCallbackIn
         }
 
         $matcher = new EqualFieldsMatcher($expectedEvent);
-        
+
         if (!$matcher->matches($actualEvent)) {
             $this->reporter->reportDifferentEventContents(get_class($expectedEvent),
-                    $matcher->getFailedField(),
-                    $matcher->getFailedFieldActualValue(),
-                    $matcher->getFailedFieldExpectedValue());
+                $matcher->getFailedField(),
+                $matcher->getFailedFieldActualValue(),
+                $matcher->getFailedFieldExpectedValue());
         }
-        
+
         return true;
     }
 
