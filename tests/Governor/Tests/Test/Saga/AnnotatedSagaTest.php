@@ -24,6 +24,7 @@
 
 namespace Governor\Tests\Test\Saga;
 
+use Hamcrest\Matchers as CoreMatchers;
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\Test\Matchers\Matchers;
 use Governor\Framework\Test\Saga\AnnotatedSagaTestFixture;
@@ -91,47 +92,59 @@ class AnnotatedSagaTest extends \PHPUnit_Framework_TestCase
             ->expectAssociationWith("identifier", "id");
     }
 
+
+    public function testFixtureApi_WithApplicationEvents()
+    {
+        $aggregate1 = Uuid::uuid1()->toString();
+        $aggregate2 = Uuid::uuid1()->toString();
+
+        $fixture = new AnnotatedSagaTestFixture(StubSaga::class);
+
+        $fixture->givenAPublished(new TimerTriggeredEvent(Uuid::uuid1()->toString()))
+            ->andThenAPublished(new TimerTriggeredEvent(Uuid::uuid1()->toString()))
+            ->whenPublishingA(new TimerTriggeredEvent(Uuid::uuid1()->toString()))
+            ->expectActiveSagas(0)
+            ->expectNoAssociationWith("identifier", $aggregate2)
+            ->expectNoAssociationWith("identifier", $aggregate1)
+            //->expectNoScheduledEvents()
+            ->expectDispatchedCommandsEqualTo(array())
+            ->expectPublishedEvents(array());
+    }
+
+
+    public function testFixtureApi_WhenEventIsPublishedToEventBus()
+    {
+        $aggregate1 = Uuid::uuid1()->toString();
+        $aggregate2 = Uuid::uuid1()->toString();
+
+        $fixture = new AnnotatedSagaTestFixture(StubSaga::class);
+        $validator = $fixture
+            ->givenAggregate($aggregate1)->published(
+                array(
+                    new TriggerSagaStartEvent($aggregate1),
+                    new TriggerExistingSagaEvent($aggregate1)
+                )
+            )
+            ->whenAggregate($aggregate1)->publishes(new TriggerExistingSagaEvent($aggregate1));
+
+        $validator->expectActiveSagas(1);
+        $validator->expectAssociationWith("identifier", $aggregate1);
+        $validator->expectNoAssociationWith("identifier", $aggregate2);
+        //validator.expectScheduledEventMatching(Duration.standardMinutes(10),
+        // Matchers.messageWithPayload(CoreMatchers.any(Object.class)));
+        $validator->expectDispatchedCommandsEqualTo(array());
+        $validator->expectPublishedEventsMatching(
+            Matchers::listWithAnyOf(
+                array(
+                    Matchers::messageWithPayload(CoreMatchers::any(SagaWasTriggeredEvent::class))
+                )
+            )
+        );
+    }
+
     /*
-        @Test
-        public void testFixtureApi_WithApplicationEvents() {
-    UUID aggregate1 = UUID.randomUUID();
-            UUID aggregate2 = UUID.randomUUID();
-            AnnotatedSagaTestFixture fixture = new AnnotatedSagaTestFixture(StubSaga.class);
-            fixture.givenAPublished(new TimerTriggeredEvent(UUID.randomUUID().toString()))
-            .andThenAPublished(new TimerTriggeredEvent(UUID.randomUUID().toString()))
-
-            .whenPublishingA(new TimerTriggeredEvent(UUID.randomUUID().toString()))
-
-            .expectActiveSagas(0)
-            .expectNoAssociationWith("identifier", aggregate2)
-            .expectNoAssociationWith("identifier", aggregate1)
-            .expectNoScheduledEvents()
-            .expectDispatchedCommandsEqualTo()
-            .expectPublishedEvents();
-        }
-
-        @Test
-        public void testFixtureApi_WhenEventIsPublishedToEventBus() {
-    UUID aggregate1 = UUID.randomUUID();
-            UUID aggregate2 = UUID.randomUUID();
-            AnnotatedSagaTestFixture fixture = new AnnotatedSagaTestFixture(StubSaga.class);
-            FixtureExecutionResult validator = fixture
-        .givenAggregate(aggregate1).published(new TriggerSagaStartEvent(aggregate1.toString()),
-            new TriggerExistingSagaEvent(aggregate1.toString()))
-        .whenAggregate(aggregate1).publishes(new TriggerExistingSagaEvent(aggregate1.toString()));
-
-            validator.expectActiveSagas(1);
-            validator.expectAssociationWith("identifier", aggregate1);
-            validator.expectNoAssociationWith("identifier", aggregate2);
-            validator.expectScheduledEventMatching(Duration.standardMinutes(10),
-                Matchers.messageWithPayload(CoreMatchers.any(Object.class)));
-            validator.expectDispatchedCommandsEqualTo();
-            validator.expectPublishedEventsMatching(listWithAnyOf(messageWithPayload(any(SagaWasTriggeredEvent.class))));
-        }
-
-        @Test
         public void testFixtureApi_ElapsedTimeBetweenEventsHasEffectOnScheduler() {
-    UUID aggregate1 = UUID.randomUUID();
+        UUID aggregate1 = UUID.randomUUID();
             AnnotatedSagaTestFixture fixture = new AnnotatedSagaTestFixture(StubSaga.class);
             FixtureExecutionResult validator = fixture
         // event schedules a TriggerEvent after 10 minutes from t0
@@ -221,7 +234,7 @@ class AnnotatedSagaTest extends \PHPUnit_Framework_TestCase
 
         @Test
         public void testFixtureApi_WhenTimeAdvances() {
-    UUID identifier = UUID.randomUUID();
+        UUID identifier = UUID.randomUUID();
             UUID identifier2 = UUID.randomUUID();
             AnnotatedSagaTestFixture fixture = new AnnotatedSagaTestFixture(StubSaga.class);
             fixture.registerCommandGateway(StubGateway.class);

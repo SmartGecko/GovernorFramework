@@ -44,9 +44,10 @@ interface FixtureConfigurationInterface
      * Also note that you might need to reset the resources manually if you want to isolate behavior during the "when"
      * stage of the test.
      *
+     * @param string $id resource identifier
      * @param mixed $resource the resource to register.
      */
-    public function registerResource($resource);
+    public function registerResource($id, $resource);
 
     /**
      * Creates a Command Gateway for the given <code>gatewayInterface</code> and registers that as a resource. The

@@ -6,25 +6,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="83a90ae1-edab-4e52-81a7-ea70077f4ad2" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/AggregateEventPublisherImpl.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/AnnotatedSagaTest.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/CommandValidatorTest.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/EventValidatorTest.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/ForceTriggerSagaStartEvent.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/SagaWasTriggeredEvent.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/StubSaga.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/TriggerExistingSagaEvent.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/TriggerSagaEndEvent.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/TriggerSagaStartEvent.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/WhenAggregateEventPublisherInterface.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureResourceInjector.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/TimerTriggeredEvent.php" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/MockParameterResolverFactory.php" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/AnnotatedSagaTest.php" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/AnnotatedSagaTest.php" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/AnnotatedSagaTestFixture.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/AnnotatedSagaTestFixture.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/CommandValidator.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/CommandValidator.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/DescriptionUtils.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/DescriptionUtils.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/EventValidator.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/EventValidator.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Saga/ContainerAwareResourceInjector.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Saga/ContainerAwareResourceInjector.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Common/ContainerParameterResolverFactory.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Common/ContainerParameterResolverFactory.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureConfigurationInterface.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureConfigurationInterface.php" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureExecutionResultImpl.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureExecutionResultImpl.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericEventMessage.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericEventMessage.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/RepositoryContentValidator.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/RepositoryContentValidator.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/WhenStateInterface.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/WhenStateInterface.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Test/FixtureParameterResolverFactory.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Test/FixtureParameterResolverFactory.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/StubSaga.php" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/StubSaga.php" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="GovernorFramework.iws" />
@@ -46,7 +38,7 @@
     <SUITE FILE_PATH="coverage/GovernorFramework$AnnotationCommandTargetResolverTest.coverage" NAME="AnnotationCommandTargetResolverTest Coverage Results" MODIFIED="1418328461914" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/GovernorFramework$GovernorFramework.coverage" NAME="GovernorFramework Coverage Results" MODIFIED="1418329411099" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/GovernorFramework$FixtureTestGeneric.coverage" NAME="FixtureTestGeneric Coverage Results" MODIFIED="1419063535665" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/GovernorFramework$tests.coverage" NAME="tests Coverage Results" MODIFIED="1419108889778" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/GovernorFramework$tests.coverage" NAME="tests Coverage Results" MODIFIED="1419188895102" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -67,13 +59,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Governor/Framework/EventStore/Filesystem/FilesystemSnapshotEventReader.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/UnitOfWork/CurrentUnitOfWork.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/EventStore/Filesystem/FilesystemSnapshotEventWriter.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/Repository/LockingRepository.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/UnitOfWork/UnitOfWorkListenerInterface.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/ResultValidatorImpl.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Reporter.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/EventHandling/SimpleEventBusTerminal.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/UnitOfWork/UnitOfWorkListenerCollection.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/Saga/Repository/Memory/InMemorySagaRepository.php" />
@@ -110,14 +95,21 @@
         <option value="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/TriggerExistingSagaEvent.php" />
         <option value="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/ForceTriggerSagaStartEvent.php" />
         <option value="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/SagaWasTriggeredEvent.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureExecutionResultImpl.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/RepositoryContentValidator.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/AggregateEventPublisherImpl.php" />
-        <option value="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/StubSaga.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/WhenStateInterface.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericEventMessage.php" />
-        <option value="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/AnnotatedSagaTest.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Saga/ContainerAwareResourceInjector.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Common/ContainerParameterResolverFactory.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/FixtureParameterResolverFactory.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Saga/GenericResourceInjector.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureConfigurationInterface.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/AnnotatedSagaTestFixture.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureResourceInjector.php" />
+        <option value="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/StubSaga.php" />
+        <option value="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/TimerTriggeredEvent.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureExecutionResultImpl.php" />
+        <option value="$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/AnnotatedSagaTest.php" />
       </list>
     </option>
   </component>
@@ -297,10 +289,6 @@
               <option name="myItemId" value="Tests" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="UnitOfWork" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -355,140 +343,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="Saga" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Governor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Governor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Saga" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Governor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Saga" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Repository" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Governor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Saga" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Annotation" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Governor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="CommandHandling" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -592,11 +446,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Matchers" />
+              <option name="myItemId" value="Saga" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -622,33 +472,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Domain" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GovernorFramework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Governor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Framework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Correlation" />
+              <option name="myItemId" value="Common" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -795,7 +619,13 @@
       <option name="project" value="LOCAL" />
       <updated>1419071451669</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="saga testing WIP">
+      <created>1419109003170</created>
+      <option name="number" value="00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1419109003170</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -829,10 +659,10 @@
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39951962" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3282626" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3282626" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32962668" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25377283" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25377283" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32906324" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -864,7 +694,8 @@
     <MESSAGE value="wip @ saga testing + many small fixes" />
     <MESSAGE value="fixed failing tests" />
     <MESSAGE value="increased test coverage" />
-    <option name="LAST_COMMIT_MESSAGE" value="increased test coverage" />
+    <MESSAGE value="saga testing WIP" />
+    <option name="LAST_COMMIT_MESSAGE" value="saga testing WIP" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -873,86 +704,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Plugin/SymfonyBundle/Command/DebugCommand.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="47.875" vertical-offset="1239" max-vertical-offset="2385">
-          <caret line="16" column="34" selection-start-line="16" selection-start-column="34" selection-end-line="16" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Common/Annotation/HandlerDefinitionInterface.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="811">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/EventSourcing/AbstractSnapshotter.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.19949174" vertical-offset="398" max-vertical-offset="1185">
-          <caret line="57" column="41" selection-start-line="57" selection-start-column="41" selection-end-line="57" selection-end-column="41" />
-          <folding>
-            <element signature="e#1231#1280#0#PHP" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Common/Logging/NullLogger.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.22871664" vertical-offset="0" max-vertical-offset="1035">
-          <caret line="32" column="90" selection-start-line="32" selection-start-column="90" selection-end-line="32" selection-end-column="90" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Fixtures.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.22871664" vertical-offset="0" max-vertical-offset="787">
-          <caret line="32" column="9" selection-start-line="32" selection-start-column="9" selection-end-line="32" selection-end-column="9" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/GivenWhenThenTestFixture.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="5.43202" vertical-offset="600" max-vertical-offset="11055">
-          <caret line="325" column="6" selection-start-line="325" selection-start-column="6" selection-end-line="325" selection-end-column="6" />
-          <folding>
-            <element signature="e#7#1184#0#PHP" expanded="false" />
-            <element signature="e#1222#1272#0#PHP" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/phpunit.xml.dist">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="810">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/GenericFixtureTest.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.41931385" vertical-offset="240" max-vertical-offset="3135">
-          <caret line="38" column="19" selection-start-line="38" selection-start-column="19" selection-end-line="38" selection-end-column="19" />
-          <folding>
-            <element signature="e#7#1184#0#PHP" expanded="true" />
-            <element signature="e#1218#1274#0#PHP" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/EventSourcing/Annotation/AbstractAnnotatedAggregateRoot.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5908513" vertical-offset="0" max-vertical-offset="810">
-          <caret line="53" column="52" selection-start-line="53" selection-start-column="52" selection-end-line="53" selection-end-column="52" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Governor/Framework/EventSourcing/Annotation/AbstractAnnotatedEntity.php">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5527319" vertical-offset="0" max-vertical-offset="787">
@@ -1144,8 +895,8 @@
         <state vertical-scroll-proportion="0.12325286" vertical-offset="413" max-vertical-offset="1200">
           <caret line="34" column="26" selection-start-line="34" selection-start-column="26" selection-end-line="34" selection-end-column="26" />
           <folding>
-            <element signature="e#7#1183#0#PHP" expanded="true" />
-            <element signature="e#1222#1272#0#PHP" expanded="true" />
+            <element signature="e#7#1183#0#PHP" expanded="false" />
+            <element signature="e#1222#1272#0#PHP" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1163,7 +914,7 @@
         <state vertical-scroll-proportion="0.3329098" vertical-offset="1673" max-vertical-offset="2460">
           <caret line="134" column="16" selection-start-line="134" selection-start-column="16" selection-end-line="134" selection-end-column="16" />
           <folding>
-            <element signature="e#128#191#0#PHP" expanded="true" />
+            <element signature="e#128#191#0#PHP" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1174,27 +925,6 @@
           <caret line="22" column="3" selection-start-line="22" selection-start-column="3" selection-end-line="22" selection-end-column="3" />
           <folding>
             <element signature="e#7#1183#0#PHP" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/TriggerSagaStartEvent.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7433291" vertical-offset="0" max-vertical-offset="787">
-          <caret line="39" column="5" selection-start-line="29" selection-start-column="4" selection-end-line="39" selection-end-column="5" />
-          <folding>
-            <element signature="e#7#1183#0#PHP" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/CommandValidatorTest.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.19949174" vertical-offset="683" max-vertical-offset="1635">
-          <caret line="56" column="5" selection-start-line="56" selection-start-column="5" selection-end-line="56" selection-end-column="5" />
-          <folding>
-            <element signature="e#7#1183#0#PHP" expanded="true" />
-            <element signature="e#1222#1283#0#PHP" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1220,7 +950,7 @@
         <state vertical-scroll-proportion="0.49555272" vertical-offset="0" max-vertical-offset="787">
           <caret line="26" column="32" selection-start-line="26" selection-start-column="6" selection-end-line="26" selection-end-column="32" />
           <folding>
-            <element signature="e#6#1182#0#PHP" expanded="true" />
+            <element signature="e#6#1182#0#PHP" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1230,7 +960,7 @@
         <state vertical-scroll-proportion="0.038119443" vertical-offset="0" max-vertical-offset="4380">
           <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="22" selection-end-column="3" />
           <folding>
-            <element signature="e#1222#1265#0#PHP" expanded="true" />
+            <element signature="e#1222#1265#0#PHP" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1240,27 +970,7 @@
         <state vertical-scroll-proportion="0.6099111" vertical-offset="0" max-vertical-offset="787">
           <caret line="32" column="5" selection-start-line="32" selection-start-column="5" selection-end-line="32" selection-end-column="5" />
           <folding>
-            <element signature="e#7#1183#0#PHP" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/RepositoryContentValidator.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.15247777" vertical-offset="0" max-vertical-offset="1650">
-          <caret line="28" column="69" selection-start-line="28" selection-start-column="69" selection-end-line="28" selection-end-column="69" />
-          <folding>
-            <element signature="e#1226#1271#0#PHP" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureExecutionResultImpl.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.45743328" vertical-offset="510" max-vertical-offset="4320">
-          <caret line="62" column="69" selection-start-line="62" selection-start-column="69" selection-end-line="62" selection-end-column="69" />
-          <folding>
-            <element signature="e#7#1183#0#PHP" expanded="true" />
+            <element signature="e#7#1183#0#PHP" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1269,14 +979,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.59212196" vertical-offset="1199" max-vertical-offset="2010">
           <caret line="139" column="68" selection-start-line="139" selection-start-column="34" selection-end-line="139" selection-end-column="68" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureExecutionResultInterface.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.34307498" vertical-offset="1545" max-vertical-offset="2580">
-          <caret line="141" column="20" selection-start-line="141" selection-start-column="20" selection-end-line="141" selection-end-column="20" />
           <folding />
         </state>
       </provider>
@@ -1297,10 +999,131 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/CommandValidatorTest.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5044473" vertical-offset="113" max-vertical-offset="1305">
+          <caret line="56" column="5" selection-start-line="56" selection-start-column="5" selection-end-line="56" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Common/ContainerParameterResolverFactory.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.1905972" vertical-offset="0" max-vertical-offset="787">
+          <caret line="32" column="30" selection-start-line="32" selection-start-column="30" selection-end-line="32" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Saga/ResourceInjectorInterface.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="811">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureConfigurationInterface.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.49555272" vertical-offset="0" max-vertical-offset="1470">
+          <caret line="46" column="5" selection-start-line="46" selection-start-column="5" selection-end-line="46" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Saga/GenericSagaFactory.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.34307498" vertical-offset="15" max-vertical-offset="840">
+          <caret line="23" column="20" selection-start-line="23" selection-start-column="20" selection-end-line="23" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/FixtureParameterResolverFactory.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.048284624" vertical-offset="548" max-vertical-offset="1335">
+          <caret line="54" column="13" selection-start-line="54" selection-start-column="13" selection-end-line="54" selection-end-column="13" />
+          <folding>
+            <element signature="e#1222#1286#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/StubSaga.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6188056" vertical-offset="1433" max-vertical-offset="2220">
+          <caret line="133" column="49" selection-start-line="133" selection-start-column="49" selection-end-line="133" selection-end-column="49" />
+          <folding>
+            <element signature="e#124#171#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/TriggerSagaStartEvent.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.3621347" vertical-offset="0" max-vertical-offset="787">
+          <caret line="39" column="5" selection-start-line="0" selection-start-column="0" selection-end-line="40" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/TimerTriggeredEvent.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.15247777" vertical-offset="0" max-vertical-offset="787">
+          <caret line="8" column="56" selection-start-line="8" selection-start-column="56" selection-end-line="8" selection-end-column="56" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/RepositoryContentValidator.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.68614995" vertical-offset="630" max-vertical-offset="1620">
+          <caret line="28" column="69" selection-start-line="28" selection-start-column="69" selection-end-line="28" selection-end-column="69" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureExecutionResultInterface.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5349428" vertical-offset="1769" max-vertical-offset="2580">
+          <caret line="166" column="21" selection-start-line="166" selection-start-column="21" selection-end-line="166" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Matchers/Matchers.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.047013976" vertical-offset="173" max-vertical-offset="2415">
+          <caret line="34" column="15" selection-start-line="34" selection-start-column="15" selection-end-line="34" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/AnnotatedSagaTest.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="2.249047" vertical-offset="0" max-vertical-offset="3555">
+          <caret line="138" column="61" selection-start-line="138" selection-start-column="61" selection-end-line="138" selection-end-column="61" />
+          <folding>
+            <element signature="e#1222#1260#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/AnnotatedSagaTestFixture.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="2.3532403" vertical-offset="1373" max-vertical-offset="5100">
+          <caret line="215" column="20" selection-start-line="215" selection-start-column="20" selection-end-line="215" selection-end-column="20" />
+          <folding>
+            <element signature="e#7#1183#0#PHP" expanded="true" />
+            <element signature="e#1226#1295#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/AggregateEventPublisherImpl.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.56162643" vertical-offset="1178" max-vertical-offset="1965">
-          <caret line="108" column="6" selection-start-line="108" selection-start-column="6" selection-end-line="108" selection-end-column="6" />
+        <state vertical-scroll-proportion="0.34307498" vertical-offset="720" max-vertical-offset="1965">
+          <caret line="66" column="0" selection-start-line="66" selection-start-column="0" selection-end-line="66" selection-end-column="0" />
           <folding>
             <element signature="e#7#1183#0#PHP" expanded="true" />
             <element signature="e#1226#1278#0#PHP" expanded="true" />
@@ -1308,35 +1131,32 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/AnnotatedSagaTestFixture.php">
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureExecutionResultImpl.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-2.545108" vertical-offset="4073" max-vertical-offset="4860">
-          <caret line="138" column="71" selection-start-line="138" selection-start-column="71" selection-end-line="138" selection-end-column="71" />
+        <state vertical-scroll-proportion="0.5908513" vertical-offset="3315" max-vertical-offset="4320">
+          <caret line="256" column="21" selection-start-line="256" selection-start-column="21" selection-end-line="256" selection-end-column="21" />
           <folding>
             <element signature="e#7#1183#0#PHP" expanded="true" />
-            <element signature="e#1226#1297#0#PHP" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/AnnotatedSagaTest.php">
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/FixtureResourceInjector.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.027954256" vertical-offset="848" max-vertical-offset="3660">
-          <caret line="58" column="22" selection-start-line="58" selection-start-column="22" selection-end-line="58" selection-end-column="22" />
+        <state vertical-scroll-proportion="0.3329098" vertical-offset="533" max-vertical-offset="1335">
+          <caret line="53" column="7" selection-start-line="53" selection-start-column="7" selection-end-line="53" selection-end-column="7" />
           <folding>
             <element signature="e#7#1183#0#PHP" expanded="true" />
-            <element signature="e#1222#1272#0#PHP" expanded="true" />
+            <element signature="e#1226#1268#0#PHP" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/StubSaga.php">
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Saga/ContainerAwareResourceInjector.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3329098" vertical-offset="638" max-vertical-offset="2175">
-          <caret line="65" column="2" selection-start-line="65" selection-start-column="2" selection-end-line="65" selection-end-column="2" />
-          <folding>
-            <element signature="e#124#171#0#PHP" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.33926302" vertical-offset="228" max-vertical-offset="1020">
+          <caret line="57" column="47" selection-start-line="57" selection-start-column="47" selection-end-line="57" selection-end-column="47" />
+          <folding />
         </state>
       </provider>
     </entry>

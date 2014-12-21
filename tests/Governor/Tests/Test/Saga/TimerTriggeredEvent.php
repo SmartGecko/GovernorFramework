@@ -16,48 +16,26 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Test;
+namespace Governor\Tests\Test\Saga;
 
-use Governor\Framework\Common\AbstractParameterResolverFactory;
-use Governor\Framework\Common\FixedValueParameterResolver;
-use Governor\Framework\Annotations as Governor;
 
-/**
- * Description of ContainerParameterResolverFactory
- *
- * @author david
- */
-class MockParameterResolverFactory extends AbstractParameterResolverFactory
+class TimerTriggeredEvent
 {
+    private $identifier;
 
-    /**
-     * @var array
-     */
-    private $services;
-
-    function __construct($services)
+    public function  __construct($identifier)
     {
-        $this->services = $services;
+        $this->identifier = $identifier;
     }
 
-    public function createInstance(array $methodAnnotations,
-            \ReflectionParameter $parameter)
-    {        
-        $resolver = $this->getResolverFor($methodAnnotations, $parameter);        
-
-        if ($resolver && $resolver instanceof Governor\Inject) {
-            $service = $this->services[$resolver->service];
-            
-            return new FixedValueParameterResolver($service);
-        }
-
-        return null;
+    public function getIdentifier()
+    {
+        return $this->identifier;
     }
-
 }

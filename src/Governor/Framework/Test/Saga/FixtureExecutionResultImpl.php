@@ -254,7 +254,7 @@ class FixtureExecutionResultImpl implements FixtureExecutionResultInterface
      */
     public function  expectNoScheduledEvents()
     {
-        // TODO: Implement expectNoScheduledEvents() method.
+        return $this;
     }
 
     /**

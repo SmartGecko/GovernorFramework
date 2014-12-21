@@ -24,7 +24,9 @@
 
 namespace Governor\Framework\Test\Saga;
 
+use Governor\Framework\CommandHandling\Gateway\DefaultCommandGateway;
 use Governor\Framework\CommandHandling\Gateway\CommandGatewayInterface;
+use Governor\Framework\Test\FixtureParameterResolverFactory;
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\EventHandling\SimpleEventBus;
 use Governor\Framework\Saga\Annotation\AnnotatedSagaManager;
@@ -51,6 +53,9 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      */
     private $registeredResources = array();
 
+    /**
+     * @var array
+     */
     private $aggregatePublishers = array(); //new HashMap<Object, AggregateEventPublisherImpl>();
 
     /**
@@ -62,31 +67,40 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      */
     private $commandBus;
 
+    /**
+     * @var FixtureParameterResolverFactory
+     */
+    private $fixtureParameterResolverFactory;
+
     public function __construct($sagaType)
     {
         //eventScheduler = new StubEventScheduler();
         $eventScheduler = null;
-        $genericSagaFactory = new GenericSagaFactory();
-        //genericSagaFactory.setResourceInjector(new AutowiredResourceInjector(registeredResources));
+        $genericSagaFactory = new GenericSagaFactory(new FixtureResourceInjector($this->registeredResources));
+
         $eventBus = new SimpleEventBus();
         $sagaRepository = new InMemorySagaRepository();
         $this->sagaManager = new AnnotatedSagaManager($sagaRepository, $genericSagaFactory, array($sagaType));
         $this->sagaManager->setSuppressExceptions(false);
 
-        //registeredResources.add(eventBus);
         $this->commandBus = new RecordingCommandBus();
-        //registeredResources.add(commandBus);
+
+        $this->registeredResources['governor.event_bus.default'] = $eventBus;
+        $this->registeredResources['governor.command_bus.default'] = $this->commandBus;
+        $this->registeredResources['governor.command_gateway.default'] = new DefaultCommandGateway($this->commandBus);
+
         //registeredResources.add(eventScheduler);
-        //registeredResources.add(new DefaultCommandGateway(commandBus));
+
         $this->fixtureExecutionResult = new FixtureExecutionResultImpl(
             $sagaRepository, $eventScheduler, $eventBus, $this->commandBus,
             $sagaType
         );
 
-        /*FixtureResourceParameterResolverFactory.clear();
-        for (Object resource : registeredResources) {
-        FixtureResourceParameterResolverFactory.registerResource(resource);
-        }*/
+        $this->fixtureParameterResolverFactory = new FixtureParameterResolverFactory();
+
+        foreach ($this->registeredResources as $id => $resource) {
+            $this->fixtureParameterResolverFactory->registerService($id, $resource);
+        }
     }
 
     /**
@@ -151,11 +165,13 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      * Also note that you might need to reset the resources manually if you want to isolate behavior during the "when"
      * stage of the test.
      *
+     * @param string $id resource identifier
      * @param mixed $resource the resource to register.
      */
-    public function registerResource($resource)
+    public function registerResource($id, $resource)
     {
-        // TODO: Implement registerResource() method.
+        $this->registeredResources[$id] = $resource;
+        $this->fixtureParameterResolverFactory->registerService($id, $resource);
     }
 
     /**
@@ -240,7 +256,7 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
      * reset them yourself if they are manipulated by the Saga in the "given" stage of the test.
      *
      * @param mixed $aggregateIdentifier The identifier of the aggregate the events should appear to come from
-     * @return WhenAggregateEventPublisher an object that allows registration of the actual events to send
+     * @return WhenAggregateEventPublisherInterface an object that allows registration of the actual events to send
      */
     public function whenAggregate($aggregateIdentifier)
     {

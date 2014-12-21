@@ -63,7 +63,7 @@ class StubSaga extends AbstractAnnotatedSaga
     public function onTriggerEvent(TriggerExistingSagaEvent $event)
     {
         $this->handledEvents[] = $event;
-//        $this->eventBus->publish(array(new GenericEventMessage(new SagaWasTriggeredEvent($this))));
+        $this->eventBus->publish(array(new GenericEventMessage(new SagaWasTriggeredEvent($this))));
     }
 
     /**
@@ -106,6 +106,10 @@ class StubSaga extends AbstractAnnotatedSaga
         return $this->eventBus;
     }
 
+    /**
+     * @param EventBusInterface $eventBus
+     * @Governor\Inject(service="governor.event_bus.default")
+     */
     public function setEventBus(EventBusInterface $eventBus)
     {
         $this->eventBus = $eventBus;
@@ -128,7 +132,6 @@ class StubSaga extends AbstractAnnotatedSaga
     public function associateWith(AssociationValue $associationValue)
     {
         parent::associateWith($associationValue);
-
     }
 
 
