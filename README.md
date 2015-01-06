@@ -19,7 +19,7 @@ It provides components to build applications following the CQRS patterns such as
 * AMQP support
 * Testing
 
-The main source of inspiration for this library was the [Axon Framework](http://http://www.axonframework.org/ "Axon Framework") written in Java
+The main source of inspiration for this library was the [Axon Framework](http://www.axonframework.org/ "Axon Framework") written in Java
 and the Governor Framework can be viewed as a PHP port of the Axon, because it retains its basic building blocks. 
 
 The library can be directly integrated into the Symfony 2 framework as a bundle. The core of the Symfony 2 integration was
