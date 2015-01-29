@@ -25,10 +25,11 @@
 namespace Governor\Tests\EventHandling;
 
 use Governor\Framework\Domain\GenericEventMessage;
+use Governor\Framework\EventHandling\EventListenerInterface;
 use Governor\Framework\EventHandling\SimpleEventBus;
 
 /**
- * Description of SimpleEventBusTest
+ * SimpleEventBus unit test.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
@@ -38,20 +39,20 @@ class SimpleEventBusTest extends \PHPUnit_Framework_TestCase
 
     private $listener1;
     private $listener2;
-    private $testSubject;
     private $listener3;
+
+    /**
+     * @var SimpleEventBus
+     */
+    private $testSubject;
 
     public function setUp()
     {
-        $this->listener1 = $this->getMock('Governor\Framework\EventHandling\EventListenerInterface',
-            array('handle'));
-        $this->listener2 = $this->getMock('Governor\Framework\EventHandling\EventListenerInterface',
-            array('handle'));
-        $this->listener3 = $this->getMock('Governor\Framework\EventHandling\EventListenerInterface',
-            array('handle'));
+        $this->listener1 = $this->getMock(EventListenerInterface::class, array('handle'));
+        $this->listener2 = $this->getMock(EventListenerInterface::class, array('handle'));
+        $this->listener3 = $this->getMock(EventListenerInterface::class, array('handle'));
 
         $this->testSubject = new SimpleEventBus();
-        $this->testSubject->setLogger($this->getMock('Psr\Log\LoggerInterface'));
     }
 
     public function testEventIsDispatchedToSubscribedListeners()

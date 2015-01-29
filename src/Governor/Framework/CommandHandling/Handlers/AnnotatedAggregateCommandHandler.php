@@ -37,46 +37,50 @@ use Governor\Framework\Repository\RepositoryInterface;
 /**
  * Description of AggregateCommandHandler
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
 {
 
     /**
-     * @var RepositoryInterface 
+     * @var RepositoryInterface
      */
     private $repository;
 
     /**
-     * @var CommandTargetResolverInterface 
+     * @var CommandTargetResolverInterface
      */
     private $targetResolver;
 
-    public function __construct($className, $methodName,
-            ParameterResolverFactoryInterface $parameterResolver,
-            RepositoryInterface $repository,
-            CommandTargetResolverInterface $targetResolver = null)
-    {
+    public function __construct(
+        $className,
+        $methodName,
+        ParameterResolverFactoryInterface $parameterResolver,
+        RepositoryInterface $repository,
+        CommandTargetResolverInterface $targetResolver = null
+    ) {
         parent::__construct($className, $methodName, $parameterResolver);
         $this->repository = $repository;
         $this->targetResolver = null === $targetResolver ? new AnnotationCommandTargetResolver()
-                    : $targetResolver;
+            : $targetResolver;
     }
 
-    public function handle(CommandMessageInterface $commandMessage,
-            UnitOfWorkInterface $unitOfWork)
-    {                
+    public function handle(
+        CommandMessageInterface $commandMessage,
+        UnitOfWorkInterface $unitOfWork
+    ) {
         if ($this->getMethod()->isConstructor()) {
-            return $this->handleConstructor($commandMessage, $unitOfWork);
+            $this->handleConstructor($commandMessage, $unitOfWork);
         }
 
         return $this->handleMethod($commandMessage, $unitOfWork);
     }
 
-    private function handleConstructor(CommandMessageInterface $commandMessage,
-            UnitOfWorkInterface $unitOfWork)
-    {
+    private function handleConstructor(
+        CommandMessageInterface $commandMessage,
+        UnitOfWorkInterface $unitOfWork
+    ) {
         $reflectionClass = $this->getMethod()->getDeclaringClass();
         $arguments = $this->resolveArguments($commandMessage);
 
@@ -85,33 +89,44 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
         $this->repository->add($object);
     }
 
-    private function handleMethod(CommandMessageInterface $commandMessage,
-            UnitOfWorkInterface $unitOfWork)
-    {
+    private function handleMethod(
+        CommandMessageInterface $commandMessage,
+        UnitOfWorkInterface $unitOfWork
+    ) {
         $versionedId = $this->targetResolver->resolveTarget($commandMessage);
-        $aggregate = $this->repository->load($versionedId->getIdentifier(),
-                $versionedId->getVersion());
-        
+        $aggregate = $this->repository->load(
+            $versionedId->getIdentifier(),
+            $versionedId->getVersion()
+        );
+
         $arguments = $this->resolveArguments($commandMessage);
 
         return $this->getMethod()->invokeArgs($aggregate, $arguments);
     }
 
-    public static function subscribe($className,
-            RepositoryInterface $repository, CommandBusInterface $commandBus,
-            ParameterResolverFactoryInterface $parameterResolver,
-            CommandTargetResolverInterface $targetResolver = null)
-    {
-        $inspector = new MethodMessageHandlerInspector(new \ReflectionClass($className),
-                CommandHandler::class);
+    public static function subscribe(
+        $className,
+        RepositoryInterface $repository,
+        CommandBusInterface $commandBus,
+        ParameterResolverFactoryInterface $parameterResolver,
+        CommandTargetResolverInterface $targetResolver = null
+    ) {
+        $inspector = new MethodMessageHandlerInspector(
+            new \ReflectionClass($className),
+            CommandHandler::class
+        );
 
         foreach ($inspector->getHandlerDefinitions() as $handlerDefinition) {
-            $handler = new AnnotatedAggregateCommandHandler($className,
-                    $handlerDefinition->getMethod()->name, $parameterResolver,
-                    $repository, $targetResolver);           
-            
-            $commandBus->subscribe($handlerDefinition->getPayloadType(),
-                    $handler);
+            $handler = new AnnotatedAggregateCommandHandler(
+                $className,
+                $handlerDefinition->getMethod()->name, $parameterResolver,
+                $repository, $targetResolver
+            );
+
+            $commandBus->subscribe(
+                $handlerDefinition->getPayloadType(),
+                $handler
+            );
         }
     }
 

@@ -47,12 +47,18 @@ class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
      */
     private $logger;
 
+    /**
+     *
+     */
     function __construct()
     {
         $this->listeners = new \SplObjectStorage();
         $this->logger = new NullLogger();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function publish(array $events)
     {
         foreach ($events as $event) {
@@ -70,6 +76,9 @@ class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function subscribe(EventListenerInterface $eventListener)
     {
         if (!$this->listeners->contains($eventListener)) {
@@ -77,6 +86,9 @@ class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function unsubscribe(EventListenerInterface $eventListener)
     {
         if ($this->listeners->contains($eventListener)) {
@@ -84,11 +96,19 @@ class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
         }
     }
 
+
+    /**
+     * {@inheritdoc}
+     */
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
+    /**
+     * @param EventListenerInterface $eventListener
+     * @return string
+     */
     private function getClassName(EventListenerInterface $eventListener)
     {
         if ($eventListener instanceof EventListenerProxyInterface) {
