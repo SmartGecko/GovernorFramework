@@ -72,6 +72,7 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
     ) {
         if ($this->getMethod()->isConstructor()) {
             $this->handleConstructor($commandMessage, $unitOfWork);
+            return null;
         }
 
         return $this->handleMethod($commandMessage, $unitOfWork);

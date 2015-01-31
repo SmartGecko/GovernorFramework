@@ -58,11 +58,15 @@
         <!-- parameter resolvers -->
         <parameter key="governor.parameter_resolver_factory.class">Governor\Framework\Common\DelegatingParameterResolverFactory</parameter>
         <parameter key="governor.parameter_resolver_factory.default.class">Governor\Framework\Common\DefaultParameterResolverFactory</parameter>
-        <parameter key="governor.parameter_resolver_factory.container.class">Governor\Framework\Common\ContainerParameterResolverFactory</parameter>        
+        <parameter key="governor.parameter_resolver_factory.container.class">Governor\Framework\Common\ContainerParameterResolverFactory</parameter>
+
+        <parameter key="governor.identifier_factory.default.class">Governor\Framework\Domain\DefaultIdentifierFactory</parameter>
     </parameters>
 
     <services>
-        
+
+        <service id="governor.identifier_factory" class="%governor.identifier_factory.default.class%"/>
+
         <service id="governor.parameter_resolver_factory" class="%governor.parameter_resolver_factory.class%">
             <argument type="collection">
                 <argument type="service" id="governor.parameter_resolver_factory.default"/>

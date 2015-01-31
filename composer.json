@@ -5,6 +5,11 @@
     "autoload": {
         "psr-0": {"Governor\\": "src/"}
     },
+    "keywords": ["CQRS", "event sourcing", "framework"],
+    "authors": [{
+      "name": "David Kalosi",
+      "email": "david.kalosi@gmail.com"
+    }],
     "require": {
         "rhumsaa/uuid": "@stable",
         "psr/log": "@stable",

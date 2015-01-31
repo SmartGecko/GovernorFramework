@@ -2,6 +2,7 @@
 
 namespace Governor\Tests\Plugin\SymfonyBundle;
 
+use Governor\Framework\Domain\IdentifierFactory;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
@@ -77,6 +78,13 @@ class GovernorFrameworkExtensionTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($def->isLazy());
             }
         }
+    }
+
+    public function testIdentifierFactory()
+    {
+        $factory = $this->testSubject->get('governor.identifier_factory');
+
+        $this->assertInstanceOf(IdentifierFactory::class, $factory);
     }
 
     public function createTestContainer()

@@ -24,9 +24,7 @@
 
 namespace Governor\Framework\EventHandling\Listeners;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
-use Governor\Framework\Common\ReflectionUtils;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\EventHandling\EventListenerProxyInterface;
