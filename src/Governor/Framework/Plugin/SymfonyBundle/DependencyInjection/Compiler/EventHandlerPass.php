@@ -27,46 +27,60 @@ namespace Governor\Framework\Plugin\SymfonyBundle\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Governor\Framework\Annotations\EventHandler;
+use Governor\Framework\EventHandling\EventListenerInterface;
 use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
 use Governor\Framework\EventHandling\Listeners\AnnotatedEventListener;
 
 /**
- * Compiler pass that subscribes all services tagged with <code>governor.event_handler</code> 
+ * Compiler pass that subscribes all services tagged with <code>governor.event_handler</code>
  * to the event bus.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class EventHandlerPass extends AbstractHandlerPass
 {
 
+    /**
+     * @param ContainerBuilder $container
+     */
     public function process(ContainerBuilder $container)
     {
         foreach ($container->findTaggedServiceIds('governor.event_handler') as $id => $attributes) {
-            $busDefinition = $container->findDefinition(sprintf("governor.event_bus.%s",
-                            isset($attributes['event_bus']) ? $attributes['event_bus']
-                                        : 'default'));
-                     
+            $busDefinition = $container->findDefinition(
+                sprintf(
+                    "governor.event_bus.%s",
+                    isset($attributes['event_bus']) ? $attributes['event_bus']
+                        : 'default'
+                )
+            );
+
             $definition = $container->findDefinition($id);
-            $class = $definition->getClass();
-            
-            $inspector = new MethodMessageHandlerInspector(new \ReflectionClass($class),  
-                    EventHandler::class);
+            $reflectionClass = new \ReflectionClass($definition->getClass());
+
+            // subscribe event listener instances directly
+            if ($reflectionClass->implementsInterface(EventListenerInterface::class)) {
+                $busDefinition->addMethodCall('subscribe', [new Reference($id)]);
+            }
+
+            $inspector = new MethodMessageHandlerInspector($reflectionClass, EventHandler::class);
 
             foreach ($inspector->getHandlerDefinitions() as $handlerDefinition) {
                 $handlerId = $this->getHandlerIdentifier('governor.event_handler');
-                
+
                 $container
                     ->register($handlerId, AnnotatedEventListener::class)
                     ->addArgument($handlerDefinition->getPayloadType())
                     ->addArgument($handlerDefinition->getMethod()->name)
-                    ->addArgument(new Reference($id))                  
+                    ->addArgument(new Reference($id))
                     ->setPublic(true)
                     ->setLazy(true);
 
-                $busDefinition->addMethodCall('subscribe',
-                        array(new Reference($handlerId)));     
-            }                 
+                $busDefinition->addMethodCall(
+                    'subscribe',
+                    [new Reference($handlerId)]
+                );
+            }
         }
     }
 
