@@ -30,7 +30,8 @@ use Governor\Framework\CommandHandling\CommandMessageInterface;
  * Interface describing the instance that provides the relevant information for auditing purposes. The data provided by
  * this class is attached to all events processed by the {@link AuditingInterceptor}.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface AuditDataProviderInterface
 {

@@ -69,6 +69,9 @@ class SimpleEventFileResolver implements EventFileResolverInterface
     }
 
     /**
+     * @param string $type
+     * @param string $identifier
+     * @param string $extension
      * @return string
      */
     private function getEventFileName($type, $identifier, $extension)

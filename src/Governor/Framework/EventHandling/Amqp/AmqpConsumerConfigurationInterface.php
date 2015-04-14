@@ -42,7 +42,7 @@ interface AmqpConsumerConfigurationInterface
      * Returns the Queue Name the Cluster should be connected to, or <code>null</code> if no explicit cluster is
      * configured.
      *
-     * @return the Queue the cluster should be connected to, or <code>null</code> to revert to a default
+     * @return string the Queue the cluster should be connected to, or <code>null</code> to revert to a default
      */
     public function getQueueName();
 
@@ -50,7 +50,7 @@ interface AmqpConsumerConfigurationInterface
      * Indicates whether this Cluster wishes to be an exclusive consumer on a Queue. <code>null</code> indicated that
      * no explicit preference is provided, and a default should be used.
      *
-     * @return the exclusivity indicator for this cluster
+     * @return boolean the exclusivity indicator for this cluster
      */
     public function getExclusive();
 
@@ -58,7 +58,7 @@ interface AmqpConsumerConfigurationInterface
      * Indicates how many messages this Cluster's connector may read read from the Queue before expecting messages to
      * be acknowledged. <code>null</code> means no specific value is provided and a default should be used.
      *
-     * @return the number of messages a Cluster's connector may read ahead before waiting for acknowledgements.
+     * @return integer the number of messages a Cluster's connector may read ahead before waiting for acknowledgements.
      */
     public function getPrefetchCount();
 }

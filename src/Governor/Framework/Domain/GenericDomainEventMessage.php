@@ -32,7 +32,13 @@ namespace Governor\Framework\Domain;
 class GenericDomainEventMessage extends GenericEventMessage implements DomainEventMessageInterface
 {
 
+    /**
+     * @var string
+     */
     private $aggregateIdentifier;
+    /**
+     * @var int
+     */
     private $scn;
 
     /**

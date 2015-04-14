@@ -33,8 +33,8 @@ use Governor\Framework\Serializer\SerializedObjectInterface;
 /**
  * Description of DefaultEventEntryStore
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class DefaultEventEntryStore implements EventEntryStoreInterface
 {
@@ -66,20 +66,23 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
      * When overriding this method, also make sure the {@link #domainEventEntryEntityName()} method is overridden to
      * return the correct entity name.
      *
-     * @param string $aggregateType      The type identifier of the aggregate
-     * @param DomainEventMessageInterface $event              The event to be stored
-     * @param SerializedObjectInterface $serializedPayload  The serialized payload of the event
+     * @param string $aggregateType The type identifier of the aggregate
+     * @param DomainEventMessageInterface $event The event to be stored
+     * @param SerializedObjectInterface $serializedPayload The serialized payload of the event
      * @param SerializedObjectInterface $serializedMetaData The serialized meta data of the event
      * @return mixed an ORM entity, ready to be stored using the entity manager
      */
-    protected function createDomainEventEntry($aggregateType,
-            DomainEventMessageInterface $event,
-            SerializedObjectInterface $serializedPayload,
-            SerializedObjectInterface $serializedMetaData)
-    {
+    protected function createDomainEventEntry(
+        $aggregateType,
+        DomainEventMessageInterface $event,
+        SerializedObjectInterface $serializedPayload,
+        SerializedObjectInterface $serializedMetaData
+    ) {
 
-        return new DomainEventEntry($aggregateType, $event, $serializedPayload,
-                $serializedMetaData);
+        return new DomainEventEntry(
+            $aggregateType, $event, $serializedPayload,
+            $serializedMetaData
+        );
     }
 
     /**
@@ -89,49 +92,67 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
      * When overriding this method, also make sure the {@link #snapshotEventEntryEntityName()} method is overridden to
      * return the correct entity name.
      *
-     * @param string $aggregateType      The type identifier of the aggregate
-     * @param DomainEventMessageInterface $snapshotEvent      The snapshot event to be stored
-     * @param SerializedObjectInterface $serializedPayload  The serialized payload of the event
+     * @param string $aggregateType The type identifier of the aggregate
+     * @param DomainEventMessageInterface $snapshotEvent The snapshot event to be stored
+     * @param SerializedObjectInterface $serializedPayload The serialized payload of the event
      * @param SerializedObjectInterface $serializedMetaData The serialized meta data of the event
-     * @return mixed an ORM entity, ready to be stored using the entity manager     
+     * @return mixed an ORM entity, ready to be stored using the entity manager
      */
-    protected function createSnapshotEventEntry($aggregateType,
-            DomainEventMessageInterface $snapshotEvent,
-            SerializedObjectInterface $serializedPayload,
-            SerializedObjectInterface $serializedMetaData)
-    {
-        return new SnapshotEventEntry($aggregateType, $snapshotEvent,
-                $serializedPayload, $serializedMetaData);
+    protected function createSnapshotEventEntry(
+        $aggregateType,
+        DomainEventMessageInterface $snapshotEvent,
+        SerializedObjectInterface $serializedPayload,
+        SerializedObjectInterface $serializedMetaData
+    ) {
+        return new SnapshotEventEntry(
+            $aggregateType, $snapshotEvent,
+            $serializedPayload, $serializedMetaData
+        );
     }
 
-    public function fetchAggregateStream($aggregateType, $identifier, $firstScn,
-            $batchSize, EntityManager $entityManager)
-    {
-        return new BatchingAggregateStreamIterator($firstScn, $identifier,
-                $aggregateType, $batchSize, $this->domainEventEntryEntityName(),
-                $entityManager);
+    public function fetchAggregateStream(
+        $aggregateType,
+        $identifier,
+        $firstScn,
+        $batchSize,
+        EntityManager $entityManager
+    ) {
+        return new BatchingAggregateStreamIterator(
+            $firstScn, $identifier,
+            $aggregateType, $batchSize, $this->domainEventEntryEntityName(),
+            $entityManager
+        );
     }
 
-    public function fetchFiltered($whereClause, array $parameters, $batchSize,
-            EntityManager $entityManager)
-    {
-        return new BatchingIterator($whereClause, $parameters, $batchSize,
-                $this->domainEventEntryEntityName(), $entityManager);
+    public function fetchFiltered(
+        $whereClause,
+        array $parameters,
+        $batchSize,
+        EntityManager $entityManager
+    ) {
+        return new BatchingIterator(
+            $whereClause, $parameters, $batchSize,
+            $this->domainEventEntryEntityName(), $entityManager
+        );
     }
 
-    public function loadLastSnapshotEvent($aggregateType, $identifier,
-            EntityManager $entityManager)
-    {
+    public function loadLastSnapshotEvent(
+        $aggregateType,
+        $identifier,
+        EntityManager $entityManager
+    ) {
         $query = $entityManager->
-                createQuery("SELECT new Governor\Framework\Serializer\SimpleSerializedDomainEventData(" .
-                        "e.eventIdentifier, e.aggregateIdentifier, e.scn, " .
-                        "e.timestamp, e.payloadType, e.payloadRevision, e.payload, e.metaData) " .
-                        "FROM " . $this->snapshotEventEntryEntityName() . " e " .
-                        "WHERE e.aggregateIdentifier = :id AND e.type = :type " .
-                        "ORDER BY e.scn DESC")
-                ->setFirstResult(0)
-                ->setMaxResults(1)
-                ->setParameters(array(':id' => $identifier, ':type' => $aggregateType));
+        createQuery(
+            "SELECT new Governor\Framework\Serializer\SimpleSerializedDomainEventData(".
+            "e.eventIdentifier, e.aggregateIdentifier, e.scn, ".
+            "e.timestamp, e.payloadType, e.payloadRevision, e.payload, e.metaData) ".
+            "FROM ".$this->snapshotEventEntryEntityName()." e ".
+            "WHERE e.aggregateIdentifier = :id AND e.type = :type ".
+            "ORDER BY e.scn DESC"
+        )
+            ->setFirstResult(0)
+            ->setMaxResults(1)
+            ->setParameters(array(':id' => $identifier, ':type' => $aggregateType));
 
         $entries = $query->getResult();
 
@@ -142,56 +163,88 @@ class DefaultEventEntryStore implements EventEntryStoreInterface
         return $entries[0];
     }
 
-    public function persistEvent($aggregateType,
-            DomainEventMessageInterface $event,
-            SerializedObjectInterface $serializedPayload,
-            SerializedObjectInterface $serializedMetaData,
-            EntityManager $entityManager)
-    {
-        $entityManager->persist($this->createDomainEventEntry($aggregateType,
-                        $event, $serializedPayload, $serializedMetaData));
+    public function persistEvent(
+        $aggregateType,
+        DomainEventMessageInterface $event,
+        SerializedObjectInterface $serializedPayload,
+        SerializedObjectInterface $serializedMetaData,
+        EntityManager $entityManager
+    ) {
+        $entityManager->persist(
+            $this->createDomainEventEntry(
+                $aggregateType,
+                $event,
+                $serializedPayload,
+                $serializedMetaData
+            )
+        );
     }
 
-    public function persistSnapshot($aggregateType,
-            DomainEventMessageInterface $snapshotEvent,
-            SerializedObjectInterface $serializedPayload,
-            SerializedObjectInterface $serializedMetaData,
-            EntityManager $entityManager)
-    {
-        $entityManager->persist($this->createSnapshotEventEntry($aggregateType,
-                        $snapshotEvent, $serializedPayload, $serializedMetaData));
+    public function persistSnapshot(
+        $aggregateType,
+        DomainEventMessageInterface $snapshotEvent,
+        SerializedObjectInterface $serializedPayload,
+        SerializedObjectInterface $serializedMetaData,
+        EntityManager $entityManager
+    ) {
+        $entityManager->persist(
+            $this->createSnapshotEventEntry(
+                $aggregateType,
+                $snapshotEvent,
+                $serializedPayload,
+                $serializedMetaData
+            )
+        );
     }
 
-    public function pruneSnapshots($type,
-            DomainEventMessageInterface $mostRecentSnapshotEvent,
-            $maxSnapshotsArchived, EntityManager $entityManager)
-    {
-        $redundantSnapshots = $this->findRedundantSnapshots($type,
-                $mostRecentSnapshotEvent, $maxSnapshotsArchived, $entityManager);
+    public function pruneSnapshots(
+        $type,
+        DomainEventMessageInterface $mostRecentSnapshotEvent,
+        $maxSnapshotsArchived,
+        EntityManager $entityManager
+    ) {
+        $redundantSnapshots = $this->findRedundantSnapshots(
+            $type,
+            $mostRecentSnapshotEvent,
+            $maxSnapshotsArchived,
+            $entityManager
+        );
 
         if (count($redundantSnapshots)) {
             $scnOfFirstToPrune = current($redundantSnapshots);
 
-            $entityManager->createQuery("DELETE FROM " . $this->snapshotEventEntryEntityName() . " e " .
-                            "WHERE e.type = :type " .
-                            "AND e.aggregateIdentifier = :aggregateIdentifier " .
-                            "AND e.scn <= :scnOfFirstToPrune")
-                    ->setParameters(array(':type' => $type, ':aggregateIdentifier' => $mostRecentSnapshotEvent->getAggregateIdentifier(),
-                        ':scnOfFirstToPrune' => $scnOfFirstToPrune))->execute();
+            $entityManager->createQuery(
+                "DELETE FROM ".$this->snapshotEventEntryEntityName()." e ".
+                "WHERE e.type = :type ".
+                "AND e.aggregateIdentifier = :aggregateIdentifier ".
+                "AND e.scn <= :scnOfFirstToPrune"
+            )
+                ->setParameters(
+                    array(
+                        ':type' => $type,
+                        ':aggregateIdentifier' => $mostRecentSnapshotEvent->getAggregateIdentifier(),
+                        ':scnOfFirstToPrune' => $scnOfFirstToPrune
+                    )
+                )->execute();
         }
     }
 
-    private function findRedundantSnapshots($type,
-            DomainEventMessageInterface $snapshotEvent, $maxSnapshotsArchived,
-            EntityManager $entityManager)
-    {
+    private function findRedundantSnapshots(
+        $type,
+        DomainEventMessageInterface $snapshotEvent,
+        $maxSnapshotsArchived,
+        EntityManager $entityManager
+    ) {
         $query = $entityManager->createQuery(
-                        "SELECT e.scn FROM " . $this->snapshotEventEntryEntityName() . " e " .
-                        "WHERE e.type = :type AND e.aggregateIdentifier = :aggregateIdentifier " .
-                        "ORDER BY e.scn DESC")
-                ->setFirstResult($maxSnapshotsArchived - 1)
-                ->setMaxResults(1)
-                ->setParameters(array(':type' => $type, ':aggregateIdentifier' => $snapshotEvent->getAggregateIdentifier()));
+            "SELECT e.scn FROM ".$this->snapshotEventEntryEntityName()." e ".
+            "WHERE e.type = :type AND e.aggregateIdentifier = :aggregateIdentifier ".
+            "ORDER BY e.scn DESC"
+        )
+            ->setFirstResult($maxSnapshotsArchived - 1)
+            ->setMaxResults(1)
+            ->setParameters(
+                array(':type' => $type, ':aggregateIdentifier' => $snapshotEvent->getAggregateIdentifier())
+            );
 
         return $query->getResult();
     }

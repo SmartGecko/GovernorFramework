@@ -82,11 +82,11 @@ interface EventEntryStoreInterface
      * ensure that events originating from the same aggregate are always returned with the lowest sequence number
      * first.
      *
-     * @param whereClause   The JPA clause to be included after the WHERE keyword
-     * @param parameters    A map containing all the parameter values for parameter keys included in the where clause
-     * @param batchSize     The total number of events to return in this batch
-     * @param entityManager The entity manager providing access to the data store
-     * @return a List of serialized representations of Events included in this batch
+     * @param string $whereClause   The JPA clause to be included after the WHERE keyword
+     * @param array $parameters    A map containing all the parameter values for parameter keys included in the where clause
+     * @param integer $batchSize     The total number of events to return in this batch
+     * @param EntityManager $entityManager The entity manager providing access to the data store
+     * @return \Iterator a List of serialized representations of Events included in this batch
      */
     public function fetchFiltered($whereClause, array $parameters, $batchSize,
         EntityManager $entityManager);
@@ -112,11 +112,11 @@ interface EventEntryStoreInterface
      * <p/>
      * These snapshot events should be returned by the <code>loadLastSnapshotEvent(...)</code> methods.
      *
-     * @param aggregateType      The type identifier of the aggregate that generated the event
-     * @param snapshotEvent      The actual snapshot event instance. May be used to extract relevant meta data
-     * @param serializedPayload  The serialized payload of the event
-     * @param serializedMetaData The serialized MetaData of the event
-     * @param entityManager      The entity manager providing access to the data store
+     * @param string $aggregateType      The type identifier of the aggregate that generated the event
+     * @param DomainEventMessageInterface $snapshotEvent      The actual snapshot event instance. May be used to extract relevant meta data
+     * @param SerializedObjectInterface $serializedPayload  The serialized payload of the event
+     * @param SerializedObjectInterface $serializedMetaData The serialized MetaData of the event
+     * @param EntityManager $entityManager      The entity manager providing access to the data store
      */
     public function persistSnapshot($aggregateType,
         DomainEventMessageInterface $snapshotEvent,

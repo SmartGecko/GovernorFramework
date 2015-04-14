@@ -31,7 +31,8 @@ use Governor\Framework\Common\ReflectionUtils;
 /**
  * Description of EqualFieldsMatcher
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class EqualFieldsMatcher extends BaseMatcher
 {
@@ -45,7 +46,7 @@ class EqualFieldsMatcher extends BaseMatcher
      * Initializes an EqualFieldsMatcher that will match an object with equal properties as the given
      * <code>expected</code> object.
      *
-     * @param expected The expected object
+     * @param mixed $expected The expected object
      */
     public function __construct($expected)
     {
@@ -90,7 +91,7 @@ class EqualFieldsMatcher extends BaseMatcher
      * Returns the field that failed comparison, if any. This value is only populated after {@link #matches(Object)} is
      * called and a mismatch has been detected.
      *
-     * @return the field that failed comparison, if any
+     * @return string the field that failed comparison, if any
      */
     public function getFailedField()
     {
@@ -101,7 +102,7 @@ class EqualFieldsMatcher extends BaseMatcher
      * Returns the expected value of a failed field comparison, if any. This value is only populated after {@link
      * #matches(Object)} is called and a mismatch has been detected.
      *
-     * @return the expected value of the field that failed comparison, if any
+     * @return mixed the expected value of the field that failed comparison, if any
      */
     public function getFailedFieldExpectedValue()
     {
@@ -112,7 +113,7 @@ class EqualFieldsMatcher extends BaseMatcher
      * Returns the actual value of a failed field comparison, if any. This value is only populated after {@link
      * #matches(Object)} is called and a mismatch has been detected.
      *
-     * @return the actual value of the field that failed comparison, if any
+     * @return mixed the actual value of the field that failed comparison, if any
      */
     public function getFailedFieldActualValue()
     {

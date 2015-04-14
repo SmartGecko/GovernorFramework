@@ -81,9 +81,21 @@ class BatchingIterator implements \Iterator
      */
     private $em;
 
-    public function __construct($whereClause, array $parameters, $batchSize,
-            $domainEventEntryEntityName, EntityManager $em)
-    {
+
+    /**
+     * @param string $whereClause
+     * @param array $parameters
+     * @param int $batchSize
+     * @param string $domainEventEntryEntityName
+     * @param EntityManager $em
+     */
+    public function __construct(
+        $whereClause,
+        array $parameters,
+        $batchSize,
+        $domainEventEntryEntityName,
+        EntityManager $em
+    ) {
         $this->whereClause = $whereClause;
         $this->parameters = $parameters;
         $this->batchSize = $batchSize;
@@ -102,16 +114,17 @@ class BatchingIterator implements \Iterator
     private function fetchBatch()
     {
         $query = $this->em->createQuery(
-                        sprintf("SELECT new Governor\Framework\Serializer\SimpleSerializedDomainEventData(" .
-                                "e.eventIdentifier, e.aggregateIdentifier, e.scn, " .
-                                "e.timestamp, e.payloadType, e.payloadRevision, e.payload, e.metaData) " .
-                                "FROM %s e %s ORDER BY e.timestamp ASC, " . "e.scn ASC, e.aggregateIdentifier ASC",
-                                $this->domainEventEntryEntityName,
-                                $this->buildWhereClause()
-                        )
-                )
-                ->setMaxResults($this->batchSize)
-                ->setParameters($this->parameters);
+            sprintf(
+                "SELECT new Governor\Framework\Serializer\SimpleSerializedDomainEventData(".
+                "e.eventIdentifier, e.aggregateIdentifier, e.scn, ".
+                "e.timestamp, e.payloadType, e.payloadRevision, e.payload, e.metaData) ".
+                "FROM %s e %s ORDER BY e.timestamp ASC, "."e.scn ASC, e.aggregateIdentifier ASC",
+                $this->domainEventEntryEntityName,
+                $this->buildWhereClause()
+            )
+        )
+            ->setMaxResults($this->batchSize)
+            ->setParameters($this->parameters);
 
         $result = $query->getResult();
         $this->lastItem = end($result);
@@ -120,16 +133,20 @@ class BatchingIterator implements \Iterator
         return $result;
     }
 
+
+    /**
+     * @return string
+     */
     private function buildWhereClause()
-    {    
+    {
         if (null === $this->lastItem && empty($this->whereClause)) {
             return '';
         }
 
         $query = "WHERE ";
         if (null !== $this->lastItem) {
-            $query .= "((e.timestamp > :timestamp) OR (e.timestamp = :timestamp AND e.scn > :scn) " .
-                    " OR (e.timestamp = :timestamp AND e.scn = :scn AND e.aggregateIdentifier > :aggregateIdentifier))";
+            $query .= "((e.timestamp > :timestamp) OR (e.timestamp = :timestamp AND e.scn > :scn) ".
+                " OR (e.timestamp = :timestamp AND e.scn = :scn AND e.aggregateIdentifier > :aggregateIdentifier))";
 
             $this->parameters[':timestamp'] = $this->lastItem->getTimestamp();
             $this->parameters[':scn'] = $this->lastItem->getScn();
@@ -158,7 +175,7 @@ class BatchingIterator implements \Iterator
 
     public function key()
     {
-        
+
     }
 
     public function next()
@@ -183,6 +200,10 @@ class BatchingIterator implements \Iterator
         throw new \BadMethodCallException("BatchingIterator does not support rewind");
     }
 
+
+    /**
+     * @return bool
+     */
     public function valid()
     {
         return null !== $this->next;

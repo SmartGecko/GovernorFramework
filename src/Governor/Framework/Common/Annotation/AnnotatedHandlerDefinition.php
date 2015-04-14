@@ -36,8 +36,15 @@ class AnnotatedHandlerDefinition implements HandlerDefinitionInterface
      * @var array
      */
     private $methodAnnotations;
-    
-    function __construct(\ReflectionClass $target, \ReflectionMethod $method, 
+
+
+    /**
+     * @param \ReflectionClass $target
+     * @param \ReflectionMethod $method
+     * @param array $methodAnnotations
+     * @param string $payloadType
+     */
+    function __construct(\ReflectionClass $target, \ReflectionMethod $method,
             array $methodAnnotations, $payloadType) 
     {
         $this->target = $target;
@@ -46,22 +53,34 @@ class AnnotatedHandlerDefinition implements HandlerDefinitionInterface
         $this->payloadType = $payloadType;
     }
 
-    public function getMethod() 
+    /**
+     * @return \ReflectionMethod
+     */
+    public function getMethod()
     {
         return $this->method;
     }
-    
+
+    /**
+     * @return array
+     */
     public function getMethodAnnotations()
     {
         return $this->methodAnnotations;
     }
 
-    public function getPayloadType() 
+    /**
+     * @return string
+     */
+    public function getPayloadType()
     {
         return $this->payloadType;
     }
 
-    public function getTarget() 
+    /**
+     * @return \ReflectionClass
+     */
+    public function getTarget()
     {
         return $this->target;
     }

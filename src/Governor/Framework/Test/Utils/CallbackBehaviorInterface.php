@@ -16,48 +16,32 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Test;
+namespace Governor\Framework\Test\Utils;
 
-use Governor\Framework\Common\AbstractParameterResolverFactory;
-use Governor\Framework\Common\FixedValueParameterResolver;
-use Governor\Framework\Annotations as Governor;
+use Governor\Framework\Domain\MetaData;
 
 /**
- * Description of ContainerParameterResolverFactory
+ * Interface towards a mechanism that replicates the behavior of a Command Handling component. The goal of this
+ * component is to mimic behavior on the callback.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-class MockParameterResolverFactory extends AbstractParameterResolverFactory
+interface CallbackBehaviorInterface
 {
-
     /**
-     * @var array
+     * Invoked when the Command Bus receives a Command that is dispatched with a Callback method. The return value of
+     * this invocation is used to invoke the callback.
+     *
+     * @param mixed $commandPayload The payload of the Command Message
+     * @param MetaData $commandMetaData The MetaData of the CommandMessage
+     * @return mixed any return value to pass to the callback's onSuccess method.
      */
-    private $services;
-
-    function __construct($services)
-    {
-        $this->services = $services;
-    }
-
-    public function createInstance(array $methodAnnotations,
-            \ReflectionParameter $parameter)
-    {        
-        $resolver = $this->getResolverFor($methodAnnotations, $parameter);        
-
-        if ($resolver && $resolver instanceof Governor\Inject) {
-            $service = $this->services[$resolver->service];
-            
-            return new FixedValueParameterResolver($service);
-        }
-
-        return null;
-    }
-
+    public function handle($commandPayload, MetaData $commandMetaData);
 }

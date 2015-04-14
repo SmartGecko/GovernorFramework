@@ -193,7 +193,7 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * See <a href="http://www.rabbitmq.com/confirms.html">RabbitMQ Documentation</a> for more information about
      * publisher acknowledgements.
      *
-     * @param boolean waitForPublisherAck whether or not to enab;e server acknowledgements (confirms)
+     * @param boolean $waitForPublisherAck whether or not to enab;e server acknowledgements (confirms)
      */
     public function setWaitForPublisherAck($waitForPublisherAck)
     {
@@ -211,7 +211,7 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * <p/>
      * This setting is only used when {@link #setWaitForPublisherAck(boolean)} is set to <code>true</code>.
      *
-     * @param integer publisherAckTimeout The number of milliseconds to wait for confirms, or 0 to wait indefinitely.
+     * @param integer $publisherAckTimeout The number of milliseconds to wait for confirms, or 0 to wait indefinitely.
      */
     public function setPublisherAckTimeout($publisherAckTimeout)
     {
@@ -257,22 +257,6 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     {
         $this->exchangeName = $exchangeName;
     }
-
-    /**
-     * Sets the ListenerContainerLifecycleManager that creates and manages the lifecycle of Listener Containers for the
-     * clusters that are connected to this terminal.
-     * <p/>
-     * Defaults to an autowired ListenerContainerLifecycleManager
-     *
-     * @param listenerContainerLifecycleManager
-     *         the listenerContainerLifecycleManager to set
-     */
-    //   public void setListenerContainerLifecycleManager(
-    //          ListenerContainerLifecycleManager listenerContainerLifecycleManager) {
-    //      this.listenerContainerLifecycleManager = listenerContainerLifecycleManager;
-    //  }
-
-
 
     public function onClusterCreated(ClusterInterface $cluster)
     {

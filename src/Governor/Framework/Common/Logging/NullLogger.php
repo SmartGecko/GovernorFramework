@@ -30,7 +30,7 @@ use Psr\Log\LoggerInterface;
  * Null object implementation of the LoggerInterface.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class NullLogger implements LoggerInterface
 {

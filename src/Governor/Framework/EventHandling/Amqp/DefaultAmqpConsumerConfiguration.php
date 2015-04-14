@@ -27,7 +27,8 @@ namespace Governor\Framework\EventHandling\Amqp;
 /**
  * Description of DefaultAMQPConsumerConfiguration
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class DefaultAmqpConsumerConfiguration implements AmqpConsumerConfigurationInterface
 {
@@ -40,7 +41,7 @@ class DefaultAmqpConsumerConfiguration implements AmqpConsumerConfigurationInter
     /**
      * Initializes the configuration with the given <code>queueName</code>.
      *
-     * @param queueName The name of the Queue a cluster should connect to
+     * @param string $queueName The name of the Queue a cluster should connect to
      */
     public function __construct($queueName)
     {

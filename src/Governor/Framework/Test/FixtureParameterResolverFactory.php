@@ -24,13 +24,17 @@
 
 namespace Governor\Framework\Test;
 
+use Governor\Framework\Common\ParameterResolverFactoryInterface;
 use Governor\Framework\Common\AbstractParameterResolverFactory;
 use Governor\Framework\Common\DefaultParameterResolverFactory;
+use Governor\Framework\Common\FixedValueParameterResolver;
+use Governor\Framework\Annotations as Governor;
 
 /**
- * Description of FixtureParameterResolverFactory
+ * FixtureParameterResolverFactory implementation for the testing framework.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class FixtureParameterResolverFactory extends AbstractParameterResolverFactory
 {
@@ -44,14 +48,22 @@ class FixtureParameterResolverFactory extends AbstractParameterResolverFactory
      * @var ParameterResolverFactoryInterface[]
      */
     private $delegates;
-    
+
+    /**
+     *
+     */
     function __construct()
     {
         $this->delegates = array(
             new DefaultParameterResolverFactory()
         );
     }
-    
+
+    /**
+     * @param array $methodAnnotations
+     * @param \ReflectionParameter $parameter
+     * @return FixedValueParameterResolver|\Governor\Framework\Common\ParameterResolverInterface|null
+     */
     public function createInstance(array $methodAnnotations,
             \ReflectionParameter $parameter)
     {
@@ -60,15 +72,32 @@ class FixtureParameterResolverFactory extends AbstractParameterResolverFactory
                 return $factory;
             }
         }
-        
-        $mockService = new MockParameterResolverFactory($this->services);
-        
-        return $mockService->createInstance($methodAnnotations, $parameter);
+
+        $resolver = $this->getResolverFor($methodAnnotations, $parameter);
+
+        if ($resolver && $resolver instanceof Governor\Inject) {
+            $service = $this->services[$resolver->service];
+
+            return new FixedValueParameterResolver($service);
+        }
+
+        return null;
     }
-    
+
+    /**
+     * @param string $id
+     * @param mixed $service
+     */
     public function registerService($id, $service)
     {
         $this->services[$id] = $service;
     }
 
+    /**
+     *
+     */
+    public function clear()
+    {
+        $this->services = array();
+    }
 }

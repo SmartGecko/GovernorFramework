@@ -33,14 +33,16 @@ class GenericEventMessage extends GenericMessage implements EventMessageInterfac
 {
 
     /**
-     *
      * @var \DateTime
      */
     private $timestamp;
 
-    public function __construct($payload, MetaData $metadata = null, $id = null,
-            \DateTime $timestamp = null)
-    {
+    public function __construct(
+        $payload,
+        MetaData $metadata = null,
+        $id = null,
+        \DateTime $timestamp = null
+    ) {
         parent::__construct($payload, $metadata, $id);
         $this->timestamp = isset($timestamp) ? $timestamp : new \DateTime();
     }
@@ -49,5 +51,24 @@ class GenericEventMessage extends GenericMessage implements EventMessageInterfac
     {
         return $this->timestamp;
     }
+
+    /**
+     * @param mixed $event
+     * @return GenericEventMessage
+     */
+    public static function asEventMessage($event)
+    {
+        if ($event instanceof EventMessageInterface) {
+            return $event;
+        } else {
+            if ($event instanceof MessageInterface) {
+
+                return new GenericEventMessage($event->getPayload(), $event->getMetaData());
+            }
+        }
+
+        return new GenericEventMessage($event);
+    }
+
 
 }

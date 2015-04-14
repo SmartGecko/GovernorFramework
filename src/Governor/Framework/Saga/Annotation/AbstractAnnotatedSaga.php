@@ -63,7 +63,7 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
 
     /**
      * @Exclude
-     * @var SagaMehtodMessageHandlerInspector
+     * @var SagaMethodMessageHandlerInspector
      */
     private $inspector;
 

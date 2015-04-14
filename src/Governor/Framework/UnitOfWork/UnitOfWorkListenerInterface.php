@@ -92,8 +92,7 @@ interface UnitOfWorkListenerInterface
      * Note that this method is only invoked if the Unit of Work is bound to a transaction.
      *
      * @param UnitOfWorkInterface $unitOfWork  The Unit of Work of which the underlying transaction is being committed.
-     * @param transaction The object representing the (status of) the transaction, as returned by {@link
-     *                    org.axonframework.unitofwork.TransactionManager#startTransaction()}.
+     * @param mixed $transaction The object representing the (status of) the transaction
      * @see org.axonframework.unitofwork.TransactionManager
      */
     public function onPrepareTransactionCommit(UnitOfWorkInterface $unitOfWork,

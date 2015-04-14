@@ -30,6 +30,9 @@ use Hamcrest\Description;
 /**
  * Matcher that matches against a <code>null</code> or <code>void</code> value. Can be used to make sure no trailing
  * events remain when using an Exact Sequence Matcher.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class NullOrVoidMatcher extends BaseMatcher
 {

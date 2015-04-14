@@ -35,6 +35,9 @@ use Governor\Framework\Domain\EventMessageInterface;
 class UnitOfWorkListenerCollection implements UnitOfWorkListenerInterface
 {
 
+    /**
+     * @var UnitOfWorkListenerInterface[]
+     */
     private $listeners = array();
 
     public function afterCommit(UnitOfWorkInterface $unitOfWork)

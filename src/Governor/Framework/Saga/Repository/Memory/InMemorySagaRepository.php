@@ -22,16 +22,17 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Tests\Saga\Repository;
+namespace Governor\Framework\Saga\Repository\Memory;
 
 use Governor\Framework\Saga\SagaInterface;
 use Governor\Framework\Saga\SagaRepositoryInterface;
 use Governor\Framework\Saga\AssociationValue;
 
 /**
- * Description of InMemorySagaRepository
+ * SagaRepositoryInterface implementation that stores data in an in memory array;
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class InMemorySagaRepository implements SagaRepositoryInterface
 {

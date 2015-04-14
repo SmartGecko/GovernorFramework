@@ -24,65 +24,86 @@
 
 namespace Governor\Tests\Saga\Annotation;
 
-use Governor\Framework\Domain\MetaData;
-use Governor\Framework\Domain\GenericEventMessage;
-use Governor\Framework\Saga\AssociationValue;
-use Governor\Framework\Saga\GenericSagaFactory;
-use Governor\Tests\Saga\Repository\InMemorySagaRepository;
-use Governor\Framework\EventHandling\SimpleEventBus;
+use Governor\Framework\Annotations\EndSaga;
 use Governor\Framework\Annotations\SagaEventHandler;
 use Governor\Framework\Annotations\StartSaga;
-use Governor\Framework\Annotations\EndSaga;
+use Governor\Framework\Correlation\CorrelationDataHolder;
+use Governor\Framework\Correlation\CorrelationDataProviderInterface;
+use Governor\Framework\Domain\EventMessageInterface;
+use Governor\Framework\Domain\GenericEventMessage;
+use Governor\Framework\Domain\MetaData;
 use Governor\Framework\Saga\Annotation\AbstractAnnotatedSaga;
 use Governor\Framework\Saga\Annotation\AnnotatedSagaManager;
+use Governor\Framework\Saga\AssociationValue;
+use Governor\Framework\Saga\GenericSagaFactory;
+use Governor\Framework\Saga\Repository\Memory\InMemorySagaRepository;
 
 /**
- * Description of AnnotatedSagaManagerTest
+ * AnnotatedSagaManager unit tests.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class AnnotatedSagaManagerTest extends \PHPUnit_Framework_TestCase
 {
 
+    /**
+     * @var InMemorySagaRepository|\Phake_IMock
+     */
     private $sagaRepository;
+
+    /**
+     * @var AnnotatedSagaManager
+     */
     private $manager;
 
     public function setUp()
     {
+        CorrelationDataHolder::clear();
         $this->sagaRepository = \Phake::partialMock(InMemorySagaRepository::class);
-        $eventBus = new SimpleEventBus();
-        $eventBus->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
 
-        $this->manager = new AnnotatedSagaManager($this->sagaRepository,
-                new GenericSagaFactory(), array(MyTestSaga::class));
+        $this->manager = new AnnotatedSagaManager(
+            $this->sagaRepository,
+            new GenericSagaFactory(), array(MyTestSaga::class)
+        );
+    }
 
-        $this->manager->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
+    public function tearDown()
+    {
+        CorrelationDataHolder::clear();
     }
 
     private function repositoryContents($lookupValue, $sagaType)
     {
-        $identifiers = $this->sagaRepository->find($sagaType,
-                new AssociationValue("myIdentifier", $lookupValue));
+        $identifiers = $this->sagaRepository->find(
+            $sagaType,
+            new AssociationValue("myIdentifier", $lookupValue)
+        );
         $sagas = array();
         foreach ($identifiers as $identifier) {
             $sagas[] = $this->sagaRepository->load($identifier);
         }
+
         return $sagas;
     }
 
     public function testCreationPolicy_NoneExists()
     {
         $this->manager->handle(new GenericEventMessage(new StartingEvent("123")));
-        $this->assertCount(1,
-                $this->repositoryContents("123", MyTestSaga::class));
+        $this->assertCount(
+            1,
+            $this->repositoryContents("123", MyTestSaga::class)
+        );
     }
 
     public function testCreationPolicy_OneAlreadyExists()
     {
         $this->manager->handle(new GenericEventMessage(new StartingEvent("123")));
         $this->manager->handle(new GenericEventMessage(new StartingEvent("123")));
-        $this->assertCount(1,
-                $this->repositoryContents("123", MyTestSaga::class));
+        $this->assertCount(
+            1,
+            $this->repositoryContents("123", MyTestSaga::class)
+        );
     }
 
     public function testHandleUnrelatedEvent()
@@ -113,8 +134,10 @@ class AnnotatedSagaManagerTest extends \PHPUnit_Framework_TestCase
     public function testCreationPolicy_SagaNotCreated()
     {
         $this->manager->handle(new GenericEventMessage(new MiddleEvent("123")));
-        $this->assertCount(0,
-                $this->repositoryContents("123", MyTestSaga::class));
+        $this->assertCount(
+            0,
+            $this->repositoryContents("123", MyTestSaga::class)
+        );
     }
 
     // !!! TODO find a suitable PHP implementation
@@ -127,11 +150,17 @@ class AnnotatedSagaManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(1, $this->repositoryContents("23", MyTestSaga::class));
 
         $this->manager->handle(new GenericEventMessage(new MiddleEvent("12")));
-        $this->manager->handle(new GenericEventMessage(new MiddleEvent("23"),
-                new MetaData(array("catA" => "value"))));
+        $this->manager->handle(
+            new GenericEventMessage(
+                new MiddleEvent("23"),
+                new MetaData(array("catA" => "value"))
+            )
+        );
 
-        $this->assertEquals(0,
-                $this->repositoryContents("12", MyTestSaga::class)[0]->getSpecificHandlerInvocations());
+        $this->assertEquals(
+            0,
+            $this->repositoryContents("12", MyTestSaga::class)[0]->getSpecificHandlerInvocations()
+        );
 //        $this->assertEquals(1,
         //              $this->repositoryContents("23", MyTestSaga::class)[0]->getSpecificHandlerInvocations());
         //$this->assertEquals(0, repositoryContents("12", MyTestSaga.class).iterator().next().getSpecificHandlerInvocations());
@@ -149,8 +178,10 @@ class AnnotatedSagaManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(1, $this->repositoryContents("12", MyTestSaga::class));
         $this->assertCount(1, $this->repositoryContents("23", MyTestSaga::class));
 
-        $this->assertEquals(0,
-                $this->repositoryContents("12", MyTestSaga::class)[0]->getSpecificHandlerInvocations());
+        $this->assertEquals(
+            0,
+            $this->repositoryContents("12", MyTestSaga::class)[0]->getSpecificHandlerInvocations()
+        );
         //$this->assertEquals(1, repositoryContents("23", MyTestSaga.class).iterator().next().getSpecificHandlerInvocations());
 
         $this->manager->handle(new GenericEventMessage(new EndingEvent("12")));
@@ -162,6 +193,57 @@ class AnnotatedSagaManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(0, $this->repositoryContents("23", MyTestSaga::class));
         $this->assertCount(0, $this->repositoryContents("12", MyTestSaga::class));
     }
+
+    public function testCorrelationDataReadFromProvider()
+    {
+        $correlationDataProvider = \Phake::mock(CorrelationDataProviderInterface::class);
+        \Phake::when($correlationDataProvider)->correlationDataFor(\Phake::anyParameters())->thenReturn(array());
+
+        $this->manager->setCorrelationDataProvider($correlationDataProvider);
+
+        $this->manager->handle(
+            new GenericEventMessage(
+                new StartingEvent(
+                    "12", new MetaData(
+                        array(
+                            'key' => 'val'
+                        )
+                    )
+                )
+            )
+        );
+
+        \Phake::verify($correlationDataProvider)->correlationDataFor(
+            \Phake::capture($message)
+        );
+
+        $this->assertInstanceOf(EventMessageInterface::class, $message);
+    }
+
+
+    public function testCorrelationDataReadFromProviders()
+    {
+        $correlationDataProvider1 = \Phake::mock(CorrelationDataProviderInterface::class);
+        $correlationDataProvider2 = \Phake::mock(CorrelationDataProviderInterface::class);
+
+        $this->manager->setCorrelationDataProviders(array($correlationDataProvider1, $correlationDataProvider2));
+
+        $this->manager->handle(
+            new GenericEventMessage(
+                new StartingEvent(
+                    "12", new MetaData(
+                        array(
+                            'key' => 'val'
+                        )
+                    )
+                )
+            )
+        );
+
+        \Phake::verify($correlationDataProvider1)->correlationDataFor(\Phake::anyParameters());
+        \Phake::verify($correlationDataProvider2)->correlationDataFor(\Phake::anyParameters());
+    }
+
 
     /*
       @Test
@@ -348,6 +430,8 @@ class MyTestSaga extends AbstractAnnotatedSaga
     private $specificHandlerInvocations = 0;
 
     /**
+     * @param StartingEvent $event
+     *
      * @StartSaga
      * @SagaEventHandler(associationProperty = "myIdentifier")
      */
@@ -356,18 +440,10 @@ class MyTestSaga extends AbstractAnnotatedSaga
         $this->capturedEvents[] = $event;
     }
 
-    /**
-     * StartSaga
-     * SagaEventHandler(associationProperty = "myIdentifier")
-     */
-    public function handleSlowStartingEvent(SlowStartingEvent $event)
-    {
-        //   event . getStartCdl() . countDown();
-        $this->capturedEvents[] = $event;
-        // Thread . sleep(event . getDuration());
-    }
 
     /**
+     * @param ForcingStartEvent $event
+     *
      * @StartSaga(forceNew = true)
      * @SagaEventHandler(associationProperty = "myIdentifier")
      */
@@ -377,6 +453,8 @@ class MyTestSaga extends AbstractAnnotatedSaga
     }
 
     /**
+     * @param EndingEvent $event
+     *
      * @EndSaga
      * @SagaEventHandler(associationProperty = "myIdentifier")
      */
@@ -386,6 +464,8 @@ class MyTestSaga extends AbstractAnnotatedSaga
     }
 
     /**
+     * @param MiddleEvent $event
+     *
      * @SagaEventHandler(associationProperty = "myIdentifier")
      */
     public function handleMiddleEvent(MiddleEvent $event)

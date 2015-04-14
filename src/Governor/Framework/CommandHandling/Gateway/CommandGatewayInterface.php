@@ -62,10 +62,7 @@ interface CommandGatewayInterface
      * Note that the interrupted flag is set back on the thread if it has been interrupted while waiting.
      *
      * @param mixed $command The command to dispatch  
-     * @return the result of command execution.
-     * 
-     * @throws org.axonframework.commandhandling.CommandExecutionException
-     *          when an exception occurred while processing the command
+     * @return mixed $the result of command execution.
      */
     public function sendAndWait($command);
 }

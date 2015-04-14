@@ -39,8 +39,8 @@ interface ConflictResolverInterface
      * {@link org.axonframework.repository.ConflictingModificationException} (or subtype) is thrown. If no conflicts
      * are detected, nothing happens.
      *
-     * @param $appliedChanges   The list of the changes applied to the aggregate
-     * @param $committedChanges The list of events that have been previously applied, but were unexpected by the command
+     * @param array $appliedChanges   The list of the changes applied to the aggregate
+     * @param array $committedChanges The list of events that have been previously applied, but were unexpected by the command
      *                         handler
      * @throws \Governor\Framework\Repository\ConflictingModificationException
      *          if any conflicting changes are detected

@@ -34,23 +34,23 @@ interface ClusterMetaDataInterface
      * Returns the property stored using the given {@code key}. If no property has been stored using that key, it
      * returns {@code null}.
      *
-     * @param key The key under which the property was stored
-     * @return The value stored under the given {@code key}
+     * @param string $key The key under which the property was stored
+     * @return mixed The value stored under the given {@code key}
      */
     public function getProperty($key);
 
     /**
      * Stores a property {@code value} under the given {@code key}.
      *
-     * @param key   the key under which to store a value
-     * @param value the value to store
+     * @param string $key   the key under which to store a value
+     * @param mixed $value the value to store
      */
     public function setProperty($key, $value);
 
     /**
      * Removes the value store under the given {@code key}. If no such value is available, nothing happens.
      *
-     * @param key the key to remove
+     * @param string $key the key to remove
      */
     public function removeProperty($key);
 
@@ -58,8 +58,8 @@ interface ClusterMetaDataInterface
      * Indicates whether a value is stored under the given {@code key}. Will also return {@code true} if a {@code null}
      * value is stored under the given {@code key}.
      *
-     * @param key The key to find
-     * @return {@code true} if a value was stored under the given {@code key}, otherwise {@code false}.
+     * @param string $key The key to find
+     * @return boolean true if a value was stored under the given key otherwise false.
      */
     public function isPropertySet($key);
 }

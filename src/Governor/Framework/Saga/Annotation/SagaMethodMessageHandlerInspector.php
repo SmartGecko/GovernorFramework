@@ -47,6 +47,7 @@ class SagaMethodMessageHandlerInspector
         $this->reader = new AnnotationReader();
     }
 
+    // !!! TODO use the inspector for this
     public function getMessageHandlers(EventMessageInterface $event)
     {
         $found = array();

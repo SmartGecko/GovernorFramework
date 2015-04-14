@@ -24,8 +24,7 @@
 
 namespace Governor\Framework\EventHandling\Listeners;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Governor\Framework\Common\ReflectionUtils;
+use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\EventHandling\EventListenerProxyInterface;
@@ -34,17 +33,21 @@ use Governor\Framework\Annotations\EventHandler;
 
 /**
  * Description of AnnotatedEventListenerAdapter
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, ReplayAwareInterface
 {
 
     /**
-     * @var EventBusInterface 
+     * @var EventBusInterface
      */
     private $eventBus;
+
+    /**
+     * @var mixed
+     */
     private $annotatedEventListener;
 
     /**
@@ -52,9 +55,14 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, Repl
      */
     private $replayAware;
 
-    public function __construct($annotatedEventListener,
-            EventBusInterface $eventBus)
-    {
+    /**
+     * @param mixed $annotatedEventListener
+     * @param EventBusInterface $eventBus
+     */
+    public function __construct(
+        $annotatedEventListener,
+        EventBusInterface $eventBus
+    ) {
         $this->eventBus = $eventBus;
         $this->annotatedEventListener = $annotatedEventListener;
 
@@ -65,40 +73,50 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, Repl
         $this->eventBus->subscribe($this);
     }
 
+    /**
+     * @return string
+     */
     public function getTargetType()
     {
         return get_class($this->annotatedEventListener);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function handle(EventMessageInterface $event)
     {
-        $reader = new AnnotationReader();
+        $inspector = new MethodMessageHandlerInspector(
+            new \ReflectionClass($this->annotatedEventListener),
+            EventHandler::class
+        );
 
-        foreach (ReflectionUtils::getMethods(new \ReflectionClass($this->annotatedEventListener)) as $method) {
-            $annot = $reader->getMethodAnnotation($method, EventHandler::class);
-
-            // not a handler
-            if (null === $annot) {
-                continue;
-            }
-
-            $eventParam = current($method->getParameters());
-
-            // event type must be typehinted
-            if (!$eventParam->getClass()) {
-                continue;
-            }
-
-            $eventClassName = $eventParam->getClass()->name;
-
-            if ($eventClassName === $event->getPayloadType()) {
-                $listener = new AnnotatedEventListener($eventClassName,
-                        $method->name, $this->annotatedEventListener);
+        foreach ($inspector->getHandlerDefinitions() as $handlerDefinition) {
+            if ($handlerDefinition->getPayloadType() === $event->getPayloadType()) {
+                $listener = new AnnotatedEventListener(
+                    $handlerDefinition->getPayloadType(),
+                    $handlerDefinition->getMethod()->name,
+                    $this->annotatedEventListener
+                );
                 $listener->handle($event);
             }
         }
     }
 
+
+    /**
+     * @param mixed $annotatedEventListener
+     * @param EventBusInterface $eventBus
+     * @return AnnotatedEventListenerAdapter
+     */
+    public static function subscribe($annotatedEventListener, EventBusInterface $eventBus)
+    {
+        return new AnnotatedEventListenerAdapter($annotatedEventListener, $eventBus);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function afterReplay()
     {
         if (null !== $this->replayAware) {
@@ -106,6 +124,9 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, Repl
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function beforeReplay()
     {
         if (null !== $this->replayAware) {
@@ -113,6 +134,9 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, Repl
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function onReplayFailed(\Exception $cause = null)
     {
         if (null !== $this->replayAware) {

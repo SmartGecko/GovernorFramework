@@ -9,50 +9,57 @@
 namespace Governor\Tests\CommandHandling\Gateway;
 
 use Governor\Framework\CommandHandling\CommandBusInterface;
-use Governor\Framework\CommandHandling\GenericCommandMessage;
 use Governor\Framework\CommandHandling\Gateway\DefaultCommandGateway;
+use Governor\Framework\Correlation\CorrelationDataHolder;
 
 /**
- * Description of DefaultCommandGatewayTest
+ * Unit tests for the DefaultCommandGateway
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class DefaultCommandGatewayTest extends \PHPUnit_Framework_TestCase
 {
 
+    /**
+     * @var DefaultCommandGateway
+     */
     private $testSubject;
-    private $mockCommandBus;
 
-    //private CommandDispatchInterceptor mockCommandMessageTransformer;
+    /**
+     * @var CommandBusInterface|\Phake_IMock
+     */
+    private $mockCommandBus;
 
 
     public function setUp()
     {
-        $this->mockCommandBus = $this->getMock(CommandBusInterface::class);
+        CorrelationDataHolder::clear();
+        $this->mockCommandBus = \Phake::mock(CommandBusInterface::class);
         $this->testSubject = new DefaultCommandGateway($this->mockCommandBus);
+    }
+
+    public function tearDown()
+    {
+        CorrelationDataHolder::clear();
     }
 
     public function testSend()
     {
         $command = new HelloCommand('Hi !!!');
 
-        $this->mockCommandBus->expects($this->once())
-                ->method('dispatch')
-                ->with($this->anything());
-
         $this->testSubject->send($command);
+
+        \Phake::verify($this->mockCommandBus)->dispatch(\Phake::anyParameters());
     }
 
     public function testSendAndWait()
     {
         $command = new HelloCommand('Hi !!!');
 
-        $this->mockCommandBus->expects($this->once())
-                ->method('dispatch')
-                ->with($this->anything());
+        $this->testSubject->sendAndWait($command);
 
-        $result = $this->testSubject->sendAndWait($command);
+        \Phake::verify($this->mockCommandBus)->dispatch(\Phake::anyParameters());
     }
 
     /**
@@ -62,12 +69,24 @@ class DefaultCommandGatewayTest extends \PHPUnit_Framework_TestCase
     {
         $command = new HelloCommand('Hi !!!');
 
-        $this->mockCommandBus->expects($this->once())
-                ->method('dispatch')
-                ->with($this->anything())
-                ->will($this->throwException(new \RuntimeException("exception")));
+        \Phake::when($this->mockCommandBus)->dispatch(\Phake::anyParameters())->thenThrow(
+            new \RuntimeException("exception")
+        );
 
-        $result = $this->testSubject->sendAndWait($command);
+        $this->testSubject->sendAndWait($command);
+    }
+
+    public function testCorrelationDataIsAttached()
+    {
+        CorrelationDataHolder::setCorrelationData(array('correlationId' => 'test'));
+        $this->testSubject->send(new HelloCommand('Hi !!!'));
+
+        \Phake::verify($this->mockCommandBus)->dispatch(
+            \Phake::capture($command),
+            null
+        );
+
+        $this->assertEquals(array('correlationId' => 'test'), $command->getMetaData()->all());
     }
 
 }

@@ -25,21 +25,21 @@ interface SerializedDomainEventDataInterface
     /**
      * Returns the Identifier of the Aggregate to which the Event was applied.
      *
-     * @return the Identifier of the Aggregate to which the Event was applied
+     * @return string the Identifier of the Aggregate to which the Event was applied
      */
     public function getAggregateIdentifier();
 
     /**
      * Returns the sequence number of the event in the aggregate.
      *
-     * @return the sequence number of the event in the aggregate
+     * @return integer the sequence number of the event in the aggregate
      */
     public function getScn();
 
     /**
      * Returns the timestamp at which the event was first created.
      *
-     * @return the timestamp at which the event was first created
+     * @return \DateTime the timestamp at which the event was first created
      */
     public function getTimestamp();
 

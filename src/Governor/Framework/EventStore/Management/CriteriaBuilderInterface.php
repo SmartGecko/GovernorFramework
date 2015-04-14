@@ -46,7 +46,7 @@ interface CriteriaBuilderInterface
      * valid value for the Event Store that returns that value. Typically, it requires the "indexed" values to be used,
      * such as event identifier, aggregate identifier, timestamp, etc.
      *
-     * @param propertyName The name of the property to evaluate
+     * @param string $propertyName The name of the property to evaluate
      * @return PropertyInterface a property instance that can be used to build expressions
      */
     public function property($propertyName);

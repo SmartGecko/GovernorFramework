@@ -1,31 +1,36 @@
 {
-    "name": "davidkalosi/governor-framework",
-    "description": "PHP Command-Query-Responsibility-Segregation framework.",
-    "license": "MIT",
-    "autoload": {
-        "psr-0": {"Governor\\": "src/"}
-    },
-    "require": {
-        "rhumsaa/uuid": "@stable",
-        "psr/log": "@stable",
-        "php": "5.5.*",
-        "symfony/proxy-manager-bridge":">=2.4",
-        "ocramius/proxy-manager": "0.5.*",
-        "monolog/monolog": "1.8.0",
-        "hamcrest/hamcrest-php": "v1.1.1",
-        "videlalvaro/php-amqplib": "2.2.*",
-        "predis/predis": "*",
-        "jms/serializer": "*"
-    },
-    "require-dev": {
-        "doctrine/orm": ">=2.4",
-        "jms/aop-bundle": "1.1.*@dev",
-        "symfony/framework-bundle": ">=2.4",
-        "symfony/console": ">=2.3",
-        "symfony/finder": ">=2.3",
-        "symfony/validator": ">=2.3",
-        "moontoast/math": "*",
-        "phake/phake": "1.*",
-        "phpunit/phpunit": "4.2.*"
+  "name": "smartgecko/governor-framework",
+  "description": "PHP Command-Query-Responsibility-Segregation framework.",
+  "license": "MIT",
+  "autoload": {
+    "psr-0": {"Governor\\": "src/"}
+  },
+  "keywords": [
+    "CQRS",
+    "event sourcing",
+    "framework"
+  ],
+  "authors": [
+    {
+      "name": "David Kalosi",
+      "email": "david.kalosi@gmail.com"
     }
+  ],
+  "require": {
+    "rhumsaa/uuid": "@stable",
+    "psr/log": "@stable",
+    "php": "5.5.*",
+    "monolog/monolog": "1.8.0",
+    "hamcrest/hamcrest-php": "v1.1.1",
+    "videlalvaro/php-amqplib": "2.2.*",
+    "predis/predis": "*",
+    "jms/serializer": "*",
+    "symfony/validator": "2.6.6"
+  },
+  "require-dev": {
+    "doctrine/orm": ">=2.4",
+    "moontoast/math": "*",
+    "phake/phake": "1.*",
+    "phpunit/phpunit": "4.2.*"
+  }
 }

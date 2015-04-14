@@ -48,7 +48,7 @@ class AbstractAnnotatedEntity extends AbstractEventSourcedEntity
     protected function handle(DomainEventMessageInterface $event)
     {
         $this->ensureInspectorStarted();
-        $this->inspector->findAndinvokeEventHandlers($event);
+        $this->inspector->findAndInvokeEventHandlers($event);
     }
     
     private function ensureInspectorStarted()

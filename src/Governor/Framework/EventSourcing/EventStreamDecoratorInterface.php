@@ -57,11 +57,11 @@ interface EventStreamDecoratorInterface
      * events and pass them to the chain. Usually, it is best to decorate the given <code>eventStream</code> and pass
      * that to the chain.
      *
-     * @param aggregateType The type of aggregate events are being appended for
-     * @param aggregate     The aggregate for which the events are being stored
-     * @param eventStream   The eventStream containing the events to append to the event store  @return The decorated
+     * @param string $aggregateType The type of aggregate events are being appended for
+     * @param EventSourcedAggregateRootInterface $aggregate     The aggregate for which the events are being stored
+     * @param DomainEventStreamInterface $eventStream   The eventStream containing the events to append to the event store  @return The decorated
      *                      event stream
-     * @return the decorated event stream
+     * @return DomainEventStreamInterface the decorated event stream
      */
     public function decorateForAppend($aggregateType,
         EventSourcedAggregateRootInterface $aggregate,

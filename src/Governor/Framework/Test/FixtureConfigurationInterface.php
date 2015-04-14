@@ -25,6 +25,8 @@
 namespace Governor\Framework\Test;
 
 use Psr\Log\LoggerInterface;
+use Governor\Framework\CommandHandling\CommandBusInterface;
+use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\EventStore\EventStoreInterface;
 use Governor\Framework\Repository\RepositoryInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
@@ -43,9 +45,7 @@ interface FixtureConfigurationInterface
      * Registers an arbitrary event sourcing <code>repository</code> with the fixture. The repository must be wired
      * with the Event Store of this test fixture.
      * <p/>
-     * Should not be used in combination with {@link
-     * #registerAggregateFactory(org.axonframework.eventsourcing.AggregateFactory)}, as that will overwrite any
-     * repository previously registered.
+     * Should not be used in combination with registerAggregateFactory(), as that will overwrite any repository previously registered.
      *
      * @param EventSourcingRepository $repository The repository to use in the test case
      * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
@@ -57,9 +57,7 @@ interface FixtureConfigurationInterface
      * the given factory to create new aggregate instances. Defaults to an Aggregate Factory that uses the no-arg
      * constructor to create new instances.
      * <p/>
-     * Should not be used in combination with {@link
-     * #registerRepository(org.axonframework.eventsourcing.EventSourcingRepository)}, as that will overwrite any
-     * aggregate factory previously registered.
+     * Should not be used in combination with registerRepository(), as that will overwrite any aggregate factory previously registered.
      *
      * @param AggregateFactoryInterface $aggregateFactory The Aggregate Factory to create empty aggregates with
      * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
@@ -70,7 +68,7 @@ interface FixtureConfigurationInterface
      * Registers an <code>annotatedCommandHandler</code> with this fixture. This will register this command handler
      * with the command bus used in this fixture.
      *
-     * @param mixed annotatedCommandHandler The command handler to register for this test
+     * @param mixed $annotatedCommandHandler The command handler to register for this test
      * @return FixtureConfigurationInterface the current FixtureConfiguration, for fluent interfacing
      */
     public function registerAnnotatedCommandHandler($annotatedCommandHandler);
@@ -104,8 +102,8 @@ interface FixtureConfigurationInterface
      * payload and meta data from that message are copied into a newly created Domain Event Message. Otherwise, a
      * Domain Event Message with the item as payload and empty meta data is created.
      *
-     * @param domainEvents the domain events the event store should return
-     * @return a TestExecutor instance that can execute the test with this configuration
+     * @param array $domainEvents the domain events the event store should return
+     * @return TestExecutorInterface TestExecutor instance that can execute the test with this configuration
      */
     public function given(array $domainEvents);
 
@@ -114,8 +112,6 @@ interface FixtureConfigurationInterface
      * no events in the {@link #given(java.util.List)} method.
      *
      * @return TestExecutorInterface a TestExecutor instance that can execute the test with this configuration
-     *
-     * @since 2.1.1
      */
     public function givenNoPriorActivity();
 
@@ -123,7 +119,7 @@ interface FixtureConfigurationInterface
      * Configures the given <code>commands</code> as the command that will provide the "given" events. The commands are
      * executed, and the resulting stored events are captured.
      *
-     * @param commands the domain events the event store should return
+     * @param array $commands the domain events the event store should return
      * @return TestExecutorInterface a TestExecutor instance that can execute the test with this configuration
      */
     public function givenCommands(array $commands);
@@ -132,7 +128,7 @@ interface FixtureConfigurationInterface
      * Returns the command bus used by this fixture. The command bus is provided for wiring purposes only, for example
      * to support composite commands (a single command that causes the execution of one or more others).
      *
-     * @return the command bus used by this fixture
+     * @return CommandBusInterface the command bus used by this fixture
      */
     public function getCommandBus();
 
@@ -141,7 +137,7 @@ interface FixtureConfigurationInterface
      * allow command handlers to publish events other than Domain Events. Events published on the returned event bus
      * are recorded an evaluated in the {@link ResultValidator} operations.
      *
-     * @return the event bus used by this fixture
+     * @return EventBusInterface the event bus used by this fixture
      */
     public function getEventBus();
 

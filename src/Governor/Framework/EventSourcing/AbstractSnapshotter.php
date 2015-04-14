@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventSourcing;
 
+use Governor\Framework\Common\Logging\NullLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Governor\Framework\Domain\DomainEventStreamInterface;
@@ -47,10 +48,14 @@ abstract class AbstractSnapshotter implements SnapshotterInterface, LoggerAwareI
      * @var LoggerInterface
      */
     private $logger;
-    
-    public function __construct(SnapshotEventStoreInterface $eventStore) 
+
+    /**
+     * @param SnapshotEventStoreInterface $eventStore
+     */
+    public function __construct(SnapshotEventStoreInterface $eventStore)
     {
         $this->eventStore = $eventStore;
+        $this->logger = new NullLogger();
     }
 
     
@@ -75,7 +80,12 @@ abstract class AbstractSnapshotter implements SnapshotterInterface, LoggerAwareI
     protected abstract function createSnapshot($typeIdentifier, $aggregateIdentifier,
                                                          DomainEventStreamInterface $eventStream);
 
-    public function setLogger(LoggerInterface $logger) 
+
+    /**
+     * @param LoggerInterface $logger
+     * @return void
+     */
+    public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }

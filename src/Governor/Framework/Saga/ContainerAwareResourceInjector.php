@@ -63,14 +63,14 @@ class ContainerAwareResourceInjector implements ResourceInjectorInterface, Conta
      */
     public function injectResources(SagaInterface $saga)
     {
-        $reflClass = ReflectionUtils::getClass($saga);
+        $reflectionClass = ReflectionUtils::getClass($saga);
 
-        foreach (ReflectionUtils::getMethods($reflClass) as $reflMethod) {
-            if (null !== $annot = $this->reader->getMethodAnnotation($reflMethod,
+        foreach (ReflectionUtils::getMethods($reflectionClass) as $reflectionMethod) {
+            if (null !== $annotation = $this->reader->getMethodAnnotation($reflectionMethod,
                     Inject::class)) {
 
-                $service = $this->container->get($annot->service);
-                $reflMethod->invokeArgs($saga, array($service));
+                $service = $this->container->get($annotation->service);
+                $reflectionMethod->invokeArgs($saga, array($service));
             }
         }
     }

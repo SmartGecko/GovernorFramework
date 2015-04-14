@@ -58,6 +58,9 @@ class DefaultClusterSelector implements ClusterSelectorInterface
 
     /**
      * This implementation always returns the same instance of {@link SimpleCluster}.
+     *
+     * @param EventListenerInterface $eventListener
+     * @return ClusterInterface
      */
     public function selectCluster(EventListenerInterface $eventListener)
     {

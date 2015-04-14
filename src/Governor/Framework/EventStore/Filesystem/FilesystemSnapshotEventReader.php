@@ -26,6 +26,7 @@ namespace Governor\Framework\EventStore\Filesystem;
 
 use Governor\Framework\EventStore\EventStoreException;
 use Governor\Framework\Serializer\SerializerInterface;
+use Governor\Framework\Serializer\SerializedDomainEventDataInterface;
 
 /**
  * Description of FileSystemSnapshotEventReader
@@ -68,9 +69,9 @@ class FilesystemSnapshotEventReader
     /**
      * Reads the latest snapshot of the given aggregate identifier.
      *
-     * @param type       the aggregate's type
-     * @param identifier the aggregate's identifier
-     * @return The latest snapshot of the given aggregate identifier
+     * @param string $type       the aggregate's type
+     * @param string $identifier the aggregate's identifier
+     * @return SerializedDomainEventDataInterface The latest snapshot of the given aggregate identifier
      *
      * @throws EventStoreException when reading the <code>snapshotEventFile</code> or reading the <code>eventFile</code> failed
      */

@@ -31,8 +31,8 @@ use Governor\Framework\Domain\EventMessageInterface;
  * The reporter generates extensive human readable reports of what the expected outcome of a test was, and what the
  * actual results were.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class Reporter
 {
@@ -40,16 +40,17 @@ class Reporter
     /**
      * Report a failed assertion due to a difference in the stored versus the published events.
      *
-     * @param storedEvents    The events that were stored
-     * @param publishedEvents The events that were published
-     * @param probableCause   An exception that might be the cause of the failure
+     * @param array $storedEvents    The events that were stored
+     * @param array $publishedEvents The events that were published
+     * @param \Exception $probableCause   An exception that might be the cause of the failure
+     * @throws GovernorAssertionError
      */
     public function reportDifferenceInStoredVsPublished(array $storedEvents,
-            array $publishedEvents, \Exception $probableCause = null)
+        array $publishedEvents, \Exception $probableCause = null)
     {
         $str = "The stored events do not match the published events.";
         $str .= $this->appendEventOverview($storedEvents, $publishedEvents,
-                "Stored events", "Published events");
+            "Stored events", "Published events");
         $str .= $this->appendProbableCause($probableCause);
 
         throw new GovernorAssertionError($str);
@@ -59,16 +60,17 @@ class Reporter
      * Report an error in the ordering or count of events. This is typically a difference that can be shown to the user
      * by enumerating the expected and actual events
      *
-     * @param actualEvents   The events that were found
-     * @param expectedEvents The events that were expected
-     * @param probableCause  An optional exception that might be the reason for wrong events
+     * @param array $actualEvents   The events that were found
+     * @param array $expectedEvents The events that were expected
+     * @param \Exception $probableCause  An optional exception that might be the reason for wrong events
+     * @throws GovernorAssertionError
      */
     public function reportWrongEvent(array $actualEvents, array $expectedEvents,
-            \Exception $probableCause = null)
+        \Exception $probableCause = null)
     {
         $str = "The published events do not match the expected events";
         $str .= $this->appendEventOverview($expectedEvents, $actualEvents,
-                "Expected", "Actual");
+            "Expected", "Actual");
         $str .= $this->appendProbableCause($probableCause);
 
         throw new GovernorAssertionError($str);
@@ -78,45 +80,40 @@ class Reporter
      * Report an error in the ordering or count of events. This is typically a difference that can be shown to the user
      * by enumerating the expected and actual events
      *
-     * @param actualEvents  The events that were found
-     * @param expectation   A Description of what was expected
-     * @param probableCause An optional exception that might be the reason for wrong events
+     * @param array $actualEvents  The events that were found
+     * @param string $expectation   A Description of what was expected
+     * @param \Exception $probableCause An optional exception that might be the reason for wrong events
+     * @throws GovernorAssertionError
      */
-    /*  public function reportWrongEvent(array $actualEvents, $expectation,
-      \Exception $probableCause)
-      {
-      /* StringBuilder sb = new StringBuilder(
-      "The published events do not match the expected events.");
-      sb.append("Expected :");
-      sb.append(NEWLINE);
-      sb.append(expectation);
-      sb.append(NEWLINE);
-      sb.append("But got");
-      if (actualEvents.isEmpty()) {
-      sb.append(" none");
-      } else {
-      sb.append(":");
-      }
-      for (Object publishedEvent : actualEvents) {
-      sb.append(NEWLINE);
-      sb.append(publishedEvent.getClass().getSimpleName());
-      sb.append(": ");
-      sb.append(publishedEvent.toString());
-      }
-      appendProbableCause(probableCause, sb);
+    public function reportWrongEventDescription(array $actualEvents, $expectation,
+        \Exception $probableCause = null)
+    {
+        $str = "The published events do not match the expected events.";
+        $str .= "Expected :\n";
+        $str .= $expectation . "\n";
+        $str .= "But got";
 
-      throw new AxonAssertionError(sb.toString());
-      } */
+        $str .= empty($actualEvents) ? " none" : ":";
+
+        foreach ($actualEvents as $event) {
+            $str .= "\n" . get_class($event);
+        }
+
+        $this->appendProbableCause($probableCause);
+
+        throw new GovernorAssertionError($str);
+    }
 
     /**
      * Reports an error due to an unexpected exception. This means a return value was expected, but an exception was
      * thrown by the command handler
      *
-     * @param actualException The actual exception
-     * @param expectation     A text describing what was expected
+     * @param \Exception  $actualException The actual exception
+     * @param Description $expectation     A text describing what was expected
+     * @throws GovernorAssertionError
      */
     public function reportUnexpectedException(\Exception $actualException,
-            Description $expectation)
+        Description $expectation)
     {
         $str = "The command handler threw an unexpected exception";
         $str .= PHP_EOL . PHP_EOL;
@@ -130,11 +127,12 @@ class Reporter
     /**
      * Reports an error due to a wrong return value.
      *
-     * @param actualReturnValue The actual return value
-     * @param expectation       A description of the expected value
+     * @param mixed $actualReturnValue The actual return value
+     * @param Description $expectation       A description of the expected value
+     * @throws GovernorAssertionError
      */
     public function reportWrongResult($actualReturnValue,
-            Description $expectation)
+        Description $expectation)
     {
         $str = "The command handler returned an unexpected value";
         $str .= PHP_EOL . PHP_EOL;
@@ -148,11 +146,12 @@ class Reporter
     /**
      * Report an error due to an unexpected return value, while an exception was expected.
      *
-     * @param actualReturnValue The actual return value
+     * @param mixed $actualReturnValue The actual return value
      * @param Description $description       A description describing the expected value
+     * @throws GovernorAssertionError
      */
     public function reportUnexpectedReturnValue($actualReturnValue,
-            Description $description)
+        Description $description)
     {
         $str = "The command handler returned normally, but an exception was expected";
         $str .= PHP_EOL . PHP_EOL;
@@ -168,11 +167,12 @@ class Reporter
      *
      * @param \Exception $actualException The actual exception
      * @param Description $description     A description describing the expected value
+     * @throws GovernorAssertionError
      */
     public function reportWrongException(\Exception $actualException,
-            Description $description)
+        Description $description)
     {
-        $str .= "The command handler threw an exception, but not of the expected type";
+        $str = "The command handler threw an exception, but not of the expected type";
         $str .= PHP_EOL . PHP_EOL;
         $str .= "Expected <" . $description . "> but got <exception of type [";
         $str .= get_class($actualException) . "]>. Stacktrace follows: ";
@@ -184,13 +184,14 @@ class Reporter
     /**
      * Report an error due to a difference in on of the fields of an event.
      *
-     * @param eventType The (runtime) type of event the difference was found in
-     * @param field     The field that contains the difference
-     * @param actual    The actual value of the field
-     * @param expected  The expected value of the field
+     * @param string $eventType The (runtime) type of event the difference was found in
+     * @param string $field     The field that contains the difference
+     * @param mixed $actual    The actual value of the field
+     * @param mixed $expected  The expected value of the field
+     * @throws GovernorAssertionError
      */
     public function reportDifferentEventContents($eventType, $field, $actual,
-            $expected)
+        $expected)
     {
         $str = "One of the events contained different values than expected";
         $str .= PHP_EOL . PHP_EOL;
@@ -202,14 +203,14 @@ class Reporter
           .append(field.getDeclaringClass().getSimpleName())
           .append("]) ");
           } */
-        
+
         $str .= "was not as expected." . PHP_EOL;
-        $str .= "Expected <" .                 
-                $this->nullSafeToString($expected) . 
-                "> but got <" . 
-                $this->nullSafeToString($actual) . 
-                ">" . 
-                PHP_EOL;
+        $str .= "Expected <" .
+            $this->nullSafeToString($expected) .
+            "> but got <" .
+            $this->nullSafeToString($actual) .
+            ">" .
+            PHP_EOL;
 
         throw new GovernorAssertionError($str);
     }
@@ -221,7 +222,7 @@ class Reporter
         if (null !== $probableCause) {
             $str .= PHP_EOL;
             $str .= "A probable cause for the wrong chain of events is an "
-                    . "exception that occurred while handling the command.";
+                . "exception that occurred while handling the command.";
             $str .= PHP_EOL;
             $str .= $probableCause->getTraceAsString();
         }
@@ -239,11 +240,11 @@ class Reporter
         if (null === $value) {
             return "<null>";
         }
-        
+
         if (is_array($value)) {
             return print_r($value, true);
         }
-        
+
         return $value;
     }
 
@@ -257,7 +258,7 @@ class Reporter
     }
 
     private function appendEventOverview(array $leftColumnEvents,
-            array $rightColumnEvents, $leftColumnName, $rightColumnName)
+        array $rightColumnEvents, $leftColumnName, $rightColumnName)
     {
         $actualTypes = array();
         $expectedTypes = array();
@@ -277,7 +278,7 @@ class Reporter
 
         $str = PHP_EOL . PHP_EOL;
         $str .= $leftColumnName . $this->pad(strlen($leftColumnName),
-                        $largestExpectedSize, " ");
+                $largestExpectedSize, " ");
         $str .= "  |  " . $rightColumnName . PHP_EOL;
         $str .= $this->pad(0, $largestExpectedSize, "-") . "--|--";
         $str .= $this->pad(0, $largestExpectedSize, "-") . PHP_EOL;

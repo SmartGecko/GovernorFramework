@@ -28,7 +28,8 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Governor\Framework\Common\ReflectionUtils;
 
 /**
- * Description of MethodMessageHandlerInspector
+ * The MethodMessageHandlerInspector is responsible for scanning a target class for the given annotation
+ * and building an array of found handlers.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
@@ -51,6 +52,13 @@ class MethodMessageHandlerInspector
      */
     private $handlers;
 
+
+    /**
+     * Creates a new MethodMessageHandlerInspector instance.
+     *
+     * @param \ReflectionClass $targetClass Target class.
+     * @param string $annotation Annotation to scan (FQDN)
+     */
     function __construct(\ReflectionClass $targetClass, $annotation)
     {
         $this->handlers = array();
@@ -60,6 +68,9 @@ class MethodMessageHandlerInspector
         $this->inspect();
     }
 
+    /**
+     * Runs the inspection on the target class and saves its handlers.
+     */
     private function inspect()
     {
         $reader = new AnnotationReader();
@@ -82,6 +93,10 @@ class MethodMessageHandlerInspector
         }
     }
 
+    /**
+     * @param \ReflectionMethod $method
+     * @return null
+     */
     private function extractPayloadType(\ReflectionMethod $method)
     {
         $param = current($method->getParameters());
@@ -94,6 +109,8 @@ class MethodMessageHandlerInspector
     }
 
     /**
+     * Returns a list of found handlers.
+     *
      * @return HandlerDefinitionInterface[]
      */
     function getHandlerDefinitions()

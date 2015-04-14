@@ -29,9 +29,11 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Description of ContainerParameterResolverFactory
+ * ParameterResolverFactoryInterface implementation that is using the Symfony DIC to lookup services annotated
+ * with the Inject annotation.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class ContainerParameterResolverFactory extends AbstractParameterResolverFactory implements ContainerAwareInterface
 {

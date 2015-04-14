@@ -47,8 +47,8 @@ class NotEquals extends OrmCriteria
      * Initializes an Equals operator matching the given <code>property</code> against the given
      * <code>expression</code>.
      *
-     * @param property   The property to match
-     * @param expression The expression to match against. May be <code>null</code>.
+     * @param OrmProperty $property   The property to match
+     * @param mixed $expression The expression to match against. May be <code>null</code>.
      */
     public function __construct(OrmProperty $property, $expression)
     {

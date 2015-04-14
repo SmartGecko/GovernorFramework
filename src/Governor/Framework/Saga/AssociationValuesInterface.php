@@ -40,7 +40,7 @@ interface AssociationValuesInterface
      * If an association was added and then removed (or vice versa), without any calls to {@link #commit()} in
      * between, it is not returned.
      *
-     * @return the Set of association values removed since the last {@link #commit()}.
+     * @return array the Set of association values removed since the last {@link #commit()}.
      */
     public function removedAssociations();
 
@@ -50,7 +50,7 @@ interface AssociationValuesInterface
      * If an association was added and then removed (or vice versa), without any calls to {@link #commit()} in
      * between, it is not returned.
      *
-     * @return the Set of association values added since the last {@link #commit()}.
+     * @return array the Set of association values added since the last {@link #commit()}.
      */
     public function addedAssociations();
 
@@ -62,15 +62,15 @@ interface AssociationValuesInterface
     /**
      * Returns the number of AssociationValue instances available in this container
      *
-     * @return the number of AssociationValue instances available
+     * @return integer the number of AssociationValue instances available
      */
     public function size();
 
     /**
      * Indicates whether this instance contains the given <code>associationValue</code>.
      *
-     * @param associationValue the association value to verify
-     * @return <code>true</code> if the association value is available in this instance, otherwise <code>false</code>
+     * @param AssociationValue $associationValue the association value to verify
+     * @return boolean <code>true</code> if the association value is available in this instance, otherwise <code>false</code>
      */
     public function contains(AssociationValue $associationValue);
 
@@ -81,8 +81,8 @@ interface AssociationValuesInterface
      * next call to {@link #addedAssociations()}, unless it has been removed after the last call to {@link
      * #removedAssociations()}.
      *
-     * @param associationValue The association value to add
-     * @return <code>true</code> if the value was added, <code>false</code> if it was already contained in this
+     * @param AssociationValue $associationValue The association value to add
+     * @return boolean <code>true</code> if the value was added, <code>false</code> if it was already contained in this
      *         instance
      */
     public function add(AssociationValue $associationValue);
@@ -94,8 +94,8 @@ interface AssociationValuesInterface
      * next call to {@link #removedAssociations()}, unless it has been added after the last call to {@link
      * #addedAssociations()}.
      *
-     * @param associationValue The association value to remove
-     * @return <code>true</code> if the value was removed, <code>false</code> if it was not contained in this instance
+     * @param AssociationValue $associationValue The association value to remove
+     * @return boolean <code>true</code> if the value was removed, <code>false</code> if it was not contained in this instance
      */
     public function remove(AssociationValue $associationValue);
 }

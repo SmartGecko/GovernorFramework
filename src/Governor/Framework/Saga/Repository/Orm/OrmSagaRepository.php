@@ -111,7 +111,7 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
                     array('id' => $sagaId, 'type' => get_class($loadedSaga)));
 
             return $loadedSaga;
-        } catch (\Doctrine\ORM\NoResultException $ex) {
+        } catch (NoResultException $ex) {
             return null;
         }
     }

@@ -174,6 +174,7 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
     /**
      * Executes the logic required to commit this unit of work.
      *
+     * @param \Exception|null $ex
      */
     protected abstract function doRollback(\Exception $ex = null);
 
