@@ -33,63 +33,72 @@ use Governor\Framework\CommandHandling\Callbacks\NoOpCallback;
 /**
  * Simple command bus implementation.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
 {
 
     /**
-     * @var array
+     * @var CommandHandlerRegistryInterface
      */
-    private $subscriptions = array();
+    private $handlerRegistry;
 
     /**
-     * @var LoggerInterface 
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
      * @var CommandHandlerInterceptorInterface[]
      */
-    private $handlerInterceptors = array();
-    
-    /**     
-     * @var CommandDispatchInterceptorInterface 
-     */
-    private $dispatchInterceptors = array();
+    private $handlerInterceptors = [];
 
-    public function __construct()
+    /**
+     * @var CommandDispatchInterceptorInterface[]
+     */
+    private $dispatchInterceptors = [];
+
+    /**
+     * @param CommandHandlerRegistryInterface $handlerRegistry
+     */
+    public function __construct(CommandHandlerRegistryInterface $handlerRegistry)
     {
+        $this->handlerRegistry = $handlerRegistry;
         $this->logger = new NullLogger();
     }
-    
+
     /**
      * Invokes all the dispatch interceptors.
      *
      * @param CommandMessageInterface $command The original command being dispatched
      * @return CommandMessageInterface The command to actually dispatch
      */
-    protected function intercept(CommandMessageInterface $command) 
+    protected function intercept(CommandMessageInterface $command)
     {
         $commandToDispatch = $command;
-        
+
         foreach ($this->dispatchInterceptors as $interceptor) {
             $commandToDispatch = $interceptor->dispatch($commandToDispatch);
         }
-        
+
         return $commandToDispatch;
     }
 
-    public function dispatch(CommandMessageInterface $command,
-            CommandCallbackInterface $callback = null)
-    {
-        $handler = $this->findCommandHandlerFor($command);
+    /**
+     * @param CommandMessageInterface $command
+     * @param CommandCallbackInterface $callback
+     */
+    public function dispatch(
+        CommandMessageInterface $command,
+        CommandCallbackInterface $callback = null
+    ) {
+        $handler = $this->handlerRegistry->findCommandHandlerFor($command);
 
         if (null === $callback) {
             $callback = new NoOpCallback();
         }
-        
+
         $command = $this->intercept($command);
 
         try {
@@ -100,16 +109,27 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
         }
     }
 
-    protected function doDispatch(CommandMessageInterface $command,
-            CommandHandlerInterface $handler)
-    {
-        $this->logger->debug("Dispatching command [{name}]",
-                array('name' => $command->getCommandName()));
+    /**
+     * @param CommandMessageInterface $command
+     * @param CommandHandlerInterface $handler
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function doDispatch(
+        CommandMessageInterface $command,
+        CommandHandlerInterface $handler
+    ) {
+        $this->logger->debug(
+            "Dispatching command [{name}]",
+            array('name' => $command->getCommandName())
+        );
         $unitOfWork = DefaultUnitOfWork::startAndGet();
         $unitOfWork->setLogger($this->logger);
-        
-        $chain = new DefaultInterceptorChain($command, $unitOfWork, $handler,
-                $this->handlerInterceptors);
+
+        $chain = new DefaultInterceptorChain(
+            $command, $unitOfWork, $handler,
+            $this->handlerInterceptors
+        );
 
         try {
             $return = $chain->proceed();
@@ -118,7 +138,7 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
             throw $ex;
         }
 
-        $unitOfWork->commit();                
+        $unitOfWork->commit();
 
         return $return;
     }
@@ -133,38 +153,16 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     {
         $this->handlerInterceptors = $handlerInterceptors;
     }
-    
+
     /**
      * Registers the given list of dispatch interceptors to the command bus. All incoming commands will pass through
      * the interceptors at the given order before the command is dispatched toward the command handler.
      *
      * @param array $dispatchInterceptors The interceptors to invoke when commands are dispatched
      */
-    public function setDispatchInterceptors(array $dispatchInterceptors) 
+    public function setDispatchInterceptors(array $dispatchInterceptors)
     {
         $this->dispatchInterceptors = $dispatchInterceptors;
-    }
-
-    public function findCommandHandlerFor(CommandMessageInterface $command)
-    {
-        if (!array_key_exists($command->getCommandName(), $this->subscriptions)) {
-            throw new NoHandlerForCommandException(sprintf("No handler was subscribed for command [%s]",
-                    $command->getCommandName()));
-        }
-
-        return $this->subscriptions[$command->getCommandName()];
-    }
-
-    public function subscribe($commandName, CommandHandlerInterface $handler)
-    {
-        $this->subscriptions[$commandName] = $handler;
-    }
-
-    public function unsubscribe($commandName, CommandHandlerInterface $handler)
-    {
-        if (isset($this->subscriptions[$commandName])) {
-            unset($this->subscriptions[$commandName]);
-        }
     }
 
     public function setLogger(LoggerInterface $logger)

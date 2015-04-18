@@ -35,6 +35,7 @@ use Governor\Framework\CommandHandling\Handlers\AnnotatedAggregateCommandHandler
 use Governor\Framework\CommandHandling\Handlers\AnnotatedCommandHandler;
 use Governor\Framework\CommandHandling\InterceptorChainInterface;
 use Governor\Framework\CommandHandling\SimpleCommandBus;
+use Governor\Framework\CommandHandling\InMemoryCommandHandlerRegistry;
 use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
 use Governor\Framework\Common\IdentifierValidator;
 use Governor\Framework\Domain\AggregateRootInterface;
@@ -143,6 +144,11 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     private $parameterResolver;
 
     /**
+     * @var InMemoryCommandHandlerRegistry
+     */
+    private $handlerRegistry;
+
+    /**
      * Initializes a new given-when-then style test fixture for the given <code>aggregateType</code>.
      *
      * @param string $aggregateType The aggregate to initialize the test fixture for
@@ -158,7 +164,8 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         );
 
         $this->eventBus = new RecordingEventBus($this->publishedEvents);
-        $this->commandBus = new SimpleCommandBus();
+        $this->handlerRegistry = new InMemoryCommandHandlerRegistry();
+        $this->commandBus = new SimpleCommandBus($this->handlerRegistry);
         $this->commandBus->setLogger($this->logger);
         $this->eventStore = new RecordingEventStore(
             $this->storedEvents,
@@ -210,7 +217,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                 $annotatedCommandHandler
             );
 
-            $this->commandBus->subscribe($handlerDefinition->getPayloadType(), $handler);
+            $this->handlerRegistry->subscribe($handlerDefinition->getPayloadType(), $handler);
         }
 
         return $this;
@@ -222,7 +229,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     ) {
         $this->registerAggregateCommandHandlers();
         $this->explicitCommandHandlersSet = true;
-        $this->commandBus->subscribe($commandName, $commandHandler);
+        $this->handlerRegistry->subscribe($commandName, $commandHandler);
 
         return $this;
     }
@@ -231,9 +238,9 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     {
         if ($this->explicitCommandHandlersSet) {
             throw new FixtureExecutionException(
-                "Cannot inject resources after command handler has been created. " .
-                "Configure all resource before calling " .
-                "registerCommandHandler() or " .
+                "Cannot inject resources after command handler has been created. ".
+                "Configure all resource before calling ".
+                "registerCommandHandler() or ".
                 "registerAnnotatedCommandHandler()"
             );
         }
@@ -371,9 +378,9 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                 $aggregate2 = $this->repository->load($this->aggregateIdentifier);
                 if ($this->workingAggregate->isDeleted()) {
                     throw new GovernorAssertionError(
-                        "The working aggregate was considered deleted, " .
-                        "but the Repository still contains a non-deleted copy of " .
-                        "the aggregate. Make sure the aggregate explicitly marks " .
+                        "The working aggregate was considered deleted, ".
+                        "but the Repository still contains a non-deleted copy of ".
+                        "the aggregate. Make sure the aggregate explicitly marks ".
                         "itself as deleted in an EventHandler."
                     );
                 }
@@ -381,8 +388,8 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
             } catch (AggregateNotFoundException $notFound) {
                 if (!$this->workingAggregate->isDeleted()) {
                     throw new GovernorAssertionError(
-                        "The working aggregate was not considered deleted, " .
-                        "but the Repository cannot recover the state of the " .
+                        "The working aggregate was not considered deleted, ".
+                        "but the Repository cannot recover the state of the ".
                         "aggregate, as it is considered deleted there."
                     );
                 }
@@ -525,8 +532,8 @@ class IdentifierValidatingRepository implements RepositoryInterface
         if (null !== $aggregateIdentifier && !$aggregateIdentifier === $aggregate->getIdentifier()) {
             throw new \RuntimeException(
                 sprintf(
-                    "The aggregate used in this fixture was initialized with an identifier different than " .
-                    "the one used to load it. Loaded [%s], but actual identifier is [%s].\n" .
+                    "The aggregate used in this fixture was initialized with an identifier different than ".
+                    "the one used to load it. Loaded [%s], but actual identifier is [%s].\n".
                     "Make sure the identifier passed in the Command matches that of the given Events.",
                     $aggregateIdentifier,
                     $aggregate->getIdentifier()
@@ -601,14 +608,14 @@ class RecordingEventStore implements EventStoreInterface
 
                 if ($lastEvent->getAggregateIdentifier() !== $next->getAggregateIdentifier()) {
                     throw new EventStoreException(
-                        "Writing events for an unexpected aggregate. This could " .
+                        "Writing events for an unexpected aggregate. This could ".
                         "indicate that a wrong aggregate is being triggered."
                     );
                 } else {
                     if ($lastEvent->getScn() !== $next->getScn() - 1) {
                         throw new EventStoreException(
                             sprintf(
-                                "Unexpected sequence number on stored event. " .
+                                "Unexpected sequence number on stored event. ".
                                 "Expected %s, but got %s.",
                                 $lastEvent->getScn() + 1,
                                 $next->getScn()
@@ -635,7 +642,7 @@ class RecordingEventStore implements EventStoreInterface
 
         if (null !== $this->aggregateIdentifier && $this->aggregateIdentifier !== $identifier) {
             throw new EventStoreException(
-                "You probably want to use aggregateIdentifier() on your fixture " .
+                "You probably want to use aggregateIdentifier() on your fixture ".
                 "to get the aggregate identifier to use"
             );
         } else {
@@ -651,7 +658,7 @@ class RecordingEventStore implements EventStoreInterface
         if (empty($allEvents)) {
             throw new AggregateNotFoundException(
                 $identifier,
-                "No 'given' events were configured for this aggregate, " .
+                "No 'given' events were configured for this aggregate, ".
                 "nor have any events been stored."
             );
         }

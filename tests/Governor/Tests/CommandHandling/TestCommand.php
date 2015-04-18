@@ -16,32 +16,33 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling;
-
+namespace Governor\Tests\CommandHandling;
 
 /**
- * Accept and process commands by passing them along to a matching command handler.
+ * Test command.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface CommandBusInterface
+class TestCommand
 {
 
-    /**
-     * @param CommandMessageInterface $command
-     * @param CommandCallbackInterface $callback
-     * @return mixed
-     */
-    public function dispatch(
-        CommandMessageInterface $command,
-        CommandCallbackInterface $callback = null
-    );
+    private $text;
+
+    function __construct($text)
+    {
+        $this->text = $text;
+    }
+
+    public function getText()
+    {
+        return $this->text;
+    }
 
 }

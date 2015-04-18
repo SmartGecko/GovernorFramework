@@ -23,7 +23,6 @@
     "monolog/monolog": "1.8.0",
     "hamcrest/hamcrest-php": "v1.1.1",
     "videlalvaro/php-amqplib": "2.2.*",
-    "predis/predis": "*",
     "jms/serializer": "*",
     "symfony/validator": "~2.5"
   },
