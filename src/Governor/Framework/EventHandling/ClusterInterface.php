@@ -24,6 +24,8 @@
 
 namespace Governor\Framework\EventHandling;
 
+use Governor\Framework\Domain\MetaData;
+
 /**
  * A cluster represents a group of Event Listeners that are treated as a single group by the {@link
  * ClusteringEventBus}. This allows attributes and behavior (e.g. transaction management, asynchronous processing,
@@ -86,7 +88,7 @@ interface ClusterInterface extends EventProcessingMonitorSupportInterface
     /**
      * Returns the MetaData of this Cluster.
      *
-     * @return the MetaData of this Cluster
+     * @return MetaData MetaData of this Cluster
      */
     public function getMetaData();
 }

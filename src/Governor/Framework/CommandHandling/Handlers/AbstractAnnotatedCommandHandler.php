@@ -33,7 +33,8 @@ use Governor\Framework\CommandHandling\CommandHandlerInterface;
 /**
  * Description of AbstractAnnotatedCommandHandler
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AbstractAnnotatedCommandHandler implements CommandHandlerInterface
 {

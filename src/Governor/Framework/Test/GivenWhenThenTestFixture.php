@@ -37,6 +37,7 @@ use Governor\Framework\CommandHandling\InterceptorChainInterface;
 use Governor\Framework\CommandHandling\SimpleCommandBus;
 use Governor\Framework\CommandHandling\InMemoryCommandHandlerRegistry;
 use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
+use Governor\Framework\Common\Annotation\SimpleAnnotationReaderFactory;
 use Governor\Framework\Common\IdentifierValidator;
 use Governor\Framework\Domain\AggregateRootInterface;
 use Governor\Framework\Domain\DomainEventMessageInterface;
@@ -103,7 +104,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     /**
      * @var DomainEventMessageInterface[]
      */
-    private $givenEvents = array();
+    private $givenEvents = [];
 
     /**
      * @var DomainEventMessageInterface[]
@@ -178,6 +179,9 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->clearGivenWhenState();
     }
 
+    /**
+     * @return Logger
+     */
     public function getLogger()
     {
         return $this->logger;
@@ -207,7 +211,11 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         $this->explicitCommandHandlersSet = true;
 
         $reflectionClass = new \ReflectionClass($annotatedCommandHandler);
-        $inspector = new MethodMessageHandlerInspector($reflectionClass, CommandHandler::class);
+        $inspector = new MethodMessageHandlerInspector(
+            new SimpleAnnotationReaderFactory(),
+            $reflectionClass,
+            CommandHandler::class
+        );
 
         foreach ($inspector->getHandlerDefinitions() as $handlerDefinition) {
             $handler = new AnnotatedCommandHandler(
@@ -363,7 +371,9 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                 $this->aggregateType,
                 $this->repository,
                 $this->commandBus,
-                $this->parameterResolver
+                $this->parameterResolver,
+                null,
+                new SimpleAnnotationReaderFactory()
             );
         }
     }

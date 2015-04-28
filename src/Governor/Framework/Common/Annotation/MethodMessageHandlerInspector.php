@@ -24,15 +24,15 @@
 
 namespace Governor\Framework\Common\Annotation;
 
-use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\Reader;
 use Governor\Framework\Common\ReflectionUtils;
 
 /**
  * The MethodMessageHandlerInspector is responsible for scanning a target class for the given annotation
  * and building an array of found handlers.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class MethodMessageHandlerInspector
 {
@@ -43,7 +43,7 @@ class MethodMessageHandlerInspector
     private $targetClass;
 
     /**
-     * @var string 
+     * @var string
      */
     private $annotation;
 
@@ -52,18 +52,28 @@ class MethodMessageHandlerInspector
      */
     private $handlers;
 
+    /**
+     * @var Reader
+     */
+    private $annotationReader;
 
     /**
      * Creates a new MethodMessageHandlerInspector instance.
      *
+     * @param AnnotationReaderFactoryInterface $annotationReaderFactory
      * @param \ReflectionClass $targetClass Target class.
      * @param string $annotation Annotation to scan (FQDN)
      */
-    function __construct(\ReflectionClass $targetClass, $annotation)
-    {
-        $this->handlers = array();
+    function __construct(
+        AnnotationReaderFactoryInterface $annotationReaderFactory,
+        \ReflectionClass $targetClass,
+        $annotation
+    ) {
+        $this->handlers = [];
         $this->targetClass = $targetClass;
         $this->annotation = $annotation;
+
+        $this->annotationReader = $annotationReaderFactory->getReader();
 
         $this->inspect();
     }
@@ -73,29 +83,31 @@ class MethodMessageHandlerInspector
      */
     private function inspect()
     {
-        $reader = new AnnotationReader();
-
         foreach (ReflectionUtils::getMethods($this->targetClass) as $method) {
-            $annotation = $reader->getMethodAnnotation($method,
-                    $this->annotation);
+            $annotation = $this->annotationReader->getMethodAnnotation(
+                $method,
+                $this->annotation
+            );
 
             if (!$annotation) {
                 continue;
             }
 
             $payloadType = $this->extractPayloadType($method);
-            $methodAnnotations = $reader->getMethodAnnotations($method);
+            $methodAnnotations = $this->annotationReader->getMethodAnnotations($method);
 
             if ($payloadType) {
-                $this->handlers[] = new AnnotatedHandlerDefinition($this->targetClass,
-                        $method, $methodAnnotations, $payloadType);
+                $this->handlers[] = new AnnotatedHandlerDefinition(
+                    $this->targetClass,
+                    $method, $methodAnnotations, $payloadType
+                );
             }
         }
     }
 
     /**
      * @param \ReflectionMethod $method
-     * @return null
+     * @return string|null
      */
     private function extractPayloadType(\ReflectionMethod $method)
     {

@@ -32,9 +32,10 @@ use Governor\Framework\Test\Fixtures;
 use Rhumsaa\Uuid\Uuid;
 
 /**
- * Description of FixtureTestGeneric
+ * Class GenericFixtureTest.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class GenericFixtureTest extends \PHPUnit_Framework_TestCase
 {
@@ -43,6 +44,10 @@ class GenericFixtureTest extends \PHPUnit_Framework_TestCase
      * @var FixtureConfigurationInterface
      */
     private $fixture;
+
+    /**
+     * @var AggregateFactoryInterface
+     */
     private $mockAggregateFactory;
 
     public function setUp()
@@ -71,7 +76,11 @@ class GenericFixtureTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $this->fixture->given(array(new MyEvent("id1", 1)))
+        $this->fixture->given(
+            [
+                new MyEvent("id1", 1)
+            ]
+        )
             ->when(new TestCommand("id1"));
 
         \Phake::verify($this->mockAggregateFactory, \Phake::atLeast(1))->createAggregate(
@@ -169,10 +178,10 @@ class GenericFixtureTest extends \PHPUnit_Framework_TestCase
         $this->fixture->getEventStore()->appendEvents(
             "whatever",
             new SimpleDomainEventStream(
-                array(
+                [
                     new GenericDomainEventMessage(Uuid::uuid1()->toString(), 0, new StubDomainEvent()),
                     new GenericDomainEventMessage(Uuid::uuid1()->toString(), 0, new StubDomainEvent())
-                )
+                ]
             )
         );
     }
@@ -188,10 +197,10 @@ class GenericFixtureTest extends \PHPUnit_Framework_TestCase
         $this->fixture->getEventStore()->appendEvents(
             "whatever",
             new SimpleDomainEventStream(
-                array(
+                [
                     new GenericDomainEventMessage($identifier, 0, new StubDomainEvent()),
                     new GenericDomainEventMessage($identifier, 2, new StubDomainEvent())
-                )
+                ]
             )
         );
     }

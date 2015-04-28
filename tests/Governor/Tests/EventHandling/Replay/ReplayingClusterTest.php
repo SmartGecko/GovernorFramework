@@ -24,6 +24,7 @@
 
 namespace Governor\Tests\EventHandling\Replay;
 
+use Governor\Framework\Common\Annotation\SimpleAnnotationReaderFactory;
 use Governor\Framework\Annotations\EventHandler;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\GenericEventMessage;
@@ -53,17 +54,17 @@ class ReplayingClusterTest extends \PHPUnit_Framework_TestCase
     private $testSubject;
 
     /**
-     * @var IncomingMessageHandler
+     * @var IncomingMessageHandlerInterface
      */
     private $mockMessageHandler;
 
     /**
-     * @var EventStoreManagement
+     * @var EventStoreManagementInterface
      */
     private $mockEventStore;
 
     /**
-     * @var Cluster
+     * @var ClusterInterface
      */
     private $delegateCluster;
 
@@ -81,7 +82,7 @@ class ReplayingClusterTest extends \PHPUnit_Framework_TestCase
         $this->testSubject = new ReplayingCluster($this->delegateCluster,
                 $this->mockEventStore, $this->mockMessageHandler);
 
-        $this->testSubject->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
+        //$this->testSubject->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
 
         for ($i = 0; $i < 10; $i++) {
             $this->messages[] = new GenericDomainEventMessage("id", $i,
@@ -110,10 +111,10 @@ class ReplayingClusterTest extends \PHPUnit_Framework_TestCase
     public function testAnnotatedHandlersRecognized()
     {
         $eventBus = new ClusteringEventBus(new DefaultClusterSelector($this->testSubject));
-        $eventBus->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
+      //  $eventBus->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
 
         $listener = new MyReplayAwareListener();
-        $adapter = new AnnotatedEventListenerAdapter($listener, $eventBus);
+        $adapter = new AnnotatedEventListenerAdapter($listener, $eventBus, new SimpleAnnotationReaderFactory());
 
         $this->testSubject->startReplay();
 

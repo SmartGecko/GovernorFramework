@@ -16,7 +16,7 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
@@ -24,28 +24,14 @@
 
 namespace Governor\Framework\EventHandling;
 
-
 /**
- * Event Message bus handles all events that were emitted by domain objects.
- *
- * The Event Message Bus finds all event handles that listen to a certain
- * event, and then triggers these handlers one after another. Exceptions in
- * event handlers should be swallowed. Intelligent Event Systems should know
- * how to retry failing events until they are successful or failed too often.
+ * Manages a registry of available event listeners.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface EventBusInterface
+interface EventListenerRegistryInterface
 {
-
-    /**
-     * Publish an event to the bus.
-     *
-     * @param array $events
-     */
-    public function publish(array $events);
-
     /**
      * Subscribe the given <code>eventListener</code> to this bus. When subscribed, it will receive all events
      * published to this bus.

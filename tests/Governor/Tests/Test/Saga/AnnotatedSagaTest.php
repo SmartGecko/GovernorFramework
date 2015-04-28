@@ -39,14 +39,14 @@ class AnnotatedSagaTest extends \PHPUnit_Framework_TestCase
 
         $fixture = new AnnotatedSagaTestFixture(StubSaga::class);
         $validator = $fixture->givenAggregate($aggregate1)->published(
-            array(
+            [
                 new GenericEventMessage(new TriggerSagaStartEvent($aggregate1)),
                 new GenericEventMessage(new TriggerExistingSagaEvent($aggregate1))
-            )
+            ]
         )->andThenAggregate($aggregate2)->published(
-            array(
+            [
                 new GenericEventMessage(new TriggerSagaStartEvent($aggregate2))
-            )
+            ]
         )->whenAggregate($aggregate1)->publishes(new GenericEventMessage(new TriggerSagaEndEvent($aggregate1)));
 
         $validator->expectActiveSagas(1);

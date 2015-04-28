@@ -24,12 +24,14 @@
 
 namespace Governor\Framework\Test\Utils;
 
-
+use Governor\Framework\CommandHandling\CommandHandlerRegistryInterface;
+use Governor\Framework\CommandHandling\InMemoryCommandHandlerRegistry;
 use Governor\Framework\CommandHandling\CommandBusInterface;
 use Governor\Framework\CommandHandling\CommandCallbackInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 
+// TODO fully convert to handler registry
 class RecordingCommandBus implements CommandBusInterface
 {
     /**
@@ -43,6 +45,11 @@ class RecordingCommandBus implements CommandBusInterface
     private $dispatchedCommands = array();
 
     /**
+     * @var InMemoryCommandHandlerRegistry
+     */
+    private $handlerRegistry;
+
+    /**
      * @var CallbackBehaviorInterface
      */
     private $callbackBehavior;
@@ -50,6 +57,7 @@ class RecordingCommandBus implements CommandBusInterface
     function __construct()
     {
         $this->callbackBehavior = new DefaultCallbackBehavior();
+        $this->handlerRegistry = new InMemoryCommandHandlerRegistry();
         $this->subscriptions = array();
     }
 
@@ -109,7 +117,7 @@ class RecordingCommandBus implements CommandBusInterface
      */
     public function clearCommands()
     {
-        $this->dispatchedCommands = array();
+        $this->dispatchedCommands = [];
     }
 
     /**
@@ -168,4 +176,16 @@ class RecordingCommandBus implements CommandBusInterface
     {
         $this->callbackBehavior = $callbackBehavior;
     }
+
+    /**
+     * Returns the associated command handler registry.
+     *
+     * @return CommandHandlerRegistryInterface
+     */
+    public function getCommandHandlerRegistry()
+    {
+        return $this->handlerRegistry;
+    }
+
+
 }

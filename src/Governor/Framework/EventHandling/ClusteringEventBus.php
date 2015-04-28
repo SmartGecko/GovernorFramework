@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventHandling;
 
+use Governor\Framework\Common\Logging\NullLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
 
@@ -50,7 +51,11 @@ class ClusteringEventBus implements EventBusInterface, LoggerAwareInterface
      * @var ClusterSelectorInterface
      */
     private $clusterSelector;
-    private $clusters = array();
+
+    /**
+     * @var ClusterInterface[]
+     */
+    private $clusters = [];
 
     /**
      * Initializes a <code>ClusteringEventBus</code> with the given <code>clusterSelector</code> and a
@@ -62,6 +67,9 @@ class ClusteringEventBus implements EventBusInterface, LoggerAwareInterface
     public function __construct(ClusterSelectorInterface $clusterSelector = null,
             EventBusTerminalInterface $terminal = null)
     {
+        $this->logger = new NullLogger();
+
+        // TODO setters instead of nullable constructor args
         $this->clusterSelector = (null === $clusterSelector) ? new DefaultClusterSelector()
                     : $clusterSelector;
         $this->terminal = (null === $terminal) ? new SimpleEventBusTerminal() : $terminal;
@@ -113,6 +121,10 @@ class ClusteringEventBus implements EventBusInterface, LoggerAwareInterface
         return $cluster;
     }
 
+    /**
+     * @param LoggerInterface $logger
+     * @return null
+     */
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;

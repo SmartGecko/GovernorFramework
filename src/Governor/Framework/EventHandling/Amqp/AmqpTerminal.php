@@ -36,9 +36,9 @@ use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
 
 /**
  * Implementation of the {@see EventBusTerminalInterface} supporting the AMQP protocol.
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
 {
@@ -101,13 +101,16 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      */
     private $clusters = array();
 
-    public function __construct(SerializerInterface $serializer,
-            AmqpMessageConverterInterface $messageConverter = null)
-    {
+    public function __construct(
+        SerializerInterface $serializer,
+        AmqpMessageConverterInterface $messageConverter = null
+    ) {
         $this->serializer = $serializer;
         $this->routingKeyResolver = new NamespaceRoutingKeyResolver();
-        $this->messageConverter = null === $messageConverter ? new DefaultAmqpMessageConverter($this->serializer,
-                $this->routingKeyResolver, $this->isDurable) : $messageConverter;
+        $this->messageConverter = null === $messageConverter ? new DefaultAmqpMessageConverter(
+            $this->serializer,
+            $this->routingKeyResolver, $this->isDurable
+        ) : $messageConverter;
     }
 
     private function tryClose(AMQPChannel $channel)
@@ -123,24 +126,33 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
      * Does the actual publishing of the given <code>body</code> on the given <code>channel</code>. This method can be
      * overridden to change the properties used to send a message.
      *
-     * @param AMQPChannel $channel     The channel to dispatch the message on
-     * @param AmqpMessage $amqpMessage The AMQPMessage describing the characteristics of the message to publish     
+     * @param AMQPChannel $channel The channel to dispatch the message on
+     * @param AmqpMessage $amqpMessage The AMQPMessage describing the characteristics of the message to publish
      */
-    protected function doSendMessage(AMQPChannel $channel,
-            AmqpMessage $amqpMessage)
-    {
-        $rawMessage = new RawMessage($amqpMessage->getBody(),
-                $amqpMessage->getProperties());
+    protected function doSendMessage(
+        AMQPChannel $channel,
+        AmqpMessage $amqpMessage
+    ) {
+        $rawMessage = new RawMessage(
+            $amqpMessage->getBody(),
+            $amqpMessage->getProperties()
+        );
 
-        $this->logger->debug("Publishing message to {exchange} with routing key {key}",
-                array(
-            'exchange' => $this->exchangeName,
-            'key' => $amqpMessage->getRoutingKey()
-        ));
+        $this->logger->debug(
+            "Publishing message to {exchange} with routing key {key}",
+            array(
+                'exchange' => $this->exchangeName,
+                'key' => $amqpMessage->getRoutingKey()
+            )
+        );
 
-        $channel->basic_publish($rawMessage, $this->exchangeName,
-                $amqpMessage->getRoutingKey(), $amqpMessage->isMandatory(),
-                $amqpMessage->isImmediate());
+        $channel->basic_publish(
+            $rawMessage,
+            $this->exchangeName,
+            $amqpMessage->getRoutingKey(),
+            $amqpMessage->isMandatory(),
+            $amqpMessage->isImmediate()
+        );
     }
 
     private function tryRollback(AMQPChannel $channel)
@@ -154,7 +166,7 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
 
     /**
      * Sets the Connection providing the Channels to send messages on.
-     * <p/>     
+     * <p/>
      *
      * @param AMQPConnection $connection The connection to set
      */
@@ -262,7 +274,10 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     {
         $clusterMetaData = $cluster->getMetaData();
 
-        if ($clusterMetaData->getProperty(AmqpConsumerConfigurationInterface::AMQP_CONFIG_PROPERTY) instanceof AmqpConsumerConfigurationInterface) {
+        if ($clusterMetaData->getProperty(
+                AmqpConsumerConfigurationInterface::AMQP_CONFIG_PROPERTY
+            ) instanceof AmqpConsumerConfigurationInterface
+        ) {
             $config = $clusterMetaData->getProperty(AmqpConsumerConfigurationInterface::AMQP_CONFIG_PROPERTY);
         } else {
             $config = new DefaultAmqpConsumerConfiguration($cluster->getName());
@@ -292,16 +307,22 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
             if ($this->waitForAck) {
                 $channel->confirm_select();
             }
+
             foreach ($events as $event) {
                 $amqpMessage = $this->messageConverter->createAmqpMessage($event);
                 $this->doSendMessage($channel, $amqpMessage);
             }
+
             if (CurrentUnitOfWork::isStarted()) {
-                CurrentUnitOfWork::get()->registerListener(new ChannelTransactionUnitOfWorkListener($this->logger,
-                        $channel, $this));
-            } else if ($this->isTransactional) {
+                CurrentUnitOfWork::get()->registerListener(
+                    new ChannelTransactionUnitOfWorkListener(
+                        $this->logger,
+                        $channel, $this
+                    )
+                );
+            } elseif ($this->isTransactional) {
                 $channel->tx_commit();
-            } else if ($this->waitForAck) {
+            } elseif ($this->waitForAck) {
                 $channel->wait_for_pending_acks($this->publisherAckTimeout);
             }
         } catch (\Exception $ex) {
@@ -309,8 +330,10 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
                 $this->tryRollback($channel);
             }
 
-            throw new EventPublicationFailedException("Failed to dispatch Events to the Message Broker.",
-            0, $ex);
+            throw new EventPublicationFailedException(
+                "Failed to dispatch Events to the Message Broker.",
+                0, $ex
+            );
         } finally {
             if (!CurrentUnitOfWork::isStarted()) {
                 $this->tryClose($channel);
@@ -324,7 +347,7 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
     }
 
     /**
-     * Sets the RoutingKeyResolver that provides the Routing Key for each message to dispatch. 
+     * Sets the RoutingKeyResolver that provides the Routing Key for each message to dispatch.
      *
      * @param RoutingKeyResolverInterface $routingKeyResolver the RoutingKeyResolver to use
      */

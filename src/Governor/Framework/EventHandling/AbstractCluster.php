@@ -29,9 +29,9 @@ use Psr\Log\LoggerAwareInterface;
 
 /**
  * Description of AbstractCluster
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
 {
@@ -62,9 +62,10 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
      */
     protected $logger;
 
-    protected function __construct($name,
-            OrderResolverInterface $orderResolver = null)
-    {
+    protected function __construct(
+        $name,
+        OrderResolverInterface $orderResolver = null
+    ) {
         if (null === $name) {
             throw new \InvalidArgumentException("name may not be null");
         }
@@ -89,17 +90,19 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
         }
 
         if (null !== $this->orderResolver) {
-            uasort($listeners,
-                    function ($a, $b) {
-                $orderA = $this->orderResolver->orderOf($a);
-                $orderB = $this->orderResolver->orderOf($b);
+            uasort(
+                $listeners,
+                function ($a, $b) {
+                    $orderA = $this->orderResolver->orderOf($a);
+                    $orderB = $this->orderResolver->orderOf($b);
 
-                if ($orderA === $orderB) {
-                    return 0;
+                    if ($orderA === $orderB) {
+                        return 0;
+                    }
+
+                    return ($orderA < $orderB) ? -1 : 1;
                 }
-
-                return ($orderA < $orderB) ? -1 : 1;
-            });
+            );
         }
 
         return $listeners;
@@ -116,7 +119,7 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
     }
 
     public function publish(array $events)
-    {        
+    {
         $this->doPublish($events, $this->getMembers());
     }
 

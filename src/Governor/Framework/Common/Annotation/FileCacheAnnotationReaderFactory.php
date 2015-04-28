@@ -16,52 +16,56 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventHandling;
+namespace Governor\Framework\Common\Annotation;
 
+
+use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\FileCacheReader;
 
 /**
- * Event Message bus handles all events that were emitted by domain objects.
- *
- * The Event Message Bus finds all event handles that listen to a certain
- * event, and then triggers these handlers one after another. Exceptions in
- * event handlers should be swallowed. Intelligent Event Systems should know
- * how to retry failing events until they are successful or failed too often.
+ * Implementation of the {@see AnnotationReaderFactoryInterface} that returns a reader backed by a file cache.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface EventBusInterface
+class FileCacheAnnotationReaderFactory implements AnnotationReaderFactoryInterface
 {
+    /**
+     * @var string
+     */
+    private $path;
 
     /**
-     * Publish an event to the bus.
-     *
-     * @param array $events
+     * @var bool
      */
-    public function publish(array $events);
+    private $debug;
 
     /**
-     * Subscribe the given <code>eventListener</code> to this bus. When subscribed, it will receive all events
-     * published to this bus.
-     * <p/>
-     * If the given <code>eventListener</code> is already subscribed, nothing happens.
-     *
-     * @param EventListenerInterface $eventListener The event listener to subscribe
-     * @throws EventListenerSubscriptionFailedException if the listener could not be subscribed
+     * @param string $path
+     * @param bool $debug
      */
-    public function subscribe(EventListenerInterface $eventListener);
+    function __construct($path, $debug = false)
+    {
+        $this->path = $path;
+        $this->debug = $debug;
+    }
+
 
     /**
-     * Unsubscribe the given <code>eventListener</code> to this bus. When unsubscribed, it will no longer receive
-     * events published to this bus.
+     * Returns a Reader instance.
      *
-     * @param EventListenerInterface $eventListener The event listener to unsubscribe
+     * @return Reader
      */
-    public function unsubscribe(EventListenerInterface $eventListener);
+    public function getReader()
+    {
+        return new FileCacheReader(new AnnotationReader(), $this->path, $this->debug);
+    }
+
 }

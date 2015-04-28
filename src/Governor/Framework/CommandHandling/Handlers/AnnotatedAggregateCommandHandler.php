@@ -24,7 +24,9 @@
 
 namespace Governor\Framework\CommandHandling\Handlers;
 
+use Governor\Framework\Common\Annotation\AnnotationReaderFactoryInterface;
 use Governor\Framework\Annotations\CommandHandler;
+use Governor\Framework\Common\Annotation\SimpleAnnotationReaderFactory;
 use Governor\Framework\Common\ParameterResolverFactoryInterface;
 use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
 use Governor\Framework\CommandHandling\CommandBusInterface;
@@ -53,17 +55,35 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
      */
     private $targetResolver;
 
+    /**
+     * @var AnnotationReaderFactoryInterface
+     */
+    private $annotationReaderFactory;
+
+    /**
+     * @param string $className
+     * @param string $methodName
+     * @param ParameterResolverFactoryInterface $parameterResolver
+     * @param RepositoryInterface $repository
+     * @param CommandTargetResolverInterface $targetResolver
+     * @param AnnotationReaderFactoryInterface $annotationReaderFactory
+     */
     public function __construct(
         $className,
         $methodName,
         ParameterResolverFactoryInterface $parameterResolver,
         RepositoryInterface $repository,
-        CommandTargetResolverInterface $targetResolver = null
+        CommandTargetResolverInterface $targetResolver = null,
+        AnnotationReaderFactoryInterface $annotationReaderFactory = null
     ) {
         parent::__construct($className, $methodName, $parameterResolver);
         $this->repository = $repository;
+
         $this->targetResolver = null === $targetResolver ? new AnnotationCommandTargetResolver()
             : $targetResolver;
+
+        $this->annotationReaderFactory = null === $annotationReaderFactory ? new SimpleAnnotationReaderFactory(
+        ) : $annotationReaderFactory;
     }
 
     public function handle(
@@ -72,6 +92,7 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
     ) {
         if ($this->getMethod()->isConstructor()) {
             $this->handleConstructor($commandMessage, $unitOfWork);
+
             return null;
         }
 
@@ -105,14 +126,24 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
         return $this->getMethod()->invokeArgs($aggregate, $arguments);
     }
 
+    /**
+     * @param $className
+     * @param RepositoryInterface $repository
+     * @param CommandBusInterface $commandBus
+     * @param ParameterResolverFactoryInterface $parameterResolver
+     * @param CommandTargetResolverInterface $targetResolver
+     * @param AnnotationReaderFactoryInterface $annotationReaderFactory
+     */
     public static function subscribe(
         $className,
         RepositoryInterface $repository,
         CommandBusInterface $commandBus,
         ParameterResolverFactoryInterface $parameterResolver,
-        CommandTargetResolverInterface $targetResolver = null
+        CommandTargetResolverInterface $targetResolver = null,
+        AnnotationReaderFactoryInterface $annotationReaderFactory = null
     ) {
         $inspector = new MethodMessageHandlerInspector(
+            $annotationReaderFactory,
             new \ReflectionClass($className),
             CommandHandler::class
         );
@@ -124,7 +155,7 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
                 $repository, $targetResolver
             );
 
-            $commandBus->subscribe(
+            $commandBus->getCommandHandlerRegistry(
                 $handlerDefinition->getPayloadType(),
                 $handler
             );

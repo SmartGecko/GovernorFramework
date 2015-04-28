@@ -88,6 +88,7 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     /**
      * @param CommandMessageInterface $command
      * @param CommandCallbackInterface $callback
+     * @return mixed
      */
     public function dispatch(
         CommandMessageInterface $command,
@@ -165,9 +166,24 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
         $this->dispatchInterceptors = $dispatchInterceptors;
     }
 
+    /**
+     * @param LoggerInterface $logger
+     * @return null
+     */
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
+
+    /**
+     * Returns the associated command handler registry.
+     *
+     * @return CommandHandlerRegistryInterface
+     */
+    public function getCommandHandlerRegistry()
+    {
+        return $this->handlerRegistry;
+    }
+
 
 }

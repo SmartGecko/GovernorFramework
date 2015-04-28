@@ -24,6 +24,8 @@
 
 namespace Governor\Tests\EventHandling\Listeners;
 
+use Governor\Framework\Domain\EventMessageInterface;
+use Governor\Framework\Common\Annotation\SimpleAnnotationReaderFactory;
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\EventHandling\Listeners\AnnotatedEventListenerAdapter;
 use Governor\Framework\Annotations\EventHandler;
@@ -39,7 +41,10 @@ use Governor\Tests\Test\MyOtherEvent;
  */
 class AnnotatedEventListenerAdapterTest extends \PHPUnit_Framework_TestCase
 {
-    private $publishedEvents = array();
+    /**
+     * @var EventMessageInterface[]
+     */
+    private $publishedEvents = [];
 
     /**
      * @var RecordingEventBus
@@ -54,7 +59,7 @@ class AnnotatedEventListenerAdapterTest extends \PHPUnit_Framework_TestCase
     public function testSubscribe()
     {
         $listener = new AnnotatedListener();
-        AnnotatedEventListenerAdapter::subscribe($listener, $this->eventBus);
+        AnnotatedEventListenerAdapter::subscribe($listener, $this->eventBus, new SimpleAnnotationReaderFactory());
 
         $event1 = new MyEvent("a", "b");
         $event2 = new MyOtherEvent();
@@ -74,7 +79,9 @@ class AnnotatedEventListenerAdapterTest extends \PHPUnit_Framework_TestCase
 
 class AnnotatedListener
 {
-
+    /**
+     * @var mixed
+     */
     public $event;
 
     /**

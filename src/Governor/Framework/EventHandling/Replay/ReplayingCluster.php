@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventHandling\Replay;
 
+use Governor\Framework\Common\Logging\NullLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Governor\Framework\EventHandling\EventProcessingMonitorInterface;
@@ -81,6 +82,7 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
         $this->eventHandlingListeners = new EventProcessingListeners(array());
         $this->replayAwareListeners = new \SplObjectStorage();
 
+        $this->logger = new NullLogger();
         //this.delegate.subscribeEventProcessingMonitor(eventHandlingListeners);
     }
 
@@ -174,6 +176,10 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
         $this->delegate->unsubscribe($eventListener);
     }
 
+    /**
+     * @param LoggerInterface $logger
+     * @return null
+     */
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;

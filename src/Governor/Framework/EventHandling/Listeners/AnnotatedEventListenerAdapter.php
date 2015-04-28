@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventHandling\Listeners;
 
+use Governor\Framework\Common\Annotation\AnnotationReaderFactoryInterface;
 use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
 use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\EventHandling\EventBusInterface;
@@ -56,15 +57,23 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, Repl
     private $replayAware;
 
     /**
+     * @var AnnotationReaderFactoryInterface
+     */
+    private $annotationReaderFactory;
+
+    /**
      * @param mixed $annotatedEventListener
      * @param EventBusInterface $eventBus
+     * @param AnnotationReaderFactoryInterface $annotationReaderFactory
      */
     public function __construct(
         $annotatedEventListener,
-        EventBusInterface $eventBus
+        EventBusInterface $eventBus,
+        AnnotationReaderFactoryInterface $annotationReaderFactory
     ) {
         $this->eventBus = $eventBus;
         $this->annotatedEventListener = $annotatedEventListener;
+        $this->annotationReaderFactory = $annotationReaderFactory;
 
         if ($annotatedEventListener instanceof ReplayAwareInterface) {
             $this->replayAware = $annotatedEventListener;
@@ -87,6 +96,7 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, Repl
     public function handle(EventMessageInterface $event)
     {
         $inspector = new MethodMessageHandlerInspector(
+            $this->annotationReaderFactory,
             new \ReflectionClass($this->annotatedEventListener),
             EventHandler::class
         );
@@ -107,11 +117,15 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, Repl
     /**
      * @param mixed $annotatedEventListener
      * @param EventBusInterface $eventBus
+     * @param AnnotationReaderFactoryInterface $annotationReaderFactory
      * @return AnnotatedEventListenerAdapter
      */
-    public static function subscribe($annotatedEventListener, EventBusInterface $eventBus)
-    {
-        return new AnnotatedEventListenerAdapter($annotatedEventListener, $eventBus);
+    public static function subscribe(
+        $annotatedEventListener,
+        EventBusInterface $eventBus,
+        AnnotationReaderFactoryInterface $annotationReaderFactory
+    ) {
+        return new AnnotatedEventListenerAdapter($annotatedEventListener, $eventBus, $annotationReaderFactory);
     }
 
     /**

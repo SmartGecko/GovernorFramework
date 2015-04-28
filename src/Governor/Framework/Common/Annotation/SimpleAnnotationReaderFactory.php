@@ -16,38 +16,34 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling;
+namespace Governor\Framework\Common\Annotation;
 
+
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\Reader;
 
 /**
- * Accept and process commands by passing them along to a matching command handler.
+ * Simple implementation of the {@see AnnotationReaderFactoryInterface} that returns the default reader.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface CommandBusInterface
+class SimpleAnnotationReaderFactory implements AnnotationReaderFactoryInterface
 {
-
     /**
-     * @param CommandMessageInterface $command
-     * @param CommandCallbackInterface $callback
-     * @return mixed
-     */
-    public function dispatch(
-        CommandMessageInterface $command,
-        CommandCallbackInterface $callback = null
-    );
-
-    /**
-     * Returns the associated command handler registry.
+     * Returns a Reader instance.
      *
-     * @return CommandHandlerRegistryInterface
+     * @return Reader
      */
-    public function getCommandHandlerRegistry();
+    public function getReader()
+    {
+        return new AnnotationReader();
+    }
+
 }
