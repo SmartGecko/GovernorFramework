@@ -32,6 +32,7 @@ use Governor\Framework\CommandHandling\GenericCommandMessage;
 use Governor\Framework\CommandHandling\SimpleCommandBus;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
 use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
+use Governor\Framework\UnitOfWork\DefaultUnitOfWorkFactory;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 use Governor\Framework\CommandHandling\InMemoryCommandHandlerRegistry;
 
@@ -61,7 +62,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->handlerRegistry = new InMemoryCommandHandlerRegistry();
-        $this->commandBus = new SimpleCommandBus($this->handlerRegistry);
+        $this->commandBus = new SimpleCommandBus($this->handlerRegistry, new DefaultUnitOfWorkFactory());
     }
 
     /**

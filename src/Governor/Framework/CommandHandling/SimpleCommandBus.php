@@ -27,8 +27,8 @@ namespace Governor\Framework\CommandHandling;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Governor\Framework\Common\Logging\NullLogger;
-use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 use Governor\Framework\CommandHandling\Callbacks\NoOpCallback;
+use Governor\Framework\UnitOfWork\UnitOfWorkFactoryInterface;
 
 /**
  * Simple command bus implementation.
@@ -60,11 +60,18 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     private $dispatchInterceptors = [];
 
     /**
-     * @param CommandHandlerRegistryInterface $handlerRegistry
+     * @var UnitOfWorkFactoryInterface
      */
-    public function __construct(CommandHandlerRegistryInterface $handlerRegistry)
+    private $unitOfWorkFactory;
+
+    /**
+     * @param CommandHandlerRegistryInterface $handlerRegistry
+     * @param UnitOfWorkFactoryInterface $unitOfWorkFactory
+     */
+    public function __construct(CommandHandlerRegistryInterface $handlerRegistry, UnitOfWorkFactoryInterface $unitOfWorkFactory)
     {
         $this->handlerRegistry = $handlerRegistry;
+        $this->unitOfWorkFactory = $unitOfWorkFactory;
         $this->logger = new NullLogger();
     }
 
@@ -124,7 +131,8 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
             "Dispatching command [{name}]",
             array('name' => $command->getCommandName())
         );
-        $unitOfWork = DefaultUnitOfWork::startAndGet();
+
+        $unitOfWork = $this->unitOfWorkFactory->createUnitOfWork();
         $unitOfWork->setLogger($this->logger);
 
         $chain = new DefaultInterceptorChain(

@@ -57,6 +57,7 @@ use Governor\Framework\Repository\NullLockManager;
 use Governor\Framework\Repository\RepositoryInterface;
 use Governor\Framework\Test\Utils\RecordingEventBus;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
+use Governor\Framework\UnitOfWork\DefaultUnitOfWorkFactory;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
 use Monolog\Handler\StreamHandler;
@@ -166,7 +167,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
 
         $this->eventBus = new RecordingEventBus($this->publishedEvents);
         $this->handlerRegistry = new InMemoryCommandHandlerRegistry();
-        $this->commandBus = new SimpleCommandBus($this->handlerRegistry);
+        $this->commandBus = new SimpleCommandBus($this->handlerRegistry, new DefaultUnitOfWorkFactory());
         $this->commandBus->setLogger($this->logger);
         $this->eventStore = new RecordingEventStore(
             $this->storedEvents,

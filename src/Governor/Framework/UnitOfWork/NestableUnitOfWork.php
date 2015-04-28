@@ -31,27 +31,38 @@ use Governor\Framework\Common\Logging\NullLogger;
 /**
  * Description of DummyUnitOfWork
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInterface
 {
 
+    /**
+     * @var UnitOfWorkInterface
+     */
     private $outerUnitOfWork;
-    private $innerUnitsOfWork = array();
+
+    /**
+     * @var UnitOfWorkInterface[]
+     */
+    private $innerUnitsOfWork = [];
+
+    /**
+     * @var bool
+     */
     private $isStarted;
 
     /**
-     * @var LoggerInterface 
+     * @var LoggerInterface
      */
     protected $logger;
-    
+
     function __construct()
     {
         $this->logger = new NullLogger();
     }
 
-        public function commit()
+    public function commit()
     {
         $this->logger->debug("Committing Unit Of Work");
         $this->assertStarted();
@@ -67,13 +78,13 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
                 $this->logger->debug("This Unit Of Work is nested. Commit will be finalized by outer Unit Of Work.");
             }
         } catch (\RuntimeException $ex) {
-            $this->logger->debug("An error occurred while committing this UnitOfWork. Performing rollback...");            
+            $this->logger->debug("An error occurred while committing this UnitOfWork. Performing rollback...");
             $this->doRollback($ex);
             $this->stop();
             if (null === $this->outerUnitOfWork) {
                 $this->performCleanup();
-            }           
-            
+            }
+
             throw $ex;
         } finally {
             $this->logger->debug("Clearing resources of this Unit Of Work.");
@@ -104,16 +115,18 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
             if ($this->outerUnitOfWork instanceof NestableUnitOfWork) {
                 $this->outerUnitOfWork->registerInnerUnitOfWork($this);
             } else {
-                $listener = new CommitOnOuterCommitTask(function(UnitOfWorkInterface $uow ) {
-                    $this->performInnerCommit();
-                },
-                        function (UnitOfWorkInterface $uow) {
-                    $this->performCleanup();
-                },
-                        function (UnitOfWorkInterface $uow, \Exception $ex = null) {
-                    CurrentUnitOfWork::set($this);
-                    $this->rollback($ex);
-                });
+                $listener = new CommitOnOuterCommitTask(
+                    function (UnitOfWorkInterface $uow) {
+                        $this->performInnerCommit();
+                    },
+                    function (UnitOfWorkInterface $uow) {
+                        $this->performCleanup();
+                    },
+                    function (UnitOfWorkInterface $uow, \Exception $ex = null) {
+                        CurrentUnitOfWork::set($this);
+                        $this->rollback($ex);
+                    }
+                );
 
                 $this->outerUnitOfWork->registerListener($listener);
             }
@@ -126,8 +139,10 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
     public function rollback(\Exception $ex = null)
     {
         if (null !== $ex) {
-            $this->logger->debug("Rollback requested for Unit Of Work due to exception. {exception} ",
-                    array('exception' => $ex->getMessage()));
+            $this->logger->debug(
+                "Rollback requested for Unit Of Work due to exception. {exception} ",
+                array('exception' => $ex->getMessage())
+            );
         } else {
             $this->logger->debug("Rollback requested for Unit Of Work for unknown reason.");
         }
@@ -141,7 +156,7 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
                 $this->doRollback($ex);
             }
         } catch (\Exception $ex) {
-            
+
         }
 
         if (null === $this->outerUnitOfWork) {
@@ -172,7 +187,7 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
     protected abstract function doCommit();
 
     /**
-     * Executes the logic required to commit this unit of work.
+     * Executes the logic required to rollback this unit of work.
      *
      * @param \Exception|null $ex
      */
@@ -183,6 +198,7 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
         $exception = null;
         $this->logger->debug("Finalizing commit of inner Unit Of Work...");
         CurrentUnitOfWork::set($this);
+
         try {
             $this->doCommit();
         } catch (\RuntimeException $ex) {
@@ -229,6 +245,9 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
         }
     }
 
+    /**
+     * @param NestableUnitOfWork $unitOfWork
+     */
     private function registerInnerUnitOfWork(NestableUnitOfWork $unitOfWork)
     {
         $this->innerUnitsOfWork[] = $unitOfWork;
@@ -242,7 +261,11 @@ abstract class NestableUnitOfWork implements UnitOfWorkInterface, LoggerAwareInt
     protected abstract function notifyListenersPrepareCommit();
 
     protected abstract function notifyListenersCleanup();
-    
+
+    /**
+     * @param LoggerInterface $logger
+     * @return null
+     */
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
@@ -257,9 +280,11 @@ class CommitOnOuterCommitTask extends UnitOfWorkListenerAdapter
     private $cleanupClosure;
     private $rollbackClosure;
 
-    function __construct(\Closure $commitClosure, \Closure $cleanupClosure,
-            \Closure $rollbackClosure)
-    {
+    function __construct(
+        \Closure $commitClosure,
+        \Closure $cleanupClosure,
+        \Closure $rollbackClosure
+    ) {
         $this->commitClosure = $commitClosure;
         $this->cleanupClosure = $cleanupClosure;
         $this->rollbackClosure = $rollbackClosure;
@@ -277,9 +302,10 @@ class CommitOnOuterCommitTask extends UnitOfWorkListenerAdapter
         $cb($unitOfWork);
     }
 
-    public function onRollback(UnitOfWorkInterface $unitOfWork,
-            \Exception $failureCause = null)
-    {
+    public function onRollback(
+        UnitOfWorkInterface $unitOfWork,
+        \Exception $failureCause = null
+    ) {
         $cb = $this->rollbackClosure;
         $cb($unitOfWork, $failureCause);
     }

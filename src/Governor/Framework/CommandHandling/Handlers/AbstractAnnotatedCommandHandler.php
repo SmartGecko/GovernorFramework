@@ -54,6 +54,11 @@ abstract class AbstractAnnotatedCommandHandler implements CommandHandlerInterfac
      */
     private $parameterResolver;
 
+    /**
+     * @param string $className
+     * @param string $methodName
+     * @param ParameterResolverFactoryInterface $parameterResolver
+     */
     function __construct($className, $methodName,
             ParameterResolverFactoryInterface $parameterResolver)
     {        
@@ -65,21 +70,34 @@ abstract class AbstractAnnotatedCommandHandler implements CommandHandlerInterfac
         $this->parameterResolver = $parameterResolver;
     }
 
+    /**
+     * @return \ReflectionMethod
+     */
     public function getMethod()
     {
         return $this->method;
     }
 
+    /**
+     * @return array
+     */
     public function getAnnotations()
     {
         return $this->annotations;
     }
 
+    /**
+     * @return ParameterResolverFactoryInterface
+     */
     public function getParameterResolver()
     {
         return $this->parameterResolver;
     }
 
+    /**
+     * @param MessageInterface $message
+     * @return array
+     */
     protected function resolveArguments(MessageInterface $message)
     {
         $arguments = array();

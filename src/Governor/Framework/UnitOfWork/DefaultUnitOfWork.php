@@ -31,17 +31,17 @@ use Governor\Framework\Domain\DomainEventMessageInterface;
 
 /**
  * DefaultUnitOfWork.
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class DefaultUnitOfWork extends NestableUnitOfWork
 {
 
     /**
-     * @var AggregateRootInterface[] 
+     * @var AggregateRootInterface[]
      */
-    private $registeredAggregates = array();
+    private $registeredAggregates = [];
 
     /**
      * @var \SplObjectStorage
@@ -59,7 +59,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     private $dispatcherStatus;
 
     /**
-     * @var TransactionManagerInterface 
+     * @var TransactionManagerInterface
      */
     private $transactionManager;
 
@@ -82,7 +82,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     }
 
     /**
-     * 
+     *
      * @param TransactionManagerInterface $transactionManager
      * @return UnitOfWorkInterface
      */
@@ -90,6 +90,7 @@ class DefaultUnitOfWork extends NestableUnitOfWork
     {
         $uow = new DefaultUnitOfWork($transactionManager);
         $uow->start();
+
         return $uow;
     }
 
@@ -130,36 +131,49 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         $this->listeners->onRollback($this, $ex);
     }
 
-    public function registerAggregate(AggregateRootInterface $aggregateRoot,
-            EventBusInterface $eventBus,
-            SaveAggregateCallbackInterface $saveAggregateCallback)
-    {
-        $similarAggregate = $this->findSimilarAggregate(get_class($aggregateRoot),
-                $aggregateRoot->getIdentifier());
+    public function registerAggregate(
+        AggregateRootInterface $aggregateRoot,
+        EventBusInterface $eventBus,
+        SaveAggregateCallbackInterface $saveAggregateCallback
+    ) {
+        $similarAggregate = $this->findSimilarAggregate(
+            get_class($aggregateRoot),
+            $aggregateRoot->getIdentifier()
+        );
         if (null !== $similarAggregate) {
 
-            $this->logger->info("Ignoring aggregate registration. An aggregate of same type and identifier was already" .
-                    "registered in this Unit Of Work: type [{aggregate}], identifier [{identifier}]",
-                    array('aggregate' => get_class($aggregateRoot), 'identifier' => $aggregateRoot->getIdentifier()));
+            $this->logger->info(
+                "Ignoring aggregate registration. An aggregate of same type and identifier was already".
+                "registered in this Unit Of Work: type [{aggregate}], identifier [{identifier}]",
+                array('aggregate' => get_class($aggregateRoot), 'identifier' => $aggregateRoot->getIdentifier())
+            );
 
             return $similarAggregate;
         }
 
         $uow = $this;
-        $eventRegistrationCallback = new UoWEventRegistrationCallback(function (DomainEventMessageInterface $event) use ($uow, $eventBus) {
-            $event = $uow->invokeEventRegistrationListeners($event);
-            $uow->eventsToPublishOn($event, $eventBus);
+        $eventRegistrationCallback = new UoWEventRegistrationCallback(
+            function (DomainEventMessageInterface $event) use ($uow, $eventBus) {
+                $event = $uow->invokeEventRegistrationListeners($event);
+                $uow->eventsToPublishOn($event, $eventBus);
 
-            return $event;
-        });
+                return $event;
+            }
+        );
 
-        $this->registeredAggregates[spl_object_hash($aggregateRoot)] = array($aggregateRoot,
-            $saveAggregateCallback);
+        $this->registeredAggregates[spl_object_hash($aggregateRoot)] = array(
+            $aggregateRoot,
+            $saveAggregateCallback
+        );
 
-        $this->logger->debug("Registering aggregate {aggregate}",
-                array('aggregate' => get_class($aggregateRoot)));
+        $this->logger->debug(
+            "Registering aggregate {aggregate}",
+            array('aggregate' => get_class($aggregateRoot))
+        );
+
         // listen for new events registered in the aggregate
         $aggregateRoot->addEventRegistrationCallback($eventRegistrationCallback);
+
         return $aggregateRoot;
     }
 
@@ -174,18 +188,22 @@ class DefaultUnitOfWork extends NestableUnitOfWork
             list ($aggregate, $callback) = $aggregateEntry;
 
             if (get_class($aggregate) === $aggregateType && $aggregate->getIdentifier()
-                    === $identifier) {
+                === $identifier
+            ) {
                 return $aggregate;
             }
         }
+
         return null;
     }
 
-    private function eventsToPublishOn(EventMessageInterface $event,
-            EventBusInterface $eventBus)
-    {
+    private function eventsToPublishOn(
+        EventMessageInterface $event,
+        EventBusInterface $eventBus
+    ) {
         if (!$this->eventsToPublish->contains($eventBus)) {
             $this->eventsToPublish->attach($eventBus, array($event));
+
             return;
         }
 
@@ -199,9 +217,10 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         return $this->listeners->onEventRegistered($this, $event);
     }
 
-    public function publishEvent(EventMessageInterface $event,
-            EventBusInterface $eventBus)
-    {
+    public function publishEvent(
+        EventMessageInterface $event,
+        EventBusInterface $eventBus
+    ) {
         $event = $this->invokeEventRegistrationListeners($event);
         $this->eventsToPublishOn($event, $eventBus);
     }
@@ -214,8 +233,11 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         $this->logger->debug("Publishing events to the event bus");
         if ($this->dispatcherStatus == self::STATUS_DISPATCHING) {
             // this prevents events from overtaking each other
-            $this->logger->debug("UnitOfWork is already in the dispatch process. " .
-                    "That process will publish events instead. Aborting...");
+            $this->logger->debug(
+                "UnitOfWork is already in the dispatch process. ".
+                "That process will publish events instead. Aborting..."
+            );
+
             return;
         }
         $this->dispatcherStatus = self::STATUS_DISPATCHING;
@@ -226,8 +248,10 @@ class DefaultUnitOfWork extends NestableUnitOfWork
             $events = $this->eventsToPublish->getInfo();
 
             foreach ($events as $event) {
-                $this->logger->debug("Publishing event [{event}] to event bus [{bus}]",
-                        array('event' => $event->getPayloadType(), 'bus' => get_class($bus)));
+                $this->logger->debug(
+                    "Publishing event [{event}] to event bus [{bus}]",
+                    array('event' => $event->getPayloadType(), 'bus' => get_class($bus))
+                );
             }
 
             // clear and send
@@ -298,11 +322,13 @@ class DefaultUnitOfWork extends NestableUnitOfWork
         foreach ($this->registeredAggregates as $aggregateEntry) {
             list ($aggregate, $callback) = $aggregateEntry;
 
-            $this->logger->debug("Persisting changes to [{aggregate}], identifier: [{id}]",
-                    array(
-                'aggregate' => get_class($aggregate),
-                'id' => $aggregate->getIdentifier()
-            ));
+            $this->logger->debug(
+                "Persisting changes to [{aggregate}], identifier: [{id}]",
+                array(
+                    'aggregate' => get_class($aggregate),
+                    'id' => $aggregate->getIdentifier()
+                )
+            );
 
             $callback->save($aggregate);
         }
