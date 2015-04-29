@@ -25,6 +25,7 @@
 namespace Governor\Framework\EventHandling;
 
 use Governor\Framework\Domain\MetaData;
+use Governor\Framework\Domain\EventMessageInterface;
 
 /**
  * A cluster represents a group of Event Listeners that are treated as a single group by the {@link
@@ -53,7 +54,7 @@ interface ClusterInterface extends EventProcessingMonitorSupportInterface
      * discouraged to throw exceptions, it is possible that they are propagated through this method invocation. In that
      * case, no guarantees can be given about the delivery of Events at all Cluster members.
      *
-     * @param array $events The Events to publish in the cluster
+     * @param EventMessageInterface[] $events The Events to publish in the cluster
      */
     public function publish(array $events);
 
@@ -81,7 +82,7 @@ interface ClusterInterface extends EventProcessingMonitorSupportInterface
      * unsubscribe. Cluster implementations may also return the view representing the state at the moment this method
      * is invoked.
      *
-     * @return array a view of the members of this cluster
+     * @return EventListenerInterface[] a view of the members of this cluster
      */
     public function getMembers();
 

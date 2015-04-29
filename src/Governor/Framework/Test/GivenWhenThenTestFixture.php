@@ -48,6 +48,7 @@ use Governor\Framework\Domain\MessageInterface;
 use Governor\Framework\Domain\SimpleDomainEventStream;
 use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\EventSourcing\AggregateFactoryInterface;
+use Governor\Framework\EventSourcing\EventSourcedAggregateRootInterface;
 use Governor\Framework\EventSourcing\EventSourcingRepository;
 use Governor\Framework\EventSourcing\GenericAggregateFactory;
 use Governor\Framework\EventStore\EventStoreException;
@@ -418,7 +419,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     }
 
 
-    private function assertValidWorkingAggregateState(EventSourcedAggregateRoot $eventSourcedAggregate)
+    private function assertValidWorkingAggregateState(EventSourcedAggregateRootInterface $eventSourcedAggregate)
     {
         /*HashSet<ComparationEntry> comparedEntries = new HashSet<ComparationEntry>();
         if (!workingAggregate.getClass().equals(eventSourcedAggregate.getClass())) {

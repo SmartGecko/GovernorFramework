@@ -230,7 +230,7 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
         $this->publisherAckTimeout = $publisherAckTimeout;
     }
 
-    /**
+    /*
      * Sets the Message Converter that creates AMQP Messages from Event Messages and vice versa. Setting this property
      * will ignore the "durable", "serializer" and "routingKeyResolver" properties, which just act as short hands to
      * create a DefaultAMQPMessageConverter instance.

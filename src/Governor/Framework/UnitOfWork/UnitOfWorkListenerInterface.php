@@ -27,9 +27,9 @@ namespace Governor\Framework\UnitOfWork;
 use Governor\Framework\Domain\EventMessageInterface;
 
 /**
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface UnitOfWorkListenerInterface
 {
@@ -40,7 +40,6 @@ interface UnitOfWorkListenerInterface
      * an exception, a UnitOfWork may choose to call {@link #onRollback(UnitOfWork, Throwable)} consecutively.
      *
      * @param UnitOfWorkInterface $unitOfWork The Unit of Work being committed
-     * @see UnitOfWork#commit()
      */
     public function afterCommit(UnitOfWorkInterface $unitOfWork);
 
@@ -48,12 +47,13 @@ interface UnitOfWorkListenerInterface
      * Invoked when the UnitOfWork is rolled back. The UnitOfWork may choose to invoke this method when committing the
      * UnitOfWork failed, too.
      *
-     * @param UnitOfWorkInterface $unitOfWork   The Unit of Work being rolled back
+     * @param UnitOfWorkInterface $unitOfWork The Unit of Work being rolled back
      * @param \Exception $failureCause The exception (or error) causing the roll back
-     * @see UnitOfWork#rollback(Throwable)
      */
-    public function onRollback(UnitOfWorkInterface $unitOfWork,
-        \Exception $failureCause = null);
+    public function onRollback(
+        UnitOfWorkInterface $unitOfWork,
+        \Exception $failureCause = null
+    );
 
     /**
      * Invoked when an Event is registered for publication when the UnitOfWork is committed. Listeners may alter Event
@@ -63,11 +63,13 @@ interface UnitOfWorkListenerInterface
      * The simplest implementation simply returns the given <code>event</code>.
      *
      * @param UnitOfWorkInterface $unitOfWork The Unit of Work on which an event is registered
-     * @param EventMessageInterface $event      The event about to be registered for publication     
+     * @param EventMessageInterface $event The event about to be registered for publication
      * @return EventMessageInterface the (modified) event to register for publication
      */
-    public function onEventRegistered(UnitOfWorkInterface $unitOfWork,
-        EventMessageInterface $event);
+    public function onEventRegistered(
+        UnitOfWorkInterface $unitOfWork,
+        EventMessageInterface $event
+    );
 
     /**
      * Invoked before aggregates are committed, and before any events are published. This phase can be used to do
@@ -77,12 +79,15 @@ interface UnitOfWorkListenerInterface
      * <code>aggregateRoots</code>. To retrieve all events, collect all uncommitted events from the aggregate roots and
      * combine them with the list of events.
      *
-     * @param UnitOfWorkInterface $unitOfWork     The Unit of Work being committed
+     * @param UnitOfWorkInterface $unitOfWork The Unit of Work being committed
      * @param array $aggregateRoots the aggregate roots being committed
-     * @param array $events         Events that have been registered for dispatching with the UnitOfWork
+     * @param array $events Events that have been registered for dispatching with the UnitOfWork
      */
-    public function onPrepareCommit(UnitOfWorkInterface $unitOfWork,
-        array $aggregateRoots, array $events);
+    public function onPrepareCommit(
+        UnitOfWorkInterface $unitOfWork,
+        array $aggregateRoots,
+        array $events
+    );
 
     /**
      * Invoked before the transaction bound to this Unit of Work is committed, but after all other commit activities
@@ -91,12 +96,13 @@ interface UnitOfWorkListenerInterface
      * <p/>
      * Note that this method is only invoked if the Unit of Work is bound to a transaction.
      *
-     * @param UnitOfWorkInterface $unitOfWork  The Unit of Work of which the underlying transaction is being committed.
+     * @param UnitOfWorkInterface $unitOfWork The Unit of Work of which the underlying transaction is being committed.
      * @param mixed $transaction The object representing the (status of) the transaction
-     * @see org.axonframework.unitofwork.TransactionManager
      */
-    public function onPrepareTransactionCommit(UnitOfWorkInterface $unitOfWork,
-        $transaction);
+    public function onPrepareTransactionCommit(
+        UnitOfWorkInterface $unitOfWork,
+        $transaction
+    );
 
     /**
      * Notifies listeners that the UnitOfWork is being cleaned up. This gives listeners the opportunity to clean up

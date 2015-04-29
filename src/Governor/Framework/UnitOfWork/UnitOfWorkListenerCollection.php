@@ -29,8 +29,8 @@ use Governor\Framework\Domain\EventMessageInterface;
 /**
  * Description of UnitOfWorkListenerCollection
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class UnitOfWorkListenerCollection implements UnitOfWorkListenerInterface
 {
@@ -38,61 +38,90 @@ class UnitOfWorkListenerCollection implements UnitOfWorkListenerInterface
     /**
      * @var UnitOfWorkListenerInterface[]
      */
-    private $listeners = array();
+    private $listeners = [];
 
+    /**
+     * {@inheritdoc}
+     */
     public function afterCommit(UnitOfWorkInterface $unitOfWork)
     {
         foreach (array_reverse($this->listeners) as $listener) {
+            /** @var  UnitOfWorkListenerInterface $listener */
             $listener->afterCommit($unitOfWork);
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function onCleanup(UnitOfWorkInterface $unitOfWork)
     {
         foreach (array_reverse($this->listeners) as $listener) {
+            /** @var  UnitOfWorkListenerInterface $listener */
             try {
                 $listener->onCleanup($unitOfWork);
             } catch (\Exception $ex) {
-                
+
             }
         }
     }
 
-    public function onEventRegistered(UnitOfWorkInterface $unitOfWork,
-        EventMessageInterface $event)
-    {        
+    /**
+     * {@inheritdoc}
+     */
+    public function onEventRegistered(
+        UnitOfWorkInterface $unitOfWork,
+        EventMessageInterface $event
+    ) {
         $newEvent = $event;
-        foreach ($this->listeners as $listener) {        
+        foreach ($this->listeners as $listener) {
             $newEvent = $listener->onEventRegistered($unitOfWork, $newEvent);
         }
-                
+
         return $newEvent;
     }
 
-    public function onPrepareCommit(UnitOfWorkInterface $unitOfWork,
-        array $aggregateRoots, array $events)
-    {        
+    /**
+     * {@inheritdoc}
+     */
+    public function onPrepareCommit(
+        UnitOfWorkInterface $unitOfWork,
+        array $aggregateRoots,
+        array $events
+    ) {
         foreach ($this->listeners as $listener) {
             $listener->onPrepareCommit($unitOfWork, $aggregateRoots, $events);
         }
     }
 
-    public function onPrepareTransactionCommit(UnitOfWorkInterface $unitOfWork,
-        $transaction)
-    {
+    /**
+     * {@inheritdoc}
+     */
+    public function onPrepareTransactionCommit(
+        UnitOfWorkInterface $unitOfWork,
+        $transaction
+    ) {
         foreach ($this->listeners as $listener) {
             $listener->onPrepareTransactionCommit($unitOfWork, $transaction);
         }
     }
 
-    public function onRollback(UnitOfWorkInterface $unitOfWork,
-        \Exception $failureCause = null)
-    {
+    /**
+     * {@inheritdoc}
+     */
+    public function onRollback(
+        UnitOfWorkInterface $unitOfWork,
+        \Exception $failureCause = null
+    ) {
         foreach (array_reverse($this->listeners) as $listener) {
+            /** @var  UnitOfWorkListenerInterface $listener */
             $listener->onRollback($unitOfWork, $failureCause);
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function add(UnitOfWorkListenerInterface $listener)
     {
         $this->listeners[] = $listener;

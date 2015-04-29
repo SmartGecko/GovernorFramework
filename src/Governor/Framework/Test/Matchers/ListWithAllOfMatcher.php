@@ -29,11 +29,15 @@ use Hamcrest\Description;
 /**
  * Description of ListWithAllOfMatcher
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class ListWithAllOfMatcher extends ListMatcher
 {
 
+    /**
+     * @param \Hamcrest\Matcher[] $matchers
+     */
     public function __construct($matchers)
     {
         parent::__construct($matchers);
@@ -44,6 +48,10 @@ class ListWithAllOfMatcher extends ListMatcher
         $description->appendText("all");
     }
 
+    /**
+     * @param array $items
+     * @return bool
+     */
     protected function matchesList(array $items)
     {
         foreach ($this->getMatchers() as $matcher) {
@@ -55,9 +63,11 @@ class ListWithAllOfMatcher extends ListMatcher
             }
             if (!$match) {
                 $this->reportFailed($matcher);
+
                 return false;
             }
         }
+
         return true;
     }
 

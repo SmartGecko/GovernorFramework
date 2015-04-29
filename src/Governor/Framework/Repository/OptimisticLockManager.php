@@ -32,6 +32,7 @@ use Governor\Framework\Domain\AggregateRootInterface;
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
+// TODO this should be moved to the redis extension since this cannot occur without workers
 class OptimisticLockManager implements LockManagerInterface
 {
 

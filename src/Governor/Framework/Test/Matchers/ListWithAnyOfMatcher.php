@@ -25,20 +25,29 @@
 namespace Governor\Framework\Test\Matchers;
 
 use Hamcrest\Description;
+use Hamcrest\Matcher;
 
 /**
  * Description of ListWithAnyOfMatcher
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class ListWithAnyOfMatcher extends ListMatcher
 {
 
+    /**
+     * @param Matcher[] $matchers
+     */
     public function __construct($matchers)
     {
         parent::__construct($matchers);
     }
 
+    /**
+     * @param array $items
+     * @return bool
+     */
     public function matchesList(array $items)
     {
         $match = false;
@@ -64,11 +73,17 @@ class ListWithAnyOfMatcher extends ListMatcher
         $description->appendText("any");
     }
 
+    /**
+     * @return string
+     */
     protected function failedMatcherMessage()
     {
         return "NO MATCH";
     }
 
+    /**
+     * @return string
+     */
     protected function getLastSeparator()
     {
         return "or";

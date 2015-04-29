@@ -65,7 +65,7 @@ interface FixtureConfigurationInterface
     public function registerCommandGateway(CommandGatewayInterface $gatewayInterface);
 
 
-    /**
+    /*
      * Sets the instance that defines the behavior of the Command Bus when a command is dispatched with a callback.
      *
      * @param callbackBehavior The instance deciding to how the callback should be invoked.

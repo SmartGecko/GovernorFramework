@@ -127,6 +127,10 @@ class FilesystemSnapshotEventReader
         return array('snapshotEvent' => $snapshotEvent, 'bytesToSkip' => $bytesToSkip);
     }
 
+    /**
+     * @param \SplFileObject $file
+     * @return int
+     */
     private function readLong($file)
     {
         $stream = null;

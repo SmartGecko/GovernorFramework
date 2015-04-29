@@ -28,6 +28,8 @@ use Governor\Framework\Domain\AggregateRootInterface;
 use Governor\Framework\Domain\DomainEventStreamInterface;
 
 /**
+ * Definition of an event sourced aggregate root.
+ * Event sourced aggregates are rebuilt to their current state from a {@see DomainEventStreamInterface}
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
@@ -35,6 +37,11 @@ use Governor\Framework\Domain\DomainEventStreamInterface;
 interface EventSourcedAggregateRootInterface extends AggregateRootInterface
 {
 
+    /**
+     * Initializes the aggregate from the event stream.
+     *
+     * @param DomainEventStreamInterface $domainEventStream
+     */
     public function initializeState(DomainEventStreamInterface $domainEventStream);
         
 }

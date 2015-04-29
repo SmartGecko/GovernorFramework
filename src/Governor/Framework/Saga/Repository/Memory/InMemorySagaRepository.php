@@ -38,15 +38,21 @@ class InMemorySagaRepository implements SagaRepositoryInterface
 {
 
     /**
-     * @var array
+     * @var SagaInterface[]
      */
     private $managedSagas = array();
 
+    /**
+     * {@inheritdoc}
+     */
     public function add(SagaInterface $saga)
     {
         $this->commit($saga);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function commit(SagaInterface $saga)
     {
         if (!$saga->isActive()) {
@@ -58,13 +64,17 @@ class InMemorySagaRepository implements SagaRepositoryInterface
         $saga->getAssociationValues()->commit();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function find($type, AssociationValue $associationValue)
-    {        
+    {
         $result = array();
 
         foreach ($this->managedSagas as $id => $saga) {
             if ($saga->getAssociationValues()->contains($associationValue) && $type
-                    === get_class($saga)) {
+                === get_class($saga)
+            ) {
                 $result[] = $saga->getSagaIdentifier();
             }
         }
@@ -72,11 +82,17 @@ class InMemorySagaRepository implements SagaRepositoryInterface
         return $result;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function load($sagaIdentifier)
     {
         return $this->managedSagas[$sagaIdentifier];
     }
 
+    /**
+     * @return int
+     */
     public function size()
     {
         return count($this->managedSagas);

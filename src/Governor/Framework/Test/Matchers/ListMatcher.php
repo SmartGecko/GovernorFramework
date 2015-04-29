@@ -49,13 +49,17 @@ abstract class ListMatcher extends BaseMatcher
     /**
      * Creates an abstract matcher to match a number of Matchers against Events contained inside a Collection.
      *
-     * @param array $matchers The matchers to match the individual Events in the Collection
+     * @param Matcher[] $matchers The matchers to match the individual Events in the Collection
      */
     protected function __construct(array $matchers)
     {
         $this->matchers = $matchers;
     }
 
+    /**
+     * @param mixed $item
+     * @return bool
+     */
     public function matches($item)
     {        
         return is_array($item) && $this->matchesList($item);
@@ -107,7 +111,7 @@ abstract class ListMatcher extends BaseMatcher
     /**
      * Returns a read-only list of Matchers, in the order they were provided in the constructor.
      *
-     * @return array<Matecher> a read-only list of Matchers, in the order they were provided in the constructor
+     * @return Matcher[] a read-only list of Matchers, in the order they were provided in the constructor
      */
     protected function getMatchers()
     {

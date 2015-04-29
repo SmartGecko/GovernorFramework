@@ -32,8 +32,8 @@ use Governor\Framework\Annotations\SagaEventHandler;
 /**
  * The SagaMethodMessageHandlerInspector is using annotations to find the correct message handlers of a Saga.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class SagaMethodMessageHandlerInspector
 {
@@ -52,36 +52,48 @@ class SagaMethodMessageHandlerInspector
     {
         $found = array();
         $reflectionClass = ReflectionUtils::getClass($this->targetSaga);
-        
+
         foreach (ReflectionUtils::getMethods($reflectionClass) as $method) {
-            $annot = $this->reader->getMethodAnnotation($method,
-                    SagaEventHandler::class);
+            $annot = $this->reader->getMethodAnnotation(
+                $method,
+                SagaEventHandler::class
+            );
 
             if (null === $annot) {
                 continue;
             }
 
             if (0 === count($method->getParameters())) {
-                throw new \RuntimeException(sprintf("Invalid method signature detected of %s::%s. " .
+                throw new \RuntimeException(
+                    sprintf(
+                        "Invalid method signature detected of %s::%s. ".
                         "Methods annotated with @SagaEventHandler must have exatly one parameter with the type of the message they handle. ",
-                        $reflectionClass->name, $method->name));
+                        $reflectionClass->name,
+                        $method->name
+                    )
+                );
             }
 
             $parameter = current($method->getParameters());
 
             if (null !== $parameter->getClass() &&
-                    $parameter->getClass()->name === $event->getPayloadType()) {                
-                $found[] = SagaMethodMessageHandler::getInstance($event,
-                                $method, $annot);
+                $parameter->getClass()->name === $event->getPayloadType()
+            ) {
+                $found[] = SagaMethodMessageHandler::getInstance(
+                    $event,
+                    $method,
+                    $annot
+                );
             }
         }
 
         return $found;
     }
 
-    public function findHandlerMethod(AbstractAnnotatedSaga $target,
-            EventMessageInterface $event)
-    {
+    public function findHandlerMethod(
+        AbstractAnnotatedSaga $target,
+        EventMessageInterface $event
+    ) {
         foreach ($this->getMessageHandlers($event) as $handler) {
             $associationValue = $handler->getAssociationValue($event);
             if ($target->getAssociationValues()->contains($associationValue)) {

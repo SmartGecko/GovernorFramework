@@ -24,7 +24,6 @@
 
 namespace Governor\Framework\Saga;
 
-use Doctrine\Tests\Common\Annotations\Null;
 use Governor\Framework\Common\Logging\NullLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;

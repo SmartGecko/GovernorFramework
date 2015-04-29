@@ -32,17 +32,20 @@ use Governor\Framework\Domain\DomainEventStreamInterface;
 use Governor\Framework\Domain\AbstractAggregateRoot;
 
 /**
- * Description of AbstractEventSourcedAggregateRoot
+ * Abstract implementation of the {@see EventSourcedAggregateRootInterface} to be used as a base class for event sourced aggregates.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  * @ORM\MappedSuperclass
  */
 abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot implements EventSourcedAggregateRootInterface
 {
-    
+
+    /**
+     * {@inheritdoc}
+     */
     public function initializeState(DomainEventStreamInterface $domainEventStream)
-    {        
+    {
         if (0 !== $this->getUncommittedEventCount()) {
             throw new \RuntimeException("Aggregate is already initialized");
         }
@@ -51,34 +54,51 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
 
         while ($domainEventStream->hasNext()) {
             $event = $domainEventStream->next();
-            $lastScn = $event->getScn();                   
+            $lastScn = $event->getScn();
             $this->handleRecursively($event);
         }
 
         $this->initializeEventStream($lastScn);
     }
 
+    /**
+     * @return EventSourcedEntityInterface[]
+     */
     protected abstract function getChildEntities();
 
+    /**
+     * @param DomainEventMessageInterface $event
+     * @return mixed
+     */
     protected abstract function handle(DomainEventMessageInterface $event);
 
+    /**
+     * @param mixed $payload
+     * @param MetaData $metaData
+     */
     public function apply($payload, MetaData $metaData = null)
     {
         $metaData = isset($metaData) ? $metaData : MetaData::emptyInstance();
-      
+
         if (null === $this->getIdentifier()) {
             if ($this->getUncommittedEventCount() > 0 || $this->getVersion() !== null) {
-                throw new \RuntimeException("The Aggregate Identifier has not been initialized. "
-                . "It must be initialized at the latest when the "
-                . "first event is applied.");
+                throw new \RuntimeException(
+                    "The Aggregate Identifier has not been initialized. "
+                    ."It must be initialized at the latest when the "
+                    ."first event is applied."
+                );
             }
-            $this->handleRecursively(new GenericDomainEventMessage(null, 0,
-                $payload, $metaData));
+            $this->handleRecursively(
+                new GenericDomainEventMessage(
+                    null, 0,
+                    $payload, $metaData
+                )
+            );
             $this->registerEvent($payload, $metaData);
         } else {
             $event = $this->registerEvent($payload, $metaData);
             $this->handleRecursively($event);
-        }        
+        }
     }
 
     private function handleRecursively(DomainEventMessageInterface $event)
@@ -97,7 +117,10 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
         }
     }
 
-    
+
+    /**
+     * @return int
+     */
     public function getVersion()
     {
         return $this->getLastCommittedEventScn();

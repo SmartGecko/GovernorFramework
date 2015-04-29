@@ -26,6 +26,7 @@ namespace Governor\Framework\EventHandling;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
+use Governor\Framework\Domain\EventMessageInterface;
 
 /**
  * Description of AbstractCluster
@@ -77,8 +78,15 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
         $this->subscribedMonitors = new EventProcessingMonitorCollection();
     }
 
+    /**
+     * @param EventMessageInterface[] $events
+     * @param EventListenerInterface[] $eventListeners
+     */
     protected abstract function doPublish(array $events, array $eventListeners);
 
+    /**
+     * @return EventListenerInterface[]
+     */
     public function getMembers()
     {
         $listeners = array();
@@ -108,16 +116,25 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
         return $listeners;
     }
 
+    /**
+     * @return ClusterMetaDataInterface
+     */
     public function getMetaData()
     {
         return $this->clusterMetaData;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
 
+    /**
+     * @param EventMessageInterface[] $events
+     */
     public function publish(array $events)
     {
         $this->doPublish($events, $this->getMembers());
@@ -137,6 +154,10 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
         }
     }
 
+    /**
+     * @param LoggerInterface $logger
+     * @return null
+     */
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;

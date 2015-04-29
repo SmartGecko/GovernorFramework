@@ -24,33 +24,42 @@
 
 namespace Governor\Framework\EventHandling;
 
+use Governor\Framework\Domain\EventMessageInterface;
+
 /**
  * Description of SimpleCluster
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class SimpleCluster extends AbstractCluster
 {
 
-    public function __construct($name,
-            OrderResolverInterface $orderResolver = null)
-    {
+    public function __construct(
+        $name,
+        OrderResolverInterface $orderResolver = null
+    ) {
         parent::__construct($name, $orderResolver);
     }
 
+    /**
+     * @param EventMessageInterface[] $events
+     * @param EventListenerInterface[] $eventListeners
+     * @throws \Exception
+     */
     protected function doPublish(array $events, array $eventListeners)
-    {        
+    {
         try {
             foreach ($events as $event) {
-                $this->logger->debug("Dispatching Event {event} to {count} listeners",
-                            array(
-                                "event" => $event->getPayloadType(), 
-                                "count" => count($eventListeners)
-                            )
-                        );
-                    
-                foreach ($eventListeners as $listener) {                    
+                $this->logger->debug(
+                    "Dispatching Event {event} to {count} listeners",
+                    array(
+                        "event" => $event->getPayloadType(),
+                        "count" => count($eventListeners)
+                    )
+                );
+
+                foreach ($eventListeners as $listener) {
                     $listener->handle($event);
                 }
             }
