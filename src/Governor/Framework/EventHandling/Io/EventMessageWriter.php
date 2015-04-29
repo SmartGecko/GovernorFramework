@@ -66,15 +66,15 @@ class EventMessageWriter
         $serializedPayload = $this->serializer->serializePayload($event);
         $serializedMetaData = $this->serializer->serializeMetaData($event);
                 
-        $data = pack("na36a25", $type, $event->getIdentifier(),
-                $event->getTimestamp()->format('c'));
+        $data = pack("na36N", $type, $event->getIdentifier(),
+                $event->getTimestamp()->format('U'));
 
         if ($event instanceof DomainEventMessageInterface) {
             $data .= pack("a36N", $event->getAggregateIdentifier(),
                     $event->getScn());
         }
 
-        $packFormat = sprintf("na%sna%sna%s",
+        $packFormat = sprintf("Na%sNa%sNa%s",
                 strlen($serializedPayload->getType()->getName()),
                 strlen($serializedPayload->getData()),
                 strlen($serializedMetaData->getData()));

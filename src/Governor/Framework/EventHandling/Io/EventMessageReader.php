@@ -62,8 +62,8 @@ class EventMessageReader
      */
     public function readEventMessage($data)
     {
-        $raw = unpack("ntype/a36identifier/a25timestamp", $data);
-        $offset = 63;
+        $raw = unpack("ntype/a36identifier/Ntimestamp", $data);
+        $offset = 42;
 
         if ($raw['type'] === 3) {
             $raw = array_merge($raw,
@@ -80,7 +80,7 @@ class EventMessageReader
         $serializedMetadata = new SimpleSerializedObject($raw['meta'],
                 new SimpleSerializedType('Governor\Framework\Domain\MetaData'));
         
-        $dateTime = new \DateTime($raw['timestamp']);
+        $dateTime = \DateTime::createFromFormat('U', $raw['timestamp']);
         $dateTime->setTimezone(new \DateTimeZone(date_default_timezone_get()));                
         
         if (3 === $raw['type']) {
@@ -99,8 +99,8 @@ class EventMessageReader
     private function read(&$raw, &$offset, $data, $name)
     {
         $raw = array_merge($raw,
-                unpack(sprintf("n%sLength", $name), substr($data, $offset)));
-        $offset += 2;
+                unpack(sprintf("N%sLength", $name), substr($data, $offset)));
+        $offset += 4;
 
         $raw = array_merge($raw,
                 unpack(sprintf("a%s%s", $raw[sprintf("%sLength", $name)], $name),
