@@ -1,6 +1,6 @@
 # Governor Framework PHP CQRS library
 
-[![Build Status](https://travis-ci.org/davidkalosi/GovernorFramework.png?branch=master)](https://travis-ci.org/davidkalosi/GovernorFramework)
+[![Build Status](https://travis-ci.org/SmartGecko/GovernorFramework.svg?branch=master)](https://travis-ci.org/SmartGecko/GovernorFramework)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/SmartGecko/GovernorFramework/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/SmartGecko/GovernorFramework/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/SmartGecko/GovernorFramework/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/SmartGecko/GovernorFramework/?branch=master)
 
