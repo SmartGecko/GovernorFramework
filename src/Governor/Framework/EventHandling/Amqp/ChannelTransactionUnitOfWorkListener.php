@@ -44,7 +44,7 @@ class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
     private $channel;
 
     /**
-     * @var AmqpTerminal 
+     * @var AmqpClusterTerminal
      */
     private $terminal;
 
@@ -57,10 +57,10 @@ class ChannelTransactionUnitOfWorkListener extends UnitOfWorkListenerAdapter
      * 
      * @param LoggerInterface $logger
      * @param AMQPChannel $channel
-     * @param AmqpTerminal $terminal
+     * @param AmqpClusterTerminal $terminal
      */
     public function __construct(LoggerInterface $logger, AMQPChannel $channel,
-            AmqpTerminal $terminal)
+            AmqpClusterTerminal $terminal)
     {
         $this->logger = $logger;
         $this->channel = $channel;

@@ -35,7 +35,7 @@ use Governor\Framework\UnitOfWork\NullTransactionManager;
 use Governor\Framework\Serializer\SimpleSerializedObject;
 use Governor\Framework\Serializer\SimpleSerializedType;
 use Governor\Framework\EventHandling\Amqp\DefaultAmqpMessageConverter;
-use Governor\Framework\EventHandling\Amqp\AmqpTerminal;
+use Governor\Framework\EventHandling\Amqp\AmqpClusterTerminal;
 use Governor\Framework\EventHandling\Amqp\EventPublicationFailedException;
 
 /**
@@ -54,7 +54,7 @@ class AmqpTerminalTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->serializer = \Phake::mock(SerializerInterface::class);
-        $this->testSubject = new AmqpTerminal($this->serializer, null,
+        $this->testSubject = new AmqpClusterTerminal($this->serializer, null,
                 new DefaultAmqpMessageConverter($this->serializer));
         $this->connection = \Phake::mock(AMQPConnection::class);
 

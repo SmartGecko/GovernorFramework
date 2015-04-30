@@ -26,74 +26,72 @@ namespace Governor\Framework\EventHandling;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
+use Governor\Framework\Domain\EventMessageInterface;
 use Governor\Framework\Common\Logging\NullLogger;
 
 /**
  * Simple in memory event bus implementation.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
 {
 
-    /**
-     * @var \SplObjectStorage
-     */
-    private $listeners;
 
     /**
-     * @var LoggerInterface 
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     *
+     * @var EventListenerRegistryInterface
      */
-    function __construct()
+    private $eventListenerRegistry;
+
+    /**
+     * @param EventListenerRegistryInterface $eventListenerRegistry
+     */
+    function __construct(EventListenerRegistryInterface $eventListenerRegistry)
     {
-        $this->listeners = new \SplObjectStorage();
+        $this->eventListenerRegistry = $eventListenerRegistry;
         $this->logger = new NullLogger();
     }
 
     /**
-     * {@inheritdoc}
+     * @param EventMessageInterface[] $events
      */
     public function publish(array $events)
     {
+        $listeners = $this->eventListenerRegistry->getListeners();
+
         foreach ($events as $event) {
-            $this->listeners->rewind();
+            $listeners->rewind();
 
-            while ($this->listeners->valid()) {
-                $listener = $this->listeners->current();
+            while ($listeners->valid()) {
+                /** @var EventListenerInterface $listener */
+                $listener = $listeners->current();
 
-                $this->logger->debug("Dispatching Event {event} to EventListener {listener}",
-                        array("event" => $event->getPayloadType(), "listener" => $this->getClassName($listener)));
+                $this->logger->debug(
+                    "Dispatching Event {event} to EventListener {listener}",
+                    [
+                        "event" => $event->getPayloadType(),
+                        "listener" => $this->eventListenerRegistry->getListenerClassName($listener)
+                    ]
+                );
                 $listener->handle($event);
 
-                $this->listeners->next();
+                $listeners->next();
             }
         }
     }
 
     /**
-     * {@inheritdoc}
+     * @return EventListenerRegistryInterface
      */
-    public function subscribe(EventListenerInterface $eventListener)
+    public function getEventListenerRegistry()
     {
-        if (!$this->listeners->contains($eventListener)) {
-            $this->listeners->attach($eventListener);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function unsubscribe(EventListenerInterface $eventListener)
-    {
-        if ($this->listeners->contains($eventListener)) {
-            $this->listeners->detach($eventListener);
-        }
+        return $this->eventListenerRegistry;
     }
 
 
@@ -105,19 +103,5 @@ class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
         $this->logger = $logger;
     }
 
-    /**
-     * @param EventListenerInterface $eventListener
-     * @return string
-     */
-    private function getClassName(EventListenerInterface $eventListener)
-    {
-        if ($eventListener instanceof EventListenerProxyInterface) {
-            $listenerType = $eventListener->getTargetType();
-        } else {
-            $listenerType = get_class($eventListener);
-        }
-
-        return $listenerType;
-    }
 
 }

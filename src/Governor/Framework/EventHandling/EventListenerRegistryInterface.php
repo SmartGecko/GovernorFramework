@@ -50,4 +50,19 @@ interface EventListenerRegistryInterface
      * @param EventListenerInterface $eventListener The event listener to unsubscribe
      */
     public function unsubscribe(EventListenerInterface $eventListener);
+
+    /**
+     * Returns an array of registered EventListenerInterface-s.
+     *
+     * @return \SplObjectStorage|EventListenerInterface[]
+     */
+    public function getListeners();
+
+    /**
+     * Returns the class name of the EventListenerInterface.
+     *
+     * @param EventListenerInterface $eventListener
+     * @return string
+     */
+    public function getListenerClassName(EventListenerInterface $eventListener);
 }

@@ -30,6 +30,12 @@ use Governor\Framework\Test\Matchers\Matchers;
 use Governor\Framework\Test\Saga\AnnotatedSagaTestFixture;
 use Rhumsaa\Uuid\Uuid;
 
+/**
+ * AnnotatedSaga unit tests
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
+ */
 class AnnotatedSagaTest extends \PHPUnit_Framework_TestCase
 {
     public function testFixtureApi_WhenEventOccurs()

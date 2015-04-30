@@ -16,7 +16,7 @@
  * The software is based on the Axon Framework project which is
  * licensed under the Apache 2.0 license. For more information on the Axon Framework
  * see <http://www.axonframework.org/>.
- * 
+ *
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license. For more information, see
  * <http://www.governor-framework.org/>.
@@ -24,59 +24,68 @@
 
 namespace Governor\Framework\EventHandling;
 
-use Governor\Framework\Domain\MetaData;
 use Governor\Framework\Domain\EventMessageInterface;
 
 /**
- * A cluster represents a group of Event Listeners that are treated as a single group by the {@link
- * ClusteringEventBus}. This allows attributes and behavior (e.g. transaction management, asynchronous processing,
- * distribution) to be applied over a whole group at once.
+ * Description of DefaultClusterTerminal
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface ClusterInterface extends EventProcessingMonitorSupportInterface
+class DefaultClusterTerminal implements ClusterTerminalInterface
 {
 
     /**
-     * Returns the name of this cluster. This name is used to detect distributed instances of the
-     * same cluster. Multiple instances referring to the same logical cluster (on different JVM's) must have the same
-     * name.
-     *
-     * @return string The name of this cluster.
+     * @var \SplObjectStorage|EventBusInterface[]
      */
-    public function getName();
+    private $eventBuses;
+
+    function __construct()
+    {
+        $this->eventBuses = new \SplObjectStorage();
+    }
+
 
     /**
-     * Publishes the given Events to the members of this cluster.
-     *
-     * @param EventMessageInterface[] $events The Events to publish in the cluster
+     * @param EventMessageInterface[] $events
      */
-    public function publish(array $events);
+    public function publish(array $events)
+    {
+        foreach ($this->eventBuses as $eventBus) {
+            $eventBus->publish($events);
+        }
+    }
 
     /**
-     * Returns the MetaData of this Cluster.
-     *
-     * @return MetaData MetaData of this Cluster
-     */
-    public function getMetaData();
-
-    /**
-     * Subscribes the EventBusInterface to this cluster.
+     * Called on a EventBusInterface has been subscribed.
      *
      * @param EventBusInterface $eventBus
      */
-    public function subscribe(EventBusInterface $eventBus);
+    public function onEventBusSubscribed(EventBusInterface $eventBus)
+    {
+        if (!$this->eventBuses->contains($eventBus)) {
+            $this->eventBuses->attach($eventBus);
+        }
+    }
 
     /**
-     * Unsubscribes the EventBusInterface from this cluster.
+     * Called on a EventBusInterface has been unsubscribed.
      *
      * @param EventBusInterface $eventBus
      */
-    public function unsubscribe(EventBusInterface $eventBus);
+    public function onEventBusUnsubscribed(EventBusInterface $eventBus)
+    {
+        if ($this->eventBuses->contains($eventBus)) {
+            $this->eventBuses->detach($eventBus);
+        }
+    }
 
     /**
-     * @return EventBusInterface[]
+     * @return \SplObjectStorage|EventBusInterface[]
      */
-    public function getMembers();
+    public function getMembers()
+    {
+        return $this->eventBuses;
+    }
+
 }

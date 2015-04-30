@@ -25,20 +25,36 @@
 namespace Governor\Framework\EventHandling;
 
 /**
- * Description of DefaultClusterMetaData
+ * ClusterMetaDataInterface implementation using a PHP array as storage.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class DefaultClusterMetaData implements ClusterMetaDataInterface
 {
+    /**
+     * @var array
+     */
+    private $properties;
 
-    private $properties = array();
+    public function __construct()
+    {
+        $this->properties = [];
+    }
 
+    /**
+     * @param string $key
+     * @return mixed
+     */
     public function getProperty($key)
     {
         return isset($this->properties[$key]) ? $this->properties[$key] : null;
     }
 
+    /**
+     * @param string $key
+     * @param mixed $value
+     */
     public function setProperty($key, $value)
     {
         if (null === $key) {
@@ -48,11 +64,18 @@ class DefaultClusterMetaData implements ClusterMetaDataInterface
         $this->properties[$key] = $value;
     }
 
+    /**
+     * @param string $key
+     */
     public function removeProperty($key)
     {
         unset($this->properties[$key]);
     }
 
+    /**
+     * @param string $key
+     * @return bool
+     */
     public function isPropertySet($key)
     {
         return array_key_exists($key, $this->properties);

@@ -25,8 +25,10 @@
 namespace Governor\Framework\Test\Utils;
 
 
+use Governor\Framework\EventHandling\EventListenerRegistryInterface;
+use Governor\Framework\EventHandling\InMemoryEventListenerRegistry;
 use Governor\Framework\EventHandling\EventBusInterface;
-use Governor\Framework\EventHandling\EventListenerInterface;
+use Governor\Framework\Domain\EventMessageInterface;
 
 /**
  * Implementation of the EventBusInterface that records the published events into an in memory array.
@@ -34,7 +36,6 @@ use Governor\Framework\EventHandling\EventListenerInterface;
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-
 class RecordingEventBus implements EventBusInterface
 {
     /**
@@ -42,9 +43,9 @@ class RecordingEventBus implements EventBusInterface
      */
     private $publishedEvents;
     /**
-     * @var EventListenerInterface[]
+     * @var EventListenerRegistryInterface[]
      */
-    private $eventListeners;
+    private $eventListenerRegistry;
 
     /**
      * @param array $publishedEvents
@@ -52,36 +53,33 @@ class RecordingEventBus implements EventBusInterface
     public function __construct(array &$publishedEvents)
     {
         $this->publishedEvents = &$publishedEvents;
-        $this->eventListeners = array();
+        $this->eventListenerRegistry = new InMemoryEventListenerRegistry();
     }
 
     /**
-     * @param array $events
+     * @param EventMessageInterface[] $events
      */
     public function publish(array $events)
     {
         $this->publishedEvents = array_merge($this->publishedEvents, $events);
 
         foreach ($events as $event) {
-            foreach ($this->eventListeners as $eventListener) {
+            foreach ($this->eventListenerRegistry->getListeners() as $eventListener) {
                 $eventListener->handle($event);
             }
         }
     }
 
-    /**
-     * @param EventListenerInterface $eventListener
-     */
-    public function subscribe(EventListenerInterface $eventListener)
-    {
-        $this->eventListeners[] = $eventListener;
-    }
 
     /**
-     * @param EventListenerInterface $eventListener
+     * Returns the EventListenerRegistryInterface of this EventBus.
+     *
+     * @return EventListenerRegistryInterface
      */
-    public function unsubscribe(EventListenerInterface $eventListener)
+    public function getEventListenerRegistry()
     {
-
+        return $this->eventListenerRegistry;
     }
+
+
 }

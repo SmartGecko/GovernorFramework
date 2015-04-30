@@ -24,22 +24,43 @@
 
 namespace Governor\Framework\EventHandling;
 
+use Governor\Framework\Domain\EventMessageInterface;
+
 /**
- * The ClusterSelector defines the mechanism that assigns each of the subscribed listeners to a Cluster instance. The
- * selector does *not* need to subscribe the listener to that cluster.
- * <p/>
+ * Interface describing a mechanism that connects Event Buses within a Cluster.
+ * The terminal is responsible for delivering published Events with all of the EventBuses available in the cluster.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface ClusterSelectorInterface
+interface ClusterTerminalInterface
 {
 
     /**
-     * Selects the cluster instance that the given {@code eventListener} should be member of. This may be an existing
-     * (or pre-configured) cluster, as well as a newly created cluster.
-     * <p/>
-     * When {@code null} is returned, this may cause the Event Listener not to be subscribed to any cluster at all.
+     * Publishes the given <code>events</code> to all clusters on the Event Bus. The terminal is responsible for the
+     * delivery process, albeit local or remote.
      *
-     * @param EventListenerInterface $eventListener the event listener to select a cluster for
-     * @return ClusterInterface The Cluster assigned to the listener
+     * @param EventMessageInterface[] $events the collections of events to publish
      */
-    public function selectCluster(EventListenerInterface $eventListener);
+    public function publish(array $events);
+
+    /**
+     * Called on a EventBusInterface has been subscribed.
+     *
+     * @param EventBusInterface $eventBus
+     */
+    public function onEventBusSubscribed(EventBusInterface $eventBus);
+
+    /**
+     * Called on a EventBusInterface has been unsubscribed.
+     *
+     * @param EventBusInterface $eventBus
+     */
+    public function onEventBusUnsubscribed(EventBusInterface $eventBus);
+
+    /**
+     * @return EventBusInterface[]
+     */
+    public function getMembers();
+
 }

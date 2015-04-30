@@ -25,64 +25,54 @@
 namespace Governor\Tests\EventHandling;
 
 use Governor\Framework\Domain\GenericEventMessage;
+use Governor\Framework\EventHandling\InMemoryEventListenerRegistry;
 use Governor\Framework\EventHandling\SimpleCluster;
 use Governor\Framework\EventHandling\EventListenerInterface;
 use Governor\Framework\EventHandling\OrderResolverInterface;
+use Governor\Framework\EventHandling\SimpleEventBus;
 
 /**
- * Description of SimpleClusterTest
+ * SimpleCluster unit tests
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class SimpleClusterTest extends \PHPUnit_Framework_TestCase
 {
 
+    /**
+     * @var SimpleCluster
+     */
     private $testSubject;
+
+    /**
+     * @var EventListenerInterface
+     */
     private $eventListener;
+
+    /**
+     * @var SimpleEventBus
+     */
+    private $eventBus;
 
     public function setUp()
     {
         $this->testSubject = new SimpleCluster("cluster");
-        $this->testSubject->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
         $this->eventListener = $this->getMock(EventListenerInterface::class);
+        $this->eventBus = new SimpleEventBus(new InMemoryEventListenerRegistry());
     }
 
-    public function testSubscribeMember()
+    public function testSubscribeEventBus()
     {
-        $this->testSubject->subscribe($this->eventListener);
+        $this->testSubject->subscribe($this->eventBus);
         $this->assertCount(1, $this->testSubject->getMembers());
     }
 
-    public function testSubscribeOrderedMembers()
-    {
-        $mockOrderResolver = $this->getMock(OrderResolverInterface::class);
-        $eventListener2 = $this->getMock(EventListenerInterface::class);
-
-        $mockOrderResolver->expects($this->any())
-                ->method('orderOf')
-                ->with($this->eventListener)
-                ->will($this->returnValue(1));
-
-        $mockOrderResolver->expects($this->any())
-                ->method('orderOf')
-                ->with($eventListener2)
-                ->will($this->returnValue(2));
-
-        $this->testSubject = new SimpleCluster("cluster", $mockOrderResolver);
-        $this->testSubject->subscribe($eventListener2);
-        $this->testSubject->subscribe($this->eventListener);
-        $this->assertCount(2, $this->testSubject->getMembers());
-        // the eventListener instance must come first        
-        $this->assertSame($this->eventListener,
-                current($this->testSubject->getMembers()));
-    }
-
-    public function testUnsubscribeMember()
+    public function testUnsubscribeEventBus()
     {
         $this->assertCount(0, $this->testSubject->getMembers());
-        $this->testSubject->subscribe($this->eventListener);
-        $this->testSubject->unsubscribe($this->eventListener);
+        $this->testSubject->subscribe($this->eventBus);
+        $this->testSubject->unsubscribe($this->eventBus);
         $this->assertCount(0, $this->testSubject->getMembers());
     }
 
@@ -93,13 +83,39 @@ class SimpleClusterTest extends \PHPUnit_Framework_TestCase
 
     public function testPublishEvent()
     {
-        $this->testSubject->subscribe($this->eventListener);
+        $this->testSubject->subscribe($this->eventBus);
+        $this->eventBus->getEventListenerRegistry()->subscribe($this->eventListener);
 
         $this->eventListener->expects($this->once())
-                ->method('handle');
+            ->method('handle');
 
-        $event = new GenericEventMessage(new \stdClass());
-        $this->testSubject->publish(array($event));
+        $this->testSubject->publish([GenericEventMessage::asEventMessage(new \stdClass())]);
     }
 
+
+    /*    public function testSubscribeOrderedMembers()
+        {
+            $mockOrderResolver = $this->getMock(OrderResolverInterface::class);
+            $eventListener2 = $this->getMock(EventListenerInterface::class);
+
+            $mockOrderResolver->expects($this->any())
+                    ->method('orderOf')
+                    ->with($this->eventListener)
+                    ->will($this->returnValue(1));
+
+            $mockOrderResolver->expects($this->any())
+                    ->method('orderOf')
+                    ->with($eventListener2)
+                    ->will($this->returnValue(2));
+
+            $this->testSubject = new SimpleCluster("cluster", $mockOrderResolver);
+            $this->testSubject->subscribe($eventListener2);
+            $this->testSubject->subscribe($this->eventListener);
+            $this->assertCount(2, $this->testSubject->getMembers());
+            // the eventListener instance must come first
+            $this->assertSame($this->eventListener,
+                    current($this->testSubject->getMembers()));
+        }
+
+    */
 }

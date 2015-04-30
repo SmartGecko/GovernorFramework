@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventHandling;
 
+use Governor\Framework\Domain\EventMessageInterface;
 
 /**
  * Event Message bus handles all events that were emitted by domain objects.
@@ -42,26 +43,14 @@ interface EventBusInterface
     /**
      * Publish an event to the bus.
      *
-     * @param array $events
+     * @param EventMessageInterface[] $events
      */
     public function publish(array $events);
 
     /**
-     * Subscribe the given <code>eventListener</code> to this bus. When subscribed, it will receive all events
-     * published to this bus.
-     * <p/>
-     * If the given <code>eventListener</code> is already subscribed, nothing happens.
+     * Returns the EventListenerRegistryInterface of this EventBus.
      *
-     * @param EventListenerInterface $eventListener The event listener to subscribe
-     * @throws EventListenerSubscriptionFailedException if the listener could not be subscribed
+     * @return EventListenerRegistryInterface
      */
-    public function subscribe(EventListenerInterface $eventListener);
-
-    /**
-     * Unsubscribe the given <code>eventListener</code> to this bus. When unsubscribed, it will no longer receive
-     * events published to this bus.
-     *
-     * @param EventListenerInterface $eventListener The event listener to unsubscribe
-     */
-    public function unsubscribe(EventListenerInterface $eventListener);
+    public function getEventListenerRegistry();
 }

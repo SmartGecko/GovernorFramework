@@ -26,6 +26,7 @@ namespace Governor\Framework\Test\Saga;
 
 use Governor\Framework\CommandHandling\Gateway\DefaultCommandGateway;
 use Governor\Framework\CommandHandling\Gateway\CommandGatewayInterface;
+use Governor\Framework\EventHandling\InMemoryEventListenerRegistry;
 use Governor\Framework\Test\FixtureParameterResolverFactory;
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\EventHandling\SimpleEventBus;
@@ -78,7 +79,7 @@ class AnnotatedSagaTestFixture implements FixtureConfigurationInterface, Continu
         $eventScheduler = null;
         $genericSagaFactory = new GenericSagaFactory(new FixtureResourceInjector($this->registeredResources));
 
-        $eventBus = new SimpleEventBus();
+        $eventBus = new SimpleEventBus(new InMemoryEventListenerRegistry());
         $sagaRepository = new InMemorySagaRepository();
         $this->sagaManager = new AnnotatedSagaManager($sagaRepository, $genericSagaFactory, array($sagaType));
         $this->sagaManager->setSuppressExceptions(false);

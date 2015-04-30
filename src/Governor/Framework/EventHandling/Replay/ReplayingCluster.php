@@ -25,6 +25,8 @@
 namespace Governor\Framework\EventHandling\Replay;
 
 use Governor\Framework\Common\Logging\NullLogger;
+use Governor\Framework\EventHandling\EventBusInterface;
+use Governor\Framework\EventHandling\EventListenerRegistryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Governor\Framework\EventHandling\EventProcessingMonitorInterface;
@@ -37,8 +39,8 @@ use Governor\Framework\EventHandling\EventListenerInterface;
 /**
  * Description of ReplayingCluster
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
 {
@@ -71,10 +73,11 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
     private $status = self::STATUS_LIVE;
     private $eventHandlingListeners;
 
-    public function __construct(ClusterInterface $delegate,
-            EventStoreManagementInterface $eventStore,
-            IncomingMessageHandlerInterface $incomingMessageHandler)
-    {
+    public function __construct(
+        ClusterInterface $delegate,
+        EventStoreManagementInterface $eventStore,
+        IncomingMessageHandlerInterface $incomingMessageHandler
+    ) {
         $this->delegate = $delegate;
         $this->replayingEventStore = $eventStore;
         $this->incomingMessageHandler = $incomingMessageHandler;
@@ -97,24 +100,24 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
     }
 
     public function startReplay(CriteriaInterface $criteria = null)
-    {        
-        $this->incomingMessageHandler->prepareForReplay($this->delegate);        
+    {
+        $this->incomingMessageHandler->prepareForReplay($this->delegate);
         $this->status = self::STATUS_REPLAYING;
         $visitor = new ReplayingEventVisitor($this->delegate, $this->logger);
-                    
-        foreach ($this->replayAwareListeners as $replayAwareListener) {            
+
+        foreach ($this->replayAwareListeners as $replayAwareListener) {
             $replayAwareListener->beforeReplay();
         }
-           
+
         $this->replayingEventStore->visitEvents($visitor, $criteria);
-        
-        foreach ($this->replayAwareListeners as $replayAwareListener) {            
+
+        foreach ($this->replayAwareListeners as $replayAwareListener) {
             $replayAwareListener->afterReplay();
         }
-        
-        $this->status = self::STATUS_PROCESSING_BACKLOG;        
+
+        $this->status = self::STATUS_PROCESSING_BACKLOG;
         $this->incomingMessageHandler->processBacklog($this->delegate);
-        
+
         $this->status = self::STATUS_LIVE;
     }
 
@@ -127,11 +130,6 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
     public function isInReplayMode()
     {
         return $this->status !== self::STATUS_LIVE;
-    }
-
-    public function getMembers()
-    {
-        return $this->delegate->getMembers();
     }
 
     public function getMetaData()
@@ -150,30 +148,42 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
             $this->delegate->publish($events);
         } else {
             $this->logger->debug("Cluster is in replaying: sending message to process backlog");
-            $acknowledgedMessages = $this->incomingMessageHandler->onIncomingMessages($this->delegate,
-                    $events);
+            $acknowledgedMessages = $this->incomingMessageHandler->onIncomingMessages(
+                $this->delegate,
+                $events
+            );
             if (null !== $acknowledgedMessages && !empty($acknowledgedMessages)) {
                 $this->eventHandlingListeners->onEventProcessingCompleted($acknowledgedMessages);
             }
         }
     }
 
-    public function subscribe(EventListenerInterface $eventListener)
-    {             
-        $this->delegate->subscribe($eventListener);
-
-        if ($eventListener instanceof ReplayAwareInterface) {                   
-            $this->replayAwareListeners->attach($eventListener);
-        }
+    /**
+     * Subscribes the EventBusInterface to this cluster.
+     *
+     * @param EventBusInterface $eventBus
+     */
+    public function subscribe(EventBusInterface $eventBus)
+    {
+        return $this->delegate->subscribe($eventBus);
     }
 
-    public function unsubscribe(EventListenerInterface $eventListener)
-    {        
-        if ($eventListener instanceof ReplayAwareInterface) {            
-            $this->replayAwareListeners->detach($eventListener);
-        }
+    /**
+     * Unsubscribes the EventBusInterface from this cluster.
+     *
+     * @param EventBusInterface $eventBus
+     */
+    public function unsubscribe(EventBusInterface $eventBus)
+    {
+        return $this->delegate->unsubscribe($eventBus);
+    }
 
-        $this->delegate->unsubscribe($eventListener);
+    /**
+     * @return EventBusInterface[]
+     */
+    public function getMembers()
+    {
+        // TODO: Implement getMembers() method.
     }
 
     /**
@@ -192,7 +202,7 @@ class ReplayingCluster implements ClusterInterface, LoggerAwareInterface
 
     public function unsubscribeEventProcessingMonitor(EventProcessingMonitorInterface $monitor)
     {
-        
+
     }
 
 }

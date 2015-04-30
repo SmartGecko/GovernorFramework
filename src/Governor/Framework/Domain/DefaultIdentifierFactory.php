@@ -27,9 +27,10 @@ namespace Governor\Framework\Domain;
 use Rhumsaa\Uuid\Uuid;
 
 /**
- * Description of DefaultIdentityFactory
+ * DefaultIdentityFactory
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class DefaultIdentifierFactory extends IdentifierFactory
 {

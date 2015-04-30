@@ -25,9 +25,10 @@ use Governor\Framework\EventStore\SnapshotEventStoreInterface;
 use Governor\Framework\EventHandling\EventBusInterface;
 
 /**
- * Description of EventSourcingRepositoryTest
+ * EventSourcingRepository unit tests
  *
- * @author 255196
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -41,8 +42,8 @@ class EventSourcingRepositoryTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->mockEventStore = $this->getMock(SnapshotEventStoreInterface::class);
-        $this->mockEventBus = $this->getMock(EventBusInterface::class,
-            array('publish', 'subscribe', 'unsubscribe'));
+        $this->mockEventBus = $this->getMock(EventBusInterface::class);//,
+            //array('publish', 'subscribe', 'unsubscribe'));
         $this->stubAggregateFactory = new StubAggregateFactory();
         $this->testSubject = new EventSourcingRepository(TestAggregate::class,
             $this->mockEventBus, new NullLockManager(), $this->mockEventStore,

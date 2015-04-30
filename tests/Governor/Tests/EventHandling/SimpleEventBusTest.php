@@ -26,6 +26,7 @@ namespace Governor\Tests\EventHandling;
 
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\EventHandling\EventListenerInterface;
+use Governor\Framework\EventHandling\InMemoryEventListenerRegistry;
 use Governor\Framework\EventHandling\SimpleEventBus;
 
 /**
@@ -52,7 +53,7 @@ class SimpleEventBusTest extends \PHPUnit_Framework_TestCase
         $this->listener2 = $this->getMock(EventListenerInterface::class, array('handle'));
         $this->listener3 = $this->getMock(EventListenerInterface::class, array('handle'));
 
-        $this->testSubject = new SimpleEventBus();
+        $this->testSubject = new SimpleEventBus(new InMemoryEventListenerRegistry());
     }
 
     public function testEventIsDispatchedToSubscribedListeners()
@@ -70,20 +71,20 @@ class SimpleEventBusTest extends \PHPUnit_Framework_TestCase
             ->method('handle');
 
         $this->testSubject->publish($this->newEvent());
-        $this->testSubject->subscribe($this->listener1);
+        $this->testSubject->getEventListenerRegistry()->subscribe($this->listener1);
 
         // subscribing twice should not make a difference
-        $this->testSubject->subscribe($this->listener1);
+        $this->testSubject->getEventListenerRegistry()->subscribe($this->listener1);
         $this->testSubject->publish($this->newEvent());
-        $this->testSubject->subscribe($this->listener2);
-        $this->testSubject->subscribe($this->listener3);
+        $this->testSubject->getEventListenerRegistry()->subscribe($this->listener2);
+        $this->testSubject->getEventListenerRegistry()->subscribe($this->listener3);
         $this->testSubject->publish($this->newEvent());
-        $this->testSubject->unsubscribe($this->listener1);
+        $this->testSubject->getEventListenerRegistry()->unsubscribe($this->listener1);
         $this->testSubject->publish($this->newEvent());
-        $this->testSubject->unsubscribe($this->listener2);
-        $this->testSubject->unsubscribe($this->listener3);
+        $this->testSubject->getEventListenerRegistry()->unsubscribe($this->listener2);
+        $this->testSubject->getEventListenerRegistry()->unsubscribe($this->listener3);
         // unsubscribe a non-subscribed listener should not fail
-        $this->testSubject->unsubscribe($this->listener3);
+        $this->testSubject->getEventListenerRegistry()->unsubscribe($this->listener3);
         $this->testSubject->publish($this->newEvent());
     }
 

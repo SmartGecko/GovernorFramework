@@ -79,7 +79,7 @@ class AnnotatedEventListenerAdapter implements EventListenerProxyInterface, Repl
             $this->replayAware = $annotatedEventListener;
         }
 
-        $this->eventBus->subscribe($this);
+        $this->eventBus->getEventListenerRegistry()->subscribe($this);
     }
 
     /**

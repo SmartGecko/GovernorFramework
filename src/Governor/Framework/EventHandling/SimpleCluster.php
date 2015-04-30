@@ -24,8 +24,6 @@
 
 namespace Governor\Framework\EventHandling;
 
-use Governor\Framework\Domain\EventMessageInterface;
-
 /**
  * Description of SimpleCluster
  *
@@ -35,37 +33,19 @@ use Governor\Framework\Domain\EventMessageInterface;
 class SimpleCluster extends AbstractCluster
 {
 
+    /**
+     * @param string $name
+     * @param ClusterTerminalInterface $clusterTerminal
+     * @param OrderResolverInterface $orderResolver
+     */
     public function __construct(
         $name,
+        ClusterTerminalInterface $clusterTerminal = null,
         OrderResolverInterface $orderResolver = null
     ) {
-        parent::__construct($name, $orderResolver);
-    }
+        $clusterTerminal = null === $clusterTerminal ? new DefaultClusterTerminal() : $clusterTerminal;
 
-    /**
-     * @param EventMessageInterface[] $events
-     * @param EventListenerInterface[] $eventListeners
-     * @throws \Exception
-     */
-    protected function doPublish(array $events, array $eventListeners)
-    {
-        try {
-            foreach ($events as $event) {
-                $this->logger->debug(
-                    "Dispatching Event {event} to {count} listeners",
-                    array(
-                        "event" => $event->getPayloadType(),
-                        "count" => count($eventListeners)
-                    )
-                );
-
-                foreach ($eventListeners as $listener) {
-                    $listener->handle($event);
-                }
-            }
-        } catch (\Exception $ex) {
-            throw $ex;
-        }
+        parent::__construct($name, $clusterTerminal, $orderResolver);
     }
 
 }

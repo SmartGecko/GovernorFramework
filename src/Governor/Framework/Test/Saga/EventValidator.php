@@ -93,7 +93,7 @@ class EventValidator implements EventListenerInterface
      */
     public function startRecording()
     {
-        $this->eventBus->subscribe($this);
+        $this->eventBus->getEventListenerRegistry()->subscribe($this);
 
     }
 

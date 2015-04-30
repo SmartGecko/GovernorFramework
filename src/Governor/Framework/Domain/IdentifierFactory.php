@@ -25,9 +25,10 @@
 namespace Governor\Framework\Domain;
 
 /**
- * Description of IdentifierFactory
+ * Abstract IdentifierFactory definition to be used as a base class by subsequent implementations.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class IdentifierFactory
 {

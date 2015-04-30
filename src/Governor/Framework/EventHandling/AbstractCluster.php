@@ -43,11 +43,6 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
     private $name;
 
     /**
-     * @var \SplObjectStorage
-     */
-    private $eventListeners;
-
-    /**
      * @var DefaultClusterMetaData
      */
     private $clusterMetaData;
@@ -56,6 +51,10 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
      * @var OrderResolverInterface
      */
     private $orderResolver;
+
+    /**
+     * @var EventProcessingMonitorCollection
+     */
     private $subscribedMonitors;
 
     /**
@@ -63,58 +62,70 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
      */
     protected $logger;
 
+    /**
+     * @var ClusterTerminalInterface
+     */
+    private $clusterTerminal;
+
+    /**
+     * @param string $name
+     * @param ClusterTerminalInterface $clusterTerminal
+     * @param OrderResolverInterface $orderResolver
+     */
     protected function __construct(
         $name,
+        ClusterTerminalInterface $clusterTerminal,
         OrderResolverInterface $orderResolver = null
     ) {
         if (null === $name) {
-            throw new \InvalidArgumentException("name may not be null");
+            throw new \InvalidArgumentException("Cluster name cannot not be null.");
         }
 
         $this->name = $name;
-        $this->eventListeners = new \SplObjectStorage();
+        $this->clusterTerminal = $clusterTerminal;
         $this->clusterMetaData = new DefaultClusterMetaData();
         $this->orderResolver = $orderResolver;
         $this->subscribedMonitors = new EventProcessingMonitorCollection();
     }
 
-    /**
-     * @param EventMessageInterface[] $events
-     * @param EventListenerInterface[] $eventListeners
-     */
-    protected abstract function doPublish(array $events, array $eventListeners);
+    /*
+      public function getMembers()
+      {
+          $result = [];
+          $listeners = $this->eventListenerRegistry->getListeners();
+          $listeners->rewind();
 
+          while ($listeners->valid()) {
+              $result[] = $listeners->current();
+              $listeners->next();
+          }
+
+          if (null !== $this->orderResolver) {
+              uasort(
+                  $result,
+                  function ($a, $b) {
+                      $orderA = $this->orderResolver->orderOf($a);
+                      $orderB = $this->orderResolver->orderOf($b);
+
+                      if ($orderA === $orderB) {
+                          return 0;
+                      }
+
+                      return ($orderA < $orderB) ? -1 : 1;
+                  }
+              );
+          }
+
+          return $result;
+      }*/
     /**
-     * @return EventListenerInterface[]
+     * @return EventBusInterface[]
      */
     public function getMembers()
     {
-        $listeners = array();
-        $this->eventListeners->rewind();
-
-        while ($this->eventListeners->valid()) {
-            $listeners[] = $this->eventListeners->current();
-            $this->eventListeners->next();
-        }
-
-        if (null !== $this->orderResolver) {
-            uasort(
-                $listeners,
-                function ($a, $b) {
-                    $orderA = $this->orderResolver->orderOf($a);
-                    $orderB = $this->orderResolver->orderOf($b);
-
-                    if ($orderA === $orderB) {
-                        return 0;
-                    }
-
-                    return ($orderA < $orderB) ? -1 : 1;
-                }
-            );
-        }
-
-        return $listeners;
+        return $this->clusterTerminal->getMembers();
     }
+
 
     /**
      * @return ClusterMetaDataInterface
@@ -137,21 +148,27 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
      */
     public function publish(array $events)
     {
-        $this->doPublish($events, $this->getMembers());
+        $this->clusterTerminal->publish($events);
     }
 
-    public function subscribe(EventListenerInterface $eventListener)
+    /**
+     * Subscribes the EventBusInterface to this cluster.
+     *
+     * @param EventBusInterface $eventBus
+     */
+    public function subscribe(EventBusInterface $eventBus)
     {
-        if (!$this->eventListeners->contains($eventListener)) {
-            $this->eventListeners->attach($eventListener);
-        }
+        $this->clusterTerminal->onEventBusSubscribed($eventBus);
     }
 
-    public function unsubscribe(EventListenerInterface $eventListener)
+    /**
+     * Unsubscribes the EventBusInterface from this cluster.
+     *
+     * @param EventBusInterface $eventBus
+     */
+    public function unsubscribe(EventBusInterface $eventBus)
     {
-        if ($this->eventListeners->contains($eventListener)) {
-            $this->eventListeners->detach($eventListener);
-        }
+        $this->clusterTerminal->onEventBusUnsubscribed($eventBus);
     }
 
     /**
@@ -163,22 +180,17 @@ abstract class AbstractCluster implements ClusterInterface, LoggerAwareInterface
         $this->logger = $logger;
     }
 
-    protected function getClassName(EventListenerInterface $eventListener)
-    {
-        if ($eventListener instanceof EventListenerProxyInterface) {
-            $listenerType = $eventListener->getTargetType();
-        } else {
-            $listenerType = get_class($eventListener);
-        }
-
-        return $listenerType;
-    }
-
+    /**
+     * @param EventProcessingMonitorInterface $monitor
+     */
     public function subscribeEventProcessingMonitor(EventProcessingMonitorInterface $monitor)
     {
         $this->subscribedMonitors->subscribeEventProcessingMonitor($monitor);
     }
 
+    /**
+     * @param EventProcessingMonitorInterface $monitor
+     */
     public function unsubscribeEventProcessingMonitor(EventProcessingMonitorInterface $monitor)
     {
         $this->subscribedMonitors->unsubscribeEventProcessingMonitor($monitor);

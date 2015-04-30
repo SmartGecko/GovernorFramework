@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventHandling\Amqp;
 
+use Governor\Framework\EventHandling\DefaultClusterTerminal;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage as RawMessage;
@@ -31,16 +32,15 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Governor\Framework\Serializer\SerializerInterface;
 use Governor\Framework\EventHandling\ClusterInterface;
-use Governor\Framework\EventHandling\EventBusTerminalInterface;
 use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
 
 /**
- * Implementation of the {@see EventBusTerminalInterface} supporting the AMQP protocol.
+ * Implementation of the {@see ClusterTerminalInterface} supporting the AMQP protocol.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
+class AmqpClusterTerminal extends DefaultClusterTerminal implements  LoggerAwareInterface
 {
 
     const DEFAULT_EXCHANGE_NAME = "Governor.EventBus";
@@ -105,6 +105,8 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
         SerializerInterface $serializer,
         AmqpMessageConverterInterface $messageConverter = null
     ) {
+        parent::__construct();
+
         $this->serializer = $serializer;
         $this->routingKeyResolver = new NamespaceRoutingKeyResolver();
         $this->messageConverter = null === $messageConverter ? new DefaultAmqpMessageConverter(
@@ -270,23 +272,6 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
         $this->exchangeName = $exchangeName;
     }
 
-    public function onClusterCreated(ClusterInterface $cluster)
-    {
-        $clusterMetaData = $cluster->getMetaData();
-
-        if ($clusterMetaData->getProperty(
-                AmqpConsumerConfigurationInterface::AMQP_CONFIG_PROPERTY
-            ) instanceof AmqpConsumerConfigurationInterface
-        ) {
-            $config = $clusterMetaData->getProperty(AmqpConsumerConfigurationInterface::AMQP_CONFIG_PROPERTY);
-        } else {
-            $config = new DefaultAmqpConsumerConfiguration($cluster->getName());
-        }
-
-        $this->clusters[] = $cluster;
-        //getListenerContainerLifecycleManager().registerCluster(cluster, config, messageConverter);
-    }
-
     public function publish(array $events)
     {
         if (null === $this->connection) {
@@ -299,9 +284,7 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
             $channel->tx_select();
         }
 
-        foreach ($this->clusters as $cluster) {
-            $cluster->publish($events);
-        }
+        parent::publish($events);
 
         try {
             if ($this->waitForAck) {
@@ -341,6 +324,10 @@ class AmqpTerminal implements EventBusTerminalInterface, LoggerAwareInterface
         }
     }
 
+    /**
+     * @param LoggerInterface $logger
+     * @return null
+     */
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
