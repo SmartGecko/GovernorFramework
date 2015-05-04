@@ -24,23 +24,22 @@
 
 namespace Governor\Framework\EventHandling\Amqp;
 
-use Governor\Framework\EventHandling\DefaultClusterTerminal;
+use Governor\Framework\EventHandling\TerminalInterface;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage as RawMessage;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Governor\Framework\Serializer\SerializerInterface;
-use Governor\Framework\EventHandling\ClusterInterface;
 use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
 
 /**
- * Implementation of the {@see ClusterTerminalInterface} supporting the AMQP protocol.
+ * Implementation of the {@see TerminalInterface} supporting the AMQP protocol.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-class AmqpClusterTerminal extends DefaultClusterTerminal implements  LoggerAwareInterface
+class AmqpTerminal implements TerminalInterface,  LoggerAwareInterface
 {
 
     const DEFAULT_EXCHANGE_NAME = "Governor.EventBus";
@@ -96,17 +95,10 @@ class AmqpClusterTerminal extends DefaultClusterTerminal implements  LoggerAware
      */
     private $publisherAckTimeout = 0;
 
-    /**
-     * @var ClusterInterface[]
-     */
-    private $clusters = array();
-
     public function __construct(
         SerializerInterface $serializer,
         AmqpMessageConverterInterface $messageConverter = null
     ) {
-        parent::__construct();
-
         $this->serializer = $serializer;
         $this->routingKeyResolver = new NamespaceRoutingKeyResolver();
         $this->messageConverter = null === $messageConverter ? new DefaultAmqpMessageConverter(
@@ -283,8 +275,6 @@ class AmqpClusterTerminal extends DefaultClusterTerminal implements  LoggerAware
         if ($this->isTransactional) {
             $channel->tx_select();
         }
-
-        parent::publish($events);
 
         try {
             if ($this->waitForAck) {

@@ -50,12 +50,18 @@ class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
     private $eventListenerRegistry;
 
     /**
+     * @var TerminalInterface[]
+     */
+    private $terminals;
+
+    /**
      * @param EventListenerRegistryInterface $eventListenerRegistry
      */
     function __construct(EventListenerRegistryInterface $eventListenerRegistry)
     {
         $this->eventListenerRegistry = $eventListenerRegistry;
         $this->logger = new NullLogger();
+        $this->terminals = [];
     }
 
     /**
@@ -84,6 +90,10 @@ class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
                 $listeners->next();
             }
         }
+
+        foreach ($this->terminals as $terminal) {
+            $terminal->publish($events);
+        }
     }
 
     /**
@@ -104,4 +114,13 @@ class SimpleEventBus implements EventBusInterface, LoggerAwareInterface
     }
 
 
+    /**
+     * Sets the terminals to which events will be forwarded.
+     *
+     * @param TerminalInterface[] $terminals
+     */
+    public function setTerminals(array $terminals)
+    {
+        $this->terminals = $terminals;
+    }
 }

@@ -24,6 +24,7 @@
 
 namespace Governor\Tests\EventHandling;
 
+use Governor\Framework\EventHandling\TerminalInterface;
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\EventHandling\EventListenerInterface;
 use Governor\Framework\EventHandling\InMemoryEventListenerRegistry;
@@ -88,9 +89,27 @@ class SimpleEventBusTest extends \PHPUnit_Framework_TestCase
         $this->testSubject->publish($this->newEvent());
     }
 
+    public function testEventsForwardedToTerminals()
+    {
+        $mockTerminal1 = $this->getMock(TerminalInterface::class);
+        $mockTerminal2 = $this->getMock(TerminalInterface::class);
+
+        $this->testSubject->setTerminals([$mockTerminal1, $mockTerminal2]);
+
+        $mockTerminal1->expects($this->once())
+            ->method('publish');
+
+        $mockTerminal2->expects($this->once())
+            ->method('publish');
+
+        $this->testSubject->publish($this->newEvent());
+    }
+
     private function newEvent()
     {
-        return array(new GenericEventMessage(new StubEventMessage()));
+        return [
+            GenericEventMessage::asEventMessage(new StubEventMessage())
+        ];
     }
 
 }

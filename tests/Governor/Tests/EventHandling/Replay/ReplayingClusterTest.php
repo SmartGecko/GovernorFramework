@@ -48,7 +48,7 @@ use Governor\Framework\EventHandling\Replay\ReplayingCluster;
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
  */
-class ReplayingClusterTest extends \PHPUnit_Framework_TestCase
+class ReplayingClusterTest //extends \PHPUnit_Framework_TestCase
 {
 
     /**

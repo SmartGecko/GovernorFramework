@@ -18,6 +18,9 @@ use Governor\Framework\Domain\EventMessageInterface;
  * transaction. Sagas need to be associated with concepts in order to receive specific events. These associations are
  * managed through AssociationValues. For example, to associate a saga with an Order with ID 1234, this saga needs an
  * association value with key <code>"orderId"</code> and value <code>"1234"</code>.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface SagaInterface {
 

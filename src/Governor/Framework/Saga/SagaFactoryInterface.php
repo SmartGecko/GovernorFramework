@@ -10,6 +10,9 @@ namespace Governor\Framework\Saga;
 
 /**
  * Interface describing a mechanism that creates implementations of a Saga.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface SagaFactoryInterface
 {
