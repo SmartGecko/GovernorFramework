@@ -30,29 +30,25 @@ use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\EventHandling\InMemoryEventListenerRegistry;
 use Governor\Framework\EventHandling\Listeners\AnnotatedEventListenerAdapter;
-use Governor\Framework\EventHandling\ClusterInterface;
-use Governor\Framework\EventHandling\ClusteringEventBus;
-use Governor\Framework\EventHandling\DefaultClusterSelector;
 use Governor\Framework\EventHandling\EventListenerInterface;
-use Governor\Framework\EventHandling\SimpleCluster;
 use Governor\Framework\EventHandling\SimpleEventBus;
 use Governor\Framework\EventStore\Management\EventStoreManagementInterface;
 use Governor\Framework\EventStore\Orm\Criteria\OrmCriteriaBuilder;
 use Governor\Framework\EventHandling\Replay\ReplayAwareInterface;
 use Governor\Framework\EventHandling\Replay\IncomingMessageHandlerInterface;
-use Governor\Framework\EventHandling\Replay\ReplayingCluster;
+use Governor\Framework\EventHandling\Replay\ReplayingEventBus;
 
 /**
- * Description of ReplayingClusterTest
+ * Description of ReplayingEventBusTest
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-class ReplayingClusterTest //extends \PHPUnit_Framework_TestCase
+class ReplayingEventBusTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
-     * @var ReplayingCluster
+     * @var ReplayingEventBus
      */
     private $testSubject;
 
@@ -67,9 +63,9 @@ class ReplayingClusterTest //extends \PHPUnit_Framework_TestCase
     private $mockEventStore;
 
     /**
-     * @var ClusterInterface
+     * @var SimpleEventBus
      */
-    private $delegateCluster;
+    private $delegate;
 
     /**
      * @var array
@@ -80,44 +76,46 @@ class ReplayingClusterTest //extends \PHPUnit_Framework_TestCase
     {
         $this->mockMessageHandler = \Phake::mock(IncomingMessageHandlerInterface::class);
         $this->mockEventStore = \Phake::mock(EventStoreManagementInterface::class);
-        $this->delegateCluster = new SimpleCluster('delegate');
+        $this->delegate = \Phake::mock(SimpleEventBus::class);
 
-        $this->testSubject = new ReplayingCluster($this->delegateCluster,
-                $this->mockEventStore, $this->mockMessageHandler);
+        \Phake::when($this->delegate)->getEventListenerRegistry()->thenReturn(new InMemoryEventListenerRegistry());
+
+        $this->testSubject = new ReplayingEventBus(
+            $this->delegate,
+            $this->mockEventStore, $this->mockMessageHandler
+        );
 
         //$this->testSubject->setLogger($this->getMock(\Psr\Log\LoggerInterface::class));
 
         for ($i = 0; $i < 10; $i++) {
-            $this->messages[] = new GenericDomainEventMessage("id", $i,
-                    new Payload("payload text"));
+            $this->messages[] = new GenericDomainEventMessage(
+                "id", $i,
+                new Payload("payload text")
+            );
         }
     }
 
     public function testAnnotatedHandlersRecognized()
     {
-       /* $eventBus = new SimpleEventBus(new InMemoryEventListenerRegistry());
-        $listener = new MyReplayAwareListener();
-        $adapter = new AnnotatedEventListenerAdapter($listener, $eventBus, new SimpleAnnotationReaderFactory());
+//        $delegate = new SimpleEventBus(new InMemoryEventListenerRegistry());
 
-        $eventBus->getEventListenerRegistry()->subscribe($adapter);
-        $this->delegateCluster->subscribe($eventBus);
+        $listener = new MyReplayAwareListener();
+        $adapter = new AnnotatedEventListenerAdapter($listener, $this->delegate, new SimpleAnnotationReaderFactory());
+
+        $this->delegate->getEventListenerRegistry()->subscribe($adapter);
 
         $this->testSubject->startReplay();
 
         $this->assertEquals(0, $listener->counter);
         $this->assertEquals(1, $listener->before);
-        $this->assertEquals(1, $listener->after);*/
+        $this->assertEquals(1, $listener->after);
     }
-/*
+
     public function testRegularMethodsDelegated()
     {
-        $this->testSubject->getMembers();
-        $this->testSubject->getName();
-        $this->testSubject->getMetaData();
+        $this->testSubject->getEventListenerRegistry();
 
-        \Phake::verify($this->delegateCluster)->getMembers();
-        \Phake::verify($this->delegateCluster)->getName();
-        \Phake::verify($this->delegateCluster)->getMetaData();
+        \Phake::verify($this->delegate)->getEventListenerRegistry();
     }
 
     public function testReplay()
@@ -125,32 +123,34 @@ class ReplayingClusterTest //extends \PHPUnit_Framework_TestCase
         $messages = $this->messages;
 
         \Phake::when($this->mockEventStore)->visitEvents(\Phake::anyParameters())
-                ->thenGetReturnByLambda(function ($visitor, $criteria) use ($messages) {
+            ->thenGetReturnByLambda(
+                function ($visitor, $criteria) use ($messages) {
                     foreach ($messages as $message) {
                         $visitor->doWithEvent($message);
                     }
-                });
+                }
+            );
 
         $this->testSubject->startReplay();
 
         \Phake::inOrder(
-                \Phake::verify($this->mockMessageHandler)->prepareForReplay(\Phake::anyParameters()),
-                \Phake::verify($this->mockEventStore)->visitEvents(\Phake::anyParameters()),
-                \Phake::verify($this->delegateCluster, \Phake::times(10))->publish(\Phake::anyParameters()),
-                \Phake::verify($this->mockMessageHandler)->processBacklog(\Phake::anyParameters())
+            \Phake::verify($this->mockMessageHandler)->prepareForReplay(\Phake::anyParameters()),
+            \Phake::verify($this->mockEventStore)->visitEvents(\Phake::anyParameters()),
+            \Phake::verify($this->delegate, \Phake::times(10))->publish(\Phake::anyParameters()),
+            \Phake::verify($this->mockMessageHandler)->processBacklog(\Phake::anyParameters())
         );
 
-        /* !!! TODO 
+        /* !!! TODO
           inOrder.verify(mockMessageHandler).releaseMessage(eq(delegateCluster), isA(DomainEventMessage.class));
          */
-  //  }
-/*
+    }
+
     public function testReplay_HandlersSubscribedTwice()
     {
         $replayAwareListener = \Phake::mock(ReplayAwareListenerInterface::class);
 
-        $this->testSubject->subscribe($replayAwareListener);
-        $this->testSubject->subscribe($replayAwareListener);
+        $this->testSubject->getEventListenerRegistry()->subscribe($replayAwareListener);
+        $this->testSubject->getEventListenerRegistry()->subscribe($replayAwareListener);
 
         $this->testSubject->startReplay();
 
@@ -163,11 +163,13 @@ class ReplayingClusterTest //extends \PHPUnit_Framework_TestCase
         $messages = $this->messages;
 
         \Phake::when($this->mockEventStore)->visitEvents(\Phake::anyParameters())
-                ->thenGetReturnByLambda(function ($visitor, $criteria) use ($messages) {
+            ->thenGetReturnByLambda(
+                function ($visitor, $criteria) use ($messages) {
                     foreach ($messages as $message) {
                         $visitor->doWithEvent($message);
                     }
-                });
+                }
+            );
 
         \Phake::when($this->mockEventStore)->newCriteriaBuilder()->thenReturn(new OrmCriteriaBuilder());
 
@@ -175,11 +177,11 @@ class ReplayingClusterTest //extends \PHPUnit_Framework_TestCase
         $this->testSubject->startReplay($criteria);
 
         \Phake::inOrder(
-                \Phake::verify($this->mockMessageHandler)->prepareForReplay(\Phake::anyParameters()),
-                \Phake::verify($this->mockEventStore)->visitEvents(\Phake::anyParameters()),
-                \Phake::verify($this->delegateCluster, \Phake::times(10))->publish(\Phake::anyParameters()),
-//                \Phake::verify($this->mockMessageHandler, \Phake::times(10))->releaseMessage(\Phake::anyParameters()),
-                \Phake::verify($this->mockMessageHandler)->processBacklog(\Phake::anyParameters())
+            \Phake::verify($this->mockMessageHandler)->prepareForReplay(\Phake::anyParameters()),
+            \Phake::verify($this->mockEventStore)->visitEvents(\Phake::anyParameters()),
+            \Phake::verify($this->delegate, \Phake::times(10))->publish(\Phake::anyParameters()),
+            //                \Phake::verify($this->mockMessageHandler, \Phake::times(10))->releaseMessage(\Phake::anyParameters()),
+            \Phake::verify($this->mockMessageHandler)->processBacklog(\Phake::anyParameters())
         );
 
         /*
@@ -189,45 +191,47 @@ class ReplayingClusterTest //extends \PHPUnit_Framework_TestCase
           inOrder.verify(mockMessageHandler).releaseMessage(eq(delegateCluster), isA(DomainEventMessage.class));
           }
           inOrder.verify(mockMessageHandler).processBacklog(delegateCluster); */
-    //}
-/*
+    }
+
     public function testEventReceivedDuringReplay()
     {
         $concurrentMessage = new GenericEventMessage(new Payload("Concurrent MSG"));
         $self = $this;
 
         \Phake::when($this->mockEventStore)->visitEvents(\Phake::anyParameters())
-                ->thenGetReturnByLambda(function ($visitor, $criteria) use ($concurrentMessage, $self) {
+            ->thenGetReturnByLambda(
+                function ($visitor, $criteria) use ($concurrentMessage, $self) {
                     $self->assertTrue($self->testSubject->isInReplayMode());
                     $self->testSubject->publish(array($concurrentMessage));
 
                     foreach ($self->messages as $message) {
                         $visitor->doWithEvent($message);
                     }
-                });
-      
+                }
+            );
+
         $listener = \Phake::mock(ReplayAwareListenerInterface::class);
-        $this->testSubject->subscribe($listener);
+        $this->testSubject->getEventListenerRegistry()->subscribe($listener);
         $this->testSubject->startReplay();
 
         \Phake::inOrder(
-                \Phake::verify($this->mockMessageHandler)->prepareForReplay(\Phake::anyParameters()),
-                \Phake::verify($listener)->beforeReplay(),
-                \Phake::verify($this->mockEventStore)->visitEvents(\Phake::anyParameters()),
-                \Phake::verify($this->mockMessageHandler)->onIncomingMessages(\Phake::anyParameters()),
-                \Phake::verify($this->delegateCluster, \Phake::times(10))->publish(\Phake::anyParameters()),
-                \Phake::verify($listener)->afterReplay(),
-                \Phake::verify($this->mockMessageHandler)->processBacklog(\Phake::anyParameters())
+            \Phake::verify($this->mockMessageHandler)->prepareForReplay(\Phake::anyParameters()),
+            \Phake::verify($listener)->beforeReplay(),
+            \Phake::verify($this->mockEventStore)->visitEvents(\Phake::anyParameters()),
+            \Phake::verify($this->mockMessageHandler)->onIncomingMessages(\Phake::anyParameters()),
+            \Phake::verify($this->delegate, \Phake::times(10))->publish(\Phake::anyParameters()),
+            \Phake::verify($listener)->afterReplay(),
+            \Phake::verify($this->mockMessageHandler)->processBacklog(\Phake::anyParameters())
         );
-        
-        \Phake::verify($this->delegateCluster, \Phake::never())->publish($concurrentMessage);
-        \Phake::verify($this->delegateCluster)->subscribe($listener);      
+
+        \Phake::verify($this->delegate, \Phake::never())->publish($concurrentMessage);
+     //   \Phake::verify($this->delegate)->subscribe($listener);
     }
-*/
+
     /*
       @Test
       public void testIntermediateTransactionsCommitted() {
-      testSubject = new ReplayingCluster(delegateCluster, mockEventStore, mockTransactionManager, 5,
+      testSubject = new ReplayingEventBus(delegateCluster, mockEventStore, mockTransactionManager, 5,
       mockMessageHandler);
       doAnswer(new Answer() {
       @Override
@@ -268,7 +272,7 @@ class ReplayingClusterTest //extends \PHPUnit_Framework_TestCase
 
 interface ReplayAwareListenerInterface extends ReplayAwareInterface, EventListenerInterface
 {
-    
+
 }
 
 class MyReplayAwareListener implements ReplayAwareInterface

@@ -25,21 +25,23 @@
 namespace Governor\Framework\EventHandling\Replay;
 
 use Psr\Log\LoggerInterface;
-use Governor\Framework\EventHandling\ClusterInterface;
+use Psr\Log\LoggerAwareInterface;
+use Governor\Framework\Common\Logging\NullLogger;
+use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\EventStore\EventVisitorInterface;
 
 /**
  * Description of ReplayingEventVisitor
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-class ReplayingEventVisitor implements EventVisitorInterface
+class ReplayingEventVisitor implements EventVisitorInterface, LoggerAwareInterface
 {
 
     /**
-     * @var ClusterInterface
+     * @var EventBusInterface
      */
     private $delegate;
 
@@ -48,49 +50,41 @@ class ReplayingEventVisitor implements EventVisitorInterface
      */
     private $logger;
 
-    function __construct(ClusterInterface $delegate, LoggerInterface $logger)
+    /**
+     * @param EventBusInterface $delegate
+     */
+    function __construct(EventBusInterface $delegate)
     {
         $this->delegate = $delegate;
-        $this->logger = $logger;
+        $this->logger = new NullLogger();
     }
 
+    /**
+     * @param DomainEventMessageInterface $domainEvent
+     */
     public function doWithEvent(DomainEventMessageInterface $domainEvent)
     {
-    /*    $this->logger->debug(sprintf("Visiting event %s with payload %s",
-                        $domainEvent->getIdentifier(),
-                        $domainEvent->getPayloadType()));*/
+        $this->logger->debug(
+            sprintf(
+                "Visiting event %s with payload %s",
+                $domainEvent->getIdentifier(),
+                $domainEvent->getPayloadType()
+            )
+        );
+
         $this->delegate->publish(array($domainEvent));
     }
 
+    /**
+     * Sets a logger instance on the object
+     *
+     * @param LoggerInterface $logger
+     * @return null
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+
 }
-
-/*
-private int eventCounter = 0;
-            private Object currentTransaction;
-
-            public ReplayingEventVisitor(Object tx) {
-                this.currentTransaction = tx;
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public void doWithEvent(DomainEventMessage domainEvent) {
-                if (commitThreshold > 0 && ++eventCounter > commitThreshold) {
-                    eventCounter = 0;
-                    logger.trace("Replay batch size reached; committing Replay Transaction");
-                    transactionManager.commitTransaction(currentTransaction);
-                    logger.trace("Starting new Replay Transaction for next batch");
-                    currentTransaction = transactionManager.startTransaction();
-                }
-                delegate.publish(domainEvent);
-                List<EventMessage> releasedMessages = incomingMessageHandler.releaseMessage(delegate, domainEvent);
-                if (releasedMessages != null && !releasedMessages.isEmpty()) {
-                    eventHandlingListeners.onEventProcessingCompleted(releasedMessages);
-                }
-            }
-
-            public Object getTransaction() {
-                return currentTransaction;
-            }
-        }
-*/

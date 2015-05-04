@@ -24,43 +24,61 @@
 
 namespace Governor\Framework\EventHandling\Replay;
 
-use Governor\Framework\EventHandling\ClusterInterface;
+use Governor\Framework\EventHandling\EventBusInterface;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 
 /**
- * Description of DiscardingIncomingMessageHandler
+ * DiscardingIncomingMessageHandler
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class DiscardingIncomingMessageHandler implements IncomingMessageHandlerInterface
 {
 
-    public function onIncomingMessages(ClusterInterface $destination,
-            array $messages)
-    {
+    /**
+     * {@inheritdoc}
+     */
+    public function onIncomingMessages(
+        EventBusInterface $destination,
+        array $messages
+    ) {
         return $messages;
     }
 
-    public function onReplayFailed(ClusterInterface $destination,
-            \Exception $cause)
-    {
-        
+    /**
+     * {@inheritdoc}
+     */
+    public function onReplayFailed(
+        EventBusInterface $destination,
+        \Exception $cause
+    ) {
+
     }
 
-    public function prepareForReplay(ClusterInterface $destination)
+    /**
+     * {@inheritdoc}
+     */
+    public function prepareForReplay(EventBusInterface $destination)
     {
-        
+
     }
 
-    public function processBacklog(ClusterInterface $destination)
+    /**
+     * {@inheritdoc}
+     */
+    public function processBacklog(EventBusInterface $destination)
     {
-        
+
     }
 
-    public function releaseMessage(ClusterInterface $destination,
-            DomainEventMessageInterface $message)
-    {
+    /**
+     * {@inheritdoc}
+     */
+    public function releaseMessage(
+        EventBusInterface $destination,
+        DomainEventMessageInterface $message
+    ) {
         return null;
     }
 

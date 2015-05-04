@@ -36,7 +36,7 @@ class EventProcessingListeners implements EventProcessingMonitorInterface
 
     private $delegates;
 
-    function __construct($delegates)
+    function __construct(array $delegates = [])
     {
         $this->delegates = $delegates;
     }

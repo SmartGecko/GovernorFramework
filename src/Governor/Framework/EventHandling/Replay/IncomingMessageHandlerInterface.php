@@ -25,7 +25,7 @@
 namespace Governor\Framework\EventHandling\Replay;
 
 use Governor\Framework\Domain\DomainEventMessageInterface;
-use Governor\Framework\EventHandling\ClusterInterface;
+use Governor\Framework\EventHandling\EventBusInterface;
 
 /**
  * Interface of a mechanism that receives Messages dispatched to a Cluster that is in Replay mode. The implementation
@@ -34,8 +34,8 @@ use Governor\Framework\EventHandling\ClusterInterface;
  * When replying is finished, the handler is asked to flush any backlog it may have gathered during the replay.
  * <p/>
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface IncomingMessageHandlerInterface
 {
@@ -48,12 +48,12 @@ interface IncomingMessageHandlerInterface
      * <p/>
      * This method is invoked in the thread that executes the replay process.
      *
-     * @param ClusterInterface $destination The cluster on which events are about te be replayed
+     * @param EventBusInterface $destination The cluster on which events are about te be replayed
      */
-    public function prepareForReplay(ClusterInterface $destination);
+    public function prepareForReplay(EventBusInterface $destination);
 
     /**
-     * Invoked while the ReplayingCluster is in replay mode and an Event is being dispatched to the Cluster. If the
+     * Invoked while the ReplayingEventBus is in replay mode and an Event is being dispatched to the Cluster. If the
      * timestamp of the given <code>message</code> is before the timestamp of any message reported via {@link
      * #releaseMessage(org.axonframework.eventhandling.Cluster, org.axonframework.domain.DomainEventMessage)}, consider
      * discarding the incoming message.
@@ -63,12 +63,14 @@ interface IncomingMessageHandlerInterface
      * <p/>
      * This method is invoked in the thread that attempts to publish the given messages to the given destination.
      *
-     * @param ClusterInterface $destination The cluster to receive the message
-     * @param array $messages    The messages to dispatch to the cluster
+     * @param EventBusInterface $destination The cluster to receive the message
+     * @param array $messages The messages to dispatch to the cluster
      * @return array a list of messages that may be considered as handled
      */
-    public function onIncomingMessages(ClusterInterface $destination,
-            array $messages);
+    public function onIncomingMessages(
+        EventBusInterface $destination,
+        array $messages
+    );
 
     /**
      * Invoked when a message has been replayed from the event store. If such a message has been received with {@link
@@ -91,12 +93,14 @@ interface IncomingMessageHandlerInterface
      * <p/>
      * This method is invoked in the thread that executes the replay process
      *
-     * @param ClusterInterface $destination The original destination of the message to be released
-     * @param DomainEventMessageInterface $message     The message replayed from the event store
+     * @param EventBusInterface $destination The original destination of the message to be released
+     * @param DomainEventMessageInterface $message The message replayed from the event store
      * @return array The list of messages that have been released
      */
-    public function releaseMessage(ClusterInterface $destination,
-            DomainEventMessageInterface $message);
+    public function releaseMessage(
+        EventBusInterface $destination,
+        DomainEventMessageInterface $message
+    );
 
     /**
      * Invoked when all events from the Event Store have been processed. Any remaining backlog, as well as any messages
@@ -110,17 +114,19 @@ interface IncomingMessageHandlerInterface
      * <p/>
      * This method is invoked in the thread that executes the replay process
      *
-     * @param ClusterInterface $destination The destination cluster to dispatch backlogged messages to
+     * @param EventBusInterface $destination The destination cluster to dispatch backlogged messages to
      */
-    public function processBacklog(ClusterInterface $destination);
+    public function processBacklog(EventBusInterface $destination);
 
     /**
      * Invoked when a replay has failed. Typically, this means the state of the cluster's backing data source cannot be
      * guaranteed, and the replay should be retried.
      *
-     * @param ClusterInterface $destination The destination cluster to dispatch backlogged messages to, if appropriate in this scenario
-     * @param \Exception $cause       The cause of the failure
+     * @param EventBusInterface $destination The destination cluster to dispatch backlogged messages to, if appropriate in this scenario
+     * @param \Exception $cause The cause of the failure
      */
-    public function onReplayFailed(ClusterInterface $destination,
-            \Exception $cause);
+    public function onReplayFailed(
+        EventBusInterface $destination,
+        \Exception $cause
+    );
 }
