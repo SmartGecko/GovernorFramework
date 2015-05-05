@@ -56,6 +56,11 @@ abstract class AbstractAnnotatedCommandHandler implements CommandHandlerInterfac
     private $parameterResolver;
 
     /**
+     * @var AnnotationReaderFactoryInterface
+     */
+    private $annotationReaderFactory;
+
+    /**
      * @param string $className
      * @param string $methodName
      * @param ParameterResolverFactoryInterface $parameterResolver

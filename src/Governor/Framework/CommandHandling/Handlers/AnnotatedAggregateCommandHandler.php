@@ -56,11 +56,6 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
     private $targetResolver;
 
     /**
-     * @var AnnotationReaderFactoryInterface
-     */
-    private $annotationReaderFactory;
-
-    /**
      * @param string $className
      * @param string $methodName
      * @param ParameterResolverFactoryInterface $parameterResolver
