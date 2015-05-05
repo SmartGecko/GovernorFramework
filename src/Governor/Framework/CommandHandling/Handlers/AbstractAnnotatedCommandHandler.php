@@ -24,7 +24,8 @@
 
 namespace Governor\Framework\CommandHandling\Handlers;
 
-use Doctrine\Common\Annotations\AnnotationReader;
+use Governor\Framework\Common\Annotation\SimpleAnnotationReaderFactory;
+use Governor\Framework\Common\Annotation\AnnotationReaderFactoryInterface;
 use Governor\Framework\Common\ParameterResolverFactoryInterface;
 use Governor\Framework\Common\PayloadParameterResolver;
 use Governor\Framework\Domain\MessageInterface;
@@ -40,7 +41,7 @@ abstract class AbstractAnnotatedCommandHandler implements CommandHandlerInterfac
 {
 
     /**
-     * @var \ReflectionMethod 
+     * @var \ReflectionMethod
      */
     private $method;
 
@@ -58,15 +59,20 @@ abstract class AbstractAnnotatedCommandHandler implements CommandHandlerInterfac
      * @param string $className
      * @param string $methodName
      * @param ParameterResolverFactoryInterface $parameterResolver
+     * @param AnnotationReaderFactoryInterface $annotationReaderFactory
      */
-    function __construct($className, $methodName,
-            ParameterResolverFactoryInterface $parameterResolver)
-    {        
+    function __construct(
+        $className,
+        $methodName,
+        ParameterResolverFactoryInterface $parameterResolver,
+        AnnotationReaderFactoryInterface $annotationReaderFactory = null
+    ) {
         $this->method = new \ReflectionMethod($className, $methodName);
 
-        $reader = new AnnotationReader();
-        
-        $this->annotations = $reader->getMethodAnnotations($this->method);
+        $this->annotationReaderFactory = null === $annotationReaderFactory ? new SimpleAnnotationReaderFactory(
+        ) : $annotationReaderFactory;
+
+        $this->annotations = $this->annotationReaderFactory->getReader()->getMethodAnnotations($this->method);
         $this->parameterResolver = $parameterResolver;
     }
 
@@ -102,16 +108,19 @@ abstract class AbstractAnnotatedCommandHandler implements CommandHandlerInterfac
     {
         $arguments = array();
         $parameters = $this->method->getParameters();
-                
-        for ($cc = 0; $cc < count($parameters); $cc++) {            
+        $count = count($parameters);
+
+        for ($cc = 0; $cc < $count; $cc++) {
             if ($cc === 0) {
                 $resolver = new PayloadParameterResolver($message->getPayloadType());
                 $arguments[] = $resolver->resolveParameterValue($message);
-            } else {                
-                $resolver = $this->parameterResolver->createInstance($this->annotations,
-                        $parameters[$cc]);
-                                                
-                $arguments[] = $resolver->resolveParameterValue($message);                
+            } else {
+                $resolver = $this->parameterResolver->createInstance(
+                    $this->annotations,
+                    $parameters[$cc]
+                );
+
+                $arguments[] = $resolver->resolveParameterValue($message);
             }
         }
 

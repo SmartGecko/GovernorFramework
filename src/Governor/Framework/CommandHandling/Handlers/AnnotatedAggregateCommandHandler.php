@@ -76,14 +76,11 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
         CommandTargetResolverInterface $targetResolver = null,
         AnnotationReaderFactoryInterface $annotationReaderFactory = null
     ) {
-        parent::__construct($className, $methodName, $parameterResolver);
+        parent::__construct($className, $methodName, $parameterResolver, $annotationReaderFactory);
         $this->repository = $repository;
 
         $this->targetResolver = null === $targetResolver ? new AnnotationCommandTargetResolver()
             : $targetResolver;
-
-        $this->annotationReaderFactory = null === $annotationReaderFactory ? new SimpleAnnotationReaderFactory(
-        ) : $annotationReaderFactory;
     }
 
     public function handle(
@@ -152,10 +149,10 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
             $handler = new AnnotatedAggregateCommandHandler(
                 $className,
                 $handlerDefinition->getMethod()->name, $parameterResolver,
-                $repository, $targetResolver
+                $repository, $targetResolver, $annotationReaderFactory
             );
 
-            $commandBus->getCommandHandlerRegistry(
+            $commandBus->getCommandHandlerRegistry()->subscribe(
                 $handlerDefinition->getPayloadType(),
                 $handler
             );
