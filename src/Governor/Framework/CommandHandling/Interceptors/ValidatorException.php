@@ -27,9 +27,10 @@ namespace Governor\Framework\CommandHandling\Interceptors;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Governor\Framework\CommandHandling\StructuralCommandValidationFailedException;
 /**
- * Description of ValidatorException
+ * Exception thrown by the validator interceptor.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class ValidatorException extends StructuralCommandValidationFailedException
 {
@@ -37,7 +38,11 @@ class ValidatorException extends StructuralCommandValidationFailedException
      * @var ConstraintViolationListInterface
      */
     private $list;
-    
+
+    /**
+     * @param string $message
+     * @param ConstraintViolationListInterface $list
+     */
     public function __construct($message, ConstraintViolationListInterface $list)
     {
         parent::__construct($message);

@@ -24,7 +24,7 @@
 
 namespace Governor\Framework\CommandHandling\Interceptors;
 
-use Symfony\Component\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterceptorInterface;
 use Governor\Framework\CommandHandling\CommandDispatchInterceptorInterface;
