@@ -1,9 +1,25 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Framework\Domain;
@@ -12,9 +28,10 @@ use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Exclude;
 
 /**
- * Description of MetaData
+ * The object holds meta data information attached to a {@see MessageInterface}
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class MetaData implements \IteratorAggregate, \Countable
 {
@@ -29,17 +46,18 @@ class MetaData implements \IteratorAggregate, \Countable
 
     /**
      * Metadata storage.
+     *
      * @Type ("array")
      * @var array
      */
-    private $metadata = array();
+    private $metadata = [];
 
     /**
      * Constructor.
      *     
      * @param array $metadata
      */
-    public function __construct(array $metadata = array())
+    public function __construct(array $metadata = [])
     {
         $this->metadata = $metadata;
     }
@@ -77,7 +95,7 @@ class MetaData implements \IteratorAggregate, \Countable
      */
     public function get($key)
     {
-        return array_key_exists($key, $this->metadata) ? $this->metadata[$key] : null;
+        return isset($this->metadata[$key]) ? $this->metadata[$key] : null;
     }
 
     /**
@@ -86,7 +104,7 @@ class MetaData implements \IteratorAggregate, \Countable
      * @param array $metadata An array of metadata
      * @return \Governor\Framework\Domain\MetaData
      */
-    public function mergeWith(array $metadata = array())
+    public function mergeWith(array $metadata = [])
     {
         if (empty($metadata)) {
             return $this;
@@ -100,7 +118,7 @@ class MetaData implements \IteratorAggregate, \Countable
      * @param array $keys
      * @return \Governor\Framework\Domain\MetaData
      */
-    public function withoutKeys(array $keys = array())
+    public function withoutKeys(array $keys = [])
     {
         if (empty($keys)) {
             return $this;
@@ -137,7 +155,7 @@ class MetaData implements \IteratorAggregate, \Countable
      */
     public function has($key)
     {
-        return array_key_exists($key, $this->metadata);
+        return isset($this->metadata[$key]);
     }
 
     /**
@@ -173,6 +191,10 @@ class MetaData implements \IteratorAggregate, \Countable
         return self::$emptyInstance;
     }
 
+    /**
+     * @param mixed $other
+     * @return bool
+     */
     public function isEqualTo($other)
     {       
         if (is_array($other)) {

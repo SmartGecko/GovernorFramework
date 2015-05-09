@@ -27,35 +27,53 @@ namespace Governor\Framework\Domain;
 use Rhumsaa\Uuid\Uuid;
 
 /**
- * Description of GenericMessage
+ * Basic implementation of the @see MessageInterface.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class GenericMessage implements MessageInterface
 {
-
+    /**
+     * @var string
+     */
     private $id;
+    /**
+     * @var MetaData
+     */
     private $metadata;
+
+    /**
+     * @var mixed
+     */
     private $payload;
 
+    /**
+     * @param mixed $payload
+     * @param MetaData $metadata
+     * @param string $id
+     */
     public function __construct($payload, MetaData $metadata = null, $id = null)
     {
         if (!is_object($payload)) {
             throw new \InvalidArgumentException("Payload needs to be an object.");
         }
-        
+
         $this->id = isset($id) ? $id : Uuid::uuid1()->toString();
         $this->metadata = isset($metadata) ? $metadata : MetaData::emptyInstance();
         $this->payload = $payload;
     }
 
+    /**
+     * @return string
+     */
     public function getIdentifier()
     {
         return $this->id;
     }
 
     /**
-     * 
+     *
      * @return \Governor\Framework\Domain\MetaData
      */
     public function getMetaData()
@@ -63,33 +81,50 @@ class GenericMessage implements MessageInterface
         return $this->metadata;
     }
 
+    /**
+     * @return mixed
+     */
     public function getPayload()
     {
         return $this->payload;
     }
 
+    /**
+     * @return string
+     */
     public function getPayloadType()
     {
         return get_class($this->payload);
     }
 
-    public function andMetaData(array $metadata = array())
+    /**
+     * @param array $metadata
+     * @return GenericMessage
+     */
+    public function andMetaData(array $metadata = [])
     {
         if (empty($metadata)) {
             return $this;
         }
 
-        return new GenericMessage($this->getPayload(),
-            $this->getMetaData()->mergeWith($metadata));
+        return new GenericMessage(
+            $this->getPayload(),
+            $this->getMetaData()->mergeWith($metadata),
+            $this->getIdentifier()
+        );
     }
 
-    public function withMetaData(array $metadata = array())
+    /**
+     * @param array $metadata
+     * @return GenericMessage
+     */
+    public function withMetaData(array $metadata = [])
     {
         if ($this->getMetaData()->isEqualTo($metadata)) {
             return $this;
         }
 
-        return new GenericMessage($this->getPayload(), new MetaData($metadata));
+        return new GenericMessage($this->getPayload(), new MetaData($metadata), $this->getIdentifier());
     }
 
 }

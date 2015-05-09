@@ -25,9 +25,10 @@
 namespace Governor\Framework\Domain;
 
 /**
- * Description of GenericEventMessage
+ * Default implementation of the @see EventMessageInterface
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class GenericEventMessage extends GenericMessage implements EventMessageInterface
 {
@@ -37,6 +38,12 @@ class GenericEventMessage extends GenericMessage implements EventMessageInterfac
      */
     private $timestamp;
 
+    /**
+     * @param mixed $payload
+     * @param MetaData $metadata
+     * @param string $id
+     * @param \DateTime $timestamp
+     */
     public function __construct(
         $payload,
         MetaData $metadata = null,
@@ -47,6 +54,9 @@ class GenericEventMessage extends GenericMessage implements EventMessageInterfac
         $this->timestamp = isset($timestamp) ? $timestamp : new \DateTime();
     }
 
+    /**
+     * @return \DateTime
+     */
     public function getTimestamp()
     {
         return $this->timestamp;
@@ -62,12 +72,47 @@ class GenericEventMessage extends GenericMessage implements EventMessageInterfac
             return $event;
         } else {
             if ($event instanceof MessageInterface) {
-
-                return new GenericEventMessage($event->getPayload(), $event->getMetaData());
+                return new GenericEventMessage($event->getPayload(), $event->getMetaData(), $event->getIdentifier());
             }
         }
 
         return new GenericEventMessage($event);
+    }
+
+    /**
+     * @param array $metadata
+     * @return GenericEventMessage
+     */
+    public function andMetaData(array $metadata = [])
+    {
+        if (empty($metadata)) {
+            return $this;
+        }
+
+        return new GenericEventMessage(
+            $this->getPayload(),
+            $this->getMetaData()->mergeWith($metadata),
+            $this->getIdentifier(),
+            $this->getTimestamp()
+        );
+    }
+
+    /**
+     * @param array $metadata
+     * @return GenericEventMessage
+     */
+    public function withMetaData(array $metadata = [])
+    {
+        if ($this->getMetaData()->isEqualTo($metadata)) {
+            return $this;
+        }
+
+        return new GenericEventMessage(
+            $this->getPayload(),
+            new MetaData($metadata),
+            $this->getIdentifier(),
+            $this->getTimestamp()
+        );
     }
 
 

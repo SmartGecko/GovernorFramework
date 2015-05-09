@@ -27,7 +27,8 @@ namespace Governor\Framework\Domain;
 /**
  * Description of GenericDomainEventMessage
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class GenericDomainEventMessage extends GenericEventMessage implements DomainEventMessageInterface
 {
@@ -42,61 +43,83 @@ class GenericDomainEventMessage extends GenericEventMessage implements DomainEve
     private $scn;
 
     /**
-     * 
+     *
      * @param string $aggregateIdentifier
      * @param integer $scn
      * @param mixed $payload
-     * @param \Governor\Framework\Domain\MetaData $metadata
+     * @param MetaData $metadata
      * @param string $id
      * @param \DateTime $timestamp
      */
-    public function __construct($aggregateIdentifier, $scn, $payload,
-            MetaData $metadata = null, $id = null, \DateTime $timestamp = null)
-    {
+    public function __construct(
+        $aggregateIdentifier,
+        $scn,
+        $payload,
+        MetaData $metadata = null,
+        $id = null,
+        \DateTime $timestamp = null
+    ) {
         parent::__construct($payload, $metadata, $id, $timestamp);
         $this->aggregateIdentifier = $aggregateIdentifier;
         $this->scn = $scn;
     }
 
+    /**
+     * @return string
+     */
     public function getAggregateIdentifier()
     {
         return $this->aggregateIdentifier;
     }
 
+    /**
+     * @return int
+     */
     public function getScn()
     {
         return $this->scn;
     }
 
     /**
-     * 
+     *
      * @param array $metadata
-     * @return \Governor\Framework\Domain\GenericDomainEventMessage
+     * @return GenericDomainEventMessage
      */
-    public function andMetaData(array $metadata = array())
+    public function andMetaData(array $metadata = [])
     {
         if (empty($metadata)) {
             return $this;
         }
 
-        return new GenericDomainEventMessage($this->getAggregateIdentifier(),
-                $this->scn, $this->getPayload(),
-                $this->getMetaData()->mergeWith($metadata));
+        return new GenericDomainEventMessage(
+            $this->getAggregateIdentifier(),
+            $this->scn,
+            $this->getPayload(),
+            $this->getMetaData()->mergeWith($metadata),
+            $this->getIdentifier(),
+            $this->getTimestamp()
+        );
     }
 
     /**
-     * 
+     *
      * @param array $metadata
-     * @return \Governor\Framework\Domain\GenericDomainEventMessage
+     * @return GenericDomainEventMessage
      */
-    public function withMetaData(array $metadata = array())
+    public function withMetaData(array $metadata = [])
     {
         if ($this->getMetaData()->isEqualTo($metadata)) {
             return $this;
         }
 
-        return new GenericDomainEventMessage($this->aggregateIdentifier,
-                $this->scn, $this->getPayload(), new MetaData($metadata));
+        return new GenericDomainEventMessage(
+            $this->aggregateIdentifier,
+            $this->scn,
+            $this->getPayload(),
+            new MetaData($metadata),
+            $this->getIdentifier(),
+            $this->getTimestamp()
+        );
     }
 
 }

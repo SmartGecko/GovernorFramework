@@ -6,8 +6,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="83a90ae1-edab-4e52-81a7-ea70077f4ad2" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Interceptors/ValidatorException.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Interceptors/ValidatorException.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Interceptors/ValidatorInterceptor.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Interceptors/ValidatorInterceptor.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericDomainEventMessage.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericDomainEventMessage.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericDomainEventMessageTest.php" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericDomainEventMessageTest.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericEventMessage.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericEventMessage.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericEventMessageTest.php" afterPath="$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericEventMessageTest.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericMessage.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericMessage.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Governor/Framework/Domain/MetaData.php" afterPath="$PROJECT_DIR$/src/Governor/Framework/Domain/MetaData.php" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="GovernorFramework.iws" />
@@ -32,7 +36,7 @@
     <SUITE FILE_PATH="coverage/GovernorFramework$FixtureTestGeneric.coverage" NAME="FixtureTestGeneric Coverage Results" MODIFIED="1419063535665" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/GovernorFramework$DefaultIdentifierFactoryTest.coverage" NAME="DefaultIdentifierFactoryTest Coverage Results" MODIFIED="1430429648034" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/GovernorFramework$AnnotatedEventListenerAdapterTest.coverage" NAME="AnnotatedEventListenerAdapterTest Coverage Results" MODIFIED="1422560655825" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/GovernorFramework$tests.coverage" NAME="tests Coverage Results" MODIFIED="1430430785046" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/GovernorFramework$tests.coverage" NAME="tests Coverage Results" MODIFIED="1431169209365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="PhpCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -46,37 +50,60 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ReplayingEventBus.php" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Governor/Framework/EventHandling/Replay/ReplayingEventBus.php">
+      <file leaf-file-name="DefaultUnitOfWork.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Governor/Framework/UnitOfWork/DefaultUnitOfWork.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-8.375" vertical-offset="969" max-vertical-offset="2685">
-              <caret line="98" column="46" selection-start-line="98" selection-start-column="46" selection-end-line="98" selection-end-column="46" />
+            <state vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="4830">
+              <caret line="34" column="0" selection-start-line="34" selection-start-column="0" selection-end-line="35" selection-end-column="90" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GenericEventMessage.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/GenericEventMessage.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-61.25" vertical-offset="0" max-vertical-offset="1875">
+              <caret line="98" column="0" selection-start-line="98" selection-start-column="0" selection-end-line="98" selection-end-column="0" />
               <folding>
-                <element signature="e#1238#1287#0#PHP" expanded="true" />
+                <element signature="e#7#1184#0#PHP" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AbstractAnnotatedCommandHandler.php" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AbstractAnnotatedCommandHandler.php">
+      <file leaf-file-name="GenericDomainEventMessageTest.php" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericDomainEventMessageTest.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-9.625" vertical-offset="279" max-vertical-offset="1815">
-              <caret line="54" column="7" selection-start-line="54" selection-start-column="7" selection-end-line="54" selection-end-column="7" />
+            <state vertical-scroll-proportion="0.656051" vertical-offset="1465" max-vertical-offset="2250">
+              <caret line="134" column="83" selection-start-line="134" selection-start-column="83" selection-end-line="134" selection-end-column="83" />
               <folding>
-                <element signature="e#1242#1313#0#PHP" expanded="true" />
+                <element signature="e#7#1183#0#PHP" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ValidatorInterceptor.php" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Interceptors/ValidatorInterceptor.php">
+      <file leaf-file-name="GenericMessage.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/GenericMessage.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.34394905" vertical-offset="0" max-vertical-offset="1005">
-              <caret line="38" column="54" selection-start-line="38" selection-start-column="54" selection-end-line="38" selection-end-column="54" />
+            <state vertical-scroll-proportion="-19.375" vertical-offset="0" max-vertical-offset="2040">
+              <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="32" selection-end-column="90" />
               <folding>
-                <element signature="e#1246#1307#0#PHP" expanded="true" />
+                <element signature="e#7#1184#0#PHP" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GenericEventMessageTest.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericEventMessageTest.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-26.458334" vertical-offset="775" max-vertical-offset="1605">
+              <caret line="94" column="83" selection-start-line="94" selection-start-column="83" selection-end-line="94" selection-end-column="83" />
+              <folding>
+                <element signature="e#7#1183#0#PHP" expanded="true" />
+                <element signature="e#1220#1270#0#PHP" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -97,8 +124,8 @@
       <file leaf-file-name="AnnotatedAggregateCommandHandler.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AnnotatedAggregateCommandHandler.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-8.75" vertical-offset="0" max-vertical-offset="1995">
-              <caret line="44" column="64" selection-start-line="44" selection-start-column="64" selection-end-line="44" selection-end-column="64" />
+            <state vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="1995">
+              <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="42" selection-end-column="90" />
               <folding />
             </state>
           </provider>
@@ -107,9 +134,12 @@
       <file leaf-file-name="AnnotatedCommandHandler.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AnnotatedCommandHandler.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-13.125" vertical-offset="0" max-vertical-offset="645">
+            <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="645">
               <caret line="27" column="56" selection-start-line="27" selection-start-column="56" selection-end-line="27" selection-end-column="56" />
-              <folding />
+              <folding>
+                <element signature="e#7#191#0#PHP" expanded="false" />
+                <element signature="e#249#312#0#PHP" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -117,7 +147,7 @@
       <file leaf-file-name="DefaultParameterResolverFactory.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Common/DefaultParameterResolverFactory.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.0" vertical-offset="0" max-vertical-offset="600">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="600">
               <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding>
                 <element signature="e#7#1184#0#PHP" expanded="false" />
@@ -135,12 +165,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Matchers/ListMatcher.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Matchers/ListWithAllOfMatcher.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/Test/Matchers/ListWithAnyOfMatcher.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/EventStore/Filesystem/FilesystemSnapshotEventReader.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/EventHandling/SimpleEventBusTerminal.php" />
-        <option value="$PROJECT_DIR$/src/Governor/Framework/EventHandling/EventBusInterface.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/EventHandling/EventListenerRegistryInterface.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/EventHandling/InMemoryEventListenerRegistry.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/EventHandling/DefaultClusterSelector.php" />
@@ -186,6 +210,12 @@
         <option value="$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AbstractAnnotatedCommandHandler.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Interceptors/ValidatorException.php" />
         <option value="$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Interceptors/ValidatorInterceptor.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Domain/MetaData.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericMessage.php" />
+        <option value="$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericEventMessageTest.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericEventMessage.php" />
+        <option value="$PROJECT_DIR$/src/Governor/Framework/Domain/GenericDomainEventMessage.php" />
+        <option value="$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericDomainEventMessageTest.php" />
       </list>
     </option>
   </component>
@@ -237,6 +267,7 @@
     </include_path>
   </component>
   <component name="ProjectFrameBounds">
+    <option name="x" value="-1" />
     <option name="y" value="23" />
     <option name="width" value="2560" />
     <option name="height" value="1337" />
@@ -322,6 +353,32 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="tests" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GovernorFramework" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GovernorFramework" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tests" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Governor" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Tests" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="UnitOfWork" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -482,6 +539,32 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="CommandHandling" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GovernorFramework" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GovernorFramework" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Governor" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Framework" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="UnitOfWork" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -785,26 +868,26 @@
       <ConfigurationWrapper RunnerId="PhpUnitCoverageRunner" />
       <method />
     </configuration>
-    <configuration default="false" name="DefaultClusterTerminalTest" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" temporary="true">
-      <TestRunner class="Governor\Tests\EventHandling\DefaultClusterTerminalTest" file="$PROJECT_DIR$/tests/Governor/Tests/EventHandling/DefaultClusterTerminalTest.php" scope="Class" />
-      <RunnerSettings RunnerId="PhpRunner" />
-      <ConfigurationWrapper RunnerId="PhpRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="src" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" temporary="true">
-      <TestRunner directory="$PROJECT_DIR$/src" />
-      <RunnerSettings RunnerId="PhpRunner" />
-      <ConfigurationWrapper RunnerId="PhpRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="SimpleEventBusTest" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" temporary="true">
-      <TestRunner class="Governor\Tests\EventHandling\SimpleEventBusTest" file="$PROJECT_DIR$/tests/Governor/Tests/EventHandling/SimpleEventBusTest.php" scope="Class" />
-      <RunnerSettings RunnerId="PhpRunner" />
-      <ConfigurationWrapper RunnerId="PhpRunner" />
-      <method />
-    </configuration>
     <configuration default="false" name="ReplayingEventBusTest" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" temporary="true">
       <TestRunner class="Governor\Tests\EventHandling\Replay\ReplayingEventBusTest" file="$PROJECT_DIR$/tests/Governor/Tests/EventHandling/Replay/ReplayingEventBusTest.php" scope="Class" />
+      <RunnerSettings RunnerId="PhpRunner" />
+      <ConfigurationWrapper RunnerId="PhpRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="MetaDataTest" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" temporary="true">
+      <TestRunner class="Governor\Tests\Domain\MetaDataTest" file="$PROJECT_DIR$/tests/Governor/Tests/Domain/MetaDataTest.php" scope="Class" />
+      <RunnerSettings RunnerId="PhpRunner" />
+      <ConfigurationWrapper RunnerId="PhpRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="GenericEventMessageTest" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" temporary="true">
+      <TestRunner class="Governor\Tests\Domain\GenericEventMessageTest" file="$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericEventMessageTest.php" scope="Class" />
+      <RunnerSettings RunnerId="PhpRunner" />
+      <ConfigurationWrapper RunnerId="PhpRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="GenericDomainEventMessageTest" type="PHPUnitRunConfigurationType" factoryName="PHPUnit" temporary="true">
+      <TestRunner class="Governor\Tests\Domain\GenericDomainEventMessageTest" file="$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericDomainEventMessageTest.php" scope="Class" />
       <RunnerSettings RunnerId="PhpRunner" />
       <ConfigurationWrapper RunnerId="PhpRunner" />
       <method />
@@ -847,18 +930,18 @@
     <list size="6">
       <item index="0" class="java.lang.String" itemvalue="PHPUnit.EventValidatorTest" />
       <item index="1" class="java.lang.String" itemvalue="PHPUnit.tests" />
-      <item index="2" class="java.lang.String" itemvalue="PHPUnit.DefaultClusterTerminalTest" />
-      <item index="3" class="java.lang.String" itemvalue="PHPUnit.src" />
-      <item index="4" class="java.lang.String" itemvalue="PHPUnit.SimpleEventBusTest" />
-      <item index="5" class="java.lang.String" itemvalue="PHPUnit.ReplayingEventBusTest" />
+      <item index="2" class="java.lang.String" itemvalue="PHPUnit.ReplayingEventBusTest" />
+      <item index="3" class="java.lang.String" itemvalue="PHPUnit.MetaDataTest" />
+      <item index="4" class="java.lang.String" itemvalue="PHPUnit.GenericEventMessageTest" />
+      <item index="5" class="java.lang.String" itemvalue="PHPUnit.GenericDomainEventMessageTest" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="PHPUnit.tests" />
-        <item index="1" class="java.lang.String" itemvalue="PHPUnit.ReplayingEventBusTest" />
-        <item index="2" class="java.lang.String" itemvalue="PHPUnit.SimpleEventBusTest" />
-        <item index="3" class="java.lang.String" itemvalue="PHPUnit.src" />
-        <item index="4" class="java.lang.String" itemvalue="PHPUnit.DefaultClusterTerminalTest" />
+        <item index="1" class="java.lang.String" itemvalue="PHPUnit.GenericDomainEventMessageTest" />
+        <item index="2" class="java.lang.String" itemvalue="PHPUnit.GenericEventMessageTest" />
+        <item index="3" class="java.lang.String" itemvalue="PHPUnit.MetaDataTest" />
+        <item index="4" class="java.lang.String" itemvalue="PHPUnit.ReplayingEventBusTest" />
       </list>
     </recent_temporary>
   </component>
@@ -1005,7 +1088,13 @@
       <option name="project" value="LOCAL" />
       <updated>1430856295975</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="validator deprecation changes">
+      <created>1430945047349</created>
+      <option name="number" value="00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1430945047349</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1029,29 +1118,29 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="2560" height="1337" extended-state="0" />
+    <frame x="-1" y="23" width="2560" height="1337" extended-state="6" />
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32931727" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32906324" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39839357" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32931727" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32771084" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32771084" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32962668" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.28157267" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2855441" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32851407" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3995272" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32906324" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39839357" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32851407" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -1089,7 +1178,8 @@
     <MESSAGE value="abandoned clusters concept." />
     <MESSAGE value="replaying cluster -&gt; replaying event bus" />
     <MESSAGE value="annotation reader consolidation" />
-    <option name="LAST_COMMIT_MESSAGE" value="annotation reader consolidation" />
+    <MESSAGE value="validator deprecation changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="validator deprecation changes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1098,87 +1188,10 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/EventMessageInterface.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.21520804" vertical-offset="0" max-vertical-offset="697">
-          <caret line="14" column="31" selection-start-line="14" selection-start-column="10" selection-end-line="14" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Utils/RecordingEventBus.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.32484075" vertical-offset="0" max-vertical-offset="1050">
-          <caret line="37" column="3" selection-start-line="37" selection-start-column="3" selection-end-line="37" selection-end-column="3" />
-          <folding>
-            <element signature="e#1228#1296#0#PHP" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/EventHandling/EventListenerRegistryInterface.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7834395" vertical-offset="0" max-vertical-offset="795">
-          <caret line="61" column="60" selection-start-line="61" selection-start-column="60" selection-end-line="61" selection-end-column="60" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/vendor/phpunit/phpunit-mock-objects/src/Framework/MockObject/Generator.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.34267515" vertical-offset="4111" max-vertical-offset="16395">
-          <caret line="301" column="0" selection-start-line="301" selection-start-column="0" selection-end-line="301" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/EventValidator.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.6050955" vertical-offset="0" max-vertical-offset="1575">
-          <caret line="95" column="53" selection-start-line="95" selection-start-column="53" selection-end-line="95" selection-end-column="53" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Test/Saga/AnnotatedSagaTestFixture.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.32356688" vertical-offset="526" max-vertical-offset="4680">
-          <caret line="81" column="74" selection-start-line="81" selection-start-column="74" selection-end-line="81" selection-end-column="74" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/IdentifierFactory.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.13375796" vertical-offset="0" max-vertical-offset="785">
-          <caret line="27" column="98" selection-start-line="27" selection-start-column="98" selection-end-line="27" selection-end-column="98" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Domain/DefaultIdentifierFactoryTest.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0955414" vertical-offset="0" max-vertical-offset="785">
-          <caret line="10" column="22" selection-start-line="10" selection-start-column="22" selection-end-line="10" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/DefaultIdentifierFactory.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.26751593" vertical-offset="0" max-vertical-offset="785">
-          <caret line="34" column="48" selection-start-line="34" selection-start-column="48" selection-end-line="34" selection-end-column="48" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Test/Saga/AnnotatedSagaTest.php">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.2866242" vertical-offset="0" max-vertical-offset="3645">
           <caret line="35" column="1" selection-start-line="35" selection-start-column="1" selection-end-line="36" selection-end-column="90" />
-          <folding>
-            <element signature="e#1222#1260#0#PHP" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1186,7 +1199,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.21072797" vertical-offset="285" max-vertical-offset="6285">
           <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="31" selection-end-column="3" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1194,7 +1206,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="2.6786227" vertical-offset="2543" max-vertical-offset="4830">
           <caret line="316" column="7" selection-start-line="316" selection-start-column="7" selection-end-line="316" selection-end-column="7" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1202,7 +1213,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.24840765" vertical-offset="0" max-vertical-offset="785">
           <caret line="17" column="10" selection-start-line="17" selection-start-column="10" selection-end-line="17" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1210,7 +1220,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.1910828" vertical-offset="0" max-vertical-offset="785">
           <caret line="14" column="90" selection-start-line="14" selection-start-column="90" selection-end-line="14" selection-end-column="90" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1218,7 +1227,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.29299363" vertical-offset="40" max-vertical-offset="870">
           <caret line="22" column="90" selection-start-line="22" selection-start-column="90" selection-end-line="22" selection-end-column="90" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1226,7 +1234,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="55.0" vertical-offset="2700" max-vertical-offset="4260">
           <caret line="119" column="13" selection-start-line="119" selection-start-column="13" selection-end-line="119" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1234,7 +1241,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="809">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1242,10 +1248,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="809">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#7#1184#0#PHP" expanded="false" />
-            <element signature="e#1231#1272#0#PHP" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1253,7 +1255,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.22959183" vertical-offset="0" max-vertical-offset="1320">
           <caret line="32" column="39" selection-start-line="32" selection-start-column="39" selection-end-line="32" selection-end-column="39" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1261,7 +1262,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="147.33333" vertical-offset="3716" max-vertical-offset="4830">
           <caret line="32" column="54" selection-start-line="32" selection-start-column="54" selection-end-line="32" selection-end-column="54" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1269,7 +1269,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-5.625" vertical-offset="0" max-vertical-offset="480">
           <caret line="29" column="20" selection-start-line="29" selection-start-column="20" selection-end-line="29" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1277,7 +1276,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.85987264" vertical-offset="0" max-vertical-offset="1185">
           <caret line="50" column="9" selection-start-line="48" selection-start-column="8" selection-end-line="50" selection-end-column="9" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1285,7 +1283,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="721">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1293,7 +1290,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-10.0" vertical-offset="0" max-vertical-offset="630">
           <caret line="36" column="1" selection-start-line="36" selection-start-column="1" selection-end-line="37" selection-end-column="90" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1301,9 +1297,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-42.5" vertical-offset="0" max-vertical-offset="1680">
           <caret line="88" column="0" selection-start-line="88" selection-start-column="0" selection-end-line="88" selection-end-column="0" />
-          <folding>
-            <element signature="e#1231#1259#0#PHP" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1311,7 +1304,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.42038217" vertical-offset="330" max-vertical-offset="2685">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1319,9 +1311,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="1590">
           <caret line="22" column="3" selection-start-line="22" selection-start-column="3" selection-end-line="22" selection-end-column="3" />
-          <folding>
-            <element signature="e#1227#1282#0#PHP" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1329,9 +1318,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="2.1343873" vertical-offset="0" max-vertical-offset="1770">
           <caret line="128" column="25" selection-start-line="128" selection-start-column="25" selection-end-line="128" selection-end-column="25" />
-          <folding>
-            <element signature="e#1238#1296#0#PHP" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1339,9 +1325,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.19132653" vertical-offset="0" max-vertical-offset="1065">
           <caret line="30" column="3" selection-start-line="30" selection-start-column="3" selection-end-line="30" selection-end-column="3" />
-          <folding>
-            <element signature="e#1238#1293#0#PHP" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1349,7 +1332,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.2869898" vertical-offset="0" max-vertical-offset="825">
           <caret line="35" column="4" selection-start-line="35" selection-start-column="4" selection-end-line="35" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1357,7 +1339,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.24840765" vertical-offset="0" max-vertical-offset="785">
           <caret line="33" column="10" selection-start-line="33" selection-start-column="10" selection-end-line="33" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1365,7 +1346,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.34267515" vertical-offset="556" max-vertical-offset="2115">
           <caret line="81" column="49" selection-start-line="81" selection-start-column="25" selection-end-line="81" selection-end-column="49" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1373,10 +1353,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.21556123" vertical-offset="2996" max-vertical-offset="4905">
           <caret line="211" column="0" selection-start-line="211" selection-start-column="0" selection-end-line="211" selection-end-column="0" />
-          <folding>
-            <element signature="e#7#1184#0#PHP" expanded="true" />
-            <element signature="e#1234#1305#0#PHP" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1384,19 +1360,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3112245" vertical-offset="341" max-vertical-offset="1125">
           <caret line="59" column="5" selection-start-line="59" selection-start-column="5" selection-end-line="59" selection-end-column="5" />
-          <folding>
-            <element signature="e#1238#1266#0#PHP" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/EventHandling/Replay/ReplayingEventBus.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-8.375" vertical-offset="969" max-vertical-offset="2685">
-          <caret line="98" column="46" selection-start-line="98" selection-start-column="46" selection-end-line="98" selection-end-column="46" />
-          <folding>
-            <element signature="e#1238#1287#0#PHP" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1404,7 +1367,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3252551" vertical-offset="0" max-vertical-offset="784">
           <caret line="21" column="20" selection-start-line="21" selection-start-column="20" selection-end-line="21" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1412,7 +1374,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="808">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1420,44 +1381,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="808">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Common/DelegatingParameterResolverFactory.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="808">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#7#1184#0#PHP" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Common/DefaultParameterResolverFactory.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="808">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#7#1184#0#PHP" expanded="false" />
-            <element signature="e#1224#1271#0#PHP" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AnnotatedCommandHandler.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-13.125" vertical-offset="0" max-vertical-offset="645">
-          <caret line="27" column="56" selection-start-line="27" selection-start-column="56" selection-end-line="27" selection-end-column="56" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AnnotatedAggregateCommandHandler.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-8.75" vertical-offset="0" max-vertical-offset="1995">
-          <caret line="44" column="64" selection-start-line="44" selection-start-column="64" selection-end-line="44" selection-end-column="64" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1465,7 +1388,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.24840765" vertical-offset="0" max-vertical-offset="1230">
           <caret line="20" column="10" selection-start-line="20" selection-start-column="10" selection-end-line="20" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1481,17 +1403,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3821656" vertical-offset="0" max-vertical-offset="785">
           <caret line="41" column="7" selection-start-line="41" selection-start-column="7" selection-end-line="41" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AbstractAnnotatedCommandHandler.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-9.625" vertical-offset="279" max-vertical-offset="1815">
-          <caret line="54" column="7" selection-start-line="54" selection-start-column="7" selection-end-line="54" selection-end-column="7" />
-          <folding>
-            <element signature="e#1242#1313#0#PHP" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1499,7 +1410,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3057325" vertical-offset="0" max-vertical-offset="1695">
           <caret line="23" column="10" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1515,7 +1425,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.32281205" vertical-offset="0" max-vertical-offset="3960">
           <caret line="31" column="6" selection-start-line="31" selection-start-column="6" selection-end-line="31" selection-end-column="6" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1523,16 +1432,161 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.19368723" vertical-offset="0" max-vertical-offset="840">
           <caret line="29" column="37" selection-start-line="29" selection-start-column="37" selection-end-line="29" selection-end-column="37" />
-          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/EventHandling/Replay/ReplayingEventBus.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-8.375" vertical-offset="969" max-vertical-offset="2685">
+          <caret line="98" column="46" selection-start-line="98" selection-start-column="46" selection-end-line="98" selection-end-column="46" />
+          <folding>
+            <element signature="e#7#1184#0#PHP" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AbstractAnnotatedCommandHandler.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-9.625" vertical-offset="279" max-vertical-offset="1815">
+          <caret line="54" column="7" selection-start-line="54" selection-start-column="7" selection-end-line="54" selection-end-column="7" />
+          <folding>
+            <element signature="e#7#1184#0#PHP" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Interceptors/ValidatorInterceptor.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.34394905" vertical-offset="0" max-vertical-offset="1005">
+        <state vertical-scroll-proportion="-11.25" vertical-offset="0" max-vertical-offset="1005">
           <caret line="38" column="54" selection-start-line="38" selection-start-column="54" selection-end-line="38" selection-end-column="54" />
           <folding>
             <element signature="e#1246#1307#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AnnotatedCommandHandler.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="645">
+          <caret line="27" column="56" selection-start-line="27" selection-start-column="56" selection-end-line="27" selection-end-column="56" />
+          <folding>
+            <element signature="e#7#191#0#PHP" expanded="false" />
+            <element signature="e#249#312#0#PHP" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Common/DefaultParameterResolverFactory.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="808">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#7#1184#0#PHP" expanded="false" />
+            <element signature="e#1224#1271#0#PHP" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/EventMessageInterface.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.12573345" vertical-offset="0" max-vertical-offset="1193">
+          <caret line="14" column="10" selection-start-line="14" selection-start-column="10" selection-end-line="14" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Common/DelegatingParameterResolverFactory.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="808">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#7#1184#0#PHP" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/CommandHandling/Handlers/AnnotatedAggregateCommandHandler.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="1995">
+          <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="42" selection-end-column="90" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/MetaData.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="3.5923567" vertical-offset="0" max-vertical-offset="3255">
+          <caret line="188" column="9" selection-start-line="188" selection-start-column="9" selection-end-line="188" selection-end-column="9" />
+          <folding>
+            <element signature="e#7#1183#0#PHP" expanded="true" />
+            <element signature="e#1223#1258#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/UnitOfWork/DefaultUnitOfWork.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="4830">
+          <caret line="34" column="0" selection-start-line="34" selection-start-column="0" selection-end-line="35" selection-end-column="90" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericEventMessageTest.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-26.458334" vertical-offset="775" max-vertical-offset="1605">
+          <caret line="94" column="83" selection-start-line="94" selection-start-column="83" selection-end-line="94" selection-end-column="83" />
+          <folding>
+            <element signature="e#7#1183#0#PHP" expanded="true" />
+            <element signature="e#1220#1270#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/MessageInterface.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.22929937" vertical-offset="0" max-vertical-offset="1050">
+          <caret line="16" column="10" selection-start-line="16" selection-start-column="10" selection-end-line="16" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/GenericMessage.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-19.375" vertical-offset="0" max-vertical-offset="2040">
+          <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="32" selection-end-column="90" />
+          <folding>
+            <element signature="e#7#1184#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/GenericDomainEventMessage.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="450" max-vertical-offset="1965">
+          <caret line="30" column="90" selection-start-line="30" selection-start-column="90" selection-end-line="30" selection-end-column="90" />
+          <folding>
+            <element signature="e#7#1184#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Governor/Framework/Domain/GenericEventMessage.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-61.25" vertical-offset="0" max-vertical-offset="1875">
+          <caret line="98" column="0" selection-start-line="98" selection-start-column="0" selection-end-line="98" selection-end-column="0" />
+          <folding>
+            <element signature="e#7#1184#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/Governor/Tests/Domain/GenericDomainEventMessageTest.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.656051" vertical-offset="1465" max-vertical-offset="2250">
+          <caret line="134" column="83" selection-start-line="134" selection-start-column="83" selection-end-line="134" selection-end-column="83" />
+          <folding>
+            <element signature="e#7#1183#0#PHP" expanded="true" />
           </folding>
         </state>
       </provider>
