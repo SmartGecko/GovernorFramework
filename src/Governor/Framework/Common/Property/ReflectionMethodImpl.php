@@ -22,22 +22,38 @@
  * <http://www.governor-framework.org/>.
  */
 
+
 namespace Governor\Framework\Common\Property;
 
 /**
- * Interface describing a mechanism that can read a predefined property from a given instance.
+ * PropertyInterface implementation using a \ReflectionMethod to obtain the property value.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface PropertyInterface
+class ReflectionMethodImpl implements PropertyInterface
 {
+    /**
+     * @var \ReflectionMethod
+     */
+    private $method;
 
     /**
-     * Returns the value of the property on given <code>target</code>.
-     *
-     * @param mixed $target Target class instance
-     * @return mixed Property value
+     * @param \ReflectionMethod $method
      */
-    public function getValue($target);
+    function __construct(\ReflectionMethod $method)
+    {
+        $this->method = $method;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getValue($target)
+    {
+        $this->method->setAccessible(true);
+
+        return $this->method->invoke($target);
+    }
+
 }

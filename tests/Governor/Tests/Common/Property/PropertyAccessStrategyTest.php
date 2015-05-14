@@ -22,40 +22,66 @@
  * <http://www.governor-framework.org/>.
  */
 
+namespace Governor\Tests\Common\Property;
 
-namespace Governor\Framework\Common\Property;
+use Governor\Framework\Common\Property\ReflectionPropertyImpl;
+use Governor\Framework\Common\Property\ReflectionMethodImpl;
+use Governor\Framework\Common\Property\PropertyAccessStrategy;
 
 /**
- * Description of PropertyAccessStrategyCollection
+ * PropertyAccessStrategy unit tests.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-abstract class PropertyAccessStrategy
+class PropertyAccessStrategyTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var PropertyAccessStrategy[]
+     * @var Target
      */
-    private static $strategy;
+    private $target;
 
-
-    public static function getProperty($target, $propertyName)
+    public function setUp()
     {
-        if (null === self::$strategy) {
-            self::$strategy = new ReflectionPropertyAccessStrategy();
-        }
-
-        return self::$strategy->propertyFor($target, $propertyName);
+        $this->target = new Target();
     }
 
-    /**
-     * Returns a Property instance for the given <code>property</code>, defined in given
-     * <code>targetClass</code>, or <code>null</code> if no such property is found on the class.
-     *
-     * @param string $targetClass The class on which to find the property
-     * @param string $property The name of the property to find
-     * @return PropertyInterface the Property instance providing access to the property value, or <code>null</code> if property could not
-     * be found.
-     */
-    protected abstract function propertyFor($targetClass, $property);
+    public function testPropertyAccess()
+    {
+        $property = PropertyAccessStrategy::getProperty($this->target, 'foo');
+
+        $this->assertInstanceOf(ReflectionPropertyImpl::class, $property);
+        $this->assertEquals('foo', $property->getValue($this->target));
+    }
+
+    public function testMethodAccess()
+    {
+        $property = PropertyAccessStrategy::getProperty($this->target, 'bar');
+
+        $this->assertInstanceOf(ReflectionMethodImpl::class, $property);
+        $this->assertEquals('bar', $property->getValue($this->target));
+    }
+
+    public function testPropertyIsNullIfNotResolved()
+    {
+        $property = PropertyAccessStrategy::getProperty($this->target, 'foobar');
+
+        $this->assertNull($property);
+    }
+}
+
+class Target
+{
+    private $foo;
+
+    function __construct()
+    {
+        $this->foo = 'foo';
+    }
+
+
+    public function getBar()
+    {
+        return 'bar';
+    }
 }

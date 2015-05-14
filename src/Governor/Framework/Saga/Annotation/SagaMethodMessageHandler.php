@@ -37,8 +37,8 @@ use Governor\Framework\Common\Property\PropertyAccessStrategy;
 /**
  * Description of SagaMethodMessageHandler
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class SagaMethodMessageHandler implements Comparable
 {
@@ -63,48 +63,67 @@ class SagaMethodMessageHandler implements Comparable
 
     public static function noHandlers()
     {
-        return new SagaMethodMessageHandler(SagaCreationPolicy::NONE, null,
-                null, null, null);
+        return new SagaMethodMessageHandler(
+            SagaCreationPolicy::NONE, null,
+            null, null, null
+        );
     }
 
-    public static function getInstance(EventMessageInterface $event,
-            \ReflectionMethod $handlerMethod)
-    {
+    public static function getInstance(
+        EventMessageInterface $event,
+        \ReflectionMethod $handlerMethod
+    ) {
         $reader = new AnnotationReader();
-        $handlerAnnotation = $reader->getMethodAnnotation($handlerMethod,
-                SagaEventHandler::class);
+        $handlerAnnotation = $reader->getMethodAnnotation(
+            $handlerMethod,
+            SagaEventHandler::class
+        );
 
-        $associationProperty = PropertyAccessStrategy::getProperty($event->getPayload(),
-                        $handlerAnnotation->associationProperty);
+        $associationProperty = PropertyAccessStrategy::getProperty(
+            $event->getPayload(),
+            $handlerAnnotation->associationProperty
+        );
 
         if (null === $associationProperty) {
-            throw new \RuntimeException(sprintf("SagaEventHandler %s::%s defines a property %s that is not " .
+            throw new \RuntimeException(
+                sprintf(
+                    "SagaEventHandler %s::%s defines a property %s that is not ".
                     "defined on the Event it declares to handle (%s)",
-                    $handlerMethod->class, $handlerMethod->name,
+                    $handlerMethod->class,
+                    $handlerMethod->name,
                     $handlerAnnotation->associationProperty,
-                    $event->getPayloadType()));
+                    $event->getPayloadType()
+                )
+            );
         }
 
         $associationKey = (empty($handlerAnnotation->keyName)) ? $handlerAnnotation->associationProperty
-                    : $handlerAnnotation->keyName;
+            : $handlerAnnotation->keyName;
         $startAnnotation = $reader->getMethodAnnotation($handlerMethod, StartSaga::class);
 
         if (null === $startAnnotation) {
             $sagaCreationPolicy = SagaCreationPolicy::NONE;
-        } else if ($startAnnotation->forceNew) {
-            $sagaCreationPolicy = SagaCreationPolicy::ALWAYS;
         } else {
-            $sagaCreationPolicy = SagaCreationPolicy::IF_NONE_FOUND;
+            if ($startAnnotation->forceNew) {
+                $sagaCreationPolicy = SagaCreationPolicy::ALWAYS;
+            } else {
+                $sagaCreationPolicy = SagaCreationPolicy::IF_NONE_FOUND;
+            }
         }
 
-        return new SagaMethodMessageHandler($sagaCreationPolicy,
-                $associationKey, $associationProperty, $handlerMethod, $reader);
+        return new SagaMethodMessageHandler(
+            $sagaCreationPolicy,
+            $associationKey, $associationProperty, $handlerMethod, $reader
+        );
     }
 
-    private function __construct($creationPolicy, $associationKey,
-            $associationProperty, \ReflectionMethod $method = null,
-            AnnotationReader $reader = null)
-    {
+    private function __construct(
+        $creationPolicy,
+        $associationKey,
+        $associationProperty,
+        \ReflectionMethod $method = null,
+        AnnotationReader $reader = null
+    ) {
         $this->reader = $reader;
         $this->creationPolicy = $creationPolicy;
         $this->handlerMethod = $method;
@@ -130,8 +149,10 @@ class SagaMethodMessageHandler implements Comparable
     public function isEndingHandler()
     {
         return $this->isHandlerAvailable() &&
-                null !== $this->reader->getMethodAnnotation($this->handlerMethod,
-                        EndSaga::class);
+        null !== $this->reader->getMethodAnnotation(
+            $this->handlerMethod,
+            EndSaga::class
+        );
     }
 
     public function invoke($target, EventMessageInterface $event)
@@ -159,13 +180,15 @@ class SagaMethodMessageHandler implements Comparable
 
         $associationValue = $this->associationProperty->getValue($eventMessage->getPayload());
 
-        return (null === $associationValue) ? null : new AssociationValue($this->associationKey,
-                $associationValue);
+        return (null === $associationValue) ? null : new AssociationValue(
+            $this->associationKey,
+            $associationValue
+        );
     }
 
     public function compareTo($other)
     {
-        
+
     }
 
 }

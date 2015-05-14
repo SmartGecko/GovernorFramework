@@ -22,32 +22,19 @@
  * <http://www.governor-framework.org/>.
  */
 
-
 namespace Governor\Framework\Common\Property;
 
 /**
- * Description of PropertyAccessStrategyCollection
+ * PropertyAccessStrategy implementation using reflection to find the suitable property.
+ * This implementation will first try to find the property directly by looking for a class property by its name.
+ * Then it will try if any methods with the signature [get,is,has]propertyName exist and use the first it will found.
+ * If there is no match a null will be returned.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-abstract class PropertyAccessStrategy
+class ReflectionPropertyAccessStrategy extends PropertyAccessStrategy
 {
-    /**
-     * @var PropertyAccessStrategy[]
-     */
-    private static $strategy;
-
-
-    public static function getProperty($target, $propertyName)
-    {
-        if (null === self::$strategy) {
-            self::$strategy = new ReflectionPropertyAccessStrategy();
-        }
-
-        return self::$strategy->propertyFor($target, $propertyName);
-    }
-
     /**
      * Returns a Property instance for the given <code>property</code>, defined in given
      * <code>targetClass</code>, or <code>null</code> if no such property is found on the class.
@@ -57,5 +44,25 @@ abstract class PropertyAccessStrategy
      * @return PropertyInterface the Property instance providing access to the property value, or <code>null</code> if property could not
      * be found.
      */
-    protected abstract function propertyFor($targetClass, $property);
+    protected function propertyFor($targetClass, $property)
+    {
+        $reflectionClass = new \ReflectionClass($targetClass);
+
+        if ($reflectionClass->hasProperty($property)) {
+            return new ReflectionPropertyImpl($reflectionClass->getProperty($property));
+        }
+
+        foreach (array('get', 'is', 'has') as $prefix) {
+            $methodName = sprintf('%s%s', $prefix, ucfirst($property));
+
+            foreach ($reflectionClass->getMethods() as $method) {
+                if (0 === strcmp($method->getName(), $methodName)) {
+                    return new ReflectionMethodImpl($method);
+                }
+            }
+        }
+
+        return null;
+    }
+
 }

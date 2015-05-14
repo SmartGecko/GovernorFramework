@@ -35,9 +35,9 @@ use Governor\Framework\Domain\EventMessageInterface;
 
 /**
  * Base SagaManagerInterface implementation.
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareInterface
 {
@@ -51,7 +51,11 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      * @var SagaFactoryInterface
      */
     private $sagaFactory;
-    private $sagaTypes = array();
+
+    /**
+     * @var array
+     */
+    private $sagaTypes = [];
 
     /**
      * @var boolean
@@ -59,7 +63,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
     private $suppressExceptions = true;
 
     /**
-     * @var LoggerInterface 
+     * @var LoggerInterface
      */
     private $logger;
 
@@ -68,9 +72,16 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      */
     private $correlationDataProvider;
 
-    public function __construct(SagaRepositoryInterface $sagaRepository,
-            SagaFactoryInterface $sagaFactory, array $sagaTypes = array())
-    {
+    /**
+     * @param SagaRepositoryInterface $sagaRepository
+     * @param SagaFactoryInterface $sagaFactory
+     * @param array $sagaTypes
+     */
+    public function __construct(
+        SagaRepositoryInterface $sagaRepository,
+        SagaFactoryInterface $sagaFactory,
+        array $sagaTypes = []
+    ) {
         $this->sagaRepository = $sagaRepository;
         $this->sagaFactory = $sagaFactory;
         $this->sagaTypes = $sagaTypes;
@@ -81,38 +92,53 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
     public function handle(EventMessageInterface $event)
     {
         foreach ($this->sagaTypes as $sagaType) {
-            $associationValues = $this->extractAssociationValues($sagaType,
-                    $event);
+            $associationValues = $this->extractAssociationValues(
+                $sagaType,
+                $event
+            );
 
             if (null !== $associationValues && !empty($associationValues)) {
-                $sagaOfTypeInvoked = $this->invokeExistingSagas($event,
-                        $sagaType, $associationValues);
-                $initializationPolicy = $this->getSagaCreationPolicy($sagaType,
-                        $event);
+                $sagaOfTypeInvoked = $this->invokeExistingSagas(
+                    $event,
+                    $sagaType,
+                    $associationValues
+                );
+                $initializationPolicy = $this->getSagaCreationPolicy(
+                    $sagaType,
+                    $event
+                );
                 if ($initializationPolicy->getCreationPolicy() === SagaCreationPolicy::ALWAYS
-                        || (!$sagaOfTypeInvoked && $initializationPolicy->getCreationPolicy()
-                        === SagaCreationPolicy::IF_NONE_FOUND)) {
-                    $this->startNewSaga($event, $sagaType,
-                            $initializationPolicy->getInitialAssociationValue());
+                    || (!$sagaOfTypeInvoked && $initializationPolicy->getCreationPolicy()
+                        === SagaCreationPolicy::IF_NONE_FOUND)
+                ) {
+                    $this->startNewSaga(
+                        $event,
+                        $sagaType,
+                        $initializationPolicy->getInitialAssociationValue()
+                    );
                 }
             }
         }
     }
 
-    private function containsAny(AssociationValuesInterface $associationValues,
-            array $toFind)
-    {
+    private function containsAny(
+        AssociationValuesInterface $associationValues,
+        array $toFind
+    ) {
         foreach ($toFind as $valueToFind) {
             if ($associationValues->contains($valueToFind)) {
                 return true;
             }
         }
+
         return false;
     }
 
-    private function startNewSaga(EventMessageInterface $event, $sagaType,
-            AssociationValue $associationValue)
-    {
+    private function startNewSaga(
+        EventMessageInterface $event,
+        $sagaType,
+        AssociationValue $associationValue
+    ) {
         $newSaga = $this->sagaFactory->createSaga($sagaType);
         $newSaga->associateWith($associationValue);
         $this->preProcessSaga($newSaga);
@@ -124,9 +150,11 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         }
     }
 
-    private function invokeExistingSagas(EventMessageInterface $event,
-            $sagaType, $associationValues)
-    {
+    private function invokeExistingSagas(
+        EventMessageInterface $event,
+        $sagaType,
+        $associationValues
+    ) {
         $sagas = array();
 
         foreach ($associationValues as $associationValue) {
@@ -146,13 +174,18 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         return $sagaOfTypeInvoked;
     }
 
-    private function loadAndInvoke(EventMessageInterface $event, $sagaId,
-            array $associations)
-    {
+    private function loadAndInvoke(
+        EventMessageInterface $event,
+        $sagaId,
+        array $associations
+    ) {
         $saga = $this->sagaRepository->load($sagaId);
 
-        if (null === $saga || !$saga->isActive() || !$this->containsAny($saga->getAssociationValues(),
-                        $associations)) {
+        if (null === $saga || !$saga->isActive() || !$this->containsAny(
+                $saga->getAssociationValues(),
+                $associations
+            )
+        ) {
             return null;
         }
 
@@ -160,21 +193,23 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $exception = null;
 
         try {
-            $this->logger->info("Saga {saga} is handling event {event}",
-                    array(
-                'saga' => $sagaId,
-                'event' => $event->getPayloadType()
-                    )
+            $this->logger->info(
+                "Saga {saga} is handling event {event}",
+                [
+                    'saga' => $sagaId,
+                    'event' => $event->getPayloadType()
+                ]
             );
             $saga->handle($event);
         } catch (\Exception $ex) {
             $exception = $ex;
         } finally {
-            $this->logger->info("Saga {saga} is commiting event {event}",
-                    array(
-                'saga' => $sagaId,
-                'event' => $event->getPayloadType()
-                    )
+            $this->logger->info(
+                "Saga {saga} is commiting event {event}",
+                [
+                    'saga' => $sagaId,
+                    'event' => $event->getPayloadType()
+                ]
             );
             $this->commit($saga);
         }
@@ -186,9 +221,10 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         return $saga;
     }
 
-    private function doInvokeSaga(EventMessageInterface $event,
-            SagaInterface $saga)
-    {
+    private function doInvokeSaga(
+        EventMessageInterface $event,
+        SagaInterface $saga
+    ) {
         try {
             CorrelationDataHolder::setCorrelationData($this->correlationDataProvider->correlationDataFor($event));
             $saga->handle($event);
@@ -197,13 +233,20 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         }
     }
 
-    private function handleInvokationException(\Exception $ex,
-            EventMessageInterface $event, SagaInterface $saga)
-    {
+    private function handleInvokationException(
+        \Exception $ex,
+        EventMessageInterface $event,
+        SagaInterface $saga
+    ) {
         if ($this->suppressExceptions) {
-            $this->logger->error("An exception occurred while a Saga {name} was handling an Event {event}: {exception}",
-                    array('name' => get_class($saga), 'event' => $event->getPayloadType(),
-                'exception' => $ex->getMessage()));
+            $this->logger->error(
+                "An exception occurred while a Saga {name} was handling an Event {event}: {exception}",
+                [
+                    'name' => get_class($saga),
+                    'event' => $event->getPayloadType(),
+                    'exception' => $ex->getMessage()
+                ]
+            );
         } else {
             throw $ex;
         }
@@ -227,7 +270,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      */
     protected function preProcessSaga(SagaInterface $saga)
     {
-        
+
     }
 
     /**
@@ -236,22 +279,26 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      * saga.
      *
      * @param string $sagaType The type of Saga to get the creation policy for
-     * @param EventMessageInterface $event    The Event that is being dispatched to Saga instances
+     * @param EventMessageInterface $event The Event that is being dispatched to Saga instances
      * @return SagaInitializationPolicy the initialization policy for the Saga
      */
-    protected abstract function getSagaCreationPolicy($sagaType,
-            EventMessageInterface $event);
+    protected abstract function getSagaCreationPolicy(
+        $sagaType,
+        EventMessageInterface $event
+    );
 
     /**
      * Extracts the AssociationValues from the given <code>event</code> as relevant for a Saga of given
      * <code>sagaType</code>. A single event may be associated with multiple values.
      *
      * @param string $sagaType The type of Saga about to handle the Event
-     * @param EventMessageInterface $event    The event containing the association information
+     * @param EventMessageInterface $event The event containing the association information
      * @return array the AssociationValues indicating which Sagas should handle given event
      */
-    protected abstract function extractAssociationValues($sagaType,
-            EventMessageInterface $event);
+    protected abstract function extractAssociationValues(
+        $sagaType,
+        EventMessageInterface $event
+    );
 
     /**
      * Sets whether or not to suppress any exceptions that are cause by invoking Sagas. When suppressed, exceptions are
@@ -274,6 +321,9 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $this->logger = $logger;
     }
 
+    /**
+     * @return array
+     */
     public function getManagedSagaTypes()
     {
         return $this->sagaTypes;
@@ -283,7 +333,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      * Sets the correlation data provider for this SagaManager. It will provide the data to attach to messages sent by
      * Sagas managed by this manager.
      *
-     * @param CorrelationDataProviderInterface $correlationDataProvider    the correlation data provider for this SagaManager
+     * @param CorrelationDataProviderInterface $correlationDataProvider the correlation data provider for this SagaManager
      */
     public function setCorrelationDataProvider(CorrelationDataProviderInterface $correlationDataProvider)
     {

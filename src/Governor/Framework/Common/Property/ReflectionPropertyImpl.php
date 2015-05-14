@@ -25,19 +25,35 @@
 namespace Governor\Framework\Common\Property;
 
 /**
- * Interface describing a mechanism that can read a predefined property from a given instance.
+ * PropertyInterface implementation using a \ReflectionProperty to obtain the property value.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface PropertyInterface
+class ReflectionPropertyImpl implements PropertyInterface
 {
+    /**
+     * @var \ReflectionProperty
+     */
+    private $property;
+
 
     /**
-     * Returns the value of the property on given <code>target</code>.
-     *
-     * @param mixed $target Target class instance
-     * @return mixed Property value
+     * @param \ReflectionProperty $property
      */
-    public function getValue($target);
+    public function __construct(\ReflectionProperty $property)
+    {
+        $this->property = $property;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getValue($target)
+    {
+        $this->property->setAccessible(true);
+
+        return $this->property->getValue($target);
+    }
+
 }
