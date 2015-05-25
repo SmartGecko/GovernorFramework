@@ -127,7 +127,7 @@ abstract class AbstractRepository implements RepositoryInterface
 
     protected abstract function doSave(AggregateRootInterface $object);
 
-    protected abstract function doLoad($id, $exceptedVersion);
+    protected abstract function doLoad($id, $expectedVersion);
 
     protected abstract function doDelete(AggregateRootInterface $object);
 

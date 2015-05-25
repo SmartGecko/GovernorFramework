@@ -79,7 +79,7 @@ class MockAbstractRepository extends AbstractRepository
         
     }
 
-    protected function doLoad($id, $exceptedVersion)
+    protected function doLoad($id, $expectedVersion)
     {
         return new MockAggregateRoot();
     }

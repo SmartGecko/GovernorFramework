@@ -74,7 +74,7 @@ class GenericOrmRepository extends LockingRepository
         }
     }
 
-    protected function doLoad($id, $exceptedVersion)
+    protected function doLoad($id, $expectedVersion)
     {
         $aggregate = $this->entityManager->find($this->getClass(), $id);
 
@@ -83,9 +83,9 @@ class GenericOrmRepository extends LockingRepository
             sprintf(
                 "Aggregate [%s] with identifier [%s] not found",
                 $this->getClass(), $id));
-        } else if (null !== $exceptedVersion && null !== $aggregate->getVersion() && $exceptedVersion !== $aggregate->getVersion()) {
+        } else if (null !== $expectedVersion && null !== $aggregate->getVersion() && $expectedVersion !== $aggregate->getVersion()) {
             throw new ConflictingAggregateVersionException($id,
-            $exceptedVersion, $aggregate->getVersion());
+            $expectedVersion, $aggregate->getVersion());
         }
         
         return $aggregate;
