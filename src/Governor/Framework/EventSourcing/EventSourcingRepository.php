@@ -87,7 +87,7 @@ class EventSourcingRepository extends LockingRepository
         $this->doSaveWithLock($aggregate);
     }
 
-    protected function doLoad($id, $exceptedVersion)
+    protected function doLoad($id, $expectedVersion)
     {
         try {
             $events = $this->eventStore->readEvents($this->getTypeIdentifier(),
@@ -105,7 +105,7 @@ class EventSourcingRepository extends LockingRepository
         $unseenEvents = array();
                 
         $aggregate->initializeState(new CapturingEventStream($events,
-            $unseenEvents, $exceptedVersion));
+            $unseenEvents, $expectedVersion));
         if ($aggregate->isDeleted()) {
             throw new AggregateDeletedException($id);
         }

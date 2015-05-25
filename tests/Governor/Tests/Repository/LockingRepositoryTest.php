@@ -236,7 +236,7 @@ class InMemoryLockingRepository extends LockingRepository
         $this->saveCount++;
     }
 
-    protected function doLoad($id, $exceptedVersion)
+    protected function doLoad($id, $expectedVersion)
     {
         return $this->store[$id];
     }
