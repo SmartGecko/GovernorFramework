@@ -49,6 +49,6 @@ interface PartialEventStreamSupportInterface
      * @param int|null $lastSequenceNumber  The sequence number of the last event in the stream
      * @return DomainEventStreamInterface a Stream containing events for the given aggregate, starting at the given first sequence number
      */
-    public function readEvents($type, $identifier, $firstSequenceNumber,
+    public function readEventsWithinScn($type, $identifier, $firstSequenceNumber,
             $lastSequenceNumber = null);
 }

@@ -14,7 +14,7 @@ use Governor\Framework\Serializer\SerializerInterface;
 /**
  * Description of FilesystemEventMessageReader
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>  *
  */
 class FilesystemEventMessageReader
@@ -31,7 +31,7 @@ class FilesystemEventMessageReader
     }
 
     /**
-     * 
+     *
      * @return \Governor\Framework\Serializer\SerializedDomainEventDataInterface|null
      * @throws \RuntimeException
      */
@@ -48,29 +48,48 @@ class FilesystemEventMessageReader
         }
 
         $message = $this->readBytes($eventLength['length']);
-        $array = unpack('nmagic/a36eventIdentifier/Ntimestamp/a36aggregateIdentifier/Nscn/NpayloadTypeLength',
-            $message);
+        $array = unpack(
+            'nmagic/a36eventIdentifier/Ntimestamp/a36aggregateIdentifier/Nscn/NpayloadTypeLength',
+            $message
+        );
 
         $offset = 86;
-        $array = array_merge($array,
-            unpack(sprintf("a%spayloadType/NpayloadLength",
-                    $array['payloadTypeLength']), substr($message, $offset)));
+        $array = array_merge(
+            $array,
+            unpack(
+                sprintf(
+                    "a%spayloadType/NpayloadLength",
+                    $array['payloadTypeLength']
+                ),
+                substr($message, $offset)
+            )
+        );
 
         $offset += strlen($array['payloadType']) + 4;
-        $array = array_merge($array,
-            unpack(sprintf("a%spayload/NmetaDataLength", $array['payloadLength']),
-                substr($message, $offset)));
+        $array = array_merge(
+            $array,
+            unpack(
+                sprintf("a%spayload/NmetaDataLength", $array['payloadLength']),
+                substr($message, $offset)
+            )
+        );
 
         $offset += strlen($array['payload']) + 4;
-        $array = array_merge($array,
-            unpack(sprintf("a%smetaData", $array['metaDataLength']),
-                substr($message, $offset)));
+        $array = array_merge(
+            $array,
+            unpack(
+                sprintf("a%smetaData", $array['metaDataLength']),
+                substr($message, $offset)
+            )
+        );
 
         // !!! TODO support for payload revision 
-        return new SimpleSerializedDomainEventData($array['eventIdentifier'],
+        return new SimpleSerializedDomainEventData(
+            $array['eventIdentifier'],
             $array['aggregateIdentifier'], $array['scn'],
             \DateTime::createFromFormat('U', $array['timestamp']),
-            $array['payloadType'], null, $array['payload'], $array['metaData']);
+            $array['payloadType'], null, $array['payload'], $array['metaData']
+        );
     }
 
     private function readBytes($length)

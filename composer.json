@@ -16,6 +16,8 @@
       "email": "david.kalosi@gmail.com"
     }
   ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "require": {
     "rhumsaa/uuid": "@stable",
     "psr/log": "@stable",
@@ -24,7 +26,8 @@
     "hamcrest/hamcrest-php": "v1.1.1",
     "videlalvaro/php-amqplib": "2.2.*",
     "jms/serializer": "*",
-    "symfony/validator": "~2.5"
+    "symfony/validator": "~2.5",
+    "doctrine/mongodb-odm": "^1.0@dev"
   },
   "require-dev": {
     "doctrine/orm": ">=2.4",

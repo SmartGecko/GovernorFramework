@@ -12,7 +12,10 @@ before_script:
   - composer update
 
 script: phpunit --coverage-clover=coverage.clover
-    
+
+services:
+  - mongodb
+
 after_script:
   - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 

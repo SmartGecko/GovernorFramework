@@ -46,17 +46,28 @@ class SimpleSerializedDomainEventData implements SerializedDomainEventDataInterf
      */
     private $serializedMetaData;
 
-    public function __construct($eventIdentifier, $aggregateIdentifier, $scn,
-        \DateTime $timestamp, $payloadType, $payloadRevision, $payload, $metaData)
-    {        
+    public function __construct(
+        $eventIdentifier,
+        $aggregateIdentifier,
+        $scn,
+        \DateTime $timestamp,
+        $payloadType,
+        $payloadRevision,
+        $payload,
+        $metaData
+    ) {
         $this->eventIdentifier = $eventIdentifier;
         $this->aggregateIdentifier = $aggregateIdentifier;
         $this->scn = $scn;
         $this->timestamp = $timestamp;
-        $this->serializedPayload = new SimpleSerializedObject($payload,
-            new SimpleSerializedType($payloadType, $payloadRevision));
-        $this->serializedMetaData = new SimpleSerializedObject($metaData,
-            new SimpleSerializedType('Governor\Framework\Domain\MetaData'));
+        $this->serializedPayload = new SimpleSerializedObject(
+            $payload,
+            new SimpleSerializedType($payloadType, $payloadRevision)
+        );
+        $this->serializedMetaData = new SimpleSerializedObject(
+            $metaData,
+            new SimpleSerializedType('Governor\Framework\Domain\MetaData')
+        );
     }
 
     public function getAggregateIdentifier()
@@ -91,7 +102,7 @@ class SimpleSerializedDomainEventData implements SerializedDomainEventDataInterf
     }
 
     /**
-     * 
+     *
      * @return \DateTime
      */
     public function getTimestamp()

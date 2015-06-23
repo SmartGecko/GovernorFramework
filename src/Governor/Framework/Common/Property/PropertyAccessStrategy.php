@@ -38,7 +38,11 @@ abstract class PropertyAccessStrategy
      */
     private static $strategy;
 
-
+    /**
+     * @param mixed $target
+     * @param string $propertyName
+     * @return PropertyInterface
+     */
     public static function getProperty($target, $propertyName)
     {
         if (null === self::$strategy) {
@@ -52,7 +56,7 @@ abstract class PropertyAccessStrategy
      * Returns a Property instance for the given <code>property</code>, defined in given
      * <code>targetClass</code>, or <code>null</code> if no such property is found on the class.
      *
-     * @param string $targetClass The class on which to find the property
+     * @param mixed $targetClass The class on which to find the property
      * @param string $property The name of the property to find
      * @return PropertyInterface the Property instance providing access to the property value, or <code>null</code> if property could not
      * be found.
