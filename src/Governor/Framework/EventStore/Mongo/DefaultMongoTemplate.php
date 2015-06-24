@@ -51,7 +51,7 @@ class DefaultMongoTemplate extends AuthenticatingMongoTemplate implements MongoT
     public function __construct(
         $server,
         $databaseName,
-        $authenticationDatabaseName,
+        $authenticationDatabaseName = null,
         $domainEventsCollectionName = self::DEFAULT_DOMAINEVENTS_COLLECTION,
         $snapshotEventsCollectionName = self::DEFAULT_SNAPSHOTEVENTS_COLLECTION
     ) {

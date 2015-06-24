@@ -46,10 +46,16 @@ abstract class AuthenticatingMongoTemplate implements LoggerAwareInterface
      * @param string $databaseName The name of the database
      * @param string $authenticationDatabaseName The name of the database containing the user to authenticate
      */
-    public function __construct($server, $databaseName, $authenticationDatabaseName)
+    public function __construct($server, $databaseName, $authenticationDatabaseName = null)
     {
         $this->logger = new NullLogger();
-        $client = new MongoClient($server, ['authSource' => $authenticationDatabaseName]);
+        $options = [];
+
+        if ($authenticationDatabaseName) {
+            $options['authSource'] = $authenticationDatabaseName;
+        }
+
+        $client = new MongoClient($server, $options);
         $this->database = $client->selectDB($databaseName);
     }
 

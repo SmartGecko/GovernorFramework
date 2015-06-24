@@ -51,7 +51,7 @@ class MongoEventStoreTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         try {
-            $this->mongoTemplate = new DefaultMongoTemplate('mongodb://localhost:27017', 'governortest', 'admin');
+            $this->mongoTemplate = new DefaultMongoTemplate('mongodb://localhost:27017', 'governortest');
 
             $this->testSubject = new MongoEventStore(
                 $this->mongoTemplate,
