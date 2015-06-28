@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Governor\Framework\EventStore\Mongo;
+namespace Governor\Framework\Common\Mongo;
 
 use Psr\Log\LoggerAwareInterface;
 use MongoClient;

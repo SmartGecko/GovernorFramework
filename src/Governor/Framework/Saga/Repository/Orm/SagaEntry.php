@@ -33,39 +33,39 @@ use Governor\Framework\Serializer\SimpleSerializedType;
 /**
  * Class defining a Saga in the ORM.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  * @ORM\Entity
  * @ORM\Table(name="governor_sagas")
  */
 class SagaEntry
 {
-    
+
     /**
      * @ORM\Id
      * @ORM\Column(type="string", name="saga_id")
      * @var string
      */
     private $sagaId;
-    
+
     /**
      * @ORM\Column(type="string", name="saga_type")
-     * @var string 
+     * @var string
      */
     private $sagaType;
-     /**
+    /**
      * @ORM\Column(type="string", name="saga_revision", nullable=true)
-     * @var string 
+     * @var string
      */
     private $revision;
-     /**
+    /**
      * @ORM\Column(type="text", name="serialized_saga")
-     * @var string 
+     * @var string
      */
     private $serializedSaga;
-    
-    /**     
-     * @var SagaInterface 
+
+    /**
+     * @var SagaInterface
      */
     private $saga;
 
@@ -73,12 +73,13 @@ class SagaEntry
      * Constructs a new SagaEntry for the given <code>saga</code>. The given saga must be serializable. The provided
      * saga is not modified by this operation.
      *
-     * @param SagaInterface $saga       The saga to store
+     * @param SagaInterface $saga The saga to store
      * @param SerializerInterface $serializer The serialization mechanism to convert the Saga to a byte stream
      */
-    public function __construct(SagaInterface $saga,
-            SerializerInterface $serializer)
-    {
+    public function __construct(
+        SagaInterface $saga,
+        SerializerInterface $serializer
+    ) {
         $this->sagaId = $saga->getSagaIdentifier();
         $serialized = $serializer->serialize($saga);
         $this->serializedSaga = $serialized->getData();
@@ -98,10 +99,16 @@ class SagaEntry
         if (null !== $this->saga) {
             return $this->saga;
         }
-        
-        return $serializer->deserialize(new SimpleSerializedObject($this->serializedSaga,
-                        new SimpleSerializedType($this->sagaType,
-                        $this->revision)));
+
+        return $serializer->deserialize(
+            new SimpleSerializedObject(
+                $this->serializedSaga,
+                new SimpleSerializedType(
+                    $this->sagaType,
+                    $this->revision
+                )
+            )
+        );
     }
 
     /**
@@ -136,7 +143,7 @@ class SagaEntry
 
     /**
      * Returns the type identifier of the serialized saga.
-     * 
+     *
      * @return string the type identifier of the serialized saga
      */
     public function getSagaType()

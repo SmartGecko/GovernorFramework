@@ -40,8 +40,8 @@ use Governor\Framework\Common\Logging\NullLogger;
 /**
  * Description of OrmSagaRepository
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInterface
 {
@@ -60,8 +60,8 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
      * @var SerializerInterface
      */
     private $serializer;
-    
-    /**     
+
+    /**
      * @var boolean
      */
     private $useExplicitFlush;
@@ -72,34 +72,42 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
     private $logger;
 
     /**
-     * Initializes a Saga Repository. 
-     * 
+     * Initializes a Saga Repository.
+     *
      * @param \Doctrine\ORM\EntityManager $entityManager
      * @param \Governor\Framework\Saga\ResourceInjectorInterface $injector
      * @param \Governor\Framework\Serializer\SerializerInterface $serializer
      * @param boolean $useExplicitFlush
      */
-    public function __construct(EntityManager $entityManager,
-            ResourceInjectorInterface $injector,
-            SerializerInterface $serializer, $useExplicitFlush = true)
-    {
+    public function __construct(
+        EntityManager $entityManager,
+        ResourceInjectorInterface $injector,
+        SerializerInterface $serializer,
+        $useExplicitFlush = true
+    ) {
         $this->entityManager = $entityManager;
         $this->injector = $injector;
         $this->serializer = $serializer;
         $this->useExplicitFlush = $useExplicitFlush;
-        
+
         $this->logger = new NullLogger();
     }
 
     public function load($sagaId)
     {
         try {
-            $result = $this->entityManager->createQuery("SELECT se FROM Governor\Framework\Saga\Repository\Orm\SagaEntry se WHERE se.sagaId = :sagaId")
-                            ->setParameter(":sagaId", $sagaId)->getSingleResult();
+            $result = $this->entityManager->createQuery(
+                "SELECT se FROM Governor\Framework\Saga\Repository\Orm\SagaEntry se WHERE se.sagaId = :sagaId"
+            )
+                ->setParameter(":sagaId", $sagaId)->getSingleResult();
 
-            $serializedSaga = new SerializedSaga($result->getSerializedSaga(),
-                    new SimpleSerializedType($result->getSagaType(),
-                    $result->getRevision()));
+            $serializedSaga = new SerializedSaga(
+                $result->getSerializedSaga(),
+                new SimpleSerializedType(
+                    $result->getSagaType(),
+                    $result->getRevision()
+                )
+            );
 
             $loadedSaga = $this->serializer->deserialize($serializedSaga);
 
@@ -107,8 +115,10 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
                 $this->injector->injectResources($loadedSaga);
             }
 
-            $this->logger->debug("Loaded saga id [{id}] of type [{type}]",
-                    array('id' => $sagaId, 'type' => get_class($loadedSaga)));
+            $this->logger->debug(
+                "Loaded saga id [{id}] of type [{type}]",
+                array('id' => $sagaId, 'type' => get_class($loadedSaga))
+            );
 
             return $loadedSaga;
         } catch (NoResultException $ex) {
@@ -116,23 +126,37 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
         }
     }
 
-    protected function removeAssociationValue(AssociationValue $associationValue,
-            $sagaType, $sagaIdentifier)
-    {        
-        $updateCount = $this->entityManager->createQuery("DELETE FROM " . 
-                                " Governor\Framework\Saga\Repository\Orm\AssociationValueEntry ae " .
-                                "WHERE ae.associationKey = :associationKey " .
-                                "AND ae.associationValue = :associationValue " .
-                                "AND ae.sagaType = :sagaType " .
-                                "AND ae.sagaId = :sagaId")
-                        ->setParameters(array(':associationKey' => $associationValue->getPropertyKey(),
-                            ':associationValue' => $associationValue->getPropertyValue(),
-                            ':sagaType' => $sagaType, ':sagaId' => $sagaIdentifier))->execute();
+    protected function removeAssociationValue(
+        AssociationValue $associationValue,
+        $sagaType,
+        $sagaIdentifier
+    ) {
+        $updateCount = $this->entityManager->createQuery(
+            "DELETE FROM ".
+            " Governor\Framework\Saga\Repository\Orm\AssociationValueEntry ae ".
+            "WHERE ae.associationKey = :associationKey ".
+            "AND ae.associationValue = :associationValue ".
+            "AND ae.sagaType = :sagaType ".
+            "AND ae.sagaId = :sagaId"
+        )
+            ->setParameters(
+                [
+                    ':associationKey' => $associationValue->getPropertyKey(),
+                    ':associationValue' => $associationValue->getPropertyValue(),
+                    ':sagaType' => $sagaType,
+                    ':sagaId' => $sagaIdentifier
+                ]
+            )->execute();
 
         if (0 === $updateCount) {
-            $this->logger->warning("Wanted to remove association value, but it was already gone: sagaId= {sagaId}, key={key}, value={value}",
-                    array('sagaId' => $sagaIdentifier, 'key' => $associationValue->getPropertyKey(),
-                'value' => $associationValue->getPropertyValue()));
+            $this->logger->warning(
+                "Wanted to remove association value, but it was already gone: sagaId= {sagaId}, key={key}, value={value}",
+                array(
+                    'sagaId' => $sagaIdentifier,
+                    'key' => $associationValue->getPropertyKey(),
+                    'value' => $associationValue->getPropertyValue()
+                )
+            );
         }
     }
 
@@ -145,27 +169,40 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
         return $sagaClass;
     }
 
-    protected function storeAssociationValue(AssociationValue $associationValue,
-            $sagaType, $sagaIdentifier)
-    {        
-        $this->entityManager->persist(new AssociationValueEntry($sagaType,
-                $sagaIdentifier, $associationValue));
+    protected function storeAssociationValue(
+        AssociationValue $associationValue,
+        $sagaType,
+        $sagaIdentifier
+    ) {
+        $this->entityManager->persist(
+            new AssociationValueEntry(
+                $sagaType,
+                $sagaIdentifier, $associationValue
+            )
+        );
         if ($this->useExplicitFlush) {
             $this->entityManager->flush();
         }
     }
 
-    protected function findAssociatedSagaIdentifiers($type,
-            AssociationValue $associationValue)
-    {
-        $entries = $this->entityManager->createQuery("SELECT ae.sagaId FROM " .
-                                "Governor\Framework\Saga\Repository\Orm\AssociationValueEntry ae " .
-                                "WHERE ae.associationKey = :associationKey " .
-                                "AND ae.associationValue = :associationValue " .
-                                "AND ae.sagaType = :sagaType")
-                        ->setParameters(array(":associationKey" => $associationValue->getPropertyKey(),
-                            ":associationValue" => $associationValue->getPropertyValue(),
-                            ":sagaType" => $this->typeOf($type)))->getResult();
+    protected function findAssociatedSagaIdentifiers(
+        $type,
+        AssociationValue $associationValue
+    ) {
+        $entries = $this->entityManager->createQuery(
+            "SELECT ae.sagaId FROM ".
+            "Governor\Framework\Saga\Repository\Orm\AssociationValueEntry ae ".
+            "WHERE ae.associationKey = :associationKey ".
+            "AND ae.associationValue = :associationValue ".
+            "AND ae.sagaType = :sagaType"
+        )
+            ->setParameters(
+                array(
+                    ":associationKey" => $associationValue->getPropertyKey(),
+                    ":associationValue" => $associationValue->getPropertyValue(),
+                    ":sagaType" => $this->typeOf($type)
+                )
+            )->getResult();
 
         return array_map('current', $entries);
     }
@@ -173,14 +210,20 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
     protected function deleteSaga(SagaInterface $saga)
     {
         try {
-            $this->entityManager->createQuery("DELETE FROM Governor\Framework\Saga\Repository\Orm\AssociationValueEntry ae WHERE ae.sagaId = :sagaId")
-                    ->setParameter(":sagaId", $saga->getSagaIdentifier())->execute();
+            $this->entityManager->createQuery(
+                "DELETE FROM Governor\Framework\Saga\Repository\Orm\AssociationValueEntry ae WHERE ae.sagaId = :sagaId"
+            )
+                ->setParameter(":sagaId", $saga->getSagaIdentifier())->execute();
 
-            $this->entityManager->createQuery("DELETE FROM Governor\Framework\Saga\Repository\Orm\SagaEntry se WHERE se.sagaId = :id")
-                    ->setParameter(":id", $saga->getSagaIdentifier())->execute();
+            $this->entityManager->createQuery(
+                "DELETE FROM Governor\Framework\Saga\Repository\Orm\SagaEntry se WHERE se.sagaId = :id"
+            )
+                ->setParameter(":id", $saga->getSagaIdentifier())->execute();
         } catch (NoResultException $ex) {
-            $this->logger->info("Could not delete SagaEntry {id}, it appears to have already been deleted.",
-                    array('id' => $saga->getSagaIdentifier()));
+            $this->logger->info(
+                "Could not delete SagaEntry {id}, it appears to have already been deleted.",
+                array('id' => $saga->getSagaIdentifier())
+            );
         }
         $this->entityManager->flush();
     }
@@ -189,17 +232,24 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
     {
         $entry = new SagaEntry($saga, $this->serializer);
 
-        $this->logger->debug("Updating saga id {id} as {data}",
-                array('id' => $saga->getSagaIdentifier(), 'data' => $entry->getSerializedSaga()));
+        $this->logger->debug(
+            "Updating saga id {id} as {data}",
+            array('id' => $saga->getSagaIdentifier(), 'data' => $entry->getSerializedSaga())
+        );
 
         $updateCount = $this->entityManager->createQuery(
-                                "UPDATE Governor\Framework\Saga\Repository\Orm\SagaEntry s " .
-                                "SET s.serializedSaga = :serializedSaga, s.revision = :revision " .
-                                "WHERE s.sagaId = :sagaId AND s.sagaType = :sagaType")
-                        ->setParameters(array(":serializedSaga" => $entry->getSerializedSaga(),
-                            ":revision" => $entry->getRevision(),
-                            ":sagaId" => $entry->getSagaId(),
-                            ":sagaType" => $entry->getSagaType()))->execute();
+            "UPDATE Governor\Framework\Saga\Repository\Orm\SagaEntry s ".
+            "SET s.serializedSaga = :serializedSaga, s.revision = :revision ".
+            "WHERE s.sagaId = :sagaId AND s.sagaType = :sagaType"
+        )
+            ->setParameters(
+                array(
+                    ":serializedSaga" => $entry->getSerializedSaga(),
+                    ":revision" => $entry->getRevision(),
+                    ":sagaId" => $entry->getSagaId(),
+                    ":sagaType" => $entry->getSagaType()
+                )
+            )->execute();
 
         if ($this->useExplicitFlush) {
             $this->entityManager->flush();
@@ -207,7 +257,9 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
         }
 
         if (0 === $updateCount) {
-            $this->logger->warning("Expected to be able to update a Saga instance, but no rows were found. Inserting instead.");
+            $this->logger->warning(
+                "Expected to be able to update a Saga instance, but no rows were found. Inserting instead."
+            );
 
             $this->entityManager->persist($entry);
             if ($this->useExplicitFlush) {
@@ -221,8 +273,10 @@ class OrmSagaRepository extends AbstractSagaRepository implements LoggerAwareInt
         $entry = new SagaEntry($saga, $this->serializer);
         $this->entityManager->persist($entry);
 
-        $this->logger->debug("Storing saga id {id} as {data}",
-                array('id' => $saga->getSagaIdentifier(), 'data' => $entry->getSerializedSaga()));
+        $this->logger->debug(
+            "Storing saga id {id} as {data}",
+            array('id' => $saga->getSagaIdentifier(), 'data' => $entry->getSerializedSaga())
+        );
 
         if ($this->useExplicitFlush) {
             $this->entityManager->flush();

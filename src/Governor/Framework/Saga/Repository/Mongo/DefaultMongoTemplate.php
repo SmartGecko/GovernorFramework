@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Governor\Framework\EventStore\Mongo;
+namespace Governor\Framework\Saga\Repository\Mongo;
 
 use MongoCollection;
 use Governor\Framework\Common\Mongo\AuthenticatingMongoTemplate;
@@ -22,18 +22,12 @@ use Governor\Framework\Common\Mongo\AuthenticatingMongoTemplate;
 class DefaultMongoTemplate extends AuthenticatingMongoTemplate implements MongoTemplateInterface
 {
 
-    const DEFAULT_DOMAINEVENTS_COLLECTION = "domainevents";
-    const DEFAULT_SNAPSHOTEVENTS_COLLECTION = "snapshotevents";
+    const DEFAULT_SAGAS_COLLECTION_NAME = "sagas";
 
     /**
      * @var string
      */
-    private $domainEventsCollectionName;
-
-    /**
-     * @var string
-     */
-    private $snapshotEventsCollectionName;
+    private $sagasCollectionName;
 
 
     /**
@@ -45,40 +39,28 @@ class DefaultMongoTemplate extends AuthenticatingMongoTemplate implements MongoT
      * @param string $server The Mongo instance configured to connect to the Mongo Server
      * @param string $databaseName The name of the database containing the data
      * @param string $authenticationDatabaseName The name of the database to authenticate to
-     * @param string $domainEventsCollectionName The name of the collection containing domain events
-     * @param string $snapshotEventsCollectionName The name of the collection containing snapshot events
+     * @param string $sagasCollectionName The name of the collection containing sagas
      */
     public function __construct(
         $server,
         $databaseName,
         $authenticationDatabaseName = null,
-        $domainEventsCollectionName = self::DEFAULT_DOMAINEVENTS_COLLECTION,
-        $snapshotEventsCollectionName = self::DEFAULT_SNAPSHOTEVENTS_COLLECTION
+        $sagasCollectionName = self::DEFAULT_SAGAS_COLLECTION_NAME
     ) {
         parent::__construct($server, $databaseName, $authenticationDatabaseName);
-        $this->domainEventsCollectionName = $domainEventsCollectionName;
-        $this->snapshotEventsCollectionName = $snapshotEventsCollectionName;
+        $this->sagasCollectionName = $sagasCollectionName;
+
 
     }
 
     /**
-     * Returns a reference to the collection containing the domain events.
+     * Returns a reference to the collection containing the sagas.
      *
      * @return MongoCollection containing the domain events
      */
-    public function domainEventCollection()
+    public function sagaCollection()
     {
-        return $this->getDatabase()->selectCollection($this->domainEventsCollectionName);
-    }
-
-    /**
-     * Returns a reference to the collection containing the snapshot events.
-     *
-     * @return MongoCollection containing the snapshot events
-     */
-    public function snapshotEventCollection()
-    {
-        return $this->getDatabase()->selectCollection($this->snapshotEventsCollectionName);
+        return $this->getDatabase()->selectCollection($this->sagasCollectionName);
     }
 
 

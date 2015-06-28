@@ -43,7 +43,7 @@ class AssociationValuesImpl implements AssociationValuesInterface
         $this->addedValues = array();
         $this->removedValues = array();
     }
-    
+
     /**
      * @JMS\PostDeserialize
      */
@@ -56,14 +56,15 @@ class AssociationValuesImpl implements AssociationValuesInterface
     /**
      * Searches the array containes an association value identical to the specified one.
      * Elements are compared with <code>==</code> for equality.
-     * 
+     *
      * @param \Governor\Framework\Saga\AssociationValue $associationValue
      * @param array $collection
      * @return boolean
      */
-    private function inCollection(AssociationValue $associationValue,
-        array $collection)
-    {
+    private function inCollection(
+        AssociationValue $associationValue,
+        array $collection
+    ) {
         foreach ($collection as $element) {
             if ($element == $associationValue) {
                 return true;
@@ -84,11 +85,13 @@ class AssociationValuesImpl implements AssociationValuesInterface
 
         if ($added) {
             if ($this->inCollection($associationValue, $this->removedValues)) {
-                $this->removedValues = array_udiff($this->removedValues,
+                $this->removedValues = array_udiff(
+                    $this->removedValues,
                     array($associationValue),
                     function ($a, $b) {
-                    return $a->compareTo($b);
-                });
+                        return $a->compareTo($b);
+                    }
+                );
             } else {
                 $this->addedValues[] = $associationValue;
             }
@@ -116,22 +119,27 @@ class AssociationValuesImpl implements AssociationValuesInterface
     public function remove(AssociationValue $associationValue)
     {
         if ($this->inCollection($associationValue, $this->values)) {
-            $this->values = array_udiff($this->values, array($associationValue),
+            $this->values = array_udiff(
+                $this->values,
+                array($associationValue),
                 function ($a, $b) {
-                return $a->compareTo($b);
-            });
+                    return $a->compareTo($b);
+                }
+            );
             $removed = true;
         } else {
             $removed = false;
         }
 
-        if ($removed) {          
+        if ($removed) {
             if ($this->inCollection($associationValue, $this->addedValues)) {
-                $this->addedValues = array_udiff($this->addedValues,
+                $this->addedValues = array_udiff(
+                    $this->addedValues,
                     array($associationValue),
                     function ($a, $b) {
-                    return $a->compareTo($b);
-                });
+                        return $a->compareTo($b);
+                    }
+                );
             } else {
                 $this->removedValues[] = $associationValue;
             }
@@ -154,5 +162,14 @@ class AssociationValuesImpl implements AssociationValuesInterface
     {
         return empty($this->values);
     }
+
+    /**
+     * @return AssociationValue[]
+     */
+    public function asArray()
+    {
+        return $this->values;
+    }
+
 
 }

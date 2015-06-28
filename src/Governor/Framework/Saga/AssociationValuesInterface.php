@@ -27,9 +27,9 @@ namespace Governor\Framework\Saga;
 /**
  * Interface describing a container of {@link AssociationValue Association Values} for a single {@link Saga} instance.
  * This container tracks changes made to its contents between commits (see {@link #commit()}).
- * 
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface AssociationValuesInterface
 {
@@ -98,4 +98,9 @@ interface AssociationValuesInterface
      * @return boolean <code>true</code> if the value was removed, <code>false</code> if it was not contained in this instance
      */
     public function remove(AssociationValue $associationValue);
+
+    /**
+     * @return AssociationValue[]
+     */
+    public function asArray();
 }
