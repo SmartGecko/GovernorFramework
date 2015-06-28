@@ -13,7 +13,7 @@ use Governor\Framework\Saga\SagaRepositoryInterface;
 use Governor\Framework\Saga\AssociationValue;
 
 /**
- * Abstract implementation for saga repositories. 
+ * Abstract implementation for saga repositories.
  */
 abstract class AbstractSagaRepository implements SagaRepositoryInterface
 {
@@ -26,35 +26,44 @@ abstract class AbstractSagaRepository implements SagaRepositoryInterface
     public function add(SagaInterface $saga)
     {
         if ($saga->isActive()) {
-            $sagaType = $this->typeOf($saga);            
+            $sagaType = $this->typeOf($saga);
             $associationValues = $saga->getAssociationValues();
-            
+
             foreach ($associationValues->addedAssociations() as $av) {
-                $this->storeAssociationValue($av, $sagaType,
-                        $saga->getSagaIdentifier());
+                $this->storeAssociationValue(
+                    $av,
+                    $sagaType,
+                    $saga->getSagaIdentifier()
+                );
             }
-            
+
             $associationValues->commit();
             $this->storeSaga($saga);
         }
     }
 
     public function commit(SagaInterface $saga)
-    {        
-        if (!$saga->isActive()) {            
+    {
+        if (!$saga->isActive()) {
             $this->deleteSaga($saga);
-        } else {            
+        } else {
             $sagaType = $this->typeOf($saga);
-            $associationValues = $saga->getAssociationValues();            
-            
+            $associationValues = $saga->getAssociationValues();
+
             foreach ($associationValues->addedAssociations() as $av) {
-                $this->storeAssociationValue($av, $sagaType,
-                        $saga->getSagaIdentifier());
+                $this->storeAssociationValue(
+                    $av,
+                    $sagaType,
+                    $saga->getSagaIdentifier()
+                );
             }
 
             foreach ($associationValues->removedAssociations() as $av) {
-                $this->removeAssociationValue($av, $sagaType,
-                        $saga->getSagaIdentifier());
+                $this->removeAssociationValue(
+                    $av,
+                    $sagaType,
+                    $saga->getSagaIdentifier()
+                );
             }
 
             $associationValues->commit();
@@ -66,12 +75,14 @@ abstract class AbstractSagaRepository implements SagaRepositoryInterface
      * Finds the identifiers of the sagas of given <code>type</code> associated with the given
      * <code>associationValue</code>.
      *
-     * @param string $type             The type of saga to find identifiers for
+     * @param string $type The type of saga to find identifiers for
      * @param AssociationValue $associationValue The value the saga must be associated with
      * @return array The identifiers of sagas associated with the given <code>associationValue</code>
      */
-    protected abstract function findAssociatedSagaIdentifiers($type,
-            AssociationValue $associationValue);
+    protected abstract function findAssociatedSagaIdentifiers(
+        $type,
+        AssociationValue $associationValue
+    );
 
     /**
      * Returns the type identifier to use for the given <code>sagaClass</code>. This information is typically provided
@@ -108,20 +119,26 @@ abstract class AbstractSagaRepository implements SagaRepositoryInterface
      * Store the given <code>associationValue</code>, which has been associated with given <code>sagaIdentifier</code>.
      *
      * @param AssociationValue $associationValue The association value to store
-     * @param string $sagaType         Type type of saga the association value belongs to
-     * @param string $sagaIdentifier   The saga related to the association value
+     * @param string $sagaType Type type of saga the association value belongs to
+     * @param string $sagaIdentifier The saga related to the association value
      */
-    protected abstract function storeAssociationValue(AssociationValue $associationValue,
-            $sagaType, $sagaIdentifier);
+    protected abstract function storeAssociationValue(
+        AssociationValue $associationValue,
+        $sagaType,
+        $sagaIdentifier
+    );
 
     /**
      * Removes the association value that has been associated with Saga, identified with the given
      * <code>sagaIdentifier</code>.
      *
      * @param AssociationValue $associationValue The value to remove as association value for the given saga
-     * @param string $sagaType         The type of the Saga to remove the association from
-     * @param string $sagaIdentifier   The identifier of the Saga to remove the association from
+     * @param string $sagaType The type of the Saga to remove the association from
+     * @param string $sagaIdentifier The identifier of the Saga to remove the association from
      */
-    protected abstract function removeAssociationValue(AssociationValue $associationValue,
-            $sagaType, $sagaIdentifier);
+    protected abstract function removeAssociationValue(
+        AssociationValue $associationValue,
+        $sagaType,
+        $sagaIdentifier
+    );
 }

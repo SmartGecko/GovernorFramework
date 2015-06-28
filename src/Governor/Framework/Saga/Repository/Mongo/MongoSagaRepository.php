@@ -15,6 +15,9 @@ use Governor\Framework\Saga\ResourceInjectorInterface;
 use Governor\Framework\Saga\Repository\AbstractSagaRepository;
 use Governor\Framework\Serializer\SimpleSerializedObject;
 use Governor\Framework\Serializer\SimpleSerializedType;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
+use Governor\Framework\Common\Logging\NullLogger;
 
 /**
  * Implementations of the SagaRepository that stores Sagas and their associations in a Mongo Database. Each Saga and
@@ -24,8 +27,13 @@ use Governor\Framework\Serializer\SimpleSerializedType;
  * @author Allard Buijze
  * @since 2.0
  */
-class MongoSagaRepository extends AbstractSagaRepository
+class MongoSagaRepository extends AbstractSagaRepository implements LoggerAwareInterface
 {
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var MongoTemplateInterface
@@ -56,6 +64,8 @@ class MongoSagaRepository extends AbstractSagaRepository
         $this->mongoTemplate = $mongoTemplate;
         $this->serializer = $serializer;
         $this->injector = $injector;
+
+        $this->logger = new NullLogger();
     }
 
     /**
@@ -231,5 +241,17 @@ class MongoSagaRepository extends AbstractSagaRepository
             ]
         ];
     }
+
+    /**
+     * Sets a logger instance on the object
+     *
+     * @param LoggerInterface $logger
+     * @return null
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
 
 }
