@@ -9,7 +9,6 @@
 namespace Governor\Framework\Common\Mongo;
 
 use Psr\Log\LoggerAwareInterface;
-use MongoClient;
 use Governor\Framework\Common\Logging\NullLogger;
 use Psr\Log\LoggerInterface;
 
@@ -55,7 +54,7 @@ abstract class AuthenticatingMongoTemplate implements LoggerAwareInterface
             $options['authSource'] = $authenticationDatabaseName;
         }
 
-        $client = new MongoClient($server, $options);
+        $client = new \MongoClient($server, $options);
         $this->database = $client->selectDB($databaseName);
     }
 
