@@ -45,8 +45,8 @@ use Governor\Framework\Serializer\MessageSerializer;
 /**
  * Implementation of the {@see EventStoreInterface} backed by Doctrine ORM.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class OrmEventStore implements EventStoreInterface, EventStoreManagementInterface, SnapshotEventStoreInterface
 {
@@ -65,17 +65,17 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
     private $maxSnapshotsArchived = self::DEFAULT_MAX_SNAPSHOTS_ARCHIVED;
 
     /**
-     * @var EntityManager 
+     * @var EntityManager
      */
     private $entityManager;
 
     /**
-     * @var MessageSerializer 
+     * @var MessageSerializer
      */
     private $serializer;
 
     /**
-     * @var EventEntryStoreInterface 
+     * @var EventEntryStoreInterface
      */
     private $entryStore;
 
@@ -85,16 +85,17 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
     private $logger;
 
     /**
-     * Creates a new instance of the OrmEventStore. 
-     * 
+     * Creates a new instance of the OrmEventStore.
+     *
      * @param EntityManager $entityManager ORM entity manager.
      * @param SerializerInterface $serializer Serializer implementation.
      * @param EventEntryStoreInterface|null $entryStore Entry store implementation
      */
-    public function __construct(EntityManager $entityManager,
-            SerializerInterface $serializer,
-            EventEntryStoreInterface $entryStore = null)
-    {
+    public function __construct(
+        EntityManager $entityManager,
+        SerializerInterface $serializer,
+        EventEntryStoreInterface $entryStore = null
+    ) {
         $this->entityManager = $entityManager;
         $this->serializer = new MessageSerializer($serializer);
         $this->entryStore = null === $entryStore ? new DefaultEventEntryStore() : $entryStore;
@@ -138,26 +139,41 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
             $serializedPayload = $this->serializer->serializePayload($event);
             $serializedMetaData = $this->serializer->serializeMetaData($event);
 
-            $this->entryStore->persistEvent($type, $event, $serializedPayload,
-                    $serializedMetaData, $this->entityManager);
+            $this->entryStore->persistEvent(
+                $type,
+                $event,
+                $serializedPayload,
+                $serializedMetaData,
+                $this->entityManager
+            );
         }
 
         $this->entityManager->flush();
     }
 
-    public function appendSnapshotEvent($type,
-            DomainEventMessageInterface $snapshotEvent)
-    {
+    public function appendSnapshotEvent(
+        $type,
+        DomainEventMessageInterface $snapshotEvent
+    ) {
         // Persist snapshot before pruning redundant archived ones, in order to prevent snapshot misses when reloading
         // an aggregate, which may occur when a READ_UNCOMMITTED transaction isolation level is used.
         $serializedPayload = $this->serializer->serializePayload($snapshotEvent);
         $serializedMetaData = $this->serializer->serializeMetaData($snapshotEvent);
-        $this->entryStore->persistSnapshot($type, $snapshotEvent,
-                $serializedPayload, $serializedMetaData, $this->entityManager);
+        $this->entryStore->persistSnapshot(
+            $type,
+            $snapshotEvent,
+            $serializedPayload,
+            $serializedMetaData,
+            $this->entityManager
+        );
 
         if ($this->maxSnapshotsArchived > 0) {
-            $this->entryStore->pruneSnapshots($type, $snapshotEvent,
-                    $this->maxSnapshotsArchived, $this->entityManager);
+            $this->entryStore->pruneSnapshots(
+                $type,
+                $snapshotEvent,
+                $this->maxSnapshotsArchived,
+                $this->entityManager
+            );
         }
     }
 
@@ -165,35 +181,50 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
     {
         $snapshotScn = -1;
         $snapshotEvent = null;
-        $lastSnapshotEvent = $this->entryStore->loadLastSnapshotEvent($type,
-                $identifier, $this->entityManager);
+        $lastSnapshotEvent = $this->entryStore->loadLastSnapshotEvent(
+            $type,
+            $identifier,
+            $this->entityManager
+        );
 
         if (null !== $lastSnapshotEvent) {
             try {
                 $snapshotEvent = new GenericDomainEventMessage(
-                        $identifier, $lastSnapshotEvent->getScn(),
-                        $this->serializer->deserialize($lastSnapshotEvent->getPayload()),
-                        $this->serializer->deserialize($lastSnapshotEvent->getMetaData()));
+                    $identifier, $lastSnapshotEvent->getScn(),
+                    $this->serializer->deserialize($lastSnapshotEvent->getPayload()),
+                    $this->serializer->deserialize($lastSnapshotEvent->getMetaData())
+                );
 
 
                 $snapshotScn = $snapshotEvent->getScn();
             } catch (\RuntimeException $ex) {
-                $this->logger->warn("Error while reading snapshot event entry. " .
-                        "Reconstructing aggregate on entire event stream. Caused by: {class} {message}",
-                        array('class' => get_class($ex),
-                    'message' => $ex->getMessage()));
+                $this->logger->warn(
+                    "Error while reading snapshot event entry. ".
+                    "Reconstructing aggregate on entire event stream. Caused by: {class} {message}",
+                    array(
+                        'class' => get_class($ex),
+                        'message' => $ex->getMessage()
+                    )
+                );
             }
         }
 
-        $entries = $this->entryStore->fetchAggregateStream($type, $identifier,
-                $snapshotScn, $this->batchSize, $this->entityManager);
+        $entries = $this->entryStore->fetchAggregateStream(
+            $type,
+            $identifier,
+            $snapshotScn,
+            $this->batchSize,
+            $this->entityManager
+        );
 
         if ($snapshotEvent === null && !$entries->valid()) {
             throw new EventStreamNotFoundException($type, $identifier);
         }
 
-        return new OrmDomainEventStream($this->serializer, $entries,
-                $identifier, $snapshotEvent);
+        return new OrmDomainEventStream(
+            $this->serializer, $entries,
+            $identifier, $snapshotEvent
+        );
     }
 
     public function setLogger(LoggerInterface $logger)
@@ -201,11 +232,12 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
         $this->logger = $logger;
     }
 
-    public function visitEvents(EventVisitorInterface $visitor,
-            CriteriaInterface $criteria = null)
-    {
-        $whereClause = "";
-        $parameters = array();
+    public function visitEvents(
+        EventVisitorInterface $visitor,
+        CriteriaInterface $criteria = null
+    ) {
+        $whereClause = '';
+        $parameters = [];
 
         if (null !== $criteria) {
             $paramRegistry = new ParameterRegistry();
@@ -213,10 +245,16 @@ class OrmEventStore implements EventStoreInterface, EventStoreManagementInterfac
             $parameters = $paramRegistry->getParameters();
         }
 
-        $batch = $this->entryStore->fetchFiltered($whereClause, $parameters,
-                $this->batchSize, $this->entityManager);
-        $eventStream = new OrmDomainEventStream($this->serializer, $batch, null,
-                null);
+        $batch = $this->entryStore->fetchFiltered(
+            $whereClause,
+            $parameters,
+            $this->batchSize,
+            $this->entityManager
+        );
+        $eventStream = new OrmDomainEventStream(
+            $this->serializer, $batch, null,
+            null
+        );
 
         while ($eventStream->hasNext()) {
             $visitor->doWithEvent($eventStream->next());

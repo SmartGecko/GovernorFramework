@@ -15,6 +15,7 @@ use Governor\Framework\EventStore\Mongo\MongoEventStore;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\EventStore\Mongo\DefaultMongoTemplate;
 use Governor\Framework\EventStore\EventStreamNotFoundException;
+use Governor\Framework\EventStore\EventVisitorInterface;
 use Governor\Framework\Domain\SimpleDomainEventStream;
 use Governor\Framework\Repository\ConcurrencyException;
 use Governor\Framework\EventSourcing\Annotation\AbstractAnnotatedAggregateRoot;
@@ -305,140 +306,145 @@ class MongoEventStoreTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    /*
-              @DirtiesContext
-              @Test
-              public void testVisitAllEvents() {
-          EventVisitor eventVisitor = mock(EventVisitor.class);
-                  testSubject.appendEvents("type1", new SimpleDomainEventStream(createDomainEvents(77)));
-                  testSubject.appendEvents("type2", new SimpleDomainEventStream(createDomainEvents(23)));
 
-                  testSubject.visitEvents(eventVisitor);
-                  verify(eventVisitor, times(100)).doWithEvent(isA(DomainEventMessage.class));
-              }
+    private function createDomainEvents($numberOfEvents)
+    {
+        $events = [];
 
-              @DirtiesContext
-              @Test
-              public void testVisitAllEvents_IncludesUnknownEventType() throws Exception {
-              EventVisitor eventVisitor = mock(EventVisitor.class);
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(10)));
-                  final GenericDomainEventMessage eventMessage = new GenericDomainEventMessage<String>("test", 0, "test");
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(eventMessage));
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(10)));
-                  // we upcast the event to two instances, one of which is an unknown class
-                  testSubject.setUpcasterChain(new LazyUpcasterChain(Arrays.<Upcaster>asList(new StubUpcaster())));
-                  testSubject.visitEvents(eventVisitor);
-
-                  verify(eventVisitor, times(21)).doWithEvent(isA(DomainEventMessage.class));
-              }
-
-              @DirtiesContext
-              @Test
-              public void testVisitEvents_AfterTimestamp() {
-          EventVisitor eventVisitor = mock(EventVisitor.class);
-                  DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 12, 59, 59, 999).getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(11)));
-                  DateTime onePM = new DateTime(2011, 12, 18, 13, 0, 0, 0);
-                  DateTimeUtils.setCurrentMillisFixed(onePM.getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(12)));
-                  DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 0).getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(13)));
-                  DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 1).getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(14)));
-                  DateTimeUtils.setCurrentMillisSystem();
-
-                  CriteriaBuilder criteriaBuilder = testSubject.newCriteriaBuilder();
-                  testSubject.visitEvents(criteriaBuilder.property("timeStamp").greaterThan(onePM), eventVisitor);
-                  ArgumentCaptor<DomainEventMessage> captor = ArgumentCaptor.forClass(DomainEventMessage.class);
-                  verify(eventVisitor, times(13 + 14)).doWithEvent(captor.capture());
-                  assertEquals(new DateTime(2011, 12, 18, 14, 0, 0, 0), captor.getAllValues().get(0).getTimestamp());
-                  assertEquals(new DateTime(2011, 12, 18, 14, 0, 0, 1), captor.getAllValues().get(26).getTimestamp());
-              }
-
-              @DirtiesContext
-              @Test
-              public void testVisitEvents_BetweenTimestamps() {
-          EventVisitor eventVisitor = mock(EventVisitor.class);
-                  DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 12, 59, 59, 999).getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(11)));
-                  DateTime onePM = new DateTime(2011, 12, 18, 13, 0, 0, 0);
-                  DateTimeUtils.setCurrentMillisFixed(onePM.getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(12)));
-                  DateTime twoPM = new DateTime(2011, 12, 18, 14, 0, 0, 0);
-                  DateTimeUtils.setCurrentMillisFixed(twoPM.getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(13)));
-                  DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 1).getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(14)));
-                  DateTimeUtils.setCurrentMillisSystem();
-
-                  CriteriaBuilder criteriaBuilder = testSubject.newCriteriaBuilder();
-                  testSubject.visitEvents(criteriaBuilder.property("timeStamp").greaterThanEquals(onePM)
-                      .and(criteriaBuilder.property("timeStamp").lessThanEquals(twoPM)),
-                                          eventVisitor);
-                  verify(eventVisitor, times(12 + 13)).doWithEvent(isA(DomainEventMessage.class));
-              }
-
-              @DirtiesContext
-              @Test
-              public void testVisitEvents_OnOrAfterTimestamp() {
-          EventVisitor eventVisitor = mock(EventVisitor.class);
-                  DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 12, 59, 59, 999).getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(11)));
-                  DateTime onePM = new DateTime(2011, 12, 18, 13, 0, 0, 0);
-                  DateTimeUtils.setCurrentMillisFixed(onePM.getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(12)));
-                  DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 0).getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(13)));
-                  DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 1).getMillis());
-                  testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(14)));
-                  DateTimeUtils.setCurrentMillisSystem();
-
-                  CriteriaBuilder criteriaBuilder = testSubject.newCriteriaBuilder();
-                  testSubject.visitEvents(criteriaBuilder.property("timeStamp").greaterThanEquals(onePM), eventVisitor);
-                  verify(eventVisitor, times(12 + 13 + 14)).doWithEvent(isA(DomainEventMessage.class));
-              }
-
-          /*
-              private List<DomainEventMessage<StubStateChangedEvent>> createDomainEvents(int numberOfEvents) {
-              List<DomainEventMessage<StubStateChangedEvent>> events = new ArrayList<DomainEventMessage<StubStateChangedEvent>>();
-                  final UUID aggregateIdentifier = UUID.randomUUID();
-                  for (int t = 0; t < numberOfEvents; t++) {
-                  events.add(new GenericDomainEventMessage<StubStateChangedEvent>(
-                  aggregateIdentifier, t, new StubStateChangedEvent(), null));
-                  }
-                  return events;
-              }
-          */
-
-
-    /*
-        private static class StubUpcaster implements Upcaster<byte[]> {
-
-        @Override
-            public boolean canUpcast(SerializedType serializedType) {
-            return "java.lang.String".equals(serializedType.getName());
+        for ($cc = 0; $cc < $numberOfEvents; $cc++) {
+            $events[] = new GenericDomainEventMessage(
+                \Rhumsaa\Uuid\Uuid::uuid1()->toString(),
+                $cc,
+                new StubStateChangedEvent()
+            );
         }
 
-            @Override
-            public Class<byte[]> expectedRepresentationType() {
-                return byte[].class;
-            }
+        return $events;
+    }
+
+
+    public function testVisitAllEvents()
+    {
+        $eventVisitor = $this->getMock(EventVisitorInterface::class);
+
+        $eventVisitor->expects($this->exactly(100))
+            ->method('doWithEvent');
+
+        $this->testSubject->appendEvents('type1', new SimpleDomainEventStream($this->createDomainEvents(77)));
+        $this->testSubject->appendEvents('type2', new SimpleDomainEventStream($this->createDomainEvents(23)));
+
+        $this->testSubject->visitEvents($eventVisitor);
+    }
+
+    /*
+               @DirtiesContext
+               @Test
+               public void testVisitAllEvents_IncludesUnknownEventType() throws Exception {
+               EventVisitor eventVisitor = mock(EventVisitor.class);
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(10)));
+                   final GenericDomainEventMessage eventMessage = new GenericDomainEventMessage<String>("test", 0, "test");
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(eventMessage));
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(10)));
+                   // we upcast the event to two instances, one of which is an unknown class
+                   testSubject.setUpcasterChain(new LazyUpcasterChain(Arrays.<Upcaster>asList(new StubUpcaster())));
+                   testSubject.visitEvents(eventVisitor);
+
+                   verify(eventVisitor, times(21)).doWithEvent(isA(DomainEventMessage.class));
+               }*/
+
+               /*
+               public function testVisitEvents_AfterTimestamp() {
+                   $eventVisitor = $this->getMock(EventVisitorInterface::class);
+
+                   DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 12, 59, 59, 999).getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(11)));
+                   DateTime onePM = new DateTime(2011, 12, 18, 13, 0, 0, 0);
+                   DateTimeUtils.setCurrentMillisFixed(onePM.getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(12)));
+                   DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 0).getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(13)));
+                   DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 1).getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(14)));
+                   DateTimeUtils.setCurrentMillisSystem();
+
+                   CriteriaBuilder criteriaBuilder = testSubject.newCriteriaBuilder();
+                   testSubject.visitEvents(criteriaBuilder.property("timeStamp").greaterThan(onePM), eventVisitor);
+                   ArgumentCaptor<DomainEventMessage> captor = ArgumentCaptor.forClass(DomainEventMessage.class);
+                   verify(eventVisitor, times(13 + 14)).doWithEvent(captor.capture());
+                   assertEquals(new DateTime(2011, 12, 18, 14, 0, 0, 0), captor.getAllValues().get(0).getTimestamp());
+                   assertEquals(new DateTime(2011, 12, 18, 14, 0, 0, 1), captor.getAllValues().get(26).getTimestamp());
+               }
+
+               /*
+               public void testVisitEvents_BetweenTimestamps() {
+           EventVisitor eventVisitor = mock(EventVisitor.class);
+                   DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 12, 59, 59, 999).getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(11)));
+                   DateTime onePM = new DateTime(2011, 12, 18, 13, 0, 0, 0);
+                   DateTimeUtils.setCurrentMillisFixed(onePM.getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(12)));
+                   DateTime twoPM = new DateTime(2011, 12, 18, 14, 0, 0, 0);
+                   DateTimeUtils.setCurrentMillisFixed(twoPM.getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(13)));
+                   DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 1).getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(14)));
+                   DateTimeUtils.setCurrentMillisSystem();
+
+                   CriteriaBuilder criteriaBuilder = testSubject.newCriteriaBuilder();
+                   testSubject.visitEvents(criteriaBuilder.property("timeStamp").greaterThanEquals(onePM)
+                       .and(criteriaBuilder.property("timeStamp").lessThanEquals(twoPM)),
+                                           eventVisitor);
+                   verify(eventVisitor, times(12 + 13)).doWithEvent(isA(DomainEventMessage.class));
+               }
+
+               @DirtiesContext
+               @Test
+               public void testVisitEvents_OnOrAfterTimestamp() {
+           EventVisitor eventVisitor = mock(EventVisitor.class);
+                   DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 12, 59, 59, 999).getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(11)));
+                   DateTime onePM = new DateTime(2011, 12, 18, 13, 0, 0, 0);
+                   DateTimeUtils.setCurrentMillisFixed(onePM.getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(12)));
+                   DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 0).getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(13)));
+                   DateTimeUtils.setCurrentMillisFixed(new DateTime(2011, 12, 18, 14, 0, 0, 1).getMillis());
+                   testSubject.appendEvents("test", new SimpleDomainEventStream(createDomainEvents(14)));
+                   DateTimeUtils.setCurrentMillisSystem();
+
+                   CriteriaBuilder criteriaBuilder = testSubject.newCriteriaBuilder();
+                   testSubject.visitEvents(criteriaBuilder.property("timeStamp").greaterThanEquals(onePM), eventVisitor);
+                   verify(eventVisitor, times(12 + 13 + 14)).doWithEvent(isA(DomainEventMessage.class));
+               }
+
+        /*
+            private static class StubUpcaster implements Upcaster<byte[]> {
 
             @Override
-            public List<SerializedObject<?>> upcast(SerializedObject<byte[]> intermediateRepresentation,
-                                                    List<SerializedType> expectedTypes, UpcastingContext context) {
-            return Arrays.<SerializedObject<?>>asList(
-            new SimpleSerializedObject<String>("data1", String.class, expectedTypes.get(0)),
-                        new SimpleSerializedObject<byte[]>(intermediateRepresentation.getData(), byte[].class,
-                                                           expectedTypes.get(1)));
+                public boolean canUpcast(SerializedType serializedType) {
+                return "java.lang.String".equals(serializedType.getName());
             }
 
-            @Override
-            public List<SerializedType> upcast(SerializedType serializedType) {
-        return Arrays.<SerializedType>asList(new SimpleSerializedType("unknownType1", "2"),
-            new SimpleSerializedType(StubStateChangedEvent.class.getName(), "2"));
-            }
-        }*/
+                @Override
+                public Class<byte[]> expectedRepresentationType() {
+                    return byte[].class;
+                }
+
+                @Override
+                public List<SerializedObject<?>> upcast(SerializedObject<byte[]> intermediateRepresentation,
+                                                        List<SerializedType> expectedTypes, UpcastingContext context) {
+                return Arrays.<SerializedObject<?>>asList(
+                new SimpleSerializedObject<String>("data1", String.class, expectedTypes.get(0)),
+                            new SimpleSerializedObject<byte[]>(intermediateRepresentation.getData(), byte[].class,
+                                                               expectedTypes.get(1)));
+                }
+
+                @Override
+                public List<SerializedType> upcast(SerializedType serializedType) {
+            return Arrays.<SerializedType>asList(new SimpleSerializedType("unknownType1", "2"),
+                new SimpleSerializedType(StubStateChangedEvent.class.getName(), "2"));
+                }
+            }*/
 }
 
 class StubAggregateRoot extends AbstractAnnotatedAggregateRoot

@@ -16,6 +16,7 @@ use Governor\Framework\EventStore\EventVisitorInterface;
 use Governor\Framework\EventStore\Management\CriteriaBuilderInterface;
 use Governor\Framework\EventStore\Management\CriteriaInterface;
 use Governor\Framework\EventStore\Management\EventStoreManagementInterface;
+use Governor\Framework\EventStore\Mongo\Criteria\MongoCriteriaBuilder;
 use Governor\Framework\EventStore\PartialEventStreamSupportInterface;
 use Governor\Framework\EventStore\SnapshotEventStoreInterface;
 use Governor\Framework\Serializer\SerializerInterface;
@@ -258,16 +259,18 @@ class MongoEventStore implements EventStoreInterface, EventStoreManagementInterf
         EventVisitorInterface $visitor,
         CriteriaInterface $criteria = null
     ) {
+        $params = isset($criteria) ? $criteria->asMongoObject() : [];
+
         $cursor = $this->storageStrategy->findEventsByCriteria(
             $this->mongoTemplate->domainEventCollection(),
-            $criteria
+            $params
         );
 
         //cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         $self = $this;
 
         $cb = function (array $entry, $identifier) use ($self) {
-            return $self->extractEventMessages(
+            return $self->storageStrategy->extractEventMessages(
                 $entry,
                 $identifier,
                 $self->eventSerializer,
@@ -276,7 +279,7 @@ class MongoEventStore implements EventStoreInterface, EventStoreManagementInterf
             );
         };
 
-        $events = new CursorBackedDomainEventStream($cursor, null, null, null, true, $cb);
+        $events = new CursorBackedDomainEventStream($cursor, [], null, null, true, $cb);
 
         try {
             while ($events->hasNext()) {
@@ -294,7 +297,7 @@ class MongoEventStore implements EventStoreInterface, EventStoreManagementInterf
      */
     public function newCriteriaBuilder()
     {
-        // TODO: Implement newCriteriaBuilder() method.
+        return new MongoCriteriaBuilder();
     }
 
     /**
