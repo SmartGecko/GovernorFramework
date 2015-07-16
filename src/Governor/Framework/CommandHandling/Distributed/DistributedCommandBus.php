@@ -29,8 +29,11 @@ use Governor\Framework\CommandHandling\CommandCallbackInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 use Governor\Framework\CommandHandling\CommandDispatchInterceptorInterface;
+use Psr\Log\LoggerAwareInterface;
+use Governor\Framework\Common\Logging\NullLogger;
+use Psr\Log\LoggerInterface;
 
-class DistributedCommandBus implements CommandBusInterface
+class DistributedCommandBus implements CommandBusInterface, LoggerAwareInterface
 {
 
     const DISPATCH_ERROR_MESSAGE = 'An error occurred while trying to dispatch a command on the DistributedCommandBus';
@@ -51,6 +54,11 @@ class DistributedCommandBus implements CommandBusInterface
     private $dispatchInterceptors;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param CommandBusConnectorInterface $connector
      * @param RoutingStrategyInterface $routingStrategy
      */
@@ -60,6 +68,7 @@ class DistributedCommandBus implements CommandBusInterface
     ) {
         $this->connector = $connector;
         $this->routingStrategy = $routingStrategy;
+        $this->logger = new NullLogger();
     }
 
 
@@ -134,6 +143,14 @@ class DistributedCommandBus implements CommandBusInterface
     public function setDispatchInterceptors(array $dispatchInterceptors)
     {
         $this->dispatchInterceptors = $dispatchInterceptors;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
 
