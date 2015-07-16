@@ -22,32 +22,15 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling;
+namespace Governor\Framework\Common;
 
 /**
- * Manages a registry of available command handlers.
+ * Interface describing a mechanism that receives incoming messages.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface CommandHandlerRegistryInterface extends CommandSubscriptionInterface
+interface ReceiverInterface
 {
-
-    /**
-     * Finds and returns the suitable CommandHandlerInterface for the command message
-     * or throws a NoHandlerForCommandException if none exist.
-     *
-     * @param CommandMessageInterface $message
-     * @return CommandHandlerInterface
-     * @throws NoHandlerForCommandException
-     */
-    public function findCommandHandlerFor(CommandMessageInterface $message);
-
-    /**
-     * Returns a list of managed subscriptions.
-     *
-     * @return array
-     */
-    public function getSubscriptions();
-
+    public function run();
 }

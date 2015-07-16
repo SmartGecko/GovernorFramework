@@ -68,8 +68,10 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
      * @param CommandHandlerRegistryInterface $handlerRegistry
      * @param UnitOfWorkFactoryInterface $unitOfWorkFactory
      */
-    public function __construct(CommandHandlerRegistryInterface $handlerRegistry, UnitOfWorkFactoryInterface $unitOfWorkFactory)
-    {
+    public function __construct(
+        CommandHandlerRegistryInterface $handlerRegistry,
+        UnitOfWorkFactoryInterface $unitOfWorkFactory
+    ) {
         $this->handlerRegistry = $handlerRegistry;
         $this->unitOfWorkFactory = $unitOfWorkFactory;
         $this->logger = new NullLogger();
@@ -129,11 +131,12 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     ) {
         $this->logger->debug(
             "Dispatching command [{name}]",
-            array('name' => $command->getCommandName())
+            [
+                'name' => $command->getCommandName()
+            ]
         );
 
         $unitOfWork = $this->unitOfWorkFactory->createUnitOfWork();
-        $unitOfWork->setLogger($this->logger);
 
         $chain = new DefaultInterceptorChain(
             $command, $unitOfWork, $handler,
@@ -191,6 +194,35 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     public function getCommandHandlerRegistry()
     {
         return $this->handlerRegistry;
+    }
+
+    /**
+     * Subscribe the given <code>handler</code> to commands of type <code>commandType</code>.
+     * <p/>
+     * If a subscription already exists for the given type, the behavior is undefined. Implementations may throw an
+     * Exception to refuse duplicate subscription or alternatively decide whether the existing or new
+     * <code>handler</code> gets the subscription.
+     *
+     * @param string $commandName The name of the command to subscribe the handler to
+     * @param CommandHandlerInterface $handler The handler service that handles the given type of command
+     */
+    public function subscribe($commandName, CommandHandlerInterface $handler)
+    {
+        return $this->handlerRegistry->subscribe($commandName, $handler);
+    }
+
+    /**
+     * Unsubscribe the given <code>handler</code> to commands of type <code>commandType</code>. If the handler is not
+     * currently assigned to that type of command, no action is taken.
+     *
+     * @param string $commandName The name of the command the handler is subscribed to
+     * @param CommandHandlerInterface $handler The handler service to unsubscribe from the CommandBus
+     * @return boolean <code>true</code> of this handler is successfully unsubscribed, <code>false</code> of the given
+     *         <code>handler</code> was not the current handler for given <code>commandType</code>.
+     */
+    public function unsubscribe($commandName, CommandHandlerInterface $handler)
+    {
+        return $this->handlerRegistry->unsubscribe($commandName, $handler);
     }
 
 

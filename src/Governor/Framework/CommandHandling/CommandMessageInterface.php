@@ -52,7 +52,7 @@ interface CommandMessageInterface extends MessageInterface
      * @param array $metaData The new MetaData for the Message
      * @return CommandMessageInterface a copy of this message with the given MetaData
      */
-    public function withMetaData(array $metaData = array());
+    public function withMetaData(array $metaData = []);
 
     /**
      * Returns a copy of this CommandMessage with it MetaData merged with the given <code>metaData</code>. The payload
@@ -61,5 +61,5 @@ interface CommandMessageInterface extends MessageInterface
      * @param array $metaData The MetaData to merge with
      * @return CommandMessageInterface a copy of this message with the given MetaData
      */
-    public function andMetaData(array $metaData = array());
+    public function andMetaData(array $metaData = []);
 }

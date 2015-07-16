@@ -100,4 +100,11 @@ class InMemoryCommandHandlerRegistry implements CommandHandlerRegistryInterface
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getSubscriptions()
+    {
+        return $this->subscriptions;
+    }
 }

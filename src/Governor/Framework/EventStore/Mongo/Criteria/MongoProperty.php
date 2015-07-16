@@ -14,8 +14,8 @@ use Governor\Framework\EventStore\Management\PropertyInterface;
 /**
  * Property implementation for use by the Mongo Event Store.
  *
- * @author Allard Buijze
- * @since 2.0
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class MongoProperty implements PropertyInterface
 {

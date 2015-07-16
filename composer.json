@@ -27,7 +27,8 @@
     "videlalvaro/php-amqplib": "2.2.*",
     "jms/serializer": "*",
     "symfony/validator": "~2.5",
-    "doctrine/mongodb-odm": "^1.0@dev"
+    "doctrine/mongodb-odm": "^1.0@dev",
+    "predis/predis": "^1.0"
   },
   "require-dev": {
     "doctrine/orm": ">=2.4",

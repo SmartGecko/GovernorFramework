@@ -17,8 +17,8 @@ use Psr\Log\LoggerInterface;
  * by components of the Axon Framework. The AuthenticatingMongoTemplate takes care of the authentication against the
  * Mongo database.
  *
- * @author Allard Buijze
- * @since 2.0
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AuthenticatingMongoTemplate implements LoggerAwareInterface
 {

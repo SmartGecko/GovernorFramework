@@ -1,5 +1,4 @@
 <?php
-
 /*
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -22,32 +21,26 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling;
+namespace Governor\Framework\CommandHandling\Distributed;
+
+
+use Governor\Framework\CommandHandling\CommandMessageInterface;
 
 /**
- * Manages a registry of available command handlers.
+ * Interface describing a mechanism that generates a routing key for a given command. Commands that should be handled
+ * by the same segment, should result in the same routing key.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface CommandHandlerRegistryInterface extends CommandSubscriptionInterface
+interface RoutingStrategyInterface
 {
-
     /**
-     * Finds and returns the suitable CommandHandlerInterface for the command message
-     * or throws a NoHandlerForCommandException if none exist.
+     * Generates a routing key for the given <code>command</code>. Commands that should be handled by the same segment,
+     * should result in the same routing key.
      *
-     * @param CommandMessageInterface $message
-     * @return CommandHandlerInterface
-     * @throws NoHandlerForCommandException
+     * @param CommandMessageInterface $command the command to create a routing key for
+     * @return string the routing key for the command
      */
-    public function findCommandHandlerFor(CommandMessageInterface $message);
-
-    /**
-     * Returns a list of managed subscriptions.
-     *
-     * @return array
-     */
-    public function getSubscriptions();
-
+    public function getRoutingKey(CommandMessageInterface $command);
 }

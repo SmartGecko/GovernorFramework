@@ -30,8 +30,8 @@ use Governor\Framework\Domain\MetaData;
 /**
  * Description of GenericCommandMessage
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class GenericCommandMessage implements CommandMessageInterface
 {
@@ -56,20 +56,37 @@ class GenericCommandMessage implements CommandMessageInterface
      */
     private $metaData;
 
-    public function __construct($payload, MetaData $metaData = null, $id = null,
-            $commandName = null)
-    {
+    /**
+     * @param mixed $payload
+     * @param MetaData $metaData
+     * @param string|null $id
+     * @param string|null $commandName
+     */
+    public function __construct(
+        $payload,
+        MetaData $metaData = null,
+        $id = null,
+        $commandName = null
+    ) {
         $this->id = (null === $id) ? Uuid::uuid1()->toString() : $id;
         $this->commandName = (null === $commandName) ? get_class($payload) : $commandName;
         $this->payload = $payload;
         $this->metaData = (null === $metaData) ? MetaData::emptyInstance() : $metaData;
     }
 
+    /**
+     * @param $command
+     * @return GenericCommandMessage
+     */
     public static function asCommandMessage($command)
     {
         if (!is_object($command)) {
-            throw new \InvalidArgumentException(sprintf("Command paylod must be an object, but is of type \"%s\"",
-                    gettype($command)));
+            throw new \InvalidArgumentException(
+                sprintf(
+                    "Command payload must be an object, but is of type \"%s\"",
+                    gettype($command)
+                )
+            );
         }
 
         if ($command instanceof CommandMessageInterface) {
@@ -79,48 +96,77 @@ class GenericCommandMessage implements CommandMessageInterface
         return new GenericCommandMessage($command, MetaData::emptyInstance());
     }
 
-    public function andMetaData(array $metadata = array())
+    /**
+     * @param array $metadata
+     * @return GenericCommandMessage
+     */
+    public function andMetaData(array $metadata = [])
     {
         if (empty($metadata)) {
             return $this;
         }
-        return new GenericCommandMessage($this->payload,
-                $this->metaData->mergeWith($metadata), $this->id,
-                $this->commandName);
+
+        return new GenericCommandMessage(
+            $this->payload,
+            $this->metaData->mergeWith($metadata), $this->id,
+            $this->commandName
+        );
     }
 
+    /**
+     * @return string
+     */
     public function getCommandName()
     {
         return $this->commandName;
     }
 
+    /**
+     * @return string
+     */
     public function getIdentifier()
     {
         return $this->id;
     }
 
+    /**
+     * @return MetaData
+     */
     public function getMetaData()
     {
         return $this->metaData;
     }
 
+    /**
+     * @return mixed
+     */
     public function getPayload()
     {
         return $this->payload;
     }
 
+    /**
+     * @return string
+     */
     public function getPayloadType()
     {
         return get_class($this->payload);
     }
 
-    public function withMetaData(array $metadata = array())
+    /**
+     * @param array $metadata
+     * @return GenericCommandMessage
+     */
+    public function withMetaData(array $metadata = [])
     {
         if ($this->metaData->isEqualTo($metadata)) {
             return $this;
         }
-        return new GenericCommandMessage($this->payload,
-                new MetaData($metadata), $this->id, $this->commandName);
+
+        return new GenericCommandMessage(
+            $this->payload,
+            new MetaData($metadata), $this->id, $this->commandName
+        );
     }
 
 }
