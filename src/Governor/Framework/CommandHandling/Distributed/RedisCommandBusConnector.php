@@ -25,7 +25,6 @@ namespace Governor\Framework\CommandHandling\Distributed;
 
 use Governor\Framework\CommandHandling\NoHandlerForCommandException;
 use Governor\Framework\Serializer\MessageSerializer;
-use Predis\Client;
 use Governor\Framework\CommandHandling\CommandBusInterface;
 use Governor\Framework\Serializer\SerializerInterface;
 use Governor\Framework\CommandHandling\CommandCallbackInterface;
@@ -36,9 +35,9 @@ class RedisCommandBusConnector implements CommandBusConnectorInterface
 {
 
     /**
-     * @var Client
+     * @var RedisTemplate
      */
-    private $client;
+    private $template;
 
     /**
      * @var CommandBusInterface
@@ -51,65 +50,39 @@ class RedisCommandBusConnector implements CommandBusConnectorInterface
     private $serializer;
 
     /**
-     * @var string
-     */
-    private $nodeName;
-
-    /**
-     * @param Client $client
+     * @param RedisTemplate $template
      * @param CommandBusInterface $localSegment
      * @param SerializerInterface $serializer
-     * @param string $nodeName
      */
-    function __construct(Client $client, CommandBusInterface $localSegment, SerializerInterface $serializer, $nodeName)
+    function __construct(RedisTemplate $template, CommandBusInterface $localSegment, SerializerInterface $serializer)
     {
-        $this->client = $client;
+        $this->template = $template;
         $this->localSegment = $localSegment;
         $this->serializer = new MessageSerializer($serializer);
-        $this->nodeName = $nodeName;
     }
 
 
     /**
-     * Sends the given <code>command</code> to the node assigned to handle messages with the given
-     * <code>routingKey</code>. The sender expect a reply, and will be notified of the result in the given
-     * <code>callback</code>.
-     * <p/>
-     * If this method throws an exception, the sender is guaranteed that the destination of the command did not receive
-     * it. If the method returns normally, the actual implementation of the connector defines the delivery guarantees.
-     * Implementations <em>should</em> always invoke the callback with an outcome.
-     * <p/>
-     * If a member's connection was lost, and the result of the command is unclear, the {@link
-     * CommandCallback#onFailure(Throwable)} method is invoked with a {@link RemoteCommandHandlingException} describing
-     * the failed connection. A client may choose to resend a command.
-     * <p/>
-     * Connectors route the commands based on the given <code>routingKey</code>. Using the same <code>routingKey</code>
-     * will result in the command being sent to the same member.
-     *
-     * @param string $routingKey The key describing the routing requirements of this command. Generally, commands with the same
-     *                   routingKey will be sent to the same destination.
-     * @param CommandMessageInterface $command The command to send to the (remote) member
-     * @param CommandCallbackInterface $callback The callback on which result notifications are sent
-     * @return mixed
-     * @throws \Exception when an error occurs before or during the sending of the message
+     * {@inheritdoc}
      */
     public function send($routingKey, CommandMessageInterface $command, CommandCallbackInterface $callback)
     {
-        $hash = hash('md5', sprintf('%s-%s', $command->getCommandName(), $routingKey));
-        $destination = $this->client->hget('governor:command:routing', $hash);
+        $destination = $this->template->getRoutingDestination($command->getCommandName(), $routingKey);
 
         if (null === $destination) {
             $destination = $this->findSuitableNode($command);
+            $this->template->setRoutingDestination($destination, $command->getCommandName(), $routingKey);
         }
 
-        $serialized = $this->serializer->serialize($command);
-        $this->client->rpush(sprintf('governor:command:%s:request', $destination), [$serialized]);
+        $dispatchMessage = new DispatchMessage($command, $this->serializer, true); // TODO reply
+
+        $this->template->enqueueCommand($destination, $dispatchMessage->toBytes());
+        $this->template->readCommandReply($command->getIdentifier());
     }
 
     private function findSuitableNode(CommandMessageInterface $command)
     {
-        $hash = hash('md5', $command->getCommandName());
-        $nodes = $this->client->smembers(sprintf('governor:command:subscription:%s', $hash));
+        $nodes = $this->template->getSubscriptions($command->getCommandName());
 
         if (empty($nodes)) {
             throw new NoHandlerForCommandException(
@@ -149,6 +122,34 @@ class RedisCommandBusConnector implements CommandBusConnectorInterface
     public function unsubscribe($commandName, CommandHandlerInterface $handler)
     {
         $this->localSegment->unsubscribe($commandName, $handler);
+    }
+
+    /**
+     *
+     */
+    public function saveSubscriptions()
+    {
+        foreach ($this->localSegment->getCommandHandlerRegistry()->getSubscriptions() as $command => $handler) {
+            $this->template->subscribe($command);
+        }
+    }
+
+    /**
+     *
+     */
+    public function clearSubscriptions()
+    {
+        foreach ($this->localSegment->getCommandHandlerRegistry()->getSubscriptions() as $command => $handler) {
+            $this->template->unsubscribe($command);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getNodeName()
+    {
+        return $this->template->getNodeName();
     }
 
 }

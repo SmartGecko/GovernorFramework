@@ -8,6 +8,8 @@
 
 namespace Governor\Framework\Serializer;
 
+use Governor\Framework\Domain\MetaData;
+
 /**
  * Description of SimpleSerializedDomainEventData
  *
@@ -46,6 +48,16 @@ class SimpleSerializedDomainEventData implements SerializedDomainEventDataInterf
      */
     private $serializedMetaData;
 
+    /**
+     * @param string $eventIdentifier
+     * @param string $aggregateIdentifier
+     * @param int $scn
+     * @param \DateTime $timestamp
+     * @param string $payloadType
+     * @param string $payloadRevision
+     * @param string $payload
+     * @param string $metaData
+     */
     public function __construct(
         $eventIdentifier,
         $aggregateIdentifier,
@@ -66,15 +78,21 @@ class SimpleSerializedDomainEventData implements SerializedDomainEventDataInterf
         );
         $this->serializedMetaData = new SimpleSerializedObject(
             $metaData,
-            new SimpleSerializedType('Governor\Framework\Domain\MetaData')
+            new SimpleSerializedType(MetaData::class)
         );
     }
 
+    /**
+     * @return string
+     */
     public function getAggregateIdentifier()
     {
         return $this->aggregateIdentifier;
     }
 
+    /**
+     * @return string
+     */
     public function getEventIdentifier()
     {
         return $this->eventIdentifier;
@@ -96,6 +114,9 @@ class SimpleSerializedDomainEventData implements SerializedDomainEventDataInterf
         return $this->serializedPayload;
     }
 
+    /**
+     * @return int
+     */
     public function getScn()
     {
         return $this->scn;

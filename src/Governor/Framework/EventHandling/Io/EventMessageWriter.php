@@ -74,6 +74,7 @@ class EventMessageWriter
                     $event->getScn());
         }
 
+        // TODO payload revision
         $packFormat = sprintf("Na%sNa%sNa%s",
                 strlen($serializedPayload->getType()->getName()),
                 strlen($serializedPayload->getData()),

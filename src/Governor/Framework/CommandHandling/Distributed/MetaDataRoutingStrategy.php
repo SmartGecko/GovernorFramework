@@ -56,10 +56,13 @@ class MetaDataRoutingStrategy extends AbstractRoutingStrategy
         $this->metaDataKey = $metaDataKey;
     }
 
-
+    /**
+     * @param CommandMessageInterface $command
+     * @return null|string
+     */
     protected function doResolveRoutingKey(CommandMessageInterface $command)
     {
         $value = $command->getMetaData()->get($this->metaDataKey);
-        return (string)$value;
+        return isset($value) ? (string)$value : null;
     }
 }

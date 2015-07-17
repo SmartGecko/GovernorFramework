@@ -27,27 +27,42 @@ namespace Governor\Framework\Serializer;
 /**
  * Description of SimpleSerializedType
  *
- *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class SimpleSerializedType implements SerializedTypeInterface
 {
-
+    /**
+     * @var string
+     */
     private $objectType;
+
+    /**
+     * @var string
+     */
     private $revisionNumber;
 
+    /**
+     * @param string $objectType
+     * @param string|null $revisionNumber
+     */
     function __construct($objectType, $revisionNumber = null)
     {
         $this->objectType = $objectType;
         $this->revisionNumber = $revisionNumber;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return $this->objectType;
     }
 
+    /**
+     * @return null|string
+     */
     public function getRevision()
     {
         return $this->revisionNumber;

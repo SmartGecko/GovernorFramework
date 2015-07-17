@@ -26,6 +26,7 @@ namespace Governor\Framework\EventHandling\Io;
 
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\Domain\GenericDomainEventMessage;
+use Governor\Framework\Domain\MetaData;
 use Governor\Framework\Serializer\SerializerInterface;
 use Governor\Framework\Serializer\SimpleSerializedObject;
 use Governor\Framework\Serializer\SimpleSerializedType;
@@ -35,14 +36,14 @@ use Governor\Framework\Serializer\MessageSerializer;
  * EventMessageReader converts a binary stream encoded with {@see EventMessageWriter} to the
  * correct EventMessageInterface implementation.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class EventMessageReader
 {
 
     /**
-     * @var MessageSerializer 
+     * @var MessageSerializer
      */
     private $serializer;
 
@@ -56,7 +57,7 @@ class EventMessageReader
 
     /**
      * Reads the data and constructs the suitable EventMessageInterface implementation.
-     * 
+     *
      * @param mixed $data Input data.
      * @return GenericDomainEventMessage|GenericEventMessage
      */
@@ -66,8 +67,10 @@ class EventMessageReader
         $offset = 42;
 
         if ($raw['type'] === 3) {
-            $raw = array_merge($raw,
-                    unpack("a36aggregateIdentifier/Nscn", substr($data, $offset)));
+            $raw = array_merge(
+                $raw,
+                unpack("a36aggregateIdentifier/Nscn", substr($data, $offset))
+            );
             $offset += 40;
         }
 
@@ -75,36 +78,56 @@ class EventMessageReader
         $this->read($raw, $offset, $data, "payload");
         $this->read($raw, $offset, $data, "meta");
 
-        $serializedPayload = new SimpleSerializedObject($raw['payload'],
-                new SimpleSerializedType($raw['payloadType']));
-        $serializedMetadata = new SimpleSerializedObject($raw['meta'],
-                new SimpleSerializedType('Governor\Framework\Domain\MetaData'));
-        
+        $serializedPayload = new SimpleSerializedObject(
+            $raw['payload'],
+            new SimpleSerializedType($raw['payloadType'])
+        );
+        $serializedMetadata = new SimpleSerializedObject(
+            $raw['meta'],
+            new SimpleSerializedType(MetaData::class)
+        );
+
         $dateTime = \DateTime::createFromFormat('U', $raw['timestamp']);
-        $dateTime->setTimezone(new \DateTimeZone(date_default_timezone_get()));                
-        
+        $dateTime->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+
         if (3 === $raw['type']) {
-            return new GenericDomainEventMessage($raw['aggregateIdentifier'],
-                    $raw['scn'],
-                    $this->serializer->deserialize($serializedPayload),
-                    $this->serializer->deserialize($serializedMetadata),
-                    $raw['identifier'], $dateTime);
+            return new GenericDomainEventMessage(
+                $raw['aggregateIdentifier'],
+                $raw['scn'],
+                $this->serializer->deserialize($serializedPayload),
+                $this->serializer->deserialize($serializedMetadata),
+                $raw['identifier'], $dateTime
+            );
         } else {
-            return new GenericEventMessage($this->serializer->deserialize($serializedPayload),
-                    $this->serializer->deserialize($serializedMetadata),
-                    $raw['identifier'], $dateTime);
+            return new GenericEventMessage(
+                $this->serializer->deserialize($serializedPayload),
+                $this->serializer->deserialize($serializedMetadata),
+                $raw['identifier'], $dateTime
+            );
         }
     }
 
+    /**
+     * @param mixed $raw
+     * @param int $offset
+     * @param mixed $data
+     * @param string $name
+     */
     private function read(&$raw, &$offset, $data, $name)
     {
-        $raw = array_merge($raw,
-                unpack(sprintf("N%sLength", $name), substr($data, $offset)));
+        $raw = array_merge(
+            $raw,
+            unpack(sprintf("N%sLength", $name), substr($data, $offset))
+        );
         $offset += 4;
 
-        $raw = array_merge($raw,
-                unpack(sprintf("a%s%s", $raw[sprintf("%sLength", $name)], $name),
-                        substr($data, $offset)));
+        $raw = array_merge(
+            $raw,
+            unpack(
+                sprintf("a%s%s", $raw[sprintf("%sLength", $name)], $name),
+                substr($data, $offset)
+            )
+        );
         $offset += $raw[sprintf("%sLength", $name)];
     }
 

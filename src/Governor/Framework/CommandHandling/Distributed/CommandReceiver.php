@@ -24,11 +24,8 @@
 
 namespace Governor\Framework\CommandHandling\Distributed;
 
-use Governor\Framework\CommandHandling\GenericCommandMessage;
+use Governor\Framework\CommandHandling\Callbacks\ResultCallback;
 use Governor\Framework\Common\ReceiverInterface;
-use Governor\Framework\Serializer\SimpleSerializedObject;
-use Governor\Framework\Serializer\SimpleSerializedType;
-use Predis\Client;
 use Governor\Framework\CommandHandling\CommandBusInterface;
 use Governor\Framework\Serializer\SerializerInterface;
 use Psr\Log\LoggerAwareInterface;
@@ -44,19 +41,14 @@ use Psr\Log\LoggerInterface;
 class CommandReceiver implements ReceiverInterface, LoggerAwareInterface
 {
     /**
-     * @var Client
+     * @var RedisTemplate
      */
-    private $client;
+    private $template;
 
     /**
      * @var CommandBusInterface
      */
     private $localSegment;
-
-    /**
-     * @var string
-     */
-    private $nodeName;
 
     /**
      * @var SerializerInterface
@@ -69,17 +61,15 @@ class CommandReceiver implements ReceiverInterface, LoggerAwareInterface
     private $logger;
 
     /**
-     * @param Client $client
+     * @param RedisTemplate $template
      * @param CommandBusInterface $localSegment
      * @param SerializerInterface $serializer
-     * @param string $nodeName
      */
-    function __construct(Client $client, CommandBusInterface $localSegment, SerializerInterface $serializer, $nodeName)
+    function __construct(RedisTemplate $template, CommandBusInterface $localSegment, SerializerInterface $serializer)
     {
-        $this->client = $client;
+        $this->template = $template;
         $this->localSegment = $localSegment;
         $this->serializer = $serializer;
-        $this->nodeName = $nodeName;
         $this->logger = new NullLogger();
     }
 
@@ -87,18 +77,27 @@ class CommandReceiver implements ReceiverInterface, LoggerAwareInterface
     {
         while (true) {
             try {
-                $data = $this->client->blpop([sprintf('governor:command:%s:request', $this->nodeName)], 100);
+                $data = $this->template->dequeueCommand();
+                $dispatchMessage = DispatchMessage::fromBytes($this->serializer, $data[1]);
 
-                /** @var GenericCommandMessage $command */
-                $command = $this->serializer->deserialize(
-                    new SimpleSerializedObject($data, new SimpleSerializedType(GenericCommandMessage::class))
-                );
+                $callback = new ResultCallback();
+                $this->localSegment->dispatch($dispatchMessage->getCommandMessage(), $callback);
 
-                $this->localSegment->dispatch($command);
+                try {
+                    $result = $callback->getResult();
+
+                    if ($dispatchMessage->isExpectReply()) {
+                        $this->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $result);
+                    }
+                } catch (\Exception $ex) {
+                    $this->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $ex->getMessage());
+                }
+
             } catch (\Exception $ex) {
-                $this->logger->error('Exception on node {node} while processing command: {message}',
+                $this->logger->error(
+                    'Exception on node {node} while processing command: {message}',
                     [
-                        'node' => $this->nodeName,
+                        'node' => $this->template->getNodeName(),
                         'message' => $ex->getMessage()
                     ]
                 );
