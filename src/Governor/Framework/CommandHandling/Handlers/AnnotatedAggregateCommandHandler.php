@@ -26,7 +26,6 @@ namespace Governor\Framework\CommandHandling\Handlers;
 
 use Governor\Framework\Common\Annotation\AnnotationReaderFactoryInterface;
 use Governor\Framework\Annotations\CommandHandler;
-use Governor\Framework\Common\Annotation\SimpleAnnotationReaderFactory;
 use Governor\Framework\Common\ParameterResolverFactoryInterface;
 use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
 use Governor\Framework\CommandHandling\CommandBusInterface;
@@ -74,7 +73,7 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
         parent::__construct($className, $methodName, $parameterResolver, $annotationReaderFactory);
         $this->repository = $repository;
 
-        $this->targetResolver = null === $targetResolver ? new AnnotationCommandTargetResolver()
+        $this->targetResolver = null === $targetResolver ? new AnnotationCommandTargetResolver($annotationReaderFactory)
             : $targetResolver;
     }
 

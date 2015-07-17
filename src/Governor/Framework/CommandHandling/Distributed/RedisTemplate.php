@@ -144,7 +144,7 @@ class RedisTemplate
     public function getSubscriptions($commandName)
     {
         return $this->client->smembers(
-            sprintf('governor:command:subscription:%s', $this->hashCommandName($commandName))
+            sprintf(self::COMMAND_SUBSCRIPTION_KEY, $this->hashCommandName($commandName))
         );
     }
 
