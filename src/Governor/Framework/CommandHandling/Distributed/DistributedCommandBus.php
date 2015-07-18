@@ -160,5 +160,13 @@ class DistributedCommandBus implements CommandBusInterface, LoggerAwareInterface
         $this->logger = $logger;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getSubscriptions()
+    {
+        return [];
+    }
+
 
 }
