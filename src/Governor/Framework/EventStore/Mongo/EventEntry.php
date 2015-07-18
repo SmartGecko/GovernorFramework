@@ -190,7 +190,7 @@ final class EventEntry implements SerializedDomainEventDataInterface
      * @param string $actualAggregateIdentifier The actual aggregate identifier instance used to perform the lookup, or
      *                                  <code>null</code> if unknown
      * @param SerializerInterface $eventSerializer Serializer used to de-serialize the stored DomainEvent
-     * @param $upcasterChain             Set of upcasters to use when an event needs upcasting before
+     * @param mixed $upcasterChain             Set of upcasters to use when an event needs upcasting before
      *                                  de-serialization
      * @param bool $skipUnknownTypes whether to skip unknown event types
      * @return DomainEventMessageInterface[] The actual DomainEventMessage instances stored in this entry

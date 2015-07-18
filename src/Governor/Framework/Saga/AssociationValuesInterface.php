@@ -40,7 +40,7 @@ interface AssociationValuesInterface
      * If an association was added and then removed (or vice versa), without any calls to {@link #commit()} in
      * between, it is not returned.
      *
-     * @return array the Set of association values removed since the last {@link #commit()}.
+     * @return AssociationValue[] the Set of association values removed since the last {@link #commit()}.
      */
     public function removedAssociations();
 
@@ -50,7 +50,7 @@ interface AssociationValuesInterface
      * If an association was added and then removed (or vice versa), without any calls to {@link #commit()} in
      * between, it is not returned.
      *
-     * @return array the Set of association values added since the last {@link #commit()}.
+     * @return AssociationValue[] the Set of association values added since the last {@link #commit()}.
      */
     public function addedAssociations();
 

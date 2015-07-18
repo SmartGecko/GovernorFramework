@@ -79,43 +79,7 @@ class CommandReceiver implements ReceiverInterface, LoggerAwareInterface
     {
         while (true) {
             try {
-                $data = $this->template->dequeueCommand();
-
-                if (null === $data) {
-                    $this->logger->info('Timeout while waiting for commands, re-entering loop');
-                    continue;
-                }
-
-                $dispatchMessage = DispatchMessage::fromBytes($this->serializer, $data[1]);
-                $self = $this;
-
-                $successCallback = function ($result) use ($dispatchMessage, $self) {
-                    $message = new ReplyMessage(
-                        $dispatchMessage->getCommandIdentifier(),
-                        $self->serializer,
-                        $result
-                    );
-
-                    $self->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $message->toBytes());
-                };
-
-                $failureCallback = function (\Exception $cause) use ($dispatchMessage, $self) {
-                    $message = new ReplyMessage(
-                        $dispatchMessage->getCommandIdentifier(),
-                        $self->serializer,
-                        $cause,
-                        false
-                    );
-
-                    $self->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $message->toBytes());
-                };
-
-                $this->localSegment->dispatch(
-                    $dispatchMessage->getCommandMessage(),
-                    $dispatchMessage->isExpectReply() ? new ClosureCommandCallback(
-                        $successCallback, $failureCallback
-                    ) : null
-                );
+                $this->processCommand();
             } catch (\Exception $ex) {
                 $this->logger->error(
                     'Exception on node {node} while processing command: {message}',
@@ -126,6 +90,47 @@ class CommandReceiver implements ReceiverInterface, LoggerAwareInterface
                 );
             }
         }
+    }
+
+    public function processCommand()
+    {
+        $data = $this->template->dequeueCommand();
+
+        if (null === $data) {
+            $this->logger->info('Timeout while waiting for commands, re-entering loop');
+            return;
+        }
+
+        $dispatchMessage = DispatchMessage::fromBytes($this->serializer, $data[1]);
+        $self = $this;
+
+        $successCallback = function ($result) use ($dispatchMessage, $self) {
+            $message = new ReplyMessage(
+                $dispatchMessage->getCommandIdentifier(),
+                $self->serializer,
+                $result
+            );
+
+            $self->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $message->toBytes());
+        };
+
+        $failureCallback = function (\Exception $cause) use ($dispatchMessage, $self) {
+            $message = new ReplyMessage(
+                $dispatchMessage->getCommandIdentifier(),
+                $self->serializer,
+                $cause,
+                false
+            );
+
+            $self->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $message->toBytes());
+        };
+
+        $this->localSegment->dispatch(
+            $dispatchMessage->getCommandMessage(),
+            $dispatchMessage->isExpectReply() ? new ClosureCommandCallback(
+                $successCallback, $failureCallback
+            ) : null
+        );
     }
 
     /**

@@ -40,11 +40,6 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
 {
 
     /**
-     * @var CommandHandlerRegistryInterface
-     */
-    private $handlerRegistry;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -65,14 +60,17 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     private $unitOfWorkFactory;
 
     /**
-     * @param CommandHandlerRegistryInterface $handlerRegistry
+     * @var array
+     */
+    private $subscriptions;
+
+    /**
      * @param UnitOfWorkFactoryInterface $unitOfWorkFactory
      */
     public function __construct(
-        CommandHandlerRegistryInterface $handlerRegistry,
         UnitOfWorkFactoryInterface $unitOfWorkFactory
     ) {
-        $this->handlerRegistry = $handlerRegistry;
+        $this->subscriptions = [];
         $this->unitOfWorkFactory = $unitOfWorkFactory;
         $this->logger = new NullLogger();
     }
@@ -103,7 +101,7 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
         CommandMessageInterface $command,
         CommandCallbackInterface $callback = null
     ) {
-        $handler = $this->handlerRegistry->findCommandHandlerFor($command);
+        $handler = $this->findCommandHandlerFor($command);
 
         if (null === $callback) {
             $callback = new NoOpCallback();
@@ -187,42 +185,51 @@ class SimpleCommandBus implements CommandBusInterface, LoggerAwareInterface
     }
 
     /**
-     * Returns the associated command handler registry.
+     * Finds and returns the suitable CommandHandlerInterface for the command message
+     * or throws a NoHandlerForCommandException if none exist.
      *
-     * @return CommandHandlerRegistryInterface
+     * @param CommandMessageInterface $message
+     * @return CommandHandlerInterface
+     * @throws NoHandlerForCommandException
      */
-    public function getCommandHandlerRegistry()
+    public function findCommandHandlerFor(CommandMessageInterface $message)
     {
-        return $this->handlerRegistry;
+        if (!isset($this->subscriptions[$message->getCommandName()])) {
+            throw new NoHandlerForCommandException(
+                sprintf(
+                    "No handler was subscribed for command [%s]",
+                    $message->getCommandName()
+                )
+            );
+        }
+
+        return $this->subscriptions[$message->getCommandName()];
     }
 
     /**
-     * Subscribe the given <code>handler</code> to commands of type <code>commandType</code>.
-     * <p/>
-     * If a subscription already exists for the given type, the behavior is undefined. Implementations may throw an
-     * Exception to refuse duplicate subscription or alternatively decide whether the existing or new
-     * <code>handler</code> gets the subscription.
-     *
-     * @param string $commandName The name of the command to subscribe the handler to
-     * @param CommandHandlerInterface $handler The handler service that handles the given type of command
+     * {@inheritdoc}
      */
     public function subscribe($commandName, CommandHandlerInterface $handler)
     {
-        return $this->handlerRegistry->subscribe($commandName, $handler);
+        $this->subscriptions[$commandName] = $handler;
     }
 
     /**
-     * Unsubscribe the given <code>handler</code> to commands of type <code>commandType</code>. If the handler is not
-     * currently assigned to that type of command, no action is taken.
-     *
-     * @param string $commandName The name of the command the handler is subscribed to
-     * @param CommandHandlerInterface $handler The handler service to unsubscribe from the CommandBus
-     * @return boolean <code>true</code> of this handler is successfully unsubscribed, <code>false</code> of the given
-     *         <code>handler</code> was not the current handler for given <code>commandType</code>.
+     * {@inheritdoc}
      */
     public function unsubscribe($commandName, CommandHandlerInterface $handler)
     {
-        return $this->handlerRegistry->unsubscribe($commandName, $handler);
+        if (isset($this->subscriptions[$commandName])) {
+            unset($this->subscriptions[$commandName]);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSubscriptions()
+    {
+        return $this->subscriptions;
     }
 
 

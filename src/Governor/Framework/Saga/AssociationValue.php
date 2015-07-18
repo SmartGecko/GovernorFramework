@@ -57,6 +57,9 @@ class AssociationValue implements Comparable
         return $this->propertyValue;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function compareTo($other)
     {
         if (0 !== $keyDiff = strcmp($this->propertyKey, $other->propertyKey)) {

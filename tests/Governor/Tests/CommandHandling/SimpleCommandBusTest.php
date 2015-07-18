@@ -24,17 +24,16 @@
 
 namespace Governor\Tests\CommandHandling;
 
-use Governor\Framework\Domain\MetaData;
+use Governor\Framework\CommandHandling\CommandHandlerInterceptorInterface;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 use Governor\Framework\CommandHandling\Callbacks\ClosureCommandCallback;
-use Governor\Framework\UnitOfWork\DefaultUnitOfWork;
 use Governor\Framework\CommandHandling\GenericCommandMessage;
 use Governor\Framework\CommandHandling\SimpleCommandBus;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
 use Governor\Framework\UnitOfWork\CurrentUnitOfWork;
 use Governor\Framework\UnitOfWork\DefaultUnitOfWorkFactory;
 use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
-use Governor\Framework\CommandHandling\InMemoryCommandHandlerRegistry;
+use Governor\Framework\CommandHandling\InterceptorChainInterface;
 
 /**
  * SimpleCommandBus tests.
@@ -51,18 +50,12 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
     private $commandBus;
 
     /**
-     * @var InMemoryCommandHandlerRegistry
-     */
-    private $handlerRegistry;
-
-    /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp()
     {
-        $this->handlerRegistry = new InMemoryCommandHandlerRegistry();
-        $this->commandBus = new SimpleCommandBus($this->handlerRegistry, new DefaultUnitOfWorkFactory());
+        $this->commandBus = new SimpleCommandBus(new DefaultUnitOfWorkFactory());
     }
 
     /**
@@ -77,22 +70,48 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Governor\Framework\CommandHandling\NoHandlerForCommandException
      */
-    public function testDispatchCommand_NoHandlerSubscribed()
+    public function testUnsubscribeAfterSubscribe()
     {
-        $this->commandBus->dispatch(
-            new GenericCommandMessage(
-                new TestCommand('hi'),
-                MetaData::emptyInstance()
-            )
+        $commandHandler = $this->getMock(CommandHandlerInterface::class);
+        $this->commandBus->subscribe(
+            get_class(new TestCommand('hi')),
+            $commandHandler
         );
+        $this->commandBus->unsubscribe(
+            get_class(new TestCommand('hi')),
+            $commandHandler
+        );
+
+        $this->commandBus->findCommandHandlerFor(GenericCommandMessage::asCommandMessage(new TestCommand('hi')));
     }
 
+
+    public function testSubscribe()
+    {
+        $commandHandler = $this->getMock(CommandHandlerInterface::class);
+        $this->commandBus->subscribe(
+            get_class(new TestCommand('hi')),
+            $commandHandler
+        );
+
+        $handler = $this->commandBus->findCommandHandlerFor(GenericCommandMessage::asCommandMessage(new TestCommand('hi')));
+
+        $this->assertInstanceOf(CommandHandlerInterface::class, $handler);
+    }
+
+    /**
+     * @expectedException \Governor\Framework\CommandHandling\NoHandlerForCommandException
+     */
+    public function testDispatchCommand_NoHandlerSubscribed()
+    {
+        $this->commandBus->dispatch(GenericCommandMessage::asCommandMessage(new TestCommand('hi')));
+    }
 
 
     public function testDispatchCommand_HandlerSubscribed()
     {
         $commandHandler = new TestCommandHandler();
-        $this->handlerRegistry->subscribe(TestCommand::class, $commandHandler);
+        $this->commandBus->subscribe(TestCommand::class, $commandHandler);
 
         $command = new TestCommand('hi');
 
@@ -115,7 +134,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
         $command = new TestCommand("Say hi!");
         $test = $this;
 
-        $this->handlerRegistry->subscribe(
+        $this->commandBus->subscribe(
             TestCommand::class,
             new CallbackCommandHandler(
                 function (
@@ -156,7 +175,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
         $command = new TestCommand("Say hi!");
         $test = $this;
 
-        $this->handlerRegistry->subscribe(
+        $this->commandBus->subscribe(
             TestCommand::class,
             new CallbackCommandHandler(
                 function (
@@ -190,7 +209,7 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
 
     public function testUnsubscribe_HandlerNotKnown()
     {
-        $this->handlerRegistry->unsubscribe(
+        $this->commandBus->unsubscribe(
             TestCommand::class,
             new TestCommandHandler()
         );
@@ -230,50 +249,55 @@ class SimpleCommandBusTest extends \PHPUnit_Framework_TestCase
 
     public function testInterceptorChain_CommandHandledSuccessfully()
     {
-        $mockInterceptor1 = $this->getMock(CommandHandlerInterceptorInterface::class);
-        $mockInterceptor2 = $this->getMock(CommandHandlerInterceptorInterface::class);
-        $commandHandler = $this->getMock(CommandHandlerInterface::class);
+        $mockInterceptor1 = \Phake::mock(CommandHandlerInterceptorInterface::class);
+        $mockInterceptor2 = \Phake::mock(CommandHandlerInterceptorInterface::class);
 
-        /* when(mockInterceptor1.handle(isA(CommandMessage.class), isA(UnitOfWork.class), isA(InterceptorChain.class)))
-         .thenAnswer(new Answer<Object>() {
-         @Override
-         public Object answer(InvocationOnMock invocation) throws Throwable {
-         return mockInterceptor2.handle((CommandMessage) invocation.getArguments()[0],
-         (UnitOfWork) invocation.getArguments()[1],
-         (InterceptorChain) invocation.getArguments()[2]);
-         }
-         });
+        $commandHandler = \Phake::mock(CommandHandlerInterface::class);
 
-         when(mockInterceptor2.handle(isA(CommandMessage.class), isA(UnitOfWork.class), isA(InterceptorChain.class)))
-         .thenAnswer(new Answer<Object>() {
-         @Override
-         public Object answer(InvocationOnMock invocation) throws Throwable {
-         return commandHandler.handle((CommandMessage) invocation.getArguments()[0],
-         (UnitOfWork) invocation.getArguments()[1]);
-         }
-         });
-         testSubject.setHandlerInterceptors(Arrays.asList(mockInterceptor1, mockInterceptor2));
-         when(commandHandler.handle(isA(CommandMessage.class), isA(UnitOfWork.class))).thenReturn("Hi there!");
-         testSubject.subscribe(String.class.getName(), commandHandler);
+        \Phake::when($mockInterceptor1)->handle(\Phake::anyParameters())->thenGetReturnByLambda(
+            function (
+                CommandMessageInterface $commandMessage,
+                UnitOfWorkInterface $unitOfWork,
+                InterceptorChainInterface $interceptorChain
+            ) use ($mockInterceptor2) {
+                return $mockInterceptor2->handle($commandMessage, $unitOfWork, $interceptorChain);
+            }
+        );
 
-         testSubject.dispatch(GenericCommandMessage.asCommandMessage("Hi there!"), new CommandCallback<Object>() {
-         @Override
-         public void onSuccess(Object result) {
-         assertEquals("Hi there!", result);
-         }
+        \Phake::when($mockInterceptor2)->handle(\Phake::anyParameters())->thenGetReturnByLambda(
+            function (
+                CommandMessageInterface $commandMessage,
+                UnitOfWorkInterface $unitOfWork,
+                InterceptorChainInterface $interceptorChain
+            ) use ($commandHandler) {
+                return $commandHandler->handle($commandMessage, $unitOfWork);
+            }
+        );
 
-         @Override
-         public void onFailure(Throwable cause) {
-         throw new RuntimeException("Unexpected exception", cause);
-         }
-         });
+        \Phake::when($commandHandler)->handle(\Phake::anyParameters())->thenReturn(new TestCommand("Hi there!"));
 
-         InOrder inOrder = inOrder(mockInterceptor1, mockInterceptor2, commandHandler);
-         inOrder.verify(mockInterceptor1).handle(isA(CommandMessage.class),
-         isA(UnitOfWork.class), isA(InterceptorChain.class));
-         inOrder.verify(mockInterceptor2).handle(isA(CommandMessage.class),
-         isA(UnitOfWork.class), isA(InterceptorChain.class));
-         inOrder.verify(commandHandler).handle(isA(GenericCommandMessage.class), isA(UnitOfWork.class));*/
+        $subject = new SimpleCommandBus(new DefaultUnitOfWorkFactory());
+        $subject->setHandlerInterceptors([$mockInterceptor1, $mockInterceptor2]);
+        $subject->subscribe(TestCommand::class, $commandHandler);
+
+        $command = GenericCommandMessage::asCommandMessage(new TestCommand("Hi there!"));
+
+        $callback = new ClosureCommandCallback(
+            function ($result) {
+                $this->assertEquals("Hi there!", $result->getText());
+            },
+            function ($exception) {
+                $this->fail("Did not expect exception");
+            }
+        );
+
+        $subject->dispatch($command, $callback);
+
+        \Phake::inOrder(
+            \Phake::verify($mockInterceptor1)->handle(\Phake::anyParameters()),
+            \Phake::verify($mockInterceptor2)->handle(\Phake::anyParameters()),
+            \Phake::verify($commandHandler)->handle(\Phake::anyParameters())
+        );
     }
 
     /*

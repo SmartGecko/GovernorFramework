@@ -35,7 +35,6 @@ use Governor\Framework\CommandHandling\Handlers\AnnotatedAggregateCommandHandler
 use Governor\Framework\CommandHandling\Handlers\AnnotatedCommandHandler;
 use Governor\Framework\CommandHandling\InterceptorChainInterface;
 use Governor\Framework\CommandHandling\SimpleCommandBus;
-use Governor\Framework\CommandHandling\InMemoryCommandHandlerRegistry;
 use Governor\Framework\Common\Annotation\MethodMessageHandlerInspector;
 use Governor\Framework\Common\Annotation\SimpleAnnotationReaderFactory;
 use Governor\Framework\Common\IdentifierValidator;
@@ -147,11 +146,6 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     private $parameterResolver;
 
     /**
-     * @var InMemoryCommandHandlerRegistry
-     */
-    private $handlerRegistry;
-
-    /**
      * Initializes a new given-when-then style test fixture for the given <code>aggregateType</code>.
      *
      * @param string $aggregateType The aggregate to initialize the test fixture for
@@ -167,8 +161,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
         );
 
         $this->eventBus = new RecordingEventBus($this->publishedEvents);
-        $this->handlerRegistry = new InMemoryCommandHandlerRegistry();
-        $this->commandBus = new SimpleCommandBus($this->handlerRegistry, new DefaultUnitOfWorkFactory());
+        $this->commandBus = new SimpleCommandBus(new DefaultUnitOfWorkFactory());
         $this->commandBus->setLogger($this->logger);
         $this->eventStore = new RecordingEventStore(
             $this->storedEvents,
@@ -227,7 +220,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
                 $annotatedCommandHandler
             );
 
-            $this->handlerRegistry->subscribe($handlerDefinition->getPayloadType(), $handler);
+            $this->commandBus->subscribe($handlerDefinition->getPayloadType(), $handler);
         }
 
         return $this;
@@ -239,7 +232,7 @@ class GivenWhenThenTestFixture implements FixtureConfigurationInterface, TestExe
     ) {
         $this->registerAggregateCommandHandlers();
         $this->explicitCommandHandlersSet = true;
-        $this->handlerRegistry->subscribe($commandName, $commandHandler);
+        $this->commandBus->subscribe($commandName, $commandHandler);
 
         return $this;
     }

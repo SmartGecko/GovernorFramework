@@ -17,7 +17,7 @@ class CommandTimeoutException extends \Exception
      */
     public function __construct($commandIdentifier, $timeout = 10)
     {
-        return parent::__construct(
+        parent::__construct(
             sprintf('Timeout [%d] reached while waiting for command reply [%s] ', $timeout, $commandIdentifier)
         );
     }

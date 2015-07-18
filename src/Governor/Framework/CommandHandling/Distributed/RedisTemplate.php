@@ -46,6 +46,7 @@ class RedisTemplate
      */
     const COMMAND_SUBSCRIPTION_KEY = 'command:subscription:%s';
 
+    const DEFAULT_BLOCK_TIMEOUT = 10;
 
     /**
      * @var Client
@@ -56,6 +57,11 @@ class RedisTemplate
      * @var string
      */
     private $nodeName;
+
+    /**
+     * @var int
+     */
+    private $timeout;
 
     /**
      * @param string $connection
@@ -74,6 +80,7 @@ class RedisTemplate
         );
 
         $this->nodeName = $nodeName;
+        $this->timeout = self::DEFAULT_BLOCK_TIMEOUT;
     }
 
     /**
@@ -110,11 +117,27 @@ class RedisTemplate
     }
 
     /**
+     * Returns an array of pending commands on the destination queue.
+     * If the destination is <code>null</code> commands from the local node queue are returned.
+     *
+     * @param string|null $destination
+     * @return array
+     */
+    public function getPendingCommands($destination = null)
+    {
+        $destination = $destination ? $destination : $this->nodeName;
+
+        return $this->client->lrange(sprintf(self::COMMAND_QUEUE_KEY, $destination), 0, -1);
+    }
+
+    /**
      * @param int $timeout
      * @return array
      */
-    public function dequeueCommand($timeout = 10)
+    public function dequeueCommand($timeout = null)
     {
+        $timeout = $timeout ? $timeout : $this->timeout;
+
         return $this->client->blpop([sprintf(self::COMMAND_QUEUE_KEY, $this->nodeName)], $timeout);
     }
 
@@ -125,6 +148,7 @@ class RedisTemplate
     public function writeCommandReply($commandIdentifier, $reply)
     {
         $this->client->rpush(sprintf(self::COMMAND_RESPONSE_KEY, $commandIdentifier), [$reply]);
+        $this->client->expire(sprintf(self::COMMAND_RESPONSE_KEY, $commandIdentifier), $this->timeout);
     }
 
     /**
@@ -132,8 +156,10 @@ class RedisTemplate
      * @param int $timeout
      * @return array
      */
-    public function readCommandReply($commandIdentifier, $timeout = 10)
+    public function readCommandReply($commandIdentifier, $timeout = null)
     {
+        $timeout = $timeout ? $timeout : $this->timeout;
+
         return $this->client->blpop([sprintf(self::COMMAND_RESPONSE_KEY, $commandIdentifier)], $timeout);
     }
 
@@ -148,6 +174,11 @@ class RedisTemplate
         );
     }
 
+    /**
+     * Adds the command to the subscription set.
+     *
+     * @param string $commandName
+     */
     public function subscribe($commandName)
     {
         $this->client->sadd(
@@ -156,6 +187,11 @@ class RedisTemplate
         );
     }
 
+    /**
+     * Removes the command from the subscription set.
+     *
+     * @param string $commandName
+     */
     public function unsubscribe($commandName)
     {
         $this->client->srem(
@@ -164,12 +200,12 @@ class RedisTemplate
         );
     }
 
-    private function hashCommandName($commandName)
+    public static function hashCommandName($commandName)
     {
         return hash('md5', $commandName);
     }
 
-    private function hashCommandRouting($commandName, $routingKey)
+    public static function hashCommandRouting($commandName, $routingKey)
     {
         return hash('md5', sprintf('%s-%s', $commandName, $routingKey));
     }
@@ -190,5 +226,20 @@ class RedisTemplate
         return $this->nodeName;
     }
 
+    /**
+     * @return int
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
+    }
+
+    /**
+     * @param int $timeout
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = $timeout;
+    }
 
 }

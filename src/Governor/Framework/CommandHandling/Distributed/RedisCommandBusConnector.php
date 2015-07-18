@@ -74,6 +74,12 @@ class RedisCommandBusConnector implements CommandBusConnectorInterface
             $this->template->setRoutingDestination($destination, $command->getCommandName(), $routingKey);
         }
 
+        // dispatch locally if destination matches this node
+        if ($this->template->getNodeName() === $destination) {
+            $this->localSegment->dispatch($command, $callback);
+            return;
+        }
+
         $awaitReply = $callback ? true : false;
         $dispatchMessage = new DispatchMessage($command, $this->serializer, $awaitReply);
 
@@ -83,7 +89,8 @@ class RedisCommandBusConnector implements CommandBusConnectorInterface
             $reply = $this->template->readCommandReply($command->getIdentifier());
 
             if (null === $reply) {
-                throw new CommandTimeoutException($command->getIdentifier());
+                $callback->onFailure(new CommandTimeoutException($command->getIdentifier()));
+                return;
             }
 
             $replyMessage = ReplyMessage::fromBytes($this->serializer, $reply[1]);
@@ -145,7 +152,7 @@ class RedisCommandBusConnector implements CommandBusConnectorInterface
      */
     public function saveSubscriptions()
     {
-        foreach ($this->localSegment->getCommandHandlerRegistry()->getSubscriptions() as $command => $handler) {
+        foreach ($this->localSegment->getSubscriptions() as $command => $handler) {
             $this->template->subscribe($command);
         }
     }
@@ -155,7 +162,7 @@ class RedisCommandBusConnector implements CommandBusConnectorInterface
      */
     public function clearSubscriptions()
     {
-        foreach ($this->localSegment->getCommandHandlerRegistry()->getSubscriptions() as $command => $handler) {
+        foreach ($this->localSegment->getSubscriptions() as $command => $handler) {
             $this->template->unsubscribe($command);
         }
     }

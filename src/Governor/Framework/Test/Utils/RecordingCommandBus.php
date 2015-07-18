@@ -24,14 +24,12 @@
 
 namespace Governor\Framework\Test\Utils;
 
-use Governor\Framework\CommandHandling\CommandHandlerRegistryInterface;
-use Governor\Framework\CommandHandling\InMemoryCommandHandlerRegistry;
 use Governor\Framework\CommandHandling\CommandBusInterface;
 use Governor\Framework\CommandHandling\CommandCallbackInterface;
 use Governor\Framework\CommandHandling\CommandHandlerInterface;
 use Governor\Framework\CommandHandling\CommandMessageInterface;
 
-// TODO fully convert to handler registry
+
 class RecordingCommandBus implements CommandBusInterface
 {
     /**
@@ -42,12 +40,7 @@ class RecordingCommandBus implements CommandBusInterface
     /**
      * @var array
      */
-    private $dispatchedCommands = array();
-
-    /**
-     * @var InMemoryCommandHandlerRegistry
-     */
-    private $handlerRegistry;
+    private $dispatchedCommands = [];
 
     /**
      * @var CallbackBehaviorInterface
@@ -57,8 +50,7 @@ class RecordingCommandBus implements CommandBusInterface
     function __construct()
     {
         $this->callbackBehavior = new DefaultCallbackBehavior();
-        $this->handlerRegistry = new InMemoryCommandHandlerRegistry();
-        $this->subscriptions = array();
+        $this->subscriptions = [];
     }
 
 
@@ -80,14 +72,7 @@ class RecordingCommandBus implements CommandBusInterface
     }
 
     /**
-     * Subscribe the given <code>handler</code> to commands of type <code>commandType</code>.
-     * <p/>
-     * If a subscription already exists for the given type, the behavior is undefined. Implementations may throw an
-     * Exception to refuse duplicate subscription or alternatively decide whether the existing or new
-     * <code>handler</code> gets the subscription.
-     *
-     * @param string $commandName The name of the command to subscribe the handler to
-     * @param CommandHandlerInterface $handler The handler service that handles the given type of command
+     * {@inheritdoc}
      */
     public function subscribe($commandName, CommandHandlerInterface $handler)
     {
@@ -97,13 +82,7 @@ class RecordingCommandBus implements CommandBusInterface
     }
 
     /**
-     * Unsubscribe the given <code>handler</code> to commands of type <code>commandType</code>. If the handler is not
-     * currently assigned to that type of command, no action is taken.
-     *
-     * @param string $commandName The name of the command the handler is subscribed to
-     * @param CommandHandlerInterface $handler The handler service to unsubscribe from the CommandBus
-     * @return boolean <code>true</code> of this handler is successfully unsubscribed, <code>false</code> of the given
-     *         <code>handler</code> was not the current handler for given <code>commandType</code>.
+     * {@inheritdoc}
      */
     public function unsubscribe($commandName, CommandHandlerInterface $handler)
     {
@@ -175,16 +154,6 @@ class RecordingCommandBus implements CommandBusInterface
     public function setCallbackBehavior(CallbackBehaviorInterface $callbackBehavior)
     {
         $this->callbackBehavior = $callbackBehavior;
-    }
-
-    /**
-     * Returns the associated command handler registry.
-     *
-     * @return CommandHandlerRegistryInterface
-     */
-    public function getCommandHandlerRegistry()
-    {
-        return $this->handlerRegistry;
     }
 
 

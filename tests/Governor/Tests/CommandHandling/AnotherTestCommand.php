@@ -22,32 +22,27 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\CommandHandling;
+namespace Governor\Tests\CommandHandling;
 
 /**
- * Manages a registry of available command handlers.
+ * Test command.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-interface CommandHandlerRegistryInterface extends CommandSubscriptionInterface
+class AnotherTestCommand
 {
 
-    /**
-     * Finds and returns the suitable CommandHandlerInterface for the command message
-     * or throws a NoHandlerForCommandException if none exist.
-     *
-     * @param CommandMessageInterface $message
-     * @return CommandHandlerInterface
-     * @throws NoHandlerForCommandException
-     */
-    public function findCommandHandlerFor(CommandMessageInterface $message);
+    private $text;
 
-    /**
-     * Returns a list of managed subscriptions.
-     *
-     * @return array
-     */
-    public function getSubscriptions();
+    function __construct($text)
+    {
+        $this->text = $text;
+    }
+
+    public function getText()
+    {
+        return $this->text;
+    }
 
 }

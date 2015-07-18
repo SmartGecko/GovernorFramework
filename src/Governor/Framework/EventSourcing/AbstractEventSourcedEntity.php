@@ -30,16 +30,19 @@ use Governor\Framework\Domain\DomainEventMessageInterface;
 /**
  * Description of AbstractEventSourcedEntity
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AbstractEventSourcedEntity implements EventSourcedEntityInterface
 {
-    /**     
+    /**
      * @var AbstractEventSourcedAggregateRoot
      */
     private $aggregateRoot;
 
+    /**
+     * {@inheritdoc}
+     */
     public function handleRecursively(DomainEventMessageInterface $event)
     {
         $this->handle($event);
@@ -56,30 +59,47 @@ abstract class AbstractEventSourcedEntity implements EventSourcedEntityInterface
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function registerAggregateRoot(AbstractEventSourcedAggregateRoot $aggregateRootToRegister)
     {
         if (null !== $this->aggregateRoot && $this->aggregateRoot !== $aggregateRootToRegister) {
-            throw new \RuntimeException("Cannot register new aggregate. "
-            . "This entity is already part of another aggregate");
+            throw new \RuntimeException(
+                "Cannot register new aggregate. "
+                ."This entity is already part of another aggregate"
+            );
         }
-        
+
         $this->aggregateRoot = $aggregateRootToRegister;
     }
 
+    /**
+     * @return EventSourcedEntityInterface[]
+     */
     protected abstract function getChildEntities();
 
     protected abstract function handle(DomainEventMessageInterface $event);
 
+    /**
+     * @param mixed $event
+     * @param MetaData $metaData
+     */
     public function apply($event, MetaData $metaData = null)
     {
         if (null === $this->aggregateRoot) {
-            throw new \RuntimeException("The aggregate root is unknown. "
-            . "Is this entity properly registered as the child of an aggregate member?");
+            throw new \RuntimeException(
+                "The aggregate root is unknown. "
+                ."Is this entity properly registered as the child of an aggregate member?"
+            );
         }
 
         $this->aggregateRoot->apply($event, $metaData);
     }
 
+    /**
+     * @return AbstractEventSourcedAggregateRoot
+     */
     protected function getAggregateRoot()
     {
         return $this->aggregateRoot;
