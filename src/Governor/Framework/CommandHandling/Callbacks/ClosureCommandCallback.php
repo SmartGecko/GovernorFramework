@@ -30,25 +30,30 @@ use Governor\Framework\CommandHandling\CommandCallbackInterface;
  * Closure based implementation of the CommandCallbackInterface.
  * Depending on the outcome of the execution either the success or failure Closure function is invoked.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 final class ClosureCommandCallback implements CommandCallbackInterface
 {
 
     /**
-     * @var \Closure 
+     * @var \Closure
      */
     private $successCallback;
 
     /**
-     * @var \Closure 
+     * @var \Closure
      */
     private $failureCallback;
 
-    public function __construct(\Closure $successCallback,
-            \Closure $failureCallback)
-    {
+    /**
+     * @param callable $successCallback
+     * @param callable $failureCallback
+     */
+    public function __construct(
+        \Closure $successCallback,
+        \Closure $failureCallback
+    ) {
         $this->successCallback = $successCallback;
         $this->failureCallback = $failureCallback;
     }

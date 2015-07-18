@@ -34,7 +34,7 @@ class DispatchMessageTest extends \PHPUnit_Framework_TestCase
     public function testFromAndToBytes()
     {
         $serializer = new JMSSerializer();
-        $commandMessage = GenericCommandMessage::asCommandMessage(new DispatchPayload("string", 10, 5.1));
+        $commandMessage = GenericCommandMessage::asCommandMessage(new ResultPayload("string", 10, 5.1));
 
         $dispatchMessage1 = new DispatchMessage($commandMessage, $serializer, false);
         $bytes = $dispatchMessage1->toBytes();

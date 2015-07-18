@@ -60,7 +60,7 @@ interface CommandBusConnectorInterface
      * @return mixed
      * @throws \Exception when an error occurs before or during the sending of the message
      */
-    public function send($routingKey, CommandMessageInterface $command, CommandCallbackInterface $callback);
+    public function send($routingKey, CommandMessageInterface $command, CommandCallbackInterface $callback = null);
 
     /**
      * Subscribe the given <code>handler</code> to commands of type <code>commandType</code> to the local segment of the

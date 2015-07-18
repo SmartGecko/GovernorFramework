@@ -94,7 +94,7 @@ class RedisTemplate
     public function setRoutingDestination($destination, $commandName, $routingKey)
     {
         $this->client->hset(
-            'governor:command:routing',
+            self::COMMAND_ROUTING_KEY,
             $this->hashCommandRouting($commandName, $routingKey),
             $destination
         );
@@ -113,28 +113,28 @@ class RedisTemplate
      * @param int $timeout
      * @return array
      */
-    public function dequeueCommand($timeout = 100)
+    public function dequeueCommand($timeout = 10)
     {
         return $this->client->blpop([sprintf(self::COMMAND_QUEUE_KEY, $this->nodeName)], $timeout);
     }
 
     /**
-     * @param string $commandId
+     * @param string $commandIdentifier
      * @param mixed $reply
      */
-    public function writeCommandReply($commandId, $reply)
+    public function writeCommandReply($commandIdentifier, $reply)
     {
-        $this->client->rpush(sprintf(self::COMMAND_RESPONSE_KEY, $commandId), [$reply]);
+        $this->client->rpush(sprintf(self::COMMAND_RESPONSE_KEY, $commandIdentifier), [$reply]);
     }
 
     /**
-     * @param string $commandId
+     * @param string $commandIdentifier
      * @param int $timeout
      * @return array
      */
-    public function readCommandReply($commandId, $timeout = 0)
+    public function readCommandReply($commandIdentifier, $timeout = 10)
     {
-        return $this->client->blpop([sprintf(self::COMMAND_RESPONSE_KEY, $commandId)], $timeout);
+        return $this->client->blpop([sprintf(self::COMMAND_RESPONSE_KEY, $commandIdentifier)], $timeout);
     }
 
     /**

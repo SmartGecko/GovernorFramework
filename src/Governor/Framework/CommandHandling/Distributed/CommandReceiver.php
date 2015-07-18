@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\CommandHandling\Distributed;
 
+use Governor\Framework\CommandHandling\Callbacks\ClosureCommandCallback;
 use Governor\Framework\CommandHandling\Callbacks\ResultCallback;
 use Governor\Framework\Common\ReceiverInterface;
 use Governor\Framework\CommandHandling\CommandBusInterface;
@@ -73,26 +74,48 @@ class CommandReceiver implements ReceiverInterface, LoggerAwareInterface
         $this->logger = new NullLogger();
     }
 
+    // TODO daemonize: interrupts, shutdown etc
     public function run()
     {
         while (true) {
             try {
                 $data = $this->template->dequeueCommand();
-                $dispatchMessage = DispatchMessage::fromBytes($this->serializer, $data[1]);
 
-                $callback = new ResultCallback();
-                $this->localSegment->dispatch($dispatchMessage->getCommandMessage(), $callback);
-
-                try {
-                    $result = $callback->getResult();
-
-                    if ($dispatchMessage->isExpectReply()) {
-                        $this->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $result);
-                    }
-                } catch (\Exception $ex) {
-                    $this->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $ex->getMessage());
+                if (null === $data) {
+                    $this->logger->info('Timeout while waiting for commands, re-entering loop');
+                    continue;
                 }
 
+                $dispatchMessage = DispatchMessage::fromBytes($this->serializer, $data[1]);
+                $self = $this;
+
+                $successCallback = function ($result) use ($dispatchMessage, $self) {
+                    $message = new ReplyMessage(
+                        $dispatchMessage->getCommandIdentifier(),
+                        $self->serializer,
+                        $result
+                    );
+
+                    $self->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $message->toBytes());
+                };
+
+                $failureCallback = function (\Exception $cause) use ($dispatchMessage, $self) {
+                    $message = new ReplyMessage(
+                        $dispatchMessage->getCommandIdentifier(),
+                        $self->serializer,
+                        $cause,
+                        false
+                    );
+
+                    $self->template->writeCommandReply($dispatchMessage->getCommandIdentifier(), $message->toBytes());
+                };
+
+                $this->localSegment->dispatch(
+                    $dispatchMessage->getCommandMessage(),
+                    $dispatchMessage->isExpectReply() ? new ClosureCommandCallback(
+                        $successCallback, $failureCallback
+                    ) : null
+                );
             } catch (\Exception $ex) {
                 $this->logger->error(
                     'Exception on node {node} while processing command: {message}',

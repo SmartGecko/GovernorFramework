@@ -79,18 +79,25 @@ class DistributedCommandBus implements CommandBusInterface, LoggerAwareInterface
         CommandMessageInterface $command,
         CommandCallbackInterface $callback = null
     ) {
-        if (null === $callback) {
-            $callback = new NoOpCallback();
-        }
-
         $command = $this->intercept($command);
         $routingKey = $this->routingStrategy->getRoutingKey($command);
+
+        $this->logger->debug(
+            'Dispatching command [{name}] with routing key [{key}] in the DistributedCommandBus',
+            [
+                'name' => $command->getCommandName(),
+                'key' => $routingKey
+            ]
+        );
 
         try {
             $this->connector->send($routingKey, $command, $callback);
         } catch (\Exception $ex) {
-            $callback->onFailure(
-                new CommandDispatchException(self::DISPATCH_ERROR_MESSAGE.": ".$ex->getMessage(), $ex)
+            $this->logger->error(
+                self::DISPATCH_ERROR_MESSAGE.' {err}',
+                [
+                    'err' => $ex->getMessage()
+                ]
             );
         }
     }

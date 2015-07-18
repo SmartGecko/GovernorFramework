@@ -65,7 +65,7 @@ class RedisCommandBusConnector implements CommandBusConnectorInterface
     /**
      * {@inheritdoc}
      */
-    public function send($routingKey, CommandMessageInterface $command, CommandCallbackInterface $callback)
+    public function send($routingKey, CommandMessageInterface $command, CommandCallbackInterface $callback = null)
     {
         $destination = $this->template->getRoutingDestination($command->getCommandName(), $routingKey);
 
@@ -74,10 +74,26 @@ class RedisCommandBusConnector implements CommandBusConnectorInterface
             $this->template->setRoutingDestination($destination, $command->getCommandName(), $routingKey);
         }
 
-        $dispatchMessage = new DispatchMessage($command, $this->serializer, true); // TODO reply
+        $awaitReply = $callback ? true : false;
+        $dispatchMessage = new DispatchMessage($command, $this->serializer, $awaitReply);
 
         $this->template->enqueueCommand($destination, $dispatchMessage->toBytes());
-        $this->template->readCommandReply($command->getIdentifier());
+
+        if ($awaitReply) {
+            $reply = $this->template->readCommandReply($command->getIdentifier());
+
+            if (null === $reply) {
+                throw new CommandTimeoutException($command->getIdentifier());
+            }
+
+            $replyMessage = ReplyMessage::fromBytes($this->serializer, $reply[1]);
+
+            if ($replyMessage->isSuccess()) {
+                $callback->onSuccess($replyMessage->getReturnValue());
+            } else {
+                $callback->onFailure(new CommandDispatchException($replyMessage->getError()));
+            }
+        }
     }
 
     private function findSuitableNode(CommandMessageInterface $command)

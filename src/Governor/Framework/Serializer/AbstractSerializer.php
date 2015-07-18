@@ -34,21 +34,35 @@ abstract class AbstractSerializer implements SerializerInterface
 {
 
     /**
-     * @var RevisionResolverInterface 
+     * @var RevisionResolverInterface
      */
     private $revisionResolver;
 
+    /**
+     * @param RevisionResolverInterface $revisionResolver
+     */
     function __construct(RevisionResolverInterface $revisionResolver = null)
     {
         $this->revisionResolver = (null === $revisionResolver) ? new NullRevisionResolver()
-                    : $revisionResolver;
+            : $revisionResolver;
     }
 
+    /**
+     * @param mixed $object
+     * @return SimpleSerializedType
+     */
     public function typeForClass($object)
     {
-        $type = get_class($object);
-        return new SimpleSerializedType($type,
-                $this->revisionResolver->revisionOf($type));
+        if (is_scalar($object)) {
+            $type = gettype($object);
+        } else {
+            $type = get_class($object);
+        }
+
+        return new SimpleSerializedType(
+            $type,
+            $this->revisionResolver->revisionOf($type)
+        );
     }
 
 }
