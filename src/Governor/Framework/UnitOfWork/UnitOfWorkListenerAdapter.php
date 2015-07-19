@@ -29,44 +29,67 @@ use Governor\Framework\Domain\EventMessageInterface;
 /**
  * Description of UnitOfWorkListenerAdapter
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class UnitOfWorkListenerAdapter implements UnitOfWorkListenerInterface
 {
 
+    /**
+     * {@inheritdoc}
+     */
     public function afterCommit(UnitOfWorkInterface $unitOfWork)
     {
-        
+
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function onCleanup(UnitOfWorkInterface $unitOfWork)
     {
-        
+
     }
 
-    public function onEventRegistered(UnitOfWorkInterface $unitOfWork,
-        EventMessageInterface $event)
-    {
+    /**
+     * {@inheritdoc}
+     */
+    public function onEventRegistered(
+        UnitOfWorkInterface $unitOfWork,
+        EventMessageInterface $event
+    ) {
         return $event;
     }
 
-    public function onPrepareCommit(UnitOfWorkInterface $unitOfWork,
-        array $aggregateRoots, array $events)
-    {
-        
+    /**
+     * {@inheritdoc}
+     */
+    public function onPrepareCommit(
+        UnitOfWorkInterface $unitOfWork,
+        array $aggregateRoots,
+        array $events
+    ) {
+
     }
 
-    public function onPrepareTransactionCommit(UnitOfWorkInterface $unitOfWork,
-        $transaction)
-    {
-        
+    /**
+     * {@inheritdoc}
+     */
+    public function onPrepareTransactionCommit(
+        UnitOfWorkInterface $unitOfWork,
+        $transaction
+    ) {
+
     }
 
-    public function onRollback(UnitOfWorkInterface $unitOfWork,
-        \Exception $failureCause = null)
-    {
-        
+    /**
+     * {@inheritdoc}
+     */
+    public function onRollback(
+        UnitOfWorkInterface $unitOfWork,
+        \Exception $failureCause = null
+    ) {
+
     }
 
 }

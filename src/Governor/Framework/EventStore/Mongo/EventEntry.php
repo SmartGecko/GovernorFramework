@@ -204,6 +204,12 @@ final class EventEntry implements SerializedDomainEventDataInterface
     ) {
         // TODO upcasting
 
+        $date = \DateTime::createFromFormat('U', $this->timeStamp);
+
+        if (!$date) {
+            throw new \RuntimeException('Incompatible date format');
+        }
+
         return [
             new GenericDomainEventMessage(
                 $this->aggregateIdentifier, $this->scn,
@@ -220,8 +226,7 @@ final class EventEntry implements SerializedDomainEventDataInterface
                     )
                 ),
                 $this->eventIdentifier,
-                \DateTime::createFromFormat('U', $this->timeStamp)
-
+                $date
             )
 
         ];

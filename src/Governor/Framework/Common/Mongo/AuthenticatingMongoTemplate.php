@@ -50,7 +50,7 @@ abstract class AuthenticatingMongoTemplate implements LoggerAwareInterface
         $this->logger = new NullLogger();
         $options = [];
 
-        if ($authenticationDatabaseName) {
+        if (null !== $authenticationDatabaseName) {
             $options['authSource'] = $authenticationDatabaseName;
         }
 

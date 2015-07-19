@@ -88,7 +88,10 @@ abstract class AbstractAnnotatedSaga implements SagaInterface
     {
         $this->inspector = new SagaMethodMessageHandlerInspector($this);
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
     public function getSagaIdentifier()
     {
         return $this->identifier;

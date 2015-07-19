@@ -34,7 +34,7 @@ namespace Governor\Framework\Common\Property;
 abstract class PropertyAccessStrategy
 {
     /**
-     * @var PropertyAccessStrategy[]
+     * @var PropertyAccessStrategy
      */
     private static $strategy;
 
@@ -61,5 +61,5 @@ abstract class PropertyAccessStrategy
      * @return PropertyInterface the Property instance providing access to the property value, or <code>null</code> if property could not
      * be found.
      */
-    protected abstract function propertyFor($targetClass, $property);
+    abstract protected function propertyFor($targetClass, $property);
 }

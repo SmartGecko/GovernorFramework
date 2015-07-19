@@ -26,6 +26,9 @@ namespace Governor\Framework\Audit;
 
 /**
  * Interface describing a component capable of writing auditing entries to a log.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface AuditLoggerInterface
 {
@@ -50,9 +53,9 @@ interface AuditLoggerInterface
      * when the underlying mechanism is slow.
      *
      * @param mixed $command      The command being executed
-     * @param \Exception $cause The cause of the rollback. May be <code>null</code> if the rollback was not caused by an
+     * @param \Exception|null $cause The cause of the rollback. May be <code>null</code> if the rollback was not caused by an
      *                     exception
      * @param array $events       any events staged for storage or publishing
      */
-    public function logFailed($command, \Exception $cause, array $events);
+    public function logFailed($command, \Exception $cause = null, array $events);
 }

@@ -29,6 +29,12 @@ use Governor\Framework\Serializer\SerializerInterface;
 use Governor\Framework\Serializer\SimpleSerializedObject;
 use Governor\Framework\Serializer\SimpleSerializedType;
 
+/**
+ * Holds information about the outcome of a distributed command dispatch operation.
+ *
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
+ */
 class ReplyMessage
 {
     const NULL = "_null";
@@ -180,16 +186,22 @@ class ReplyMessage
         $data
     ) {
         $raw = unpack("a36commandIdentifier/nsuccess", $data);
+        $isSuccess = $raw['success'] === 1 ? true : false;
         $offset = 36 + 2;
 
         self::read($raw, $offset, $data, 'resultType');
+
+        if (self::NULL === $raw['resultType']) {
+            return new self($raw['commandIdentifier'], $serializer, null, $isSuccess);
+        }
+
         self::read($raw, $offset, $data, 'result');
 
         $result = $serializer->deserialize(
             new SimpleSerializedObject($raw['result'], new SimpleSerializedType($raw['resultType']))
         );
 
-        return new self($raw['commandIdentifier'], $serializer, $result, $raw['success'] === 1 ? true : false);
+        return new self($raw['commandIdentifier'], $serializer, $result, $isSuccess);
     }
 
     /**

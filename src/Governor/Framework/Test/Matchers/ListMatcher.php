@@ -74,7 +74,7 @@ abstract class ListMatcher extends BaseMatcher
      *
      * @see BaseMatcher
      */
-    protected abstract function matchesList(array $item);
+    abstract protected function matchesList(array $item);
 
     /**
      * Matches all the remaining Matchers in the given <code>matcherIterator</code> against <code>null</code>.

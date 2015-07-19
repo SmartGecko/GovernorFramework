@@ -44,5 +44,5 @@ abstract class IdentifierFactory
     /**
      * @return string
      */
-    public abstract function generateIdentifier();
+    abstract public function generateIdentifier();
 }

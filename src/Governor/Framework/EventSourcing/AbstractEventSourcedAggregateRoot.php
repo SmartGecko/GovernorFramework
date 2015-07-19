@@ -64,13 +64,13 @@ abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot i
     /**
      * @return EventSourcedEntityInterface[]
      */
-    protected abstract function getChildEntities();
+    abstract protected function getChildEntities();
 
     /**
      * @param DomainEventMessageInterface $event
      * @return mixed
      */
-    protected abstract function handle(DomainEventMessageInterface $event);
+    abstract protected function handle(DomainEventMessageInterface $event);
 
     /**
      * @param mixed $payload

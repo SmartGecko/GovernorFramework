@@ -50,7 +50,7 @@ interface SerializerInterface
     /**
      * @param mixed $object
      *
-     * @return SerializedObjectInterface
+     * @return SerializedTypeInterface
      */
     public function typeForClass($object);
 }

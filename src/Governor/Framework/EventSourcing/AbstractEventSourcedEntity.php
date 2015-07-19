@@ -77,9 +77,13 @@ abstract class AbstractEventSourcedEntity implements EventSourcedEntityInterface
     /**
      * @return EventSourcedEntityInterface[]
      */
-    protected abstract function getChildEntities();
+    abstract protected function getChildEntities();
 
-    protected abstract function handle(DomainEventMessageInterface $event);
+    /**
+     * @param DomainEventMessageInterface $event
+     * @return mixed
+     */
+    abstract protected function handle(DomainEventMessageInterface $event);
 
     /**
      * @param mixed $event

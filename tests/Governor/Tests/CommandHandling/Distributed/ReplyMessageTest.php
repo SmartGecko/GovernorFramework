@@ -63,6 +63,22 @@ class ReplyMessageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($replyMessage2->isSuccess());
     }
 
+    public function testNullResult()
+    {
+        $serializer = new JMSSerializer();
+
+        $replyMessage1 = new ReplyMessage(self::COMMAND_ID, $serializer, null);
+        $bytes = $replyMessage1->toBytes();
+
+        $replyMessage2 = ReplyMessage::fromBytes($serializer, $bytes);
+
+        $this->assertEquals($replyMessage1->getReturnValue(), $replyMessage2->getReturnValue());
+        $this->assertNull($replyMessage2->getReturnValue());
+        $this->assertEquals($replyMessage1->getCommandIdentifier(), $replyMessage2->getCommandIdentifier());
+        $this->assertTrue($replyMessage1->isSuccess());
+        $this->assertTrue($replyMessage2->isSuccess());
+    }
+
     public function testExceptionResult()
     {
         $serializer = new JMSSerializer();

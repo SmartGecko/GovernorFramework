@@ -83,5 +83,5 @@ abstract class AbstractRoutingStrategy implements RoutingStrategyInterface
      * @param CommandMessageInterface $command The command to resolve the routing key for
      * @return string the String representing the Routing Key, or <code>null</code> if unresolved.
      */
-    protected abstract function doResolveRoutingKey(CommandMessageInterface $command);
+    abstract protected function doResolveRoutingKey(CommandMessageInterface $command);
 }

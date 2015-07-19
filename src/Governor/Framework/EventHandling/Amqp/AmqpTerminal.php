@@ -24,6 +24,7 @@
 
 namespace Governor\Framework\EventHandling\Amqp;
 
+use Governor\Framework\Common\Logging\NullLogger;
 use Governor\Framework\EventHandling\TerminalInterface;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Channel\AMQPChannel;
@@ -100,6 +101,7 @@ class AmqpTerminal implements TerminalInterface,  LoggerAwareInterface
         AmqpMessageConverterInterface $messageConverter = null
     ) {
         $this->serializer = $serializer;
+        $this->logger = new NullLogger();
         $this->routingKeyResolver = new NamespaceRoutingKeyResolver();
         $this->messageConverter = null === $messageConverter ? new DefaultAmqpMessageConverter(
             $this->serializer,

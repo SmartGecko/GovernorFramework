@@ -30,15 +30,16 @@ use Governor\Framework\UnitOfWork\UnitOfWorkInterface;
 use Governor\Framework\UnitOfWork\UnitOfWorkListenerAdapter;
 
 /**
- * Description of AuditingUnitOfWorkListener
+ * Extension of the UnitOfWorkListenerAdapter providing auditing information.
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class AuditingUnitOfWorkListener extends UnitOfWorkListenerAdapter
 {
 
     /**
-     * @var AuditDataProviderInterface 
+     * @var AuditDataProviderInterface
      */
     private $auditDataProvider;
 
@@ -55,7 +56,7 @@ class AuditingUnitOfWorkListener extends UnitOfWorkListenerAdapter
     /**
      * @var array
      */
-    private $recordedEvents = array();
+    private $recordedEvents = [];
 
     /**
      * @var mixed
@@ -67,14 +68,15 @@ class AuditingUnitOfWorkListener extends UnitOfWorkListenerAdapter
      * the Unit Of Work is committed to provide the auditing information. The <code>auditLogger</code> is invoked after
      * the Unit Of Work is successfully committed.
      *
-     * @param CommandMessageInterface $command           The command being audited
+     * @param CommandMessageInterface $command The command being audited
      * @param AuditDataProviderInterface $auditDataProvider The instance providing the information to attach to the events
-     * @param AuditLoggerInterface $auditLogger       The logger writing the audit
+     * @param AuditLoggerInterface $auditLogger The logger writing the audit
      */
-    public function __construct(CommandMessageInterface $command,
-            AuditDataProviderInterface $auditDataProvider,
-            AuditLoggerInterface $auditLogger)
-    {
+    public function __construct(
+        CommandMessageInterface $command,
+        AuditDataProviderInterface $auditDataProvider,
+        AuditLoggerInterface $auditLogger
+    ) {
         if (null === $command) {
             throw new \InvalidArgumentException('command may not be null');
         }
@@ -92,15 +94,25 @@ class AuditingUnitOfWorkListener extends UnitOfWorkListenerAdapter
         $this->command = $command;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function afterCommit(UnitOfWorkInterface $unitOfWork)
     {
-        $this->auditLogger->logSuccessful($this->command, $this->returnValue,
-                $this->recordedEvents);
+        $this->auditLogger->logSuccessful(
+            $this->command,
+            $this->returnValue,
+            $this->recordedEvents
+        );
     }
 
-    public function onEventRegistered(UnitOfWorkInterface $unitOfWork,
-            EventMessageInterface $event)
-    {
+    /**
+     * {@inheritdoc}
+     */
+    public function onEventRegistered(
+        UnitOfWorkInterface $unitOfWork,
+        EventMessageInterface $event
+    ) {
         $auditData = $this->auditDataProvider->provideAuditDataFor($this->command);
 
         if (!empty($auditData)) {
@@ -108,14 +120,22 @@ class AuditingUnitOfWorkListener extends UnitOfWorkListenerAdapter
         }
 
         $this->recordedEvents[] = $event;
+
         return $event;
     }
 
-    public function onRollback(UnitOfWorkInterface $unitOfWork,
-            \Exception $failureCause = null)
-    {
-        $this->auditLogger->logFailed($this->command, $failureCause,
-                $this->recordedEvents);
+    /**
+     * {@inheritdoc}
+     */
+    public function onRollback(
+        UnitOfWorkInterface $unitOfWork,
+        \Exception $failureCause = null
+    ) {
+        $this->auditLogger->logFailed(
+            $this->command,
+            $failureCause,
+            $this->recordedEvents
+        );
     }
 
     /**

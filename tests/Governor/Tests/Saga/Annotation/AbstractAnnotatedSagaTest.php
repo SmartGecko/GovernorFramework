@@ -125,12 +125,12 @@ class StubAnnotatedSaga extends AbstractAnnotatedSaga
         $this->invocationCount++;
     }
 
-    public function associateWith(\Governor\Framework\Saga\AssociationValue $associationValue)
+    public function associateWith(AssociationValue $associationValue)
     {
         parent::associateWith($associationValue);
     }
 
-    public function removeAssociationWith(\Governor\Framework\Saga\AssociationValue $associationValue)
+    public function removeAssociationWith(AssociationValue $associationValue)
     {
         parent::removeAssociationWith($associationValue);
     }

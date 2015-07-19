@@ -89,6 +89,9 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $this->logger = new NullLogger();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function handle(EventMessageInterface $event)
     {
         foreach ($this->sagaTypes as $sagaType) {
@@ -140,7 +143,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         AssociationValue $associationValue
     ) {
         $newSaga = $this->sagaFactory->createSaga($sagaType);
-        $newSaga->associateWith($associationValue);
+        $newSaga->getAssociationValues()->add($associationValue);
         $this->preProcessSaga($newSaga);
 
         try {
@@ -155,7 +158,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
         $sagaType,
         $associationValues
     ) {
-        $sagas = array();
+        $sagas = [];
 
         foreach ($associationValues as $associationValue) {
             $sagas = $this->sagaRepository->find($sagaType, $associationValue);
@@ -205,7 +208,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
             $exception = $ex;
         } finally {
             $this->logger->info(
-                "Saga {saga} is commiting event {event}",
+                "Saga {saga} is committing event {event}",
                 [
                     'saga' => $sagaId,
                     'event' => $event->getPayloadType()
@@ -282,7 +285,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      * @param EventMessageInterface $event The Event that is being dispatched to Saga instances
      * @return SagaInitializationPolicy the initialization policy for the Saga
      */
-    protected abstract function getSagaCreationPolicy(
+    abstract protected function getSagaCreationPolicy(
         $sagaType,
         EventMessageInterface $event
     );
@@ -295,7 +298,7 @@ abstract class AbstractSagaManager implements SagaManagerInterface, LoggerAwareI
      * @param EventMessageInterface $event The event containing the association information
      * @return array the AssociationValues indicating which Sagas should handle given event
      */
-    protected abstract function extractAssociationValues(
+    abstract protected function extractAssociationValues(
         $sagaType,
         EventMessageInterface $event
     );

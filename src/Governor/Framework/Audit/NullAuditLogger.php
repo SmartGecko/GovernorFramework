@@ -25,20 +25,27 @@
 namespace Governor\Framework\Audit;
 
 /**
- * Description of NullAuditLogger
+ * Null object implementation of the @see AuditLoggerInterface
  *
- * @author david
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class NullAuditLogger implements AuditLoggerInterface
 {
-    public function logFailed($command, \Exception $cause, array $events)
+    /**
+     * {@inheritdoc}
+     */
+    public function logFailed($command, \Exception $cause = null, array $events)
     {
-        
+
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function logSuccessful($command, $returnValue, array $events)
     {
-        
+
     }
 
 }
