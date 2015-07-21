@@ -118,15 +118,6 @@ class DistributedCommandBus implements CommandBusInterface, LoggerAwareInterface
         $this->connector->unsubscribe($commandName, $handler);
     }
 
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getCommandHandlerRegistry()
-    {
-        return null;
-    }
-
     /**
      * Invokes all the dispatch interceptors.
      *

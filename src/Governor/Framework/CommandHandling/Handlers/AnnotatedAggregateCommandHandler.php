@@ -118,7 +118,7 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
     }
 
     /**
-     * @param $className
+     * @param string $className
      * @param RepositoryInterface $repository
      * @param CommandBusInterface $commandBus
      * @param ParameterResolverFactoryInterface $parameterResolver
@@ -146,7 +146,7 @@ class AnnotatedAggregateCommandHandler extends AbstractAnnotatedCommandHandler
                 $repository, $targetResolver, $annotationReaderFactory
             );
 
-            $commandBus->getCommandHandlerRegistry()->subscribe(
+            $commandBus->subscribe(
                 $handlerDefinition->getPayloadType(),
                 $handler
             );

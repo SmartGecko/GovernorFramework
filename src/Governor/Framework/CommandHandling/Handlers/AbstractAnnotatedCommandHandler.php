@@ -111,7 +111,7 @@ abstract class AbstractAnnotatedCommandHandler implements CommandHandlerInterfac
      */
     protected function resolveArguments(MessageInterface $message)
     {
-        $arguments = array();
+        $arguments = [];
         $parameters = $this->method->getParameters();
         $count = count($parameters);
 
