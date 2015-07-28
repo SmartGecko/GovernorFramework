@@ -49,37 +49,52 @@ class GenericAggregateFactory extends AbstractAggregateFactory
     /**
      * @var \ReflectionClass
      */
-    private $reflClass;
+    private $reflectionClass;
 
+    /**
+     * @param string $aggregateType
+     */
     function __construct($aggregateType)
-    {        
+    {
         if (null === $aggregateType) {
             throw new \InvalidArgumentException("Aggregate type not set.");
         }
-        
-        $this->reflClass = new \ReflectionClass($aggregateType);
 
-        if (!$this->reflClass->implementsInterface(EventSourcedAggregateRootInterface::class)) {
-            throw new \InvalidArgumentException("The given aggregateType must be a subtype of EventSourcedAggregateRootInterface");
+        $this->reflectionClass = new \ReflectionClass($aggregateType);
+
+        if (!$this->reflectionClass->implementsInterface(EventSourcedAggregateRootInterface::class)) {
+            throw new \InvalidArgumentException(
+                "The given aggregateType must be a subtype of EventSourcedAggregateRootInterface"
+            );
         }
 
         $this->aggregateType = $aggregateType;
-        $this->typeIdentifier = $this->reflClass->getShortName();
+        $this->typeIdentifier = $this->reflectionClass->getName();
     }
 
-    protected function doCreateAggregate($aggregateIdentifier,
-        DomainEventMessageInterface $firstEvent)
-    {                                
-        $aggregate = $this->reflClass->newInstanceWithoutConstructor();
-        
+    /**
+     * {@inheritdoc}
+     */
+    protected function doCreateAggregate(
+        $aggregateIdentifier,
+        DomainEventMessageInterface $firstEvent
+    ) {
+        $aggregate = $this->reflectionClass->newInstanceWithoutConstructor();
+
         return $aggregate;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getAggregateType()
     {
         return $this->aggregateType;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getTypeIdentifier()
     {
         return $this->typeIdentifier;

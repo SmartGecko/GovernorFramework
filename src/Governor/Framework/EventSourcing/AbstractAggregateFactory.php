@@ -27,26 +27,34 @@ namespace Governor\Framework\EventSourcing;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 
 /**
- * Base aggregate factory implementation that creates a new aggregate root from a 
+ * Base aggregate factory implementation that creates a new aggregate root from a
  * {@see DomainEventMessageInterface}. The implementation is capable of handling snapshot events.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AbstractAggregateFactory implements AggregateFactoryInterface
 {
 
-    public function createAggregate($aggregateIdentifier,
-        DomainEventMessageInterface $firstEvent)
-    {        
-        if (is_subclass_of($firstEvent->getPayloadType(), 
-                EventSourcedAggregateRootInterface::class)) {
+    /**
+     * {@inheritdoc}
+     */
+    public function createAggregate(
+        $aggregateIdentifier,
+        DomainEventMessageInterface $firstEvent
+    ) {
+        if (is_subclass_of(
+            $firstEvent->getPayloadType(),
+            EventSourcedAggregateRootInterface::class
+        )) {
             $aggregate = $firstEvent->getPayload();
         } else {
-            $aggregate = $this->doCreateAggregate($aggregateIdentifier,
-                $firstEvent);
+            $aggregate = $this->doCreateAggregate(
+                $aggregateIdentifier,
+                $firstEvent
+            );
         }
-        
+
         return $this->postProcessInstance($aggregate);
     }
 
@@ -71,9 +79,11 @@ abstract class AbstractAggregateFactory implements AggregateFactoryInterface
      * The given <code>firstEvent</code> is never a snapshot event.
      *
      * @param string $aggregateIdentifier The identifier of the aggregate to create
-     * @param DomainEventMessageInterface $firstEvent          The first event in the Event Stream of the Aggregate
+     * @param DomainEventMessageInterface $firstEvent The first event in the Event Stream of the Aggregate
      * @return mixed The aggregate instance to initialize with the Event Stream
      */
-    protected abstract function doCreateAggregate($aggregateIdentifier,
-        DomainEventMessageInterface $firstEvent);
+    protected abstract function doCreateAggregate(
+        $aggregateIdentifier,
+        DomainEventMessageInterface $firstEvent
+    );
 }

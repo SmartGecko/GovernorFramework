@@ -30,10 +30,9 @@ use Governor\Framework\Domain\DomainEventMessageInterface;
  * Interface describing the functionality of the aggregate root factory.
  * The aggregate factory creates an aggregate instance from a stream of domain events.
  *
- * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-
 interface AggregateFactoryInterface
 {
 
@@ -45,12 +44,14 @@ interface AggregateFactoryInterface
      * actual aggregate type.
      *
      * @param string $aggregateIdentifier the aggregate identifier of the aggregate to instantiate
-     * @param DomainEventMessageInterface $firstEvent          The first event in the event stream. This is either the event generated during
+     * @param DomainEventMessageInterface $firstEvent The first event in the event stream. This is either the event generated during
      *                            creation of the aggregate, or a snapshot event
      * @return mixed an aggregate ready for initialization using a DomainEventStream.
      */
-    public function createAggregate($aggregateIdentifier,
-        DomainEventMessageInterface $firstEvent);
+    public function createAggregate(
+        $aggregateIdentifier,
+        DomainEventMessageInterface $firstEvent
+    );
 
     /**
      * Returns the type identifier for this aggregate factory. The type identifier is used by the EventStore to

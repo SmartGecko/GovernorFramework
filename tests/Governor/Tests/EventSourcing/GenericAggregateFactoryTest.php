@@ -8,7 +8,6 @@
 
 namespace Governor\Tests\EventSourcing;
 
-use Rhumsaa\Uuid\Uuid;
 use Governor\Framework\Domain\AbstractAggregateRoot;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\Domain\GenericDomainEventMessage;
@@ -37,7 +36,7 @@ class GenericAggregateFactoryTest extends \PHPUnit_Framework_TestCase
     public function testAggregateTypeIsSimpleName()
     {
         $factory = new GenericAggregateFactory(get_class(new StubAggregate()));
-        $this->assertEquals("StubAggregate", $factory->getTypeIdentifier());
+        $this->assertEquals("Governor\\Tests\\Stubs\\StubAggregate", $factory->getTypeIdentifier());
     }
 
     public function testInitializeFromAggregateSnapshot()
@@ -45,15 +44,21 @@ class GenericAggregateFactoryTest extends \PHPUnit_Framework_TestCase
         $aggregate = new StubAggregate("stubId");
         $aggregate->doSomething();
         $aggregate->commitEvents();
-        $snapshotMessage = new GenericDomainEventMessage($aggregate->getIdentifier(),
-            $aggregate->getVersion(), $aggregate);
+        $snapshotMessage = new GenericDomainEventMessage(
+            $aggregate->getIdentifier(),
+            $aggregate->getVersion(), $aggregate
+        );
 
         $factory = new GenericAggregateFactory(get_class($aggregate));
-        $this->assertEquals("StubAggregate", $factory->getTypeIdentifier());
+        $this->assertEquals("Governor\\Tests\\Stubs\\StubAggregate", $factory->getTypeIdentifier());
 
-        $this->assertSame($aggregate,
-            $factory->createAggregate($aggregate->getIdentifier(),
-                $snapshotMessage));
+        $this->assertSame(
+            $aggregate,
+            $factory->createAggregate(
+                $aggregate->getIdentifier(),
+                $snapshotMessage
+            )
+        );
     }
 }
 
@@ -67,7 +72,7 @@ class UnsuitableAggregate extends AbstractAggregateRoot
 
     protected function handle(DomainEventMessageInterface $event)
     {
-        
+
     }
 
     public function getIdentifier()
