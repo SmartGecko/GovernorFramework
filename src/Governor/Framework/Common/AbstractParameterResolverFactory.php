@@ -39,7 +39,7 @@ abstract class AbstractParameterResolverFactory implements ParameterResolverFact
     {
         foreach ($annotations as $annotation) {
             if ($annotation instanceof Governor\Resolve &&
-                    $annotation->parameter = $parameter->getName()) {
+                    $annotation->parameter === $parameter->getName()) {
                 return $annotation->resolver;
             }
         }
