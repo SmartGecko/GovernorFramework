@@ -24,7 +24,6 @@
 
 namespace Governor\Framework\EventSourcing;
 
-use Doctrine\ORM\Mapping as ORM;
 use Governor\Framework\Domain\MetaData;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\DomainEventMessageInterface;
@@ -36,7 +35,6 @@ use Governor\Framework\Domain\AbstractAggregateRoot;
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
- * @ORM\MappedSuperclass
  */
 abstract class AbstractEventSourcedAggregateRoot extends AbstractAggregateRoot implements EventSourcedAggregateRootInterface
 {

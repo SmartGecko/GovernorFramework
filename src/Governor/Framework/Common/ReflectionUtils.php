@@ -63,21 +63,25 @@ class ReflectionUtils
         return
             $class->getMethods(\ReflectionMethod::IS_PUBLIC);
     }
-    
+
     /**
      * Returns a reflection class for the object. If the object is an Orm Proxy it returns the parent class.
-     * 
+     *
      * @param string|mixed $object
      * @return \ReflectionClass
      */
     public static function getClass ($object)
     {
         $reflectionClass = new \ReflectionClass($object);
-        
+
+        if (!class_exists('Doctrine\ORM\Proxy\Proxy')) {
+            return $reflectionClass;
+        }
+
         if ($reflectionClass->implementsInterface('Doctrine\ORM\Proxy\Proxy')) {
             return $reflectionClass->getParentClass();
         }
-        
+
         return $reflectionClass;
     }
 

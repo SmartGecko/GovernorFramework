@@ -24,7 +24,6 @@
 
 namespace Governor\Framework\EventSourcing\Annotation;
 
-use Doctrine\ORM\Mapping as ORM;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
 
@@ -32,8 +31,7 @@ use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
  * Description of AbstractAnnotatedAggregateRoot
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
- * @ORM\MappedSuperclass
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AbstractAnnotatedAggregateRoot extends AbstractEventSourcedAggregateRoot
 {
@@ -42,6 +40,9 @@ abstract class AbstractAnnotatedAggregateRoot extends AbstractEventSourcedAggreg
      */
     private $inspector;
 
+    /**
+     * @inheritdoc
+     */
     protected function getChildEntities()
     {
         $this->ensureInspectorStarted();
@@ -54,6 +55,9 @@ abstract class AbstractAnnotatedAggregateRoot extends AbstractEventSourcedAggreg
         $this->inspector->findAndInvokeEventHandlers($event);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getIdentifier()
     {
         $this->ensureInspectorStarted();

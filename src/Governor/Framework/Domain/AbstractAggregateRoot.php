@@ -24,14 +24,11 @@
 
 namespace Governor\Framework\Domain;
 
-use Doctrine\ORM\Mapping as ORM;
-
 /**
  * Base implementation of the AggregateRootInterface
  * 
  * @author    "David Kalosi" <david.kalosi@gmail.com>  
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a> 
- * @ORM\MappedSuperclass
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AbstractAggregateRoot implements AggregateRootInterface
 {
@@ -53,11 +50,15 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
     protected $deleted;
 
     /**
-     * @ORM\Column (type="integer", name="version")
      * @var integer
      */
     protected $lastEventScn;
 
+    /**
+     * @param mixed $payload
+     * @param MetaData|null $metaData
+     * @return GenericDomainEventMessage
+     */
     protected function registerEvent($payload, MetaData $metaData = null)
     {
         $meta = (null === $metaData) ? MetaData::emptyInstance() : $metaData;
@@ -65,11 +66,17 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
         return $this->getEventContainer()->addEvent($meta, $payload);
     }
 
+    /**
+     * Marks the aggregate root as deleted.
+     */
     protected function markDeleted()
     {
         $this->deleted = true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function commitEvents()
     {
         if (null !== $this->eventContainer) {
@@ -78,11 +85,17 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getUncommittedEventCount()
     {
         return (null === $this->eventContainer) ? 0 : $this->eventContainer->size();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getUncommittedEvents()
     {
         if (null === $this->eventContainer) {
@@ -92,11 +105,17 @@ abstract class AbstractAggregateRoot implements AggregateRootInterface
         return $this->eventContainer->getEventStream();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getVersion()
     {
         return $this->version;
-    }       
+    }
 
+    /**
+     * @inheritdoc
+     */
     public function isDeleted()
     {
         return $this->deleted;
