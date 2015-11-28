@@ -24,7 +24,7 @@
 
 namespace Governor\Framework\Saga\Annotation;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use JMS\Serializer\Annotation\Type;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\PostDeserialize;

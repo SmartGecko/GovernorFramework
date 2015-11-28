@@ -19,7 +19,7 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "rhumsaa/uuid": "@stable",
+    "ramsey/uuid": "^3.0",
     "psr/log": "@stable",
     "php": ">=5.5",
     "monolog/monolog": "1.8.0",

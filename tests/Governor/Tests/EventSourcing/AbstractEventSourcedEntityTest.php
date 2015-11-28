@@ -8,7 +8,7 @@
 
 namespace Governor\Tests\EventSourcing;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Governor\Framework\EventSourcing\AbstractEventSourcedAggregateRoot;
 use Governor\Framework\Domain\DomainEventMessageInterface;
 use Governor\Framework\Domain\GenericDomainEventMessage;

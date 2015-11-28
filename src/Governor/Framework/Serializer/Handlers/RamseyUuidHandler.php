@@ -6,9 +6,9 @@ use JMS\Serializer\Context;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\VisitorInterface;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 
-class RhumsaaUuidHandler implements SubscribingHandlerInterface
+class RamseyUuidHandler implements SubscribingHandlerInterface
 {
 
     public static function getSubscribingMethods()
@@ -18,14 +18,14 @@ class RhumsaaUuidHandler implements SubscribingHandlerInterface
 
         foreach ($formats as $format) {
             $methods[] = array(
-                'type' => 'Rhumsaa\Uuid\Uuid',
+                'type' => 'Ramsey\Uuid\Uuid',
                 'direction' => GraphNavigator::DIRECTION_SERIALIZATION,
                 'format' => $format,
                 'method' => 'serializeUuid'
             );
 
             $methods[] = array(
-                'type' => 'Rhumsaa\Uuid\Uuid',
+                'type' => 'Ramsey\Uuid\Uuid',
                 'direction' => GraphNavigator::DIRECTION_DESERIALIZATION,
                 'format' => $format,
                 'method' => 'deserializeUuid'

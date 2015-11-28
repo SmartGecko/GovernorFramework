@@ -24,7 +24,7 @@
 
 namespace Governor\Tests\Domain;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\Domain\MetaData;
 use Governor\Framework\Domain\SimpleDomainEventStream;

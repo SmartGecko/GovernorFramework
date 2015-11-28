@@ -24,7 +24,7 @@
 
 namespace Governor\Tests\Test;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Governor\Framework\Annotations\EventHandler;
 use Governor\Framework\Annotations\AggregateIdentifier;
 use Governor\Framework\Domain\DomainEventMessageInterface;

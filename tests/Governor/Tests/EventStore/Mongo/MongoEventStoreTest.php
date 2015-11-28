@@ -1,20 +1,36 @@
 <?php
-/**
- * This file is part of the SmartGecko(c) business platform.
+
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Tests\EventStore\Mongo;
 
+use Ramsey\Uuid\Uuid;
 use Governor\Framework\EventStore\Mongo\DocumentPerEventStorageStrategy;
 use Governor\Framework\Serializer\JMSSerializer;
 use Psr\Log\LoggerInterface;
 use Governor\Framework\EventStore\Mongo\MongoEventStore;
 use Governor\Framework\Domain\GenericDomainEventMessage;
 use Governor\Framework\EventStore\Mongo\DefaultMongoTemplate;
-use Governor\Framework\EventStore\EventStreamNotFoundException;
 use Governor\Framework\EventStore\EventVisitorInterface;
 use Governor\Framework\Domain\SimpleDomainEventStream;
 use Governor\Framework\Repository\ConcurrencyException;
@@ -262,7 +278,7 @@ class MongoEventStoreTest extends \PHPUnit_Framework_TestCase
      */
     public function testLoadNonExistent()
     {
-        $this->testSubject->readEvents("test", \Rhumsaa\Uuid\Uuid::uuid1()->toString());
+        $this->testSubject->readEvents("test", Uuid::uuid1()->toString());
     }
 
 
@@ -313,7 +329,7 @@ class MongoEventStoreTest extends \PHPUnit_Framework_TestCase
 
         for ($cc = 0; $cc < $numberOfEvents; $cc++) {
             $events[] = new GenericDomainEventMessage(
-                \Rhumsaa\Uuid\Uuid::uuid1()->toString(),
+                Uuid::uuid1()->toString(),
                 $cc,
                 new StubStateChangedEvent()
             );
@@ -455,7 +471,7 @@ class StubAggregateRoot extends AbstractAnnotatedAggregateRoot
 
     public function  __construct()
     {
-        $this->identifier = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
+        $this->identifier = Uuid::uuid1()->toString();
     }
 
     public function changeState()

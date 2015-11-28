@@ -24,7 +24,7 @@
 
 namespace Governor\Tests\EventHandling\Io;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use JMS\Serializer\Annotation\Type;
 use Governor\Framework\Serializer\JMSSerializer;
 use Governor\Framework\Domain\MetaData;

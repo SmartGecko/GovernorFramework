@@ -24,7 +24,7 @@
 
 namespace Governor\Framework\Domain;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Basic implementation of the @see MessageInterface.

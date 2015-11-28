@@ -8,7 +8,7 @@
 
 namespace Governor\Tests\EventSourcing\Annotation;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Governor\Tests\Stubs\StubDomainEvent;
 use Governor\Framework\Annotations\AggregateIdentifier;
 use Governor\Framework\Annotations\EventSourcedMember;

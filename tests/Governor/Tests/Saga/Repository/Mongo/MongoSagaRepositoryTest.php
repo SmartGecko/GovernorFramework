@@ -1,23 +1,38 @@
 <?php
-/**
- * This file is part of the SmartGecko(c) business platform.
+
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * The software is based on the Axon Framework project which is
+ * licensed under the Apache 2.0 license. For more information on the Axon Framework
+ * see <http://www.axonframework.org/>.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.governor-framework.org/>.
  */
 
 namespace Governor\Tests\Saga\Repository\Mongo;
 
+use Ramsey\Uuid\Uuid;
 use JMS\Serializer\Annotation as Serializer;
 use Governor\Framework\Domain\EventMessageInterface;
-use Governor\Framework\Saga\AssociationValuesInterface;
 use Governor\Framework\Saga\Repository\Mongo\MongoSagaRepository;
 use Governor\Framework\Saga\SagaInterface;
 use Governor\Framework\Saga\AssociationValue;
 use Psr\Log\LoggerInterface;
 use Governor\Framework\Saga\Annotation\AbstractAnnotatedSaga;
 use Governor\Framework\Serializer\JMSSerializer;
-use Governor\Framework\Common\Logging\NullLogger;
 use Governor\Framework\Saga\NullResourceInjector;
 use Governor\Framework\Saga\Repository\Mongo\SagaEntry;
 use Governor\Framework\Saga\Repository\Mongo\DefaultMongoTemplate;
@@ -126,7 +141,7 @@ class MongoSagaRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testAddAndLoadSaga_ByIdentifier()
     {
-        $identifier = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
+        $identifier = Uuid::uuid1()->toString();
 
         $saga = new MyTestSaga($identifier);
         $this->repository->add($saga);
@@ -138,7 +153,7 @@ class MongoSagaRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testAddAndLoadSaga_ByAssociationValue()
     {
-        $identifier = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
+        $identifier = Uuid::uuid1()->toString();
         $saga = new MyTestSaga($identifier);
 
         $saga->associateWith(new AssociationValue("key", "value"));
@@ -154,8 +169,8 @@ class MongoSagaRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testAddAndLoadSaga_MultipleHitsByAssociationValue()
     {
-        $identifier1 = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
-        $identifier2 = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
+        $identifier1 = Uuid::uuid1()->toString();
+        $identifier2 = Uuid::uuid1()->toString();
 
         $saga1 = new MyTestSaga($identifier1);
         $saga2 = new MyOtherTestSaga($identifier2);
@@ -184,7 +199,7 @@ class MongoSagaRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testAddAndLoadSaga_AssociateValueAfterStorage()
     {
-        $identifier = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
+        $identifier = Uuid::uuid1()->toString();
         $saga = new MyTestSaga($identifier);
 
         $this->repository->add($saga);
@@ -202,7 +217,7 @@ class MongoSagaRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadUncachedSaga_ByIdentifier()
     {
-        $identifier = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
+        $identifier = Uuid::uuid1()->toString();
         $saga = new MyTestSaga($identifier);
 
         $entry = new SagaEntry($saga, new JMSSerializer());
@@ -222,7 +237,7 @@ class MongoSagaRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadSaga_AssociationValueRemoved()
     {
-        $identifier = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
+        $identifier = Uuid::uuid1()->toString();
         $saga = new MyTestSaga($identifier);
 
         $saga->associateWith(new AssociationValue("key", "value"));
@@ -241,7 +256,7 @@ class MongoSagaRepositoryTest extends \PHPUnit_Framework_TestCase
     public function testSaveSaga()
     {
         /*
-       $identifier = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
+       $identifier = Uuid::uuid1()->toString();
        $saga = new MyTestSaga($identifier);
 
        $this->mongoTemplate->sagaCollection()->save((new SagaEntry($saga, new JMSSerializer()))->asDBObject());
@@ -259,7 +274,7 @@ class MongoSagaRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testEndSaga()
     {
-        $identifier = \Rhumsaa\Uuid\Uuid::uuid1()->toString();
+        $identifier = Uuid::uuid1()->toString();
         $saga = new MyTestSaga($identifier);
 
         $this->mongoTemplate->sagaCollection()->save((new SagaEntry($saga, new JMSSerializer()))->asDBObject());

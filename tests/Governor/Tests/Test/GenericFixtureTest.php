@@ -29,7 +29,7 @@ use Governor\Framework\Domain\SimpleDomainEventStream;
 use Governor\Framework\EventSourcing\AggregateFactoryInterface;
 use Governor\Framework\Test\FixtureConfigurationInterface;
 use Governor\Framework\Test\Fixtures;
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class GenericFixtureTest.

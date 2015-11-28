@@ -8,7 +8,7 @@
 
 namespace Governor\Tests\Domain;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Governor\Framework\Domain\AbstractAggregateRoot;
 
 /**

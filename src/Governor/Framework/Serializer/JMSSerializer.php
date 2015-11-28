@@ -24,7 +24,7 @@
 
 namespace Governor\Framework\Serializer;
 
-use Governor\Framework\Serializer\Handlers\RhumsaaUuidHandler;
+use Governor\Framework\Serializer\Handlers\RamseyUuidHandler;
 use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializerInterface as JMSSerializerInterface;
@@ -59,7 +59,7 @@ class JMSSerializer extends AbstractSerializer
                 ->addDefaultHandlers()
                 ->configureHandlers(
                     function (HandlerRegistry $registry) {
-                        $registry->registerSubscribingHandler(new RhumsaaUuidHandler());
+                        $registry->registerSubscribingHandler(new RamseyUuidHandler());
                     }
                 )->build();
         } else {

@@ -25,7 +25,7 @@
 namespace Governor\Tests\CommandHandling;
 
 use Governor\Framework\Common\Annotation\SimpleAnnotationReaderFactory;
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Governor\Framework\CommandHandling\AnnotationCommandTargetResolver;
 use Governor\Framework\Annotations\TargetAggregateIdentifier;
 use Governor\Framework\Annotations\TargetAggregateVersion;

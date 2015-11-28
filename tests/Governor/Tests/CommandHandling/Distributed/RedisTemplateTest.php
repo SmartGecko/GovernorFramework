@@ -8,7 +8,7 @@
 
 namespace Governor\Tests\CommandHandling\Distributed;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Governor\Framework\CommandHandling\Distributed\RedisTemplate;
 
 class RedisTemplateTest extends \PHPUnit_Framework_TestCase

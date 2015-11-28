@@ -28,7 +28,7 @@ use Hamcrest\Matchers as CoreMatchers;
 use Governor\Framework\Domain\GenericEventMessage;
 use Governor\Framework\Test\Matchers\Matchers;
 use Governor\Framework\Test\Saga\AnnotatedSagaTestFixture;
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 
 /**
  * AnnotatedSaga unit tests

@@ -24,7 +24,7 @@
 
 namespace Governor\Framework\Domain;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 
 /**
  * DefaultIdentityFactory

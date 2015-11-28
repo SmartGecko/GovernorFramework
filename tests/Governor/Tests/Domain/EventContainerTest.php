@@ -8,7 +8,7 @@
 
 namespace Governor\Tests\Domain;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Governor\Framework\Domain\EventRegistrationCallbackInterface;
 use Governor\Framework\Domain\EventContainer;
 use Governor\Framework\Domain\MetaData;

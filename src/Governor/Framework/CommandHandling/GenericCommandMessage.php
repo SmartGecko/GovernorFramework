@@ -24,7 +24,7 @@
 
 namespace Governor\Framework\CommandHandling;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Governor\Framework\Domain\MetaData;
 
 /**
