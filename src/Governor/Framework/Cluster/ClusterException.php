@@ -22,51 +22,38 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore\Mongo\Criteria;
+namespace Governor\Framework\Cluster;
+
 
 /**
- * Representation of an Equals operator for Mongo selection criteria.
+ * Exception signalling errors within a cluster.
  *
  * @author    "David Kalosi" <david.kalosi@gmail.com>
  * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
-class Equals extends MongoCriteria
+class ClusterException extends \Exception
 {
     /**
-     * @var MongoProperty
+     * @var string
      */
-    private $property;
+    private $clusterIdentifier;
 
     /**
-     * @var mixed
+     * @inheritDoc
      */
-    private $expression;
-
-    /**
-     * Creates an equal instance that requires the given property to equal the given <code>expression</code>. The
-     * expression may be either a fixed value, or another MongoProperty.
-     *
-     * @param MongoProperty $property The property to evaluate
-     * @param mixed $expression The expression to compare the property with
-     */
-    public function __construct(MongoProperty $property, $expression)
+    public function __construct($clusterIdentifier, $message = "", \Exception $previous = null)
     {
-        if ($expression instanceof MongoProperty) {
-            throw new \InvalidArgumentException(
-                'The MongoEventStore does not support comparison between two properties'
-            );
-        }
+        parent::__construct($message, 0, $previous);
+        $this->clusterIdentifier = $clusterIdentifier;
+    }
 
-        $this->property = $property;
-        $this->expression = $expression;
+    /**
+     * @return string
+     */
+    public function getClusterIdentifier()
+    {
+        return $this->clusterIdentifier;
     }
 
 
-    public function asMongoObject()
-    {
-        return [
-            $this->property->getName() => (string)$this->expression
-        ];
-
-    }
 }

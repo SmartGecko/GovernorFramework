@@ -68,6 +68,8 @@ class DistributedCommandBus implements CommandBusInterface, LoggerAwareInterface
     ) {
         $this->connector = $connector;
         $this->routingStrategy = $routingStrategy;
+        $this->dispatchInterceptors = [];
+
         $this->logger = new NullLogger();
     }
 

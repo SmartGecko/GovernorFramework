@@ -38,9 +38,9 @@ class NamespaceRoutingKeyResolver implements RoutingKeyResolverInterface
 
     public function resolveRoutingKey(EventMessageInterface $eventMessage)
     {
-        $reflClass = new \ReflectionClass($eventMessage->getPayloadType());
+        $reflectionClass = new \ReflectionClass($eventMessage->getPayloadType());
         
-        return strtr($reflClass->getName(), '\\', '.');
+        return strtr($reflectionClass->getName(), '\\', '.');
     }
 
 }

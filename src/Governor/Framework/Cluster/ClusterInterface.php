@@ -22,31 +22,49 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore\Mongo;
+namespace Governor\Framework\Cluster;
 
-use MongoCollection;
 
-/**
- * Interface describing a mechanism that provides access to the Database and Collections required by the
- * MongoEventStore.
- *
- * @author    "David Kalosi" <david.kalosi@gmail.com>
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
- */
-interface MongoTemplateInterface
+interface ClusterInterface
 {
+    /**
+     * @return string
+     */
+    public function getClusterIdentifier();
 
     /**
-     * Returns a reference to the collection containing the domain events.
-     *
-     * @return MongoCollection containing the domain events
+     * @param $clusterIdentifier
      */
-    public function domainEventCollection();
+    public function create($clusterIdentifier);
 
     /**
-     * Returns a reference to the collection containing the snapshot events.
-     *
-     * @return MongoCollection containing the snapshot events
+     * @param $clusterIdentifier
      */
-    public function snapshotEventCollection();
+    public function connect($clusterIdentifier);
+
+    /**
+     * @param $clusterIdentifier
+     */
+    public function drop($clusterIdentifier);
+
+    /**
+     * @param ClusterNodeInterface $node
+     */
+    public function registerNode(ClusterNodeInterface $node);
+
+    /**
+     * @param ClusterNodeInterface $node
+     */
+    public function unregisterNode(ClusterNodeInterface $node);
+
+    /**
+     * @param string $namespace
+     * @return ClusterMessageRegistryInterface
+     */
+    public function createMessageRegistry($namespace);
+
+    /**
+     * @return ClusterLockRegistryInterface
+     */
+    public function createLockRegistry();
 }

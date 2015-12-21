@@ -22,51 +22,75 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore\Mongo\Criteria;
+namespace Governor\Framework\Cluster;
 
-/**
- * Representation of an Equals operator for Mongo selection criteria.
- *
- * @author    "David Kalosi" <david.kalosi@gmail.com>
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
- */
-class Equals extends MongoCriteria
+
+use Governor\Framework\Common\Logging\NullLogger;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
+
+class ZookeeperClusterLockRegistry implements ClusterLockRegistryInterface, LoggerAwareInterface
 {
     /**
-     * @var MongoProperty
+     * @var ZookeeperCluster
      */
-    private $property;
+    private $cluster;
 
     /**
-     * @var mixed
+     * @var LoggerInterface
      */
-    private $expression;
+    private $logger;
 
     /**
-     * Creates an equal instance that requires the given property to equal the given <code>expression</code>. The
-     * expression may be either a fixed value, or another MongoProperty.
-     *
-     * @param MongoProperty $property The property to evaluate
-     * @param mixed $expression The expression to compare the property with
+     * ZookeeperClusterLockRegistry constructor.
+     * @param ZookeeperCluster $cluster
      */
-    public function __construct(MongoProperty $property, $expression)
+    public function __construct(ZookeeperCluster $cluster)
     {
-        if ($expression instanceof MongoProperty) {
-            throw new \InvalidArgumentException(
-                'The MongoEventStore does not support comparison between two properties'
-            );
-        }
-
-        $this->property = $property;
-        $this->expression = $expression;
+        $this->cluster = $cluster;
+        $this->logger = new NullLogger();
     }
 
 
-    public function asMongoObject()
+    /**
+     * @inheritDoc
+     */
+    public function acquireLock($aggregateIdentifier)
     {
-        return [
-            $this->property->getName() => (string)$this->expression
-        ];
-
+        // TODO: Implement acquireLock() method.
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function releaseLock($aggregateIdentifier)
+    {
+        // TODO: Implement releaseLock() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getLock($aggregateIdentifier)
+    {
+        // TODO: Implement getLock() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCluster()
+    {
+        return $this->cluster;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+
 }

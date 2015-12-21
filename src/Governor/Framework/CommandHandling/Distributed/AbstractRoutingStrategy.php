@@ -29,8 +29,8 @@ use Governor\Framework\CommandHandling\CommandMessageInterface;
  * Abstract implementation of the RoutingStrategy interface that uses a policy to prescribe what happens when a routing
  * cannot be resolved.
  *
- * @author Allard Buijze
- * @since 2.0
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 abstract class AbstractRoutingStrategy implements RoutingStrategyInterface
 {

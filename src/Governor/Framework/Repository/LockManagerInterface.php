@@ -35,7 +35,7 @@ interface LockManagerInterface
 {
 
     /**
-     * Make sure that the current thread holds a valid lock for the given aggregate.
+     * Make sure that the current process holds a valid lock for the given aggregate.
      *
      * @param AggregateRootInterface $aggregate the aggregate to validate the lock for
      * @return boolean true if a valid lock is held, false otherwise
@@ -51,9 +51,8 @@ interface LockManagerInterface
     public function obtainLock($aggregateIdentifier);
 
     /**
-     * Release the lock held for an aggregate with the given <code>aggregateIdentifier</code>. The caller of this
-     * method must ensure a valid lock was requested using {@link #obtainLock(Object)}. If no lock was successfully
-     * obtained, the behavior of this method is undefined.
+     * Release the lock held for an aggregate with the given <code>aggregateIdentifier</code>.
+     * If no lock was successfully obtained, the behavior of this method is undefined.
      *
      * @param string $aggregateIdentifier the identifier of the aggregate to release the lock for.
      */

@@ -245,9 +245,6 @@ class AmqpTerminal implements TerminalInterface,  LoggerAwareInterface
      * <p/>
      * By default, messages are durable.
      * <p/>
-     * Note that this setting is ignored if a {@link
-     * #setMessageConverter(org.axonframework.eventhandling.amqp.AMQPMessageConverter) MessageConverter} is provided.
-     * In that case, the message converter must add the properties to reflect the required durability setting.
      *
      * @param boolean $durable whether or not messages should be durable
      */

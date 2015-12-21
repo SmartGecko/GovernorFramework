@@ -24,11 +24,11 @@
     "php": ">=5.5",
     "monolog/monolog": "1.8.0",
     "hamcrest/hamcrest-php": "v1.1.1",
-    "videlalvaro/php-amqplib": "2.2.*",
     "jms/serializer": "*",
     "symfony/validator": "~2.5",
     "doctrine/mongodb-odm": "^1.0@dev",
-    "predis/predis": "^1.0"
+    "predis/predis": "^1.0",
+    "videlalvaro/php-amqplib": "^2.4@dev"
   },
   "require-dev": {
     "doctrine/orm": ">=2.4",

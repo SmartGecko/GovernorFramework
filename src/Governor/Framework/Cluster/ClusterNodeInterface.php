@@ -22,31 +22,45 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\EventStore\Mongo;
+namespace Governor\Framework\Cluster;
 
-use MongoCollection;
 
-/**
- * Interface describing a mechanism that provides access to the Database and Collections required by the
- * MongoEventStore.
- *
- * @author    "David Kalosi" <david.kalosi@gmail.com>
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
- */
-interface MongoTemplateInterface
+interface ClusterNodeInterface
 {
+    /**
+     * @return string
+     */
+    public function getNodeIdentifier();
 
     /**
-     * Returns a reference to the collection containing the domain events.
-     *
-     * @return MongoCollection containing the domain events
+     * @return int
      */
-    public function domainEventCollection();
+    public function getSequence();
 
     /**
-     * Returns a reference to the collection containing the snapshot events.
+     * Returns the endpoint name published by this node to send/receive messages from.
      *
-     * @return MongoCollection containing the snapshot events
+     * @return string
      */
-    public function snapshotEventCollection();
+    public function getEndpoint();
+
+    /**
+     * @param ClusterInterface $cluster
+     * @param int $sequence
+     */
+
+    public function joinedCluster(ClusterInterface $cluster, $sequence);
+
+    /**
+     * @param ClusterInterface $cluster
+     */
+    public function leftCluster(ClusterInterface $cluster);
+
+    /**
+     * @param ClusterInterface $cluster
+     * @return bool
+     */
+    public function isJoined(ClusterInterface $cluster);
+
+
 }

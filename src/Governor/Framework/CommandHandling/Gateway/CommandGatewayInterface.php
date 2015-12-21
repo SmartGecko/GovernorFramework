@@ -41,7 +41,7 @@ interface CommandGatewayInterface
      * <code>callback</code>.
      * <p/>
      * The given <code>command</code> is wrapped as the payload of the CommandMessage that is eventually posted on the
-     * Command Bus, unless Command already implements {@link org.axonframework.domain.Message}. In that case, a
+     * Command Bus, unless Command already implements {@link MessageInterface}. In that case, a
      * CommandMessage is constructed from that message's payload and MetaData.
      *
      * @param mixed $command  The command to dispatch
@@ -56,7 +56,7 @@ interface CommandGatewayInterface
      * exception, it is wrapped in a {@link org.axonframework.commandhandling.CommandExecutionException}.
      * <p/>
      * The given <code>command</code> is wrapped as the payload of the CommandMessage that is eventually posted on the
-     * Command Bus, unless Command already implements {@link org.axonframework.domain.Message}. In that case, a
+     * Command Bus, unless Command already implements {@link MessageInterface}. In that case, a
      * CommandMessage is constructed from that message's payload and MetaData.
      * <p/>
      * Note that the interrupted flag is set back on the thread if it has been interrupted while waiting.

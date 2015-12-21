@@ -28,16 +28,15 @@ use Hamcrest\Matcher;
 
 /**
  * Interface describing the operations available on the "validate result" (a.k.a. "then") stage of the test execution.
- * The underlying fixture expects a test to have been executed succesfully using a {@link
- * org.axonframework.test.TestExecutor}.
+ * The underlying fixture expects a test to have been executed successfully using a {@link TestExecutorInterface}
  * <p/>
  * There are several things to validate:<ul><li>the published events,<li>the stored events, and<li>the command
  * handler's
  * execution result, which is one of <ul><li>a regular return value,<li>a <code>void</code> return value, or<li>an
  * exception.</ul></ul>
  *
- * @author Allard Buijze
- * @since 0.6
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 interface ResultValidatorInterface
 {

@@ -30,8 +30,8 @@ use Governor\Framework\CommandHandling\CommandMessageInterface;
  * RoutingStrategy implementation that uses the value in the MetaData of a CommandMessage assigned to a given key. The
  * value's <code>toString()</code> is used to convert the MetaData value to a String.
  *
- * @author Allard Buijze
- * @since 2.0
+ * @author    "David Kalosi" <david.kalosi@gmail.com>
+ * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
  */
 class MetaDataRoutingStrategy extends AbstractRoutingStrategy
 {

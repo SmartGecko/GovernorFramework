@@ -22,15 +22,30 @@
  * <http://www.governor-framework.org/>.
  */
 
-namespace Governor\Framework\Common;
+namespace Governor\Framework\Cluster;
 
-/**
- * Interface describing a mechanism that receives incoming messages.
- *
- * @author    "David Kalosi" <david.kalosi@gmail.com>
- * @license   <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>
- */
-interface ReceiverInterface
+
+interface ClusterLockRegistryInterface
 {
-    public function run();
+
+    /**
+     * @param string $aggregateIdentifier
+     */
+    public function acquireLock($aggregateIdentifier);
+
+    /**
+     * @param string $aggregateIdentifier
+     */
+    public function releaseLock($aggregateIdentifier);
+
+    /**
+     * @param string $aggregateIdentifier
+     * @return mixed
+     */
+    public function getLock($aggregateIdentifier);
+
+    /**
+     * @return ClusterInterface
+     */
+    public function getCluster();
 }
